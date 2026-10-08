@@ -3,10 +3,12 @@ import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { Suspense } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import EmailersList from './EmailersList'
 
 export default function EmailersSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-4 flex flex-col">

@@ -76,7 +76,7 @@ export default function JobTable() {
 	const storeJobs = useJobStore((state) => state.jobs)
 
 	const { checkPermission } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const canManageJobs = checkPermission(UserPermission.ManageJobs)
 

@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { useCheckPermission } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import EmailerSendHistoryTable from './EmailerSendHistoryTable'
 
@@ -63,7 +64,7 @@ type Props = {
 }
 
 export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const fetchUser = useCheckPermission(UserPermission.ReadUsers)
 	const {

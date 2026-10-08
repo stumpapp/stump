@@ -21,6 +21,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { SubmitEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import {
 	defaultHomeSections,
 	getHomeSectionId,
@@ -34,7 +35,7 @@ import {
 const BASE = 'settingsScene.app/preferences.sections.homeArrangement'
 
 export default function HomeArrangementPreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [open, setOpen] = useState(false)
 	const { data } = useHomeArrangement()
 	const { mutateAsync, isPending } = useUpdateHomeArrangement()
@@ -78,7 +79,7 @@ type FormProps = {
 }
 
 export function HomeArrangementForm({ sections, onSave }: FormProps) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [draft, setDraft] = useState(sections)
 	const [saving, setSaving] = useState(false)
 	const sensors = useSensors(
@@ -198,7 +199,7 @@ type ItemProps = {
 }
 
 function HomeArrangementItem({ section, disabled, onVisibilityChange }: ItemProps) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const id = getHomeSectionId(section)!
 	const label = t(`homeScene.${id}.title`)
 	const {

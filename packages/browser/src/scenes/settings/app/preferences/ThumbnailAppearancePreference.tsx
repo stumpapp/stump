@@ -3,11 +3,12 @@ import { InterfaceRoundness, ThumbnailPlaceholderStyle } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import ThumbnailPreviewFrame from './ThumbnailPreviewFrame'
 
 export default function ThumbnailAppearancePreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { thumbnailRatio, thumbnailPlaceholderStyle, thumbnailRoundness },
 		update,

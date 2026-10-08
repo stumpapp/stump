@@ -18,13 +18,15 @@ import { Copy, CopyCheck, Info } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const REPO_URL = 'https://github.com/stumpapp/stump'
 const IS_DEV = import.meta.env.DEV
 
 export default function ServerInfoSection() {
 	const version = useStumpVersion()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const versionUrl = useMemo(
 		() => (version?.semver ? `${REPO_URL}/releases/tag/v${version.semver}` : REPO_URL),

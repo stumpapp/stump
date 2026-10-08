@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import HelpfulLinks from './HelpfulLinks'
 import { ServerConfiguration } from './ServerConfiguration'
@@ -14,7 +15,7 @@ import ServerInfoSection from './ServerInfoSection'
 import ServerStats from './ServerStats'
 
 export default function GeneralServerSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	// TODO: make this a toast?
 	const { updateAvailable } = useCheckForServerUpdate()

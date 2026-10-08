@@ -9,6 +9,8 @@ import { Cog } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { PROVIDER_LABELS } from './constants'
 import ProviderForm from './ProviderForm'
 import { createConfig, getPatchDefaults, PatchProviderConfigSchema } from './schema'
@@ -45,7 +47,7 @@ export function EditProviderDialog({ provider }: Props) {
 		resolver: zodResolver(createConfig),
 	})
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const onSuccess = async () => {
 		await client.invalidateQueries({

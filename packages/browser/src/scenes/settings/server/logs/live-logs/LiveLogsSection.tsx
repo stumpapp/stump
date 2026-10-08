@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import LiveLogsFeed from './LiveLogsFeed'
 
 export default function LiveLogsSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>

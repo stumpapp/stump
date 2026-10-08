@@ -44,7 +44,7 @@ const deleteMutation = graphql(`
 type ScheduledJobQueryNode = ScheduledJobsQuery['scheduledJobs'][number]
 
 export default function JobScheduler() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()

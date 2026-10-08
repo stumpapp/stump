@@ -8,6 +8,8 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const createMutation = graphql(`
 	mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
 		createEmailDevice(input: $input) {
@@ -39,7 +41,7 @@ type Props = {
 // TODO: fix types here
 export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const client = useQueryClient()
 

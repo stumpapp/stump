@@ -2,9 +2,10 @@ import { cx, NativeSelect, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function MaxWidthPreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { layoutMaxWidthPx, primaryNavigationMode },
 		update,

@@ -2,12 +2,13 @@ import { NativeSelect, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const localeKey = 'settingsScene.app/preferences.sections.themeSelect'
 
 // TODO: We officially have enough themes to warrant a filterable combobox IMO, so do that
 export default function ThemeSelect() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { theme, changeTheme } = useTheme()
 
 	return (

@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation ServerPublicURLUpdate($publicUrl: String!) {
 		updatePublicUrl(publicUrl: $publicUrl) {
@@ -24,7 +26,7 @@ const query = graphql(`
 `)
 
 export default function ServerPublicURL() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const client = useQueryClient()
 	const {

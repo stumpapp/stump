@@ -17,6 +17,7 @@ import { type FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query ServerEmojisSection {
@@ -61,7 +62,7 @@ const deleteMutation = graphql(`
 // TODO: disable upload if not enabled, but retain ui to delete existing resources
 // (e.g., if upload temp enabled, uploaded stuff, disabled, come back)
 export default function ServerEmojisSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canManageEmojis = useMemo(

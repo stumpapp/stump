@@ -2,12 +2,13 @@ import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { DevicesSection } from './devices'
 import { EmailersSection } from './emailers'
 
 export default function EmailSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<SceneContainer>

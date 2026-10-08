@@ -7,6 +7,7 @@ import { Slash, Smartphone } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEmailerSettingsContext } from '../context'
 import DeleteDeviceConfirmation from './DeleteDeviceConfirmation'
@@ -30,7 +31,7 @@ type Props = {
 }
 
 export default function DevicesTable({ onSelectForUpdate }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { canEditEmailer } = useEmailerSettingsContext()
 	const { sdk } = useSDK()
 

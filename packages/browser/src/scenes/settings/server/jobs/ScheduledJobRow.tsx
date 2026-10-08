@@ -27,7 +27,7 @@ type Props = {
 }
 
 export function ScheduledJobRow({ job, libraries, onEdit, onDelete }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const data = useFragment(scheduledJobRowFragment, job)
 
 	const configSummary = useMemo(() => {

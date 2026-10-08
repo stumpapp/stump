@@ -6,7 +6,7 @@ import DeleteLogsConfirmationDialog from './DeleteLogsConfirmationDialog'
 import PersistedLogsTable from './PersistedLogsTable'
 
 export default function PersistedLogsSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-4 flex flex-col">

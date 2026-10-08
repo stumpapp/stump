@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Container, ContentContainer } from '@/components/container'
 import ReaderSettings from '@/components/readers/imageBased/container/ReaderSettings'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 import DayResetHourOffsetPreference from '../preferences/DayResetHourOffsetPreference'
@@ -22,7 +23,7 @@ import DefaultReadingDirection from './DefaultReadingDirection'
 // dance of global vs book-level vs format-level vs library-level settings :)
 // TODO(i8n): keys/values
 export default function ReaderDefaultSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { bookPreferences, clearStore } = useReaderStore(
 		useShallow((state) => ({

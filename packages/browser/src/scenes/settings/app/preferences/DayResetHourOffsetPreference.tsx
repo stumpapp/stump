@@ -4,12 +4,13 @@ import type { ChangeEvent } from 'react'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const MIN_OFFSET = -23
 const MAX_OFFSET = 23
 
 export default function DayResetHourOffsetPreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { dayResetHourOffset },
 		update,

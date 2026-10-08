@@ -15,6 +15,8 @@ import { memo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Virtuoso } from 'react-virtuoso'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import MarkdownPreview from '../../../../components/markdown/MarkdownPreview'
 
 const CHANGELOG_RAW_URL =
@@ -68,7 +70,7 @@ const ChangelogSection = memo(({ version, subsections }: SectionProps) => (
 ChangelogSection.displayName = 'ChangelogSection'
 
 const SeeMoreFooter = () => {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<div className="pb-6 flex items-center justify-center">
 			<ButtonOrLink
@@ -92,7 +94,7 @@ export function ChangelogDialog() {
 	const version = useStumpVersion()
 	const semver = version?.semver
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { data: raw, error: fetchError } = useQuery({
 		enabled: open && !!semver,
 		gcTime: Infinity,

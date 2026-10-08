@@ -5,13 +5,14 @@ import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 /**
  * A component that allows the user to select the font for the app from a list of
  * supported fonts
  */
 export default function FontSelect() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { appFont },
 		update,

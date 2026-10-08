@@ -46,7 +46,7 @@ const query = graphql(`
 export type PersistedLog = PersistedLogsQuery['logs']['nodes'][number]
 
 export default function PersistedLogsTable() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [search] = useSearchParams()
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })

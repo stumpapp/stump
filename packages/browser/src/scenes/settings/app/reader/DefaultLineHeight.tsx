@@ -3,10 +3,11 @@ import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 export default function DefaultLineHeight() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		settings: { lineHeight },
 		setSettings,

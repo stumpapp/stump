@@ -2,10 +2,12 @@ import { ButtonOrLink, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { ChangelogDialog } from './ChangelogDialog'
 
 export default function HelpfulLinks() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<NewCard label={t('settingsScene.server/general.sections.helpfulLinks.title')}>

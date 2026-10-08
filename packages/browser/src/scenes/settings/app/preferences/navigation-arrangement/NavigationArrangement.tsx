@@ -30,6 +30,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
 
@@ -73,7 +74,7 @@ const lockMutation = graphql(`
 `)
 
 export default function NavigationArrangementRow() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
 			<NavigationArrangementSheet />
@@ -82,7 +83,7 @@ export default function NavigationArrangementRow() {
 }
 
 export function NavigationArrangementSheet() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 	const {

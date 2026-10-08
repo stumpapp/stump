@@ -1,11 +1,13 @@
 import { NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import ServerEmojisSection from './ServerEmojisSection'
 import ServerPublicURL from './ServerPublicURL'
 
 export function ServerConfiguration() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<NewCard label={t(getKey('label'))} description={t(getKey('description'))}>

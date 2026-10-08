@@ -22,6 +22,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { scheduledJobRowFragment } from './ScheduledJobRow'
 import {
 	buildScheduledJobInput,
@@ -65,7 +67,7 @@ export function CreateOrEditScheduledJobDialog({
 	onClose,
 	onSuccess,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const data = useFragment(scheduledJobRowFragment, editing)
 	const isEditing = data != null
 

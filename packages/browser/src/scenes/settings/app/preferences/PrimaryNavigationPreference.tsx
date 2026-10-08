@@ -3,9 +3,10 @@ import { useLocaleContext } from '@stump/i18n'
 import { PanelLeft, PanelTop } from 'lucide-react'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function PrimaryNavigationPreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { primaryNavigationMode },
 		update,

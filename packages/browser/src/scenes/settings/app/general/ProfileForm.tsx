@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useUser } from '@/stores'
 
 import AvatarPicker from './AvatarPicker'
@@ -25,7 +26,7 @@ const mutation = graphql(`
 `)
 
 export default function ProfileForm() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { user, setUser } = useUser()
 	const { checkPermission } = useAppContext()
 	const { uploadConfig } = useUploadConfig({ enabled: checkPermission(UserPermission.UploadFile) })

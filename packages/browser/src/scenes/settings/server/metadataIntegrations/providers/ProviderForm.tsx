@@ -14,12 +14,14 @@ import { useLocaleContext } from '@stump/i18n'
 import { startOfDay } from 'date-fns'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { ProviderApiKeyInput } from './ProviderApiKeyInput'
 import { PatchProviderConfigSchema } from './schema'
 
 export default function ProviderForm() {
 	const form = useFormContext<PatchProviderConfigSchema>()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { errors } = useFormState({ control: form.control })
 
 	const [providerEnabled, autoApplyEnabled, expirationDate] = useWatch({

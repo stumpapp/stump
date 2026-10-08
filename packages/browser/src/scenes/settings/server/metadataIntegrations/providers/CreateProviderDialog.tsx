@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { PROVIDER_LABELS, PROVIDERS } from './constants'
 import ProviderForm from './ProviderForm'
 import ProviderSelectionCard from './ProviderSelectionCard'
@@ -28,7 +30,7 @@ export function CreateProviderDialog() {
 	const [step, setStep] = useState(0)
 	const client = useQueryClient()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const form = useForm<CreateProviderConfigSchema>({
 		defaultValues: {

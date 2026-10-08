@@ -3,11 +3,12 @@ import { ReadingDirection } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useShallow } from 'zustand/react/shallow'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 // TODO: remove this global fallback. the cascading of settings is annoyingly confusing
 export default function DefaultReadingDirection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { readingDirection, setSettings } = useReaderStore(
 		useShallow((store) => ({
 			readingDirection: store.settings.readingDirection,

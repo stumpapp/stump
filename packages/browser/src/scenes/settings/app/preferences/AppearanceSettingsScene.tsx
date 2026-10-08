@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DebugSettings from './DebugSettings'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
@@ -27,7 +28,7 @@ import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 // TODO: The more I look at this the less I kinda like it
 
 export default function AppearanceSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<Container>

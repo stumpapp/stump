@@ -4,6 +4,8 @@ import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateProviderDialog } from './CreateProviderDialog'
 import { ExistingProviderCard } from './ExistingProviderCard'
 
@@ -20,7 +22,7 @@ function ProviderCards() {
 	const {
 		data: { metadataProviderConfigs: providers },
 	} = useSuspenseGraphQL(query, ['metadataProviderConfigs'])
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	if (providers.length === 0) {
 		return (

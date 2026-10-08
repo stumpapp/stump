@@ -14,7 +14,7 @@ const mutation = graphql(`
 `)
 
 export default function DeleteLogsConfirmationDialog() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()

@@ -117,8 +117,13 @@ function reorganizeLocaleFile(localeFilePath) {
 // keys in migrated files which should be left alone
 let titleCaseExclusionsList = [
 	'mobileApp.readingSessions', // meant to be sentences
+	'mobileApp.serverNetworkSettings.wifiNetwork.connectedTip',
 ]
-// TODO:more!
+
+// things that semantically should stay sentence case, painstakingly curated :')
+// was a lot of run the migration -> see changes -> find stinky ones -> scream -> add to list -> repeat
+const SENTENCE_CASE_KEY_PATTERN =
+	/description|[Dd]isclaimer|message|confirmation$|confirmText|confirmationText|typeToConfirm|claimText|emptyText|[Ss]entence$|subtitle$|hint$|explanation$|prompt$|reason$|[Pp]laceholder$|placeholderNoTags/
 
 function generateTitleCaseExclusionsList() {
 	const enUSPath = resolve(LOCALES_DIR, 'en-US.json')
@@ -161,7 +166,8 @@ function migrateAllToTitleCase(localeData, locale) {
 				const isExcludedKeyViaParent = titleCaseExclusionsList.some((excludedKey) =>
 					fullKey.startsWith(`${excludedKey}.`),
 				)
-				if (!isExcludedKey && !isExcludedKeyViaParent) {
+				const isSentenceCaseKey = SENTENCE_CASE_KEY_PATTERN.test(fullKey)
+				if (!isExcludedKey && !isExcludedKeyViaParent && !isSentenceCaseKey) {
 					obj[key] = titleCasePreservingPlaceholders(value, {
 						locale,
 						// yoink! https://github.com/ianstormtaylor/title-case-minors/blob/master/index.js

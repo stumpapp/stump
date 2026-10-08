@@ -74,6 +74,7 @@ export default function BookMenu({ data }: Props) {
 	const { t } = useTranslate()
 	const client = useQueryClient()
 	const book = useFragment(fragment, data)
+	const series = book.series
 
 	const { deleteBook: deleteBookRpc } = useDownload()
 
@@ -276,11 +277,11 @@ export default function BookMenu({ data }: Props) {
 							{t('bookActions.goToLibrary')}
 						</Stack.Toolbar.MenuAction>
 
-						{book.series && (
+						{series && (
 							<Stack.Toolbar.MenuAction
 								icon="arrow.up.right"
-								onPress={() => router.push(`/stump/${serverID}/series/${book.series?.id}`)}
-								subtitle={book.series.resolvedName}
+								onPress={() => router.push(`/stump/${serverID}/series/${series.id}`)}
+								subtitle={series.resolvedName}
 							>
 								{t('bookActions.goToSeries')}
 							</Stack.Toolbar.MenuAction>

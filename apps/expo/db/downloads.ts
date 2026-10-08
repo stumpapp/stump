@@ -104,9 +104,10 @@ export class DownloadRepository {
 			console.error('Error generating thumbnail for downloaded file:', error)
 		}
 
-		const downloadedFile = db.transaction((tx) => {
+		const downloadedFile = await db.transaction(async (tx) => {
 			if (relations?.seriesRef) {
-				tx.insert(seriesRefs)
+				await tx
+					.insert(seriesRefs)
 					.values({
 						id: relations.seriesRef.id,
 						serverId: file.serverId,
@@ -120,11 +121,11 @@ export class DownloadRepository {
 							libraryId: relations.seriesRef.libraryId,
 						},
 					})
-					.run()
 			}
 
 			if (relations?.libraryRef) {
-				tx.insert(libraryRefs)
+				await tx
+					.insert(libraryRefs)
 					.values({
 						id: relations.libraryRef.id,
 						serverId: file.serverId,
@@ -136,7 +137,6 @@ export class DownloadRepository {
 							name: relations.libraryRef.name,
 						},
 					})
-					.run()
 			}
 
 			const newFile: NewDownloadedFile = {
@@ -157,7 +157,7 @@ export class DownloadRepository {
 				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
 			}
 
-			const result = tx
+			const result = await tx
 				.insert(downloadedFiles)
 				.values(newFile)
 				.onConflictDoUpdate({
@@ -176,7 +176,6 @@ export class DownloadRepository {
 					},
 				})
 				.returning()
-				.get()
 
 			if (relations?.existingProgression) {
 				const values = {
@@ -192,7 +191,8 @@ export class DownloadRepository {
 					syncStatus: syncStatus.enum.SYNCED,
 				} satisfies typeof readProgress.$inferInsert
 
-				tx.insert(readProgress)
+				await tx
+					.insert(readProgress)
 					.values(values)
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
@@ -201,10 +201,9 @@ export class DownloadRepository {
 							lastModified: new Date(relations.existingProgression.updatedAt ?? new Date()),
 						},
 					})
-					.run()
 			}
 
-			return result
+			return result[0]
 		})
 
 		if (!downloadedFile) {

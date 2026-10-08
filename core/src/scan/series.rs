@@ -219,16 +219,17 @@ impl JobLifecycle for SeriesScanJob {
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 
-		let config = self.config.as_ref().ok_or_else(|| {
-			JobError::InitFailed("Library config missing from series scan".into())
-		})?;
-		let image_options = config.thumbnail_config.clone();
+		let image_options = self
+			.config
+			.as_ref()
+			.and_then(|config| config.thumbnail_config.clone());
 		if image_options.is_none() && (did_create || did_update) {
-			let library_id = config.library_id.as_deref().ok_or_else(|| {
-				JobError::InitFailed("Library owner missing from series scan".into())
-			})?;
-			bump_media_thumbnail_fallbacks(ctx.conn(), library_id, Some(&self.id))
-				.await?;
+			if let Some(library_id) = self.library_id() {
+				bump_media_thumbnail_fallbacks(ctx.conn(), &library_id, Some(&self.id))
+					.await?;
+			} else {
+				tracing::warn!(series_id = %self.id, "Skipping thumbnail fallback update: library owner missing from series scan");
+			}
 		}
 
 		ctx.emit_event(CoreEvent::JobOutput(event::JobOutput {
@@ -446,4 +447,66 @@ async fn handle_missing_series(
 	tracing::trace!(?affected_media, "Marked media as missing");
 
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use std::sync::Arc;
+
+	use ::tests::{db::test_database, fake_data};
+	use apalis::prelude::MemoryStorage;
+	use models::entity::job;
+	use sea_orm::{ConnectionTrait, DbBackend, Schema};
+	use tokio::sync::broadcast;
+
+	use super::*;
+	use crate::{config::StumpConfig, job::ApalisWorkerState};
+
+	#[tokio::test]
+	async fn test_finalize_without_library_config_or_owner() {
+		let db = test_database().await;
+		let schema = Schema::new(DbBackend::Sqlite);
+		db.execute(
+			db.get_database_backend()
+				.build(&schema.create_table_from_entity(job::Entity)),
+		)
+		.await
+		.unwrap();
+		let library = fake_data::Library::default().insert(&db).await;
+		let mut config = library
+			.find_related(library_config::Entity)
+			.one(&db)
+			.await
+			.unwrap()
+			.unwrap();
+		config.library_id = None;
+		let (events, mut receiver) = broadcast::channel(4);
+		let state = Arc::new(ApalisWorkerState::new(
+			Arc::new(db),
+			Arc::new(StumpConfig::debug()),
+			events,
+			MemoryStorage::new(),
+		));
+		let ctx = JobContext::new(
+			state,
+			"scan-job".into(),
+			&StumpJob::series_scan("series".into(), "/series".into(), None),
+		)
+		.await
+		.unwrap();
+
+		for config in [None, Some(config)] {
+			let mut scan = SeriesScanJob::new("series".into(), "/series".into(), None);
+			scan.config = config;
+			let output = SeriesScanOutput {
+				created_media: 1,
+				..Default::default()
+			};
+			scan.finalize(&ctx, &output).await.unwrap();
+			assert!(
+				matches!(receiver.try_recv().unwrap(), CoreEvent::JobOutput(event)
+				if event.id == "scan-job")
+			);
+		}
+	}
 }

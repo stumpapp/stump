@@ -28,7 +28,7 @@ import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, ListLabel, Text } from '~/components/ui'
-import { formatSeriesPosition } from '~/lib/bookUtils'
+import { formatSeriesPosition, parseSeriesPosition } from '~/lib/bookUtils'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -210,7 +210,7 @@ export default function Screen() {
 
 	const seriesName = book.metadata?.series || book.series?.resolvedName
 	const seriesPosition = formatSeriesPosition(
-		book.series ? ((Number(book.metadata?.number) || book.seriesPosition) ?? null) : null,
+		parseSeriesPosition(book.metadata?.number) ?? book.seriesPosition,
 		book.series?.metadata?.totalIssues ?? null,
 		{
 			t,

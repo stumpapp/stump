@@ -310,7 +310,7 @@ mod tests {
 		let user = fake_data::User::new("ishmael").insert(&db).await;
 		let series = fake_data::Series::default().insert(&db).await;
 
-		let book = fake_data::Media {
+		fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
 			name: Some("Don Quixote".to_string()),
@@ -319,9 +319,6 @@ mod tests {
 		}
 		.insert(&db)
 		.await;
-		let mut book: media::ActiveModel = book.into();
-		book.series_id = sea_orm::Set(None);
-		book.update(&db).await.unwrap();
 
 		fake_data::Media {
 			series_id: series.id.clone(),
@@ -367,8 +364,43 @@ mod tests {
 			],
 			sync_page.media_ids,
 		);
+	}
+
+	#[tokio::test]
+	async fn test_first_sync_standalones() {
+		let db = test_database().await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
+		let book = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		let mut book: media::ActiveModel = book.into();
+		book.series_id = sea_orm::Set(None);
+		book.update(&db).await.unwrap();
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+		let sync_page = KoboSync::next_page(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			None,
+			10,
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		assert_eq!(sync_page.media_ids, vec!["don-quixote"]);
 		let items = sync_page.sync_items("http://localhost/kobo").await.unwrap();
-		assert_eq!(items.len(), 3);
+		assert_eq!(items.len(), 1);
 		let standalone = items
 			.into_iter()
 			.find_map(|item| match item {

@@ -4,3 +4,4 @@
 - [ ] find "sentences" with some script (>3 words??) to form exclusion list for Title Case conversion
   - [ ] there is already a small exclusion list for things like OPDS and stuff
   - [ ] try to see if for each locale we can to Title Case per locale rules, but if not then maybe just keep the Title Case conversion to english
+- [ ] rm title-case from workspace dev deps

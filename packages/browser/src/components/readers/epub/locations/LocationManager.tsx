@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { List } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import AnnotationsList from '../annotations/AnnotationsList'
 import ControlButton from '../controls/ControlButton'
 import Bookmarks from './Bookmarks'
@@ -11,7 +13,7 @@ import TableOfContents from './TableOfContents'
 type LocationTab = 'contents' | 'annotations' | 'bookmarks'
 
 export default function LocationManager() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 	const [activeTab, setActiveTab] = useState<LocationTab>('contents')
 

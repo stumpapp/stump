@@ -3,13 +3,14 @@ import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 
 import { useEpubReaderContext } from '../context'
 
 export default function FontFamily() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()

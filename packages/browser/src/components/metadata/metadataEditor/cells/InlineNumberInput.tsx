@@ -2,6 +2,8 @@ import { Button, cn, Input, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import type { NumberValidation } from '../../fieldDefs'
 
 type Props = {
@@ -19,7 +21,7 @@ export default function InlineNumberInput({
 	validation,
 	className,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<div className={cn(`group gap-2 flex items-center`, className)}>
 			<Input

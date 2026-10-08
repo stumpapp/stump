@@ -7,12 +7,13 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function LibraryReview() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const state = useWatch({ control: form.control })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const renderThumbnailSettings = () => {
 		if (!state.thumbnailConfig?.enabled || !state.thumbnailConfig?.resizeMethod) {

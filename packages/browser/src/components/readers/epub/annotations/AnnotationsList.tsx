@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEpubReaderContext } from '../context'
 import type { EpubAnnotation } from './types'
@@ -12,7 +13,7 @@ type Props = {
 }
 
 export default function AnnotationsList({ onLocationChanged }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookMeta },
 		controls: { onGoToLocator },

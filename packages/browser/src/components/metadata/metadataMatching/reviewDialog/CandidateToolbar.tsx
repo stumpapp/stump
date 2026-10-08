@@ -3,11 +3,13 @@ import { useLocaleContext } from '@stump/i18n'
 import { upperFirst } from 'lodash'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useMatchReviewStore } from '../useMatchReviewStore'
 import { ConfidenceBadge } from './ConfidenceBadge'
 
 export function CandidateToolbar() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { records, currentRecordIndex, currentCandidateIndex, nextCandidate, prevCandidate } =
 		useMatchReviewStore()
 

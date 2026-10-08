@@ -1,6 +1,7 @@
 import { ButtonOrLink, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { SceneContainer } from '../container'
@@ -10,7 +11,7 @@ type Props = {
 }
 export default function UnderConstruction({ issue }: Props) {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<SceneContainer className="h-full w-full flex-1">

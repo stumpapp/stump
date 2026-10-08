@@ -3,13 +3,15 @@ import { ReadingImageScaleFit } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	value: ReadingImageScaleFit
 	onChange: (value: ReadingImageScaleFit) => void
 }
 
 export default function ImageScalingSelect({ value, onChange }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	/**
 	 * A change handler for the image scaling select, asserting that the value

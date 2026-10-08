@@ -4,6 +4,8 @@ import lowerFirst from 'lodash/lowerFirst'
 import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props<Field extends string> = {
 	binding: Field
 	onSave: (values: string[]) => void
@@ -12,7 +14,7 @@ type Props<Field extends string> = {
 export default function AddFieldsDialog<Field extends string>({ binding, onSave }: Props<Field>) {
 	const [isOpen, setIsOpen] = useState(false)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const label = lowerFirst(t(getLabelKey(binding)))
 
 	const [value, setValue] = useState('')

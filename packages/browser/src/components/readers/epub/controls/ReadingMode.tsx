@@ -2,12 +2,13 @@ import { Label, NativeSelect } from '@stump/components'
 import { ReadingMode as ReadingModeType } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
 
 export default function ReadingMode() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()

@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form'
 
 import { CreateOrUpdateBookClubSchema } from '@/components/bookClub/createOrUpdateForm'
 import { ReviewStepContainer } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 // TODO(club): Add more
 
@@ -11,7 +12,7 @@ export default function CreateClubReview() {
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()
 	const state = form.watch()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="space-y-8 flex flex-col">

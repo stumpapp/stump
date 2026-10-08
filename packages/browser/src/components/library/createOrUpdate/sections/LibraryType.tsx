@@ -3,12 +3,14 @@ import { LibraryType } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function LibraryTypeSelect() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-2 flex flex-col">

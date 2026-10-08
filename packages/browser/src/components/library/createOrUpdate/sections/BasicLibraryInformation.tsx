@@ -7,6 +7,7 @@ import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -27,7 +28,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	const isCreatingLibrary = !ctx?.library
 	const tags = useWatch({ control: form.control, name: 'tags' })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { errors } = useFormState({
 		control: form.control,
 	})

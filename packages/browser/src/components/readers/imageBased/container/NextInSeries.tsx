@@ -6,13 +6,14 @@ import { useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { EntityImage } from '@/components/entity'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { NextInSeriesBookRef, useImageBaseReaderContext } from '../context'
 
 export default function NextInSeries() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [isHidden, setIsHidden] = useState(false)
 
 	const { book, currentPage } = useImageBaseReaderContext()

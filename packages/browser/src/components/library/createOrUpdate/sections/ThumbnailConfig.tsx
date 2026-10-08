@@ -16,6 +16,7 @@ import { useCallback } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 import { CreateOrUpdateLibrarySchema, intoFormThumbnailConfig } from '../schema'
@@ -35,7 +36,7 @@ export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryManagementSafe()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [resizeMethod, enabled] = useWatch({
 		control: form.control,

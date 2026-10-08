@@ -3,11 +3,13 @@ import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSteppedFormContext } from './context'
 
 export default function SteppedFormIndicators() {
 	const { currentStep, localeBase, stepsBeforeReview } = useSteppedFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="flex items-center">

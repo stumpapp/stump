@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	variant?: 'media' | 'series'
 }
@@ -13,7 +15,7 @@ type Props = {
  * 2. X and up (where X is a number from 0 to 18)
  */
 export default function AgeRatingFilter({ variant = 'media' }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const form = useFormContext<{
 		metadata: {
 			ageRating: number | null

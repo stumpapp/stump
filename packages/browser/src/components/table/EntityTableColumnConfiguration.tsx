@@ -27,6 +27,8 @@ import { Columns, Eye, EyeOff } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { bookTableColumnMap } from '../book/table'
 
 type Props = {
@@ -36,7 +38,7 @@ type Props = {
 }
 
 export default function EntityTableColumnConfiguration({ entity, configuration, onSave }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 

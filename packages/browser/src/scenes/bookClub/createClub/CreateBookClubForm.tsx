@@ -16,6 +16,7 @@ import {
 } from '@/components/bookClub/createOrUpdateForm'
 import { ContentContainer } from '@/components/container'
 import { useSteppedFormContext } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateClubReview from './CreateClubReview'
 
@@ -34,7 +35,7 @@ type Props = {
 
 export default function CreateBookClubForm({ onSubmit }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { currentStep, setStep } = useSteppedFormContext()
 
 	const {

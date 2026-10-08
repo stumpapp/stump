@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const mutation = graphql(`
@@ -40,7 +41,7 @@ export default function DeleteLibraryConfirmation({
 	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		mutate: deleteLibrary,

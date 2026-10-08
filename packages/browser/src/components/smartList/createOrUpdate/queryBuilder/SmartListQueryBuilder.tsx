@@ -6,6 +6,7 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { SmartListFormSchema } from '../schema'
 import { FilterGroup } from './filterGroup'
 import GroupBy from './GroupBy'
+import { useTranslate } from '@/hooks/useTranslate'
 
 // TODO: error states throughout form elems
 
@@ -20,7 +21,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<>

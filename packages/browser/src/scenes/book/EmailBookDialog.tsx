@@ -6,6 +6,7 @@ import { Suspense, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query EmailBookDropdownDevice {
@@ -56,7 +57,7 @@ type Props = {
 } & ContainerProps
 
 function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: { emailDevices: devices },

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useSwipeable } from 'react-swipeable'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext, useEpubReaderControls } from '../context'
@@ -21,7 +22,7 @@ type Props = {
  * `fixed` to the viewport — so it tracks the actual reading pane instead of the window.
  */
 export default function EpubNavigationControls({ children }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()

@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEpubReaderContext } from '../context'
 
@@ -11,7 +12,7 @@ type Props = {
 }
 
 export default function Bookmarks({ onLocationChanged }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookMeta },
 		controls: { onGoToLocator },

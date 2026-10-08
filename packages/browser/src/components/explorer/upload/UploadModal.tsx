@@ -21,6 +21,7 @@ import { FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useSeriesContextSafe } from '@/scenes/series'
 
 import { useFileExplorerContext } from '../context'
@@ -54,7 +55,7 @@ export default function UploadModal() {
 	const [files, setFiles] = useState<UploadFileEntry[]>([])
 	const nextFileIdRef = useRef(0)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
 

@@ -3,6 +3,7 @@ import { ReadingMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Paintbrush } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
@@ -16,7 +17,7 @@ import ReadingDirection from './ReadingDirection'
 import ReadingModeControl from './ReadingMode'
 
 export default function ThemeControls() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()

@@ -7,6 +7,7 @@ import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
@@ -34,7 +35,7 @@ export default function SmartListNavigationItem({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('smartLists'))
 
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { prefetch } = usePrefetchSmartList()
 

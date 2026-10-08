@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 import paths, { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
@@ -17,7 +18,7 @@ export default function BookClubSettingsSideBar() {
 	const routerPaths = usePaths()
 
 	const { bookClub } = useBookClubContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()

@@ -2,12 +2,14 @@ import { Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function DefaultReadingSettings() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<>

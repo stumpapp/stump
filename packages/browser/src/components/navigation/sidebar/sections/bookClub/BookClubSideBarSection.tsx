@@ -7,6 +7,7 @@ import { useLocation } from 'react-router'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import paths from '@/paths'
 
 import SideBarButtonLink from '../../SideBarButtonLink'
@@ -40,7 +41,7 @@ export default function BookClubSideBarSection({
 	const location = useLocation()
 	const { user, isServerOwner, checkPermission } = useAppContext()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: { bookClubs },

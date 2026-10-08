@@ -11,6 +11,8 @@ import { Link, Locator, Publication } from '@readium/shared'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { clearFramesSelection } from '../annotations/clearSelection'
 import { locatorToHref, resolvePublicationLinkLocator } from './locator'
 import {
@@ -85,7 +87,7 @@ export function useReadiumNavigator({
 	onTextCleared,
 	onDecorationActivated,
 }: UseReadiumNavigatorArgs): UseReadiumNavigatorResult {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [loadState, setLoadState] = useState<LoadState>({ status: 'idle' })
 	const [navButtons, setNavButtons] = useState({ canGoBackward: false, canGoForward: false })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)

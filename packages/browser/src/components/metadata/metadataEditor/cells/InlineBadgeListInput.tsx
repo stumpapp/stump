@@ -2,6 +2,8 @@ import { Badge, cn, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import AddFieldsDialog from '../AddFieldsDialog'
 
 type Props = {
@@ -12,7 +14,7 @@ type Props = {
 }
 
 export default function InlineBadgeListInput({ values, onChange, className, binding }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const onRemove = (index: number) => {
 		onChange(values.filter((_, i) => i !== index))
 	}

@@ -2,13 +2,15 @@ import { cn, Tabs, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { FilterGroupJoiner, SmartListFormSchema } from '../../schema'
 import { useFilterGroupContext } from './context'
 
 export default function GroupJoiner() {
 	const form = useFormContext<SmartListFormSchema>()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const joiner = useWatch({ control: form.control, name: `filters.groups.${groupIdx}.joiner` })

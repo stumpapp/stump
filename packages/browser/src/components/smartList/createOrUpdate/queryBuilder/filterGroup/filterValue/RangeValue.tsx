@@ -13,6 +13,7 @@ import {
 	isNumberField,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 
@@ -27,7 +28,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 	const { errors } = useFormState({ control: form.control })
 

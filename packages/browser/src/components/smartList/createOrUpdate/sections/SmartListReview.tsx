@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { ReviewStepContainer } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListFormSchema } from '../schema'
 import FilterConfigJSON from './FilterConfigJSON'
@@ -11,7 +12,7 @@ export default function SmartListReview() {
 	const form = useFormContext<SmartListFormSchema>()
 	const state = useWatch({ control: form.control })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="space-y-8 flex flex-col">

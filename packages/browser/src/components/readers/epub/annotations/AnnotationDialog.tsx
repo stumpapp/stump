@@ -2,6 +2,8 @@ import { Button, Dialog, Text, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	open: boolean
 	mode: 'create' | 'edit'
@@ -27,7 +29,7 @@ export default function AnnotationDialog({
 	onSave,
 	onDelete,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [note, setNote] = useState(initialNote ?? '')
 
 	useEffect(() => {

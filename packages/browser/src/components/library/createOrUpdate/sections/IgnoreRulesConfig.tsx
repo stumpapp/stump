@@ -16,6 +16,7 @@ import { Check, Edit, Lock, Slash, SquareAsterisk, Trash, Unlock, X } from 'luci
 import { useCallback, useState } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -31,7 +32,7 @@ export default function IgnoreRulesConfig() {
 		append,
 		remove,
 	} = useFieldArray({ control: form.control, name: 'ignoreRules' })
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const isCreatingLibrary = !ctx?.library
 
@@ -244,7 +245,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 	const [isEditing, setIsEditing] = useState(false)
 	const [originalIgnoreRule] = useState(() => ignoreRule)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const handleCancelEdit = useCallback(() => {
 		form.setValue(`ignoreRules.${index}`, originalIgnoreRule)

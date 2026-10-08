@@ -1,9 +1,11 @@
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import GenericFilterMultiselect from './GenericFilterMultiselect'
 
 export default function ReadStatusSelect() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<GenericFilterMultiselect

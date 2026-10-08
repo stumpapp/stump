@@ -16,6 +16,7 @@ import { match } from 'ts-pattern'
 
 import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
@@ -58,7 +59,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const paths = usePaths()
 
 	const { basePath } = useRouterContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {

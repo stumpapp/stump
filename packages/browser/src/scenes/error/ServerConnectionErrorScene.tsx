@@ -1,5 +1,4 @@
 import { queryClient } from '@stump/client'
-import { useLocaleContext } from '@stump/i18n'
 import { motion, Variants } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -7,6 +6,7 @@ import { Navigate, useLocation } from 'react-router'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useAppStore } from '@/stores'
 
 export default function ServerConnectionErrorScene() {
@@ -25,7 +25,7 @@ export default function ServerConnectionErrorScene() {
 	const isDesktop = platform !== 'browser'
 
 	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	useEffect(() => {
 		async function checkServer() {

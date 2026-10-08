@@ -1,6 +1,8 @@
 import { Heading, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSteppedFormContext } from './context'
 import SteppedFormIndicators from './SteppedFormIndicators'
 import SteppedFormStepDetails from './SteppedFormStepDetails'
@@ -15,7 +17,7 @@ type Props = {
  */
 export default function SteppedFormSceneHeader({ subtitleLink }: Props) {
 	const { localeBase } = useSteppedFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<header className="space-y-6 p-4 flex w-full flex-col border-b border-b-border">

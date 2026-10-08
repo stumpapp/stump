@@ -2,11 +2,13 @@ import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { PendingMatchesTable } from './PendingMatchesTable'
 import { MatchReviewDialog } from './reviewDialog/MatchReviewDialog'
 
 export default function PendingMatchesSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-y-4 flex flex-col">

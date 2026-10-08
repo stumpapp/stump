@@ -14,6 +14,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import Table from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { pendingMatchRecordFragment } from './fragments'
 import { ConfidenceBadge } from './reviewDialog/ConfidenceBadge'
@@ -73,7 +74,7 @@ function ReviewButton({ records, startIndex }: { records: MatchRecord[]; startIn
 // TODO: Intake optional ids for series or library, so we can fetch only relevant matches
 
 export function PendingMatchesTable() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { data } = useSuspenseGraphQL(pendingMatchesQuery, ['pendingMetadataMatches'])
 
 	const records = useFragment(pendingMatchRecordFragment, data.pendingMetadataMatches)

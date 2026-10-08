@@ -2,6 +2,8 @@ import { CheckBox, Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useFormState } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useBookClubContextSafe } from '../context'
 import { CreateOrUpdateBookClubSchema } from './schema'
 
@@ -15,7 +17,7 @@ export default function BasicBookClubInformation() {
 	const isCreating = !ctx?.bookClub
 	const isPrivate = form.watch('isPrivate')
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { errors } = useFormState({
 		control: form.control,
 	})

@@ -2,6 +2,7 @@ import { SheetPrimitive as Sheet, StatCard, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import ReadMore from '../ReadMore'
 
@@ -26,7 +27,7 @@ export function EntityOverviewSheet({
 	stats,
 	children,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { isDarkVariant } = useTheme()
 
 	return (

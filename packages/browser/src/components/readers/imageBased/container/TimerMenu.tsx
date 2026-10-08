@@ -2,13 +2,14 @@ import { Dropdown } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Clock } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
 
 export default function TimerMenu() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { book, timer } = useImageBaseReaderContext()
 	const {
 		bookPreferences: { trackElapsedTime },

@@ -2,6 +2,8 @@ import { Button, cn, Input, TextArea, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	value: string | null | undefined
 	onChange: (value: string | null) => void
@@ -19,7 +21,7 @@ export default function InlineTextInput({
 	className,
 	size = 'sm',
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const Component = isLong ? TextArea : Input
 
 	return (

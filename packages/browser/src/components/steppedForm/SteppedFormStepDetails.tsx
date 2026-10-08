@@ -1,11 +1,13 @@
 import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSteppedFormContext } from './context'
 
 export default function SteppedFormStepDetails() {
 	const { currentStep, localeBase } = useSteppedFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div>

@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 type Props = {
@@ -22,7 +24,7 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 		name: ['convertRarToZip', 'hardDeleteConversions'],
 	})
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	useEffect(() => {
 		if (!convertRarToZip && hardDeleteConversions) {

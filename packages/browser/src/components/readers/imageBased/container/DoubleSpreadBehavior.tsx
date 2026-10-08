@@ -3,13 +3,15 @@ import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	behavior: DoublePageBehavior
 	onChange: (behavior: DoublePageBehavior) => void
 }
 
 export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
 			if (isDoublePageBehavior(e.target.value)) {

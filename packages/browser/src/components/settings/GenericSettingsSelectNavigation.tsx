@@ -4,6 +4,7 @@ import { ComponentProps, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import GenericSettingsHeader from './GenericSettingsHeader'
 
@@ -13,7 +14,7 @@ export default function GenericSettingsSelectNavigation({ localeBase, routeGroup
 	const navigate = useNavigate()
 	const location = useLocation()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groups } = useRouteGroups({ routeGroups })
 
 	/**

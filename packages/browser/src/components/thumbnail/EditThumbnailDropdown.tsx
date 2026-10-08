@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import UploadImageModal from './UploadImageModal'
 
@@ -18,7 +19,7 @@ type Props = {
 }
 
 export default function EditThumbnailDropdown({ label, onChooseSelector, onUploadImage }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canUpload = useMemo(() => checkPermission(UserPermission.UploadFile), [checkPermission])

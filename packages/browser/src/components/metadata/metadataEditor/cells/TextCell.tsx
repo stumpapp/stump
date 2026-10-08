@@ -4,6 +4,7 @@ import { Minus } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
 import { MarkdownText } from '@/components/markdown'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useMetadataEditorContext } from '../context'
 
@@ -21,7 +22,7 @@ export default function TextCell<Field extends string>({
 	isMonoText,
 }: Props<Field>) {
 	const form = useFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 

@@ -8,6 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
@@ -36,7 +37,7 @@ export default function BookClubNavigationItem({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs'))
 
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canCreateBookClub = checkPermission(UserPermission.CreateBookClub)

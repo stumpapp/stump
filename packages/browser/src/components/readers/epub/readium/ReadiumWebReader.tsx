@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 
 import Spinner from '@/components/Spinner'
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookTimer } from '@/stores/reader'
 
@@ -168,7 +169,7 @@ type LoadState =
  * Production Readium Web EPUB reader — streams via Stump RWPM.
  */
 export default function ReadiumWebReader({ id, isIncognito }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)

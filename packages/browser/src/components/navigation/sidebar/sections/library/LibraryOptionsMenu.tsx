@@ -10,6 +10,7 @@ import { useMediaMatch } from 'rooks'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const mutation = graphql(`
@@ -31,7 +32,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 
 	const [isDeleting, setIsDeleting] = useState(false)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 	const { sdk } = useSDK()
 	const { mutate: startScan } = useGraphQLMutation(mutation, {

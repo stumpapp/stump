@@ -2,10 +2,12 @@ import { Label, NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { MediaFilterFormSchema } from './MediaFilterForm'
 
 export default function ExtensionSelect() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const form = useFormContext<MediaFilterFormSchema>()
 
 	return (

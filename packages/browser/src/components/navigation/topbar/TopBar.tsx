@@ -15,6 +15,7 @@ import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
@@ -55,7 +56,7 @@ export default function TopNavigation() {
 	const location = useLocation()
 
 	const [ref, size] = useDimensionsRef()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {

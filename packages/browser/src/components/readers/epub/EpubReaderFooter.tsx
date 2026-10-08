@@ -1,12 +1,14 @@
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useEpubReaderContext } from './context'
 import { ControlsContainer } from './controls'
 
 /** Footer progress for the Readium EPUB reader. */
 export default function EpubReaderFooter() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { bookMeta, progress } = useEpubReaderContext().readerMeta
 
 	if (!bookMeta) return null

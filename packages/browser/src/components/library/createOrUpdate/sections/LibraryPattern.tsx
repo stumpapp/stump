@@ -4,13 +4,14 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function LibraryPatternRadioGroup() {
 	const form = useFormContext()
 	const ctx = useLibraryContextSafe()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
 	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased

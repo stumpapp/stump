@@ -3,13 +3,15 @@ import { ReadingMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	value: ReadingMode
 	onChange: (value: ReadingMode) => void
 }
 
 export default function ReadingModeSelect({ value, onChange }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	/**
 	 * A change handler for the reading mode select, asserting that the value

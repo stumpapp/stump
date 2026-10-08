@@ -12,6 +12,7 @@ import { ThumbnailImage } from '@/components/thumbnail/ThumbnailImage'
 import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceholder'
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const IMAGE_WIDTH_MOBILE = 160
@@ -97,7 +98,7 @@ export default function OnDeckContainer() {
 }
 
 function OnDeck() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()

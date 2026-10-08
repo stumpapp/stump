@@ -1,6 +1,7 @@
 import { Label, NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
@@ -8,7 +9,7 @@ import { useEpubReaderContext } from '../context'
 const OPTIONS = [0.5, 1, 1.5, 2]
 
 export default function PageMargins() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()

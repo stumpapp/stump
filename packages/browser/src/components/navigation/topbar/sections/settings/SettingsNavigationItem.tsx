@@ -4,6 +4,7 @@ import { Cog } from 'lucide-react'
 import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useSettingsRoutes } from '@/scenes/settings/useSettingsRoutes'
 import { useAppStore } from '@/stores'
@@ -13,7 +14,7 @@ import TopBarNavLink from '../../TopBarNavLink'
 
 export default function SettingsNavigationItem() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableDoubleSidebar },
 	} = usePreferences()

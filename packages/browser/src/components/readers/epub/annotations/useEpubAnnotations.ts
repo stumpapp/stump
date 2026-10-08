@@ -10,6 +10,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import type { ReaderLocator } from '../context'
 import type { EpubAnnotation } from './types'
 
@@ -79,7 +81,7 @@ export function useEpubAnnotations({
 	isIncognito,
 	initialAnnotations,
 }: UseEpubAnnotationsArgs) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const queryClient = useQueryClient()
 	const queryKey = useMemo(() => ['readiumWebReader', mediaId] as const, [mediaId])
 	const cachedAnnotations = useSyncExternalStore(

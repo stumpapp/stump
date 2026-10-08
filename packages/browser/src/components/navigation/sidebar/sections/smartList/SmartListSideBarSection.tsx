@@ -4,6 +4,7 @@ import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
@@ -28,7 +29,7 @@ export default function SmartListSideBarSection({
 	const location = useLocation()
 	const paths = usePaths()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: { smartLists: lists },

@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { FilterSource, SmartListFormSchema } from '../../schema'
 import { useFilterGroupContext } from './context'
 
@@ -18,7 +20,7 @@ export function FieldSelector({ idx }: Props) {
 
 	const [source, setSource] = useState<FilterSource | null>(null)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()

@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { getBindingValidation } from '../../fieldDefs'
 import { useMetadataEditorContext } from '../context'
 
@@ -18,7 +20,7 @@ export default function NumberCell<Field extends string>({
 	isDecimal,
 }: Props<Field>) {
 	const form = useFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 

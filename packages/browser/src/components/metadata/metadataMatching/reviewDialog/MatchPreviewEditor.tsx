@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import {
 	FieldComparison,
@@ -17,7 +18,7 @@ import { CandidateToolbar } from './CandidateToolbar'
 import { MatchFieldRow } from './MatchFieldRow'
 
 export function MatchPreviewEditor() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()

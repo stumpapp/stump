@@ -5,6 +5,7 @@ import { Loader2, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEpubReaderContext } from '../context'
 import { searchResultToReaderLocator } from '../readium/locator'
@@ -45,7 +46,7 @@ export function groupByChapter(
 }
 
 export default function SearchCommand() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		controls: { searchBook, onGoToLocator },
 	} = useEpubReaderContext()

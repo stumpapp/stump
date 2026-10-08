@@ -11,6 +11,7 @@ import { useMediaMatch } from 'rooks'
 import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
 import { StackedSeriesCard } from '@/components/series'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query RecentlyAddedSeries($pagination: Pagination!) {
@@ -86,7 +87,7 @@ export const usePrefetchRecentlyAddedSeries = () => {
 }
 
 function RecentlyAddedSeries() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()

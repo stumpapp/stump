@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const LOCALE_BASE_KEY = 'thumbnailDropdown.uploadImage'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
@@ -15,7 +17,7 @@ type Props = {
 }
 
 export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [filePreview, setFilePreview] = useState<string | null>(null)

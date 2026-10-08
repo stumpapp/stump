@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { type FieldComparison, resolveFieldValue } from '../types'
 import { useMatchReviewStore } from '../useMatchReviewStore'
 import { FieldActionMenu } from './FieldActionMenu'
@@ -15,7 +17,7 @@ type Props = {
 }
 
 export function MatchFieldRow({ comparison }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		strategy,
 		excludedFields,

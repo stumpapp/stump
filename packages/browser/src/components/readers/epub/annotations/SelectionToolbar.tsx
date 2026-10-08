@@ -2,6 +2,8 @@ import { cn } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Highlighter, NotebookPen } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Rect = { x: number; y: number; width: number; height: number }
 
 type Props = {
@@ -19,7 +21,7 @@ const TOOLBAR_OFFSET_PX = 8
  * the iframe-relative `BasicTextSelection`).
  */
 export default function SelectionToolbar({ rect, onHighlight, onAddNote, className }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<div
 			role="toolbar"

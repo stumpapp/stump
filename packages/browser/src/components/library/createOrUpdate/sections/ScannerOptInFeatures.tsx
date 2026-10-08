@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 type Props = {
@@ -78,7 +79,7 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 		}
 	}, [form, koreaderHashes, params, onDidChange])
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-y-6 flex flex-col">

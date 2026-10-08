@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { isNumberField, SmartListFormSchema } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 import { FieldDef } from './FilterValue'
@@ -13,7 +14,7 @@ type Props = {
 }
 
 export default function ListValue({ idx }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()

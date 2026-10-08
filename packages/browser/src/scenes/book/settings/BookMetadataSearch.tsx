@@ -19,6 +19,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { MatchRecord, useMatchReviewStore } from '@/components/metadata/metadataMatching'
+import { useTranslate } from '@/hooks/useTranslate'
 import { PROVIDER_LABELS } from '@/scenes/settings/server/metadataIntegrations/providers/constants'
 
 const providersQuery = graphql(`
@@ -61,7 +62,7 @@ type Props = {
 }
 
 export default function BookMetadataSearch({ mediaId, initialTitle, isOpen, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -93,7 +94,7 @@ type FormProps = {
 }
 
 function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		data: { metadataProviderConfigs: providers },

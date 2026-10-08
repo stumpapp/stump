@@ -3,6 +3,8 @@ import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { SmartListFormSchema } from '../schema'
 
 type SubSchema = Pick<SmartListFormSchema, 'visibility'>
@@ -15,7 +17,7 @@ export default function AccessSettings({ isCreating }: Props) {
 	const form = useFormContext<SubSchema>()
 	const visibility = useWatch({ control: form.control, name: 'visibility' })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<>

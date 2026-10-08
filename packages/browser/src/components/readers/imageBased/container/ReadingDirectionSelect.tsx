@@ -3,13 +3,15 @@ import { ReadingDirection } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	direction: ReadingDirection
 	onChange: (direction: ReadingDirection) => void
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	/**
 	 * A change handler for the reading direction select, asserting that the value

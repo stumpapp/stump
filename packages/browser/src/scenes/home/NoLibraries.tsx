@@ -2,12 +2,14 @@ import { ButtonOrLink, Heading, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useAppContext } from '../../context'
 import { usePaths } from '../../paths'
 
 export default function NoLibraries() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canCreateLibrary = checkPermission(UserPermission.CreateLibrary)

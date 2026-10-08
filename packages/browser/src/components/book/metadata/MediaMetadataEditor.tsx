@@ -26,6 +26,7 @@ import {
 	TextCell,
 } from '@/components/metadata/metadataEditor'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { getEditorDefaultValues, MetadataEditorValues, schema } from './schema'
@@ -119,7 +120,7 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
 
 	const { checkPermission } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const columns = useMemo(
 		() => [

@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from './BookPageGrid'
@@ -55,7 +56,7 @@ type Props = {
 
 export default function BookThumbnailSelector({ fragment }: Props) {
 	const book = useFragment(BookThumbnailSelectorFragment, fragment)
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()

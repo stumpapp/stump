@@ -2,13 +2,15 @@ import { Card, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useFormState } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateOrUpdateBookClubSchema } from './schema'
 
 const LOCAL_BASE = 'createOrUpdateBookClubForm.fields'
 const getKey = (key: string) => `${LOCAL_BASE}.member_role_spec.${key}`
 
 export default function RoleMappingForm() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()
 	const { errors } = useFormState({ control: form.control })

@@ -3,13 +3,14 @@ import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function ScanAfterPersist() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const scanAfterPersist = useWatch({ control: form.control, name: 'scanAfterPersist' })
 	const isCreatingLibrary = !ctx?.library

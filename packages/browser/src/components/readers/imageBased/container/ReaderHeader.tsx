@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useFullscreen } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useAppStore } from '@/stores'
@@ -14,7 +15,7 @@ import SettingsDialog from './SettingsDialog'
 import TimerMenu from './TimerMenu'
 
 export default function ReaderHeader() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { book } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar },

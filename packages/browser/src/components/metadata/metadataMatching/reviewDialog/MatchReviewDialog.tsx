@@ -1,12 +1,14 @@
 import { Dialog } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useMatchReviewStore } from '../useMatchReviewStore'
 import { MatchPreviewEditor } from './MatchPreviewEditor'
 import { ReviewDialogFooter } from './ReviewDialogFooter'
 
 export function MatchReviewDialog() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { isOpen, close, records, currentRecordIndex } = useMatchReviewStore()
 
 	const record = records[currentRecordIndex]

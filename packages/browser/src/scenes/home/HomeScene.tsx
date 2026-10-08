@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { OwlEmptyState } from '@/components/Owl'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import {
@@ -62,7 +63,7 @@ export const usePrefetchHomeScene = () => {
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const { data: arrangement } = useHomeArrangement()
 	const { sdk } = useSDK()

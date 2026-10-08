@@ -6,6 +6,7 @@ import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 import DoubleSpreadBehavior from './DoubleSpreadBehavior'
@@ -25,7 +26,7 @@ type Props = {
 }
 
 export default function ReaderSettings({ forBook, currentPage }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [search, setSearch] = useSearchParams()
 
 	const store = useReaderStore((state) => state)

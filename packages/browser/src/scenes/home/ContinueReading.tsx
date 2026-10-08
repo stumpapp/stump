@@ -13,6 +13,7 @@ import { ThumbnailImage } from '@/components/thumbnail/ThumbnailImage'
 import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceholder'
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { isEbookReadProgress, readProgressPercent } from '@/utils/readingProgress'
 
@@ -105,7 +106,7 @@ export default function ContinueReadingContainer() {
 
 function ContinueReading() {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const {
 		preferences: { thumbnailRatio },

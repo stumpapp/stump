@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { ArrowRight, MinusCircle } from 'lucide-react'
 import { useFieldArray } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../../schema'
 import { FilterGroupContext } from './context'
 import { FieldSelector } from './FieldSelector'
@@ -15,7 +17,7 @@ type Props = {
 	group: FilterGroupSchema
 }
 export default function FilterGroup({ idx, group }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { remove: removeGroup } = useFieldArray<SmartListFormSchema>({
 		name: 'filters.groups',

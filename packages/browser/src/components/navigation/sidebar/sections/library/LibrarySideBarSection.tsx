@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/queries'
 
@@ -40,7 +41,7 @@ export default function LibrarySideBarSection({
 	const location = useLocation()
 	const paths = usePaths()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {

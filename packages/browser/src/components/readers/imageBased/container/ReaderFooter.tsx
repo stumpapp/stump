@@ -9,6 +9,7 @@ import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuo
 
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
@@ -17,7 +18,7 @@ import GoToPage from './GoToPage'
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()

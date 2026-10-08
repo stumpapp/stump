@@ -3,12 +3,14 @@ import { useLocaleContext } from '@stump/i18n'
 import { Settings2 } from 'lucide-react'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
 import ReaderSettings from './ReaderSettings'
 
 export default function SettingsDialog() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { book, currentPage } = useImageBaseReaderContext()
 
 	const [modality, setModality] = useState<'book' | 'global'>('book')

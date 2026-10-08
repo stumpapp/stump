@@ -27,6 +27,7 @@ import {
 } from '@/components/metadata/metadataEditor'
 import EnumCell from '@/components/metadata/metadataEditor/cells/EnumCell'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import {
@@ -107,7 +108,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
 
 	const { checkPermission } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const columns = useMemo(
 		() => [

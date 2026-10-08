@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { isConceptualOperator, SmartListFormSchema } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 import { FieldDef } from './FilterValue'
@@ -23,7 +24,7 @@ const CONCEPTUAL_FIELD_OPTIONS: Record<string, string[]> = {
 }
 
 export default function EnumValue({ idx }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()

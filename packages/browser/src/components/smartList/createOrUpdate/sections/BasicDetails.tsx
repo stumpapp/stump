@@ -2,6 +2,8 @@ import { Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { SmartListFormSchema } from '../schema'
 
 type SubSchema = Pick<SmartListFormSchema, 'name' | 'description'>
@@ -9,7 +11,7 @@ type SubSchema = Pick<SmartListFormSchema, 'name' | 'description'>
 export default function BasicDetails() {
 	const form = useFormContext<SubSchema>()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-y-6 flex flex-col">

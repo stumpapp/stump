@@ -22,14 +22,10 @@ type Return = {
 	 */
 	t: (key: string, options?: Record<string, unknown>) => string
 	/**
-	 * the shorthand translation function for keys in the shared namespace
+	 * the translation function which takes a full key from the locale root,
+	 * e.g. 'shared.common.cancel'
 	 */
-	tShared: (key: string, options?: Record<string, unknown>) => string
-	// ^ TODO: hate this name
-	/**
-	 * the translation function which allows for specifying a namespace
-	 */
-	translate: (namespace: string, key: string, options?: Record<string, unknown>) => string
+	translate: (fullKey: string, options?: Record<string, unknown>) => string
 }
 
 export function useCreateTranslate({
@@ -39,8 +35,10 @@ export function useCreateTranslate({
 }: Params): Return {
 	const { t, locale } = useLocaleContext()
 
-	let translate = (key: string, options?: Record<string, unknown>, ns?: string) => {
-		const translation = t(`${ns || namespace}.${key}`, {
+	let translate = (key: string, options?: Record<string, unknown>, ns?: string | null) => {
+		// ns = null means key is from the locale root
+		const fullKey = ns === null ? key : `${ns || namespace}.${key}`
+		const translation = t(fullKey, {
 			...(locale.startsWith('en-') && textCase === 'sentenceCase' ? { ns: 'sentenceCase' } : {}),
 			...options,
 		})
@@ -75,8 +73,7 @@ export function useCreateTranslate({
 		t: translate,
 		locale,
 		namespace,
-		translate: (ns, key, options) => translate(key, options, ns),
+		translate: (fullKey, options) => translate(fullKey, options, null),
 		// ^ i break the rule here but that's fine lol only place it should be done as such
-		tShared: (key, options) => translate(key, options, 'shared'),
 	}
 }

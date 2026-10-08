@@ -1201,38 +1201,6 @@
       }
     },
     "metadataEditor": {
-      "labels": {
-        "day": "Day",
-        "editors": "Editors",
-        "identifierAmazon": "Amazon ID",
-        "identifierCalibre": "Calibre ID",
-        "identifierGoogle": "Google ID",
-        "identifierIsbn": "ISBN",
-        "identifierMobiAsin": "Mobi ASIN",
-        "identifierUuid": "Book UUID",
-        "month": "Month",
-        "notes": "Notes",
-        "number": "Number",
-        "pageCount": "Pages",
-        "pencillers": "Pencillers",
-        "series": "Series",
-        "seriesGroup": "Series Group",
-        "storyArc": "Story Arc",
-        "storyArcNumber": "Story Arc Number",
-        "summary": "Summary",
-        "teams": "Teams",
-        "title": "Title",
-        "titleSort": "Title Sort",
-        "metaType": "Type",
-        "imprint": "Imprint",
-        "comicid": "Comic ID",
-        "booktype": "Book Type",
-        "status": "Status",
-        "totalIssues": "Total Issues",
-        "publicationRun": "Publication Run",
-        "comicImage": "Comic Image",
-        "descriptionFormatted": "Description (formatted)"
-      },
       "addFields": {
         "description": "Add each addition on its own line"
       },
@@ -1422,7 +1390,6 @@
                   "attributes": {
                     "name": "Filename",
                     "extension": "Extension",
-                    "status": "Status",
                     "path": "Path",
                     "pages": "Pages",
                     "tags": "Tags",
@@ -1432,19 +1399,7 @@
                   }
                 },
                 "book_meta": {
-                  "label": "Book Meta",
-                  "attributes": {
-                    "title": "Title",
-                    "summary": "Summary",
-                    "notes": "Notes",
-                    "pencillers": "Pencillers",
-                    "editors": "Editors",
-                    "colorists": "Colorist",
-                    "teams": "Teams",
-                    "genres": "Genre",
-                    "month": "Month",
-                    "day": "Day"
-                  }
+                  "label": "Book Meta"
                 },
                 "series": {
                   "label": "Series",
@@ -1456,13 +1411,6 @@
                 "series_meta": {
                   "label": "Series Meta",
                   "attributes": {
-                    "title": "Title",
-                    "summary": "Summary",
-                    "imprint": "Imprint",
-                    "comicid": "Comic ID",
-                    "booktype": "Book Type",
-                    "status": "Status",
-                    "metaType": "Type",
                     "year": "Start Year"
                   }
                 },
@@ -1922,6 +1870,9 @@
             "lock": "Lock Arrangement",
             "unlock": "Unlock Arrangement",
             "options": {
+              "HOME": "Home",
+              "LIBRARIES": "Libraries",
+              "SMART_LISTS": "Smart Lists",
               "EXPLORE": "Explore",
               "BOOK_CLUBS": "Book Clubs"
             },
@@ -2507,6 +2458,7 @@
             "groups": {
               "accountManagement": "Account",
               "featureAccess": "Feature Access",
+              "fileManagement": "Files",
               "emailers": "Emailers",
               "emailing": "Emailing",
               "libraryManagement": "Library Management",
@@ -2714,7 +2666,7 @@
             "description": "A friendly name to uniquely identify this emailer"
           },
           "nameAlreadyExists": "An emailer with this name already exists",
-          "nameIsForbidden": "This name is reserved",
+          "nameIsForbidden": "This Name is Reserved",
           "smtpSettings": {
             "heading": "SMTP Settings",
             "description": "The SMTP-specific settings for this emailer"
@@ -3048,6 +3000,7 @@
         "description": "Allows the user to access the Kobo sync integration"
       },
       "ACCESS_SMART_LIST": {
+        "label": "Smart Lists",
         "description": "Allows the user to access smart list features, including creating and managing smart lists"
       },
       "CHANGE_PASSWORD": {
@@ -3433,6 +3386,36 @@
       "WEB_NOVEL": "Web Novels"
     },
     "bookMetadata": {
+      "day": "Day",
+      "editors": "Editors",
+      "identifierAmazon": "Amazon ID",
+      "identifierCalibre": "Calibre ID",
+      "identifierGoogle": "Google ID",
+      "identifierIsbn": "ISBN",
+      "identifierMobiAsin": "Mobi ASIN",
+      "identifierUuid": "Book UUID",
+      "month": "Month",
+      "notes": "Notes",
+      "number": "Number",
+      "pageCount": "Pages",
+      "pencillers": "Pencillers",
+      "series": "Series",
+      "seriesGroup": "Series Group",
+      "storyArc": "Story Arc",
+      "storyArcNumber": "Story Arc Number",
+      "summary": "Summary",
+      "teams": "Teams",
+      "title": "Title",
+      "titleSort": "Title Sort",
+      "metaType": "Type",
+      "imprint": "Imprint",
+      "comicid": "Comic ID",
+      "booktype": "Book Type",
+      "status": "Status",
+      "totalIssues": "Total Issues",
+      "publicationRun": "Publication Run",
+      "comicImage": "Comic Image",
+      "descriptionFormatted": "Description (formatted)",
       "downloadedAt": "Downloaded",
       "identifier": "Identifier",
       "identifiers": "Identifiers",
@@ -3441,11 +3424,13 @@
       "characters": "Characters",
       "format": "Format",
       "genres": "Genres",
+      "genre": "Genre",
       "language": "Language",
       "publisher": "Publisher",
       "volume": "Volume",
       "writers": "Writers",
       "colorists": "Colorists",
+      "colorist": "Colorist",
       "inkers": "Inkers",
       "letterers": "Letterers",
       "coverArtists": "Cover Artists",

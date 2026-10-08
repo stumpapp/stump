@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 
 import { useRouterContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePathActive, usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -18,7 +19,7 @@ export default function SettingsSideBar() {
 	const isActive = usePathActive()
 
 	const { basePath } = useRouterContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const platform = useAppStore((store) => store.platform)
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },

@@ -4,6 +4,7 @@ import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 
 import { EntityOverviewSheet } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from './context'
 
@@ -16,7 +17,7 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 	const {
 		library: { name, description, stats, tags, config },
 	} = useLibraryContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const hideSeriesView = config?.hideSeriesView ?? false
 	const formattedSize = stats?.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 	const formattedTime = stats?.totalReadingTimeSeconds

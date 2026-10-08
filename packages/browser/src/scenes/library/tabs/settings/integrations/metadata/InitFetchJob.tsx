@@ -5,6 +5,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
 
 const query = graphql(`
@@ -23,7 +24,7 @@ const mutation = graphql(`
 
 export default function InitFetchJob() {
 	const { library } = useLibraryContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		data: { metadataProviderConfigs },

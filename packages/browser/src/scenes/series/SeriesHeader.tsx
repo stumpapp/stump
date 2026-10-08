@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
@@ -35,7 +36,7 @@ export default function SeriesHeader() {
 			library: { id: libraryId },
 		},
 	} = useSeriesContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const location = useLocation()
 	const navigate = useNavigate()

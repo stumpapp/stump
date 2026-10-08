@@ -4,10 +4,12 @@ import { useLocaleContext } from '@stump/i18n'
 import { Languages } from 'lucide-react'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import LocaleSelector from './LocaleSelector'
 
 export default function LocalePreferences() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	// just to trigger a rerender since alert doesn't subscribe to localStorage changes
 	// its fine

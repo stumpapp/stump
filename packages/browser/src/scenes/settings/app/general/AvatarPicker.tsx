@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useUser } from '@/stores'
 
 const LOCALE_BASE = 'settingsScene.app/account.sections.account.avatarPicker'
@@ -45,7 +46,7 @@ const deleteMutation = graphql(`
 `)
 
 export default function AvatarPicker() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { user, setUser } = useUser()
 	const [isModalOpen, { on, off }] = useBoolean(false)
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)

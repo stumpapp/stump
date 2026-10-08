@@ -7,6 +7,7 @@ import { useRouterContext } from '@/context/RouterContext'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 import { useAppStore } from '@/stores'
@@ -20,7 +21,7 @@ export default function LibrarySettingsSidebar() {
 	const paths = usePaths()
 
 	const { library } = useLibraryContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },

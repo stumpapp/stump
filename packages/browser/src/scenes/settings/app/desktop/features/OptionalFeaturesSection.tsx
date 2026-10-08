@@ -1,15 +1,15 @@
 import { Alert, AlertDescription, AlertTitle, NewCard } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { usePreviousDifferent } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useTauriStore } from '@/stores'
 
 import BundledServer from './BundledServer'
 import DiscordPresenceSwitch from './DiscordPresenceSwitch'
 
 export default function OptionalFeaturesSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { runBundledServer } = useTauriStore()
 

@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router'
 
 import { useNavigate, useRouterContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useAppStore } from '@/stores'
 
 import { useSettingsRoutes } from './useSettingsRoutes'
@@ -16,7 +17,7 @@ export default function SettingsNavigation() {
 	const platform = useAppStore((store) => store.platform)
 
 	const { basePath } = useRouterContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groups } = useSettingsRoutes()
 
 	const activeRouteGroup = useMemo(

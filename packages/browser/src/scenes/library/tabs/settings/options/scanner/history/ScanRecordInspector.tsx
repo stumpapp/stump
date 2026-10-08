@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../../../context'
 import { LibraryScanRecord } from './ScanHistoryTable'
@@ -45,7 +46,7 @@ type Props = {
 }
 
 export default function ScanRecordInspector({ record, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 	const {
 		preferences: { enableHideScrollbar },

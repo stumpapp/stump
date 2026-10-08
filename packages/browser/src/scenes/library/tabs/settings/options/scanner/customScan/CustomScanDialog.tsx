@@ -2,6 +2,8 @@ import { Button, Dialog } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { ScanOptions } from '../history/ScanHistoryTable'
 import ScanConfigForm, { FORM_ID } from './ScanConfigForm'
 
@@ -10,7 +12,7 @@ type Props = {
 }
 
 export default function CustomScanDialog({ onScan }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const handleScan = useCallback(

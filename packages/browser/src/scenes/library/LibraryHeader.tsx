@@ -8,6 +8,7 @@ import { useLocation } from 'react-router'
 import { DEFAULT_SERIES_ORDER_BY } from '@/components/filters/useFilterScene'
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useLibraryContext } from './context'
@@ -17,7 +18,7 @@ import { usePrefetchLibrarySeries } from './tabs/series/queries'
 
 export default function LibraryHeader() {
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		library: { id, name, path, stats, config },
 	} = useLibraryContext()

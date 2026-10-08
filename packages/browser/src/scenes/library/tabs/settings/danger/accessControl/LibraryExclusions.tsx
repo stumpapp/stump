@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../../../context'
 
@@ -56,7 +57,7 @@ const mutation = graphql(`
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [
 		{

@@ -1,13 +1,15 @@
 import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 import ProcessLibraryThumbnails from './ProcessLibraryThumbnails'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 export default function ThumbnailManagementSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-6 flex grow flex-col">

@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useLibraryManagement } from '../../context'
@@ -38,7 +39,7 @@ const query = graphql(`
 `)
 
 export default function MisisngEntitiesTable() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		library: { id },
 	} = useLibraryManagement()

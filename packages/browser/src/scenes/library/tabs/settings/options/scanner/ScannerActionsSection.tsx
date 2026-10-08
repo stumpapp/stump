@@ -1,11 +1,13 @@
 import { Button, Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useLibraryManagement } from '../../context'
 import CustomScanDialog from './customScan'
 
 export default function ScannerActionsSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { scan } = useLibraryManagement()
 
 	if (!scan) return null

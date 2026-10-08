@@ -6,11 +6,12 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTauriRPC } from '@/hooks/useTauriRPC'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useUserStore } from '@/stores'
 
 export default function DiscordPresenceSwitch() {
 	const { setDiscordPresence } = useTauriRPC()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { userPreferences, setUserPreferences } = useUserStore(
 		useShallow((state) => ({
 			setUserPreferences: state.setUserPreferences,

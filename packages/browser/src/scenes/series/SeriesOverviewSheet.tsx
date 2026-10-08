@@ -9,6 +9,7 @@ import BadgeList from '@/components/BadgeList'
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
 import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
 import { EntityOverviewSheet } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSeriesContext } from './context'
 
@@ -39,7 +40,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 	const {
 		series: { id, resolvedName, resolvedDescription, stats, tags, createdAt, updatedAt },
 	} = useSeriesContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { data } = useGraphQL(query, ['seriesById', id, 'infoSheet'], {
 		id,

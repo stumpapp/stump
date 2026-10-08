@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router'
 
 import { useRouterContext } from '@/context/RouterContext'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../context'
 import { createRouteGroups } from './routes'
@@ -14,7 +15,7 @@ export default function LibrarySettingsSelectNavigation() {
 	const location = useLocation()
 
 	const { library } = useLibraryContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
 	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id, basePath) })
 

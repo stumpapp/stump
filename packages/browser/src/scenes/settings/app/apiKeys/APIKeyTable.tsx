@@ -13,6 +13,7 @@ import { KeyRound, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
@@ -45,7 +46,7 @@ export default function APIKeyTable() {
 		data: { apiKeys },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('apiKeys'))
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [deletingKey, setDeletingKey] = useState<APIKey | null>(null)
 	const [inspectingKey, setInspectingKey] = useState<APIKey | null>(null)

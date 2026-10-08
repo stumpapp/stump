@@ -6,6 +6,7 @@ import { useMediaMatch } from 'rooks'
 
 import { useRouterContext } from '@/context/RouterContext'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
@@ -18,7 +19,7 @@ export default function LibrarySettingsHeader() {
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')

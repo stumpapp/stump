@@ -2,13 +2,15 @@ import { Button, Dropdown } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Ellipsis } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	onSelectForDelete: () => void
 	onSelectForInspect: () => void
 }
 
 export default function APIKeyActionMenu({ onSelectForDelete, onSelectForInspect }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<Dropdown modal={false}>

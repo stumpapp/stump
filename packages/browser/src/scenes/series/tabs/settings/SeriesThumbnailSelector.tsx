@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from '../../../book/settings/BookPageGrid'
@@ -58,7 +59,7 @@ type Props = {
 
 export default function SeriesThumbnailSelector({ fragment }: Props) {
 	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { sdk } = useSDK()
 	const queryClient = useQueryClient()

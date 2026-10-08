@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import CreateOrUpdateAPIKeyForm, {
 	CREATE_OR_UPDATE_API_KEY_FORM_ID,
 	CreateOrUpdateAPIKeyFormValues,
@@ -27,7 +29,7 @@ export default function CreateAPIKeyModal() {
 
 	const client = useQueryClient()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { mutate: createKey, isPending } = useGraphQLMutation(mutation, {
 		onSuccess: ({ createApiKey: { secret } }) => {

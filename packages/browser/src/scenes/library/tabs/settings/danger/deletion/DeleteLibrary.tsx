@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../../context'
 
@@ -10,7 +11,7 @@ export default function DeleteLibrary() {
 	const {
 		library: { id, name },
 	} = useLibraryManagement()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [showConfirmation, setShowConfirmation] = useState(false)
 

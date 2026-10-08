@@ -5,6 +5,7 @@ import { ShieldAlert } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { APIKey } from './APIKeyTable'
 
@@ -14,7 +15,7 @@ type Props = {
 }
 
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { user } = useAppContext()
 
 	const displayedData = useCurrentOrPrevious(apiKey)

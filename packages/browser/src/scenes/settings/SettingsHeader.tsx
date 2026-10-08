@@ -5,6 +5,7 @@ import { useLocation } from 'react-router'
 
 import { useSceneContainer } from '@/components/container'
 import { useRouterContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import SettingsNavigation from './SettingsNavigation'
 import { useSettingsRoutes } from './useSettingsRoutes'
@@ -18,7 +19,7 @@ type Props = {
  * the locale files based on the current route
  */
 export default function SettingsHeader({ renderNavigation }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { maxWidth } = useSceneContainer()
 	const { basePath } = useRouterContext()
 

@@ -17,6 +17,7 @@ import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { userPermissionSchema } from '../../server/users/create-or-update/schema'
 
@@ -56,7 +57,7 @@ export default function CreateOrUpdateAPIKeyForm({
 	editingKey,
 	onFormFocusStateChanged,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const form = useForm<CreateOrUpdateAPIKeyFormValues>({

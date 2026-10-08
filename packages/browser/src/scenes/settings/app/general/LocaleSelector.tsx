@@ -3,6 +3,7 @@ import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -10,7 +11,7 @@ const options = Object.entries(localeNames).map(([value, label]) => ({
 }))
 
 export default function LocaleSelector() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { locale },
 		update,

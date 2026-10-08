@@ -2,6 +2,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { Search } from '@/components/filters'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSafeWorkingView } from '../../context'
 import { useSmartListViewStore } from '../../store'
@@ -11,7 +12,7 @@ import TableColumnsBottomDrawer from './TableColumnsBottomDrawer'
 import ViewManagerDropdown from './ViewManagerDropdown'
 
 export default function TableHeaderActions() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		workingView: { search },
 		updateWorkingView,

@@ -44,7 +44,7 @@ function ProviderCards() {
 }
 
 export default function ProvidersSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-4 flex flex-col">

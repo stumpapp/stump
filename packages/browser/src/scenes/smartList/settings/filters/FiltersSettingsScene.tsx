@@ -12,6 +12,7 @@ import {
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
 import { SmartListQueryBuilder } from '@/components/smartList/createOrUpdate/queryBuilder'
+import { useTranslate } from '@/hooks/useTranslate'
 import { compareByKeys } from '@/utils/compare'
 
 import { useSmartListSettings } from '../context'
@@ -19,7 +20,7 @@ import { useSmartListSettings } from '../context'
 type SubSchema = Pick<SmartListFormSchema, 'filters' | 'grouping'>
 
 export default function FiltersSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 
 	const listAsForm = useMemo(() => intoForm(list), [list])

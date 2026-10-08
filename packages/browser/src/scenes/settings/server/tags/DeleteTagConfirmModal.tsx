@@ -5,6 +5,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation DeleteTagConfirmModal($tags: [String!]!) {
 		deleteTags(tags: $tags) {
@@ -21,7 +23,7 @@ type Props = {
 
 export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const client = useQueryClient()
 

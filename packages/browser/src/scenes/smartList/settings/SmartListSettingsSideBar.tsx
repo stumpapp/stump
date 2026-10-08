@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 import paths, { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
@@ -18,7 +19,7 @@ export default function SmartListSettingsSideBar() {
 	const routerPaths = usePaths()
 
 	const { list, viewerRole } = useSmartListContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()

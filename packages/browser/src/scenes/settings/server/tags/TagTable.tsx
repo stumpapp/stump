@@ -12,6 +12,7 @@ import { Ellipsis, Slash, Tag as TagIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteTagConfirmModal from './DeleteTagConfirmModal'
 import RenameTagModal from './RenameTagModal'
@@ -32,7 +33,7 @@ export default function TagTable() {
 		data: { tags },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('tags'))
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const sortedTags = useMemo(
 		() => [...(tags || [])].sort((a, b) => a.name.localeCompare(b.name)),

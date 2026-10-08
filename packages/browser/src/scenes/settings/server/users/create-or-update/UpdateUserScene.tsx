@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router'
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
@@ -42,7 +43,7 @@ export default function UpdateUserScene() {
 	const navigate = useNavigate()
 
 	const { id } = useParams<{ id: string }>()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 

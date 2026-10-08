@@ -2,9 +2,11 @@ import { Alert, AlertDescription } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 // TODO: lock down access to CoCreator?
 export default function UserAccessManager() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div>

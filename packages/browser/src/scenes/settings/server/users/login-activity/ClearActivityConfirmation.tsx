@@ -5,6 +5,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation ClearLoginActivityConfirmation {
 		deleteLoginActivity
@@ -12,7 +14,7 @@ const mutation = graphql(`
 `)
 
 export default function ClearLoginActivityConfirmation() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()

@@ -12,6 +12,7 @@ import {
 	intoForm,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 import { compareByKeys } from '@/utils/compare'
 
 import { useSmartListSettings } from '../context'
@@ -26,7 +27,7 @@ const query = graphql(`
 	}
 `)
 export default function BasicSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 	const {
 		data: { smartLists: lists },

@@ -3,12 +3,13 @@ import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateTagModal from './CreateTagModal'
 import TagTable from './TagTable'
 
 export default function TagSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<SceneContainer>

@@ -17,6 +17,7 @@ import { useDebouncedValue } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import SmartListCard from './SmartListCard'
@@ -45,7 +46,7 @@ const query = graphql(`
 
 export default function UserSmartListsScene() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	/**
 	 * The local value state for the search input
 	 */

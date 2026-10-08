@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSmartListContext } from '../../context'
 import { useSaveSelectedStoredView, useSaveWorkingView } from '../../hooks'
 import { useSmartListViewStore } from '../../store'
@@ -19,7 +21,7 @@ type Props = {
 	onClose: () => void
 }
 export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		list: { views },
 	} = useSmartListContext()

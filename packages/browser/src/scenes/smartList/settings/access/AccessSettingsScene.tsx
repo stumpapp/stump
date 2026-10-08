@@ -11,6 +11,7 @@ import {
 	intoForm,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSmartListSettings } from '../context'
 import ChangeVisibilityConfirmation from './ChangeVisibilityConfirmation'
@@ -19,7 +20,7 @@ import UserAccessManager from './UserAccessManager'
 type SubSchema = Pick<SmartListFormSchema, 'visibility'>
 
 export default function AccessSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 
 	const form = useForm<SubSchema>({

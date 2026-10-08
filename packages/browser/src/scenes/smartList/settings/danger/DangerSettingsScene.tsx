@@ -2,6 +2,8 @@ import { Button, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSmartListSettings } from '../context'
 import DeleteListConfirmation from './DeleteListConfirmation'
 
@@ -9,7 +11,7 @@ export default function DangerSettingsScene() {
 	const {
 		list: { id },
 	} = useSmartListSettings()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [showConfirmation, setShowConfirmation] = useState(false)
 

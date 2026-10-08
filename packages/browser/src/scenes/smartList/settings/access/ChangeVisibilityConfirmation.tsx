@@ -2,6 +2,8 @@ import { ConfirmationModal } from '@stump/components'
 import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	isOpen: boolean
 	onConfirm: () => void
@@ -15,7 +17,7 @@ export default function ChangeVisibilityConfirmation({
 	onCancel,
 	target,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const localeKey = getKey(target.toLowerCase())
 	const description = t(localeKey) === localeKey ? t(getKey('fallback')) : t(localeKey)

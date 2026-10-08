@@ -7,6 +7,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { useTheme } from '@/hooks/useTheme'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query UserStats {
@@ -31,7 +32,7 @@ export const prefetchUserStats = async (sdk: Api, client: QueryClient) =>
 	})
 
 export default function UsersStats() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { isDarkVariant } = useTheme()
 	const { data } = useSuspenseGraphQL(query, ['userStats'])
 

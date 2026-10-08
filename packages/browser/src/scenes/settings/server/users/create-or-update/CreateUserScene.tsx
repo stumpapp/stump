@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 
@@ -19,7 +20,7 @@ const query = graphql(`
 `)
 
 export default function CreateUserScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {

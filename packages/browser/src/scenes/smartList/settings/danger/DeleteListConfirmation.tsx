@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 type Props = {
@@ -31,7 +32,7 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 	const client = useQueryClient()
 	const { sdk } = useSDK()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { mutate, isPending: isDeleting } = useGraphQLMutation(mutation, {
 		mutationKey: [sdk.cacheKeys.smartListDelete, id],
 		onSettled: (_, error) => {

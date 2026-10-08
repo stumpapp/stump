@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation CreateTagModal($tags: [String!]!) {
 		createTags(tags: $tags) {
@@ -20,7 +22,7 @@ export default function CreateTagModal() {
 	const [name, setName] = useState('')
 
 	const client = useQueryClient()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const { mutate: createTags, isPending } = useGraphQLMutation(mutation, {

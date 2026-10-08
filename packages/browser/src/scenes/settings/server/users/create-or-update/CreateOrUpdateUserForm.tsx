@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import AccountDetails from './AccountDetails'
@@ -57,7 +58,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const isCreating = !user
 	const schema = useMemo(

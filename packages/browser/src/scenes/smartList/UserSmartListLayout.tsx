@@ -9,6 +9,7 @@ import { SceneContainer } from '@/components/container'
 import { GenericSettingsHeader } from '@/components/settings'
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListContext } from './context'
 import { useSmartListById, useSmartListMeta, useUpdateSmartList } from './graphql'
@@ -24,7 +25,7 @@ export default function UserSmartListLayout() {
 	const location = useLocation()
 
 	const { id } = useParams<{ id: string }>()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		preferences: {

@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation RenameTagModal($id: Int!, $name: String!) {
 		renameTag(id: $id, name: $name) {
@@ -24,7 +26,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 	const [name, setName] = useState('')
 
 	const client = useQueryClient()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const { mutate: renameTag, isPending } = useGraphQLMutation(mutation, {

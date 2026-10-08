@@ -10,7 +10,7 @@ const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewSelector
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function SavedViewSelector() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		list: { views },
 	} = useSmartListContext()

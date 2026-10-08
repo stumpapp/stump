@@ -3,6 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useDeleteSelectedView } from '../../hooks'
 import { useSmartListViewStore } from '../../store'
 import CreateOrUpdateTableView from './CreateOrUpdateTableView'
@@ -13,7 +15,7 @@ const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 export default function ViewManagerDropdown() {
 	const [managerState, setManagerState] = useState<'create' | 'update' | 'delete' | 'none'>('none')
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const workingView = useSmartListViewStore((state) => state.workingView)
 	const selectedView = useSmartListViewStore((state) => state.selectedView)
 	const { deleteSelectedView, isDeleting } = useDeleteSelectedView()

@@ -165,5 +165,5 @@ export default function Home() {
 	)
 }
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers'
+const LOCALE_KEY = 'webApp.settingsScene.app/desktop.sections.configuredServers'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

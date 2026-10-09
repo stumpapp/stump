@@ -23,9 +23,9 @@ export default function EditServerModal({
 		<ConfirmationModal
 			isOpen={!!editingServer}
 			onClose={onCancel}
-			title={t(getKey('title'))}
+			title={t('shared.addOrEditServer.updateServer')}
 			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			confirmText={t('shared.common.saveChanges')}
 			formId={CREATE_OR_UPDATE_SERVER_FORM_ID}
 			trigger={null}
 		>
@@ -38,5 +38,5 @@ export default function EditServerModal({
 	)
 }
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.editServer'
+const LOCALE_KEY = 'webApp.settingsScene.app/desktop.sections.configuredServers.editServer'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

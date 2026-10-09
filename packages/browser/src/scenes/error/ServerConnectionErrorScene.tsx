@@ -24,8 +24,7 @@ export default function ServerConnectionErrorScene() {
 	)
 	const isDesktop = platform !== 'browser'
 
-	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 
 	useEffect(() => {
 		async function checkServer() {
@@ -61,13 +60,13 @@ export default function ServerConnectionErrorScene() {
 			toast.promise(
 				new Promise((resolve) => setTimeout(resolve, 2000)).then(() => setGoHome(true)),
 				{
-					error: t('serverSOS.reconnectionFailed'),
-					loading: t('serverSOS.reconnected'),
-					success: t('serverSOS.reconnected'),
+					error: translate('shared.errors.serverConnectFailed.reconnectionFailed'),
+					loading: translate('shared.errors.serverConnectFailed.reconnected'),
+					success: translate('shared.errors.serverConnectFailed.reconnected'),
 				},
 			)
 		}
-	}, [backOnline, t])
+	}, [backOnline, translate])
 
 	if (goHome) {
 		const from = location.state?.from || '/'
@@ -85,8 +84,12 @@ export default function ServerConnectionErrorScene() {
 			>
 				<div className="max-w-sm gap-6 sm:max-w-md md:max-w-xl mx-auto flex h-full w-full flex-col items-start justify-center">
 					<div className="text-left">
-						<h1 className="text-4xl font-semibold text-foreground">{t('serverSOS.heading')}</h1>
-						<p className="mt-1.5 text-base text-foreground">{t(localeKey)}</p>
+						<h1 className="text-4xl font-semibold text-foreground">
+							{translate('shared.errors.serverConnectFailed.heading')}
+						</h1>
+						<p className="mt-1.5 text-base text-foreground">
+							{translate('shared.errors.serverConnectFailed.message')}
+						</p>
 					</div>
 
 					{isDesktop && (

@@ -1186,43 +1186,17 @@
             "activeServer": {
               "tooltip": "Mevcut sunucu"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Bu isimde bir sunucu zaten var",
-                "nameForbidden": "Bu isim ayrılmış",
-                "urlExists": "Bu URL'de bir sunucu zaten var"
-              },
-              "fields": {
-                "name": {
-                  "label": "İsim",
-                  "description": "Bu sunucuyu tanımlamak için bir isim",
-                  "placeholder": "Sunucum"
-                },
-                "uri": {
-                  "description": "Stump sunucusunun URL'si"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Sunucu ekle",
-              "title": "Yeni bir sunucu ekle",
-              "description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle",
-              "confirm": "Sunucu ekle"
+              "description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle"
             },
             "editServer": {
-              "tooltip": "Sunucuyu düzenle",
-              "title": "Sunucuyu düzenle",
-              "description": "Bu sunucunun detaylarını düzenle",
-              "confirm": "Değişiklikleri kaydet"
+              "description": "Bu sunucunun detaylarını düzenle"
             },
             "deleteServer": {
-              "tooltip": "Sunucuyu sil",
               "confirmation": {
-                "title": "Bu sunucuyu sil",
                 "description": "Bu işlem, sunucuyu masaüstü uygulamasından kaldıracaktır",
                 "disclaimerActiveServer": "Bu sunucu şu anda aktif. Oturumunuz kapatılacak",
-                "disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
-                "confirm": "Sunucuyu sil"
+                "disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir"
               }
             },
             "switchToServer": {
@@ -1479,6 +1453,16 @@
     },
     "common": {
       "smartLists": "Akıllı listeler"
+    },
+    "addOrEditServer": {
+      "validation": {
+        "nameForbidden": "Bu isim ayrılmış",
+        "urlExists": "Bu URL'de bir sunucu zaten var"
+      },
+      "primaryUrlDescription": "Stump sunucusunun URL'si",
+      "name": {
+        "description": "Bu sunucuyu tanımlamak için bir isim"
+      }
     }
   }
 }

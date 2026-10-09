@@ -38,9 +38,9 @@ export default function DeleteServerConfirmation({
 
 	return (
 		<ConfirmationModal
-			title={t(getKey('title'))}
+			title={t('shared.savedServerActions.deleteServer.title')}
 			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			confirmText={t('shared.savedServerActions.deleteServer.title')}
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={onConfirm}
@@ -53,5 +53,6 @@ export default function DeleteServerConfirmation({
 	)
 }
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.deleteServer.confirmation'
+const LOCALE_KEY =
+	'webApp.settingsScene.app/desktop.sections.configuredServers.deleteServer.confirmation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

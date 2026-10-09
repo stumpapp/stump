@@ -1208,43 +1208,17 @@
             "activeServer": {
               "tooltip": "Aktuální server"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Server s tímto názvem již existuje",
-                "nameForbidden": "Toto jméno nelze použít",
-                "urlExists": "Server s touto URL již existuje"
-              },
-              "fields": {
-                "name": {
-                  "label": "Název",
-                  "description": "Přátelské jméno pro identifikaci tohoto serveru",
-                  "placeholder": "Můj server"
-                },
-                "uri": {
-                  "description": "URL serveru Stump"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Přidat server",
-              "title": "Přidat nový server",
-              "description": "Přidat nový server Stump do aplikace",
-              "confirm": "Přidat server"
+              "description": "Přidat nový server Stump do aplikace"
             },
             "editServer": {
-              "tooltip": "Upravit server",
-              "title": "Upravit server",
-              "description": "Upravit detaily tohoto serveru",
-              "confirm": "Uložit změny"
+              "description": "Upravit detaily tohoto serveru"
             },
             "deleteServer": {
-              "tooltip": "Smazat server",
               "confirmation": {
-                "title": "Smazat tento server",
                 "description": "Tímto odstraníte server z desktopové aplikace",
                 "disclaimerActiveServer": "Tento server je aktuálně aktivní. Budete odhlášeni",
-                "disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
-                "confirm": "Smazat server"
+                "disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace"
               }
             },
             "switchToServer": {
@@ -1302,22 +1276,6 @@
         "title": "Obecná nastavení",
         "description": "Obecná nastavení týkající se instance serveru Stump",
         "sections": {
-          "updateAvailable": {
-            "message": "Váš server není aktualizován. Aktualizujte prosím na nejnovější verzi!"
-          },
-          "serverInfo": {
-            "title": "Informace o serveru",
-            "description": "Základní podrobnosti o instanci serveru Stump",
-            "build": {
-              "label": "Sestavení",
-              "description": "Podrobnosti o verzi a sestavení",
-              "version": {
-                "semver": "Verze",
-                "commitHash": "Přesná revize",
-                "date": "Datum sestavení"
-              }
-            }
-          },
           "serverPublicUrl": {
             "label": "Veřejná adresa URL",
             "description": "URL, kterou je váš server přístupný mimo vaši síť, pokud je to možné. Tímto povolíte odkazy na pozvánky a další funkce"
@@ -1741,17 +1699,6 @@
         "buildDate": "Datum vytvoření"
       }
     },
-    "serverSOS": {
-      "heading": "Server není dostupný",
-      "desktop": {
-        "message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení.\nPokud se URL adresa serveru změnila, můžete ji aktualizovat pomocí formuláře níže"
-      },
-      "web": {
-        "message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení"
-      },
-      "reconnected": "Znovu připojeno k serveru! Probíhá přesměrování...",
-      "reconnectionFailed": "Něco se pokazilo!"
-    },
     "serverStatusOverlay": {
       "heading": "Server není připojen",
       "message": [
@@ -1871,6 +1818,42 @@
       },
       "typeface": {
         "description": "Písmo použité v čtečce"
+      }
+    },
+    "addOrEditServer": {
+      "validation": {
+        "nameForbidden": "Toto jméno nelze použít",
+        "urlExists": "Server s touto URL již existuje"
+      },
+      "primaryUrlDescription": "URL serveru Stump",
+      "name": {
+        "description": "Přátelské jméno pro identifikaci tohoto serveru"
+      }
+    },
+    "errors": {
+      "serverConnectFailed": {
+        "heading": "Server není dostupný",
+        "reconnected": "Znovu připojeno k serveru! Probíhá přesměrování...",
+        "reconnectionFailed": "Něco se pokazilo!",
+        "message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Váš server není aktualizován. Aktualizujte prosím na nejnovější verzi!"
+      },
+      "serverInfo": {
+        "title": "Informace o serveru",
+        "description": "Základní podrobnosti o instanci serveru Stump",
+        "build": {
+          "label": "Sestavení",
+          "description": "Podrobnosti o verzi a sestavení",
+          "version": {
+            "semver": "Verze",
+            "commitHash": "Přesná revize",
+            "date": "Datum sestavení"
+          }
+        }
       }
     }
   }

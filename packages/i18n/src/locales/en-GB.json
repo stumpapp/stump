@@ -289,7 +289,6 @@
         "autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
       },
       "localProfile": "Local Profile",
-      "primaryUrl": "Primary URL",
       "autoSwitchToLocal": {
         "label": "Auto-Switch to Local Profile",
         "description": "Switch to the local profile when able"
@@ -1529,12 +1528,9 @@
             "deleteServer": {
               "confirmation": {
                 "disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialisation process",
-                "title": "Delete This Server",
                 "description": "This will remove the server from the desktop application",
-                "disclaimerActiveServer": "This server is currently active. You will be logged out",
-                "confirm": "Delete Server"
-              },
-              "tooltip": "Delete Server"
+                "disclaimerActiveServer": "This server is currently active. You will be logged out"
+              }
             },
             "resetConfiguration": {
               "confirmation": {
@@ -1559,36 +1555,11 @@
             "activeServer": {
               "tooltip": "Current Server"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "A server with this name already exists",
-                "nameForbidden": "This name is reserved",
-                "urlExists": "A server with this URL already exists"
-              },
-              "fields": {
-                "name": {
-                  "label": "Name",
-                  "description": "A friendly name to identify this server",
-                  "placeholder": "My server"
-                },
-                "uri": {
-                  "label": "URI",
-                  "description": "The URL of the Stump server",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Add Server",
-              "title": "Add a New Server",
-              "description": "Add a new Stump server to the desktop application",
-              "confirm": "Add Server"
+              "description": "Add a new Stump server to the desktop application"
             },
             "editServer": {
-              "tooltip": "Edit Server",
-              "title": "Edit Server",
-              "description": "Edit the details of this server",
-              "confirm": "Save Changes"
+              "description": "Edit the details of this server"
             },
             "switchToServer": {
               "tooltip": "Switch to Server",
@@ -1596,8 +1567,7 @@
                 "title": "Switch to This Server",
                 "description": "This will log you out of your current server",
                 "confirm": "Switch to Server",
-                "server": "Server",
-                "uri": "URL"
+                "server": "Server"
               }
             },
             "resetTokens": {
@@ -1884,36 +1854,6 @@
         "title": "Server Settings",
         "description": "General settings related to your Stump server instance",
         "sections": {
-          "updateAvailable": {
-            "message": "Your server is not up to date. Please update to the latest version!"
-          },
-          "serverInfo": {
-            "title": "Server Information",
-            "description": "Basic details about your Stump server instance",
-            "build": "Build",
-            "nonStableChannel": {
-              "title": "You are running a non-stable build of Stump",
-              "description": [
-                "It looks like you are running the",
-                "build channel"
-              ]
-            },
-            "exactCommit": "Exact Commit",
-            "debugInfo": {
-              "label": "Debug Information",
-              "description": "Copy and paste when reporting issues on GitHub",
-              "copyDebugInfoFailed": "Failed to copy debug information"
-            },
-            "version": "Version"
-          },
-          "helpfulLinks": {
-            "title": "Helpful Links",
-            "description": "Links to resources that may be helpful for managing your Stump server instance",
-            "links": {
-              "documentation": "Documentation",
-              "changelog": "Changelog"
-            }
-          },
           "serverPublicUrl": {
             "label": "Public URL",
             "description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
@@ -1938,10 +1878,6 @@
             "renameError": "Failed to rename emoji",
             "deleteSuccess": "Emoji deleted",
             "deleteError": "Failed to delete emoji"
-          },
-          "changelog": {
-            "label": "Changelog",
-            "description": "See what has changed in the latest versions of Stump"
           },
           "serverConfig": {
             "label": "Server Configuration",
@@ -2830,17 +2766,6 @@
         "buildDate": "Build Date"
       }
     },
-    "serverSOS": {
-      "heading": "Server Unavailable",
-      "desktop": {
-        "message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
-      },
-      "web": {
-        "message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
-      },
-      "reconnected": "Reconnected to server! Redirecting...",
-      "reconnectionFailed": "Something went wrong!"
-    },
     "serverStatusOverlay": {
       "heading": "Server Isn't Connected",
       "message": [
@@ -3535,7 +3460,13 @@
       "unknownSeriesName": "series"
     },
     "errors": {
-      "unknown": "Unknown Error"
+      "unknown": "Unknown Error",
+      "serverConnectFailed": {
+        "heading": "Server Unavailable",
+        "reconnected": "Reconnected to Server! Redirecting...",
+        "reconnectionFailed": "Something went wrong!",
+        "message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+      }
     },
     "emptyState": {
       "noStumpServers": "No Stump Servers Added",
@@ -3602,22 +3533,32 @@
         "section": "Authentication",
         "method": "Method"
       },
-      "serverNamePlaceholder": "My Server",
       "failedToConnect": "Failed to connect to server",
       "didConnect": "Connected",
       "checkConnection": "Check Connection",
       "setAsDefaultServer": "Set as Default Server",
       "validation": {
         "nameAlreadyExists": "Name already exists",
-        "cannotSetAuthorizationHeader": "Cannot set Authorization header"
+        "cannotSetAuthorizationHeader": "Cannot set Authorization header",
+        "nameForbidden": "This name is reserved",
+        "urlExists": "A server with this URL already exists"
       },
       "createServer": "Create Server",
       "updateServer": "Update Server",
       "basicInfo": "Basic Info",
-      "primaryUrl": "Primary URL",
+      "primaryUrl": {
+        "label": "Primary URL",
+        "description": "The URL of the Stump server",
+        "placeholder": "https://stump.example.com"
+      },
       "optionalSettings": "Optional Settings",
       "networking": "Networking",
-      "advancedOptions": "Advanced Options"
+      "advancedOptions": "Advanced Options",
+      "name": {
+        "label": "Name",
+        "description": "A friendly name to identify this server",
+        "placeholder": "My Server"
+      }
     },
     "imageReader": {
       "header": {
@@ -3636,6 +3577,42 @@
       },
       "nextInSeries": {
         "title": "Next Up:"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Your server is not up to date. Please update to the latest version!"
+      },
+      "serverInfo": {
+        "title": "Server Information",
+        "description": "Basic details about your Stump server instance",
+        "build": "Build",
+        "nonStableChannel": {
+          "title": "You are running a non-stable build of Stump",
+          "description": [
+            "It looks like you are running the",
+            "build channel"
+          ]
+        },
+        "exactCommit": "Exact Commit",
+        "debugInfo": {
+          "label": "Debug Information",
+          "description": "Copy and paste when reporting issues on GitHub",
+          "copyDebugInfoFailed": "Failed to copy debug information"
+        },
+        "version": "Version"
+      },
+      "changelog": {
+        "label": "Changelog",
+        "description": "See what has changed in the latest versions of Stump"
+      },
+      "helpfulLinks": {
+        "title": "Helpful Links",
+        "description": "Links to resources that may be helpful for managing your Stump server instance",
+        "links": {
+          "documentation": "Documentation",
+          "changelog": "Changelog"
+        }
       }
     }
   }

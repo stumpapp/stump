@@ -1866,43 +1866,17 @@
             "activeServer": {
               "tooltip": "Bieżący serwer"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Serwer o takiej nazwie już istnieje",
-                "nameForbidden": "Ta nazwa jest już zarezerwowana",
-                "urlExists": "Serwer z takim adresem już istnieje"
-              },
-              "fields": {
-                "name": {
-                  "label": "Nazwa",
-                  "description": "Przyjazna nazwa do identyfikacji tego serwera",
-                  "placeholder": "Mój serwer"
-                },
-                "uri": {
-                  "description": "Adres serwera Stump"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Dodaj serwer",
-              "title": "Dodaj nowy serwer",
-              "description": "Dodaj nowy serwer Stump do aplikacji desktopowej",
-              "confirm": "Dodaj serwer"
+              "description": "Dodaj nowy serwer Stump do aplikacji desktopowej"
             },
             "editServer": {
-              "tooltip": "Edytuj serwer",
-              "title": "Edytuj serwer",
-              "description": "Edytuj szczegóły tego serwera",
-              "confirm": "Zapisz zmiany"
+              "description": "Edytuj szczegóły tego serwera"
             },
             "deleteServer": {
-              "tooltip": "Usuń serwer",
               "confirmation": {
-                "title": "Usuń ten serwer",
                 "description": "Spowoduje to usunięcie serwera z aplikacji desktopowej",
                 "disclaimerActiveServer": "Ten serwer jest aktualnie aktywny. Nastąpi wylogowanie",
-                "disclaimerLastServer": "Jest to ostatni skonfigurowany serwer. Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów",
-                "confirm": "Usuń serwer"
+                "disclaimerLastServer": "Jest to ostatni skonfigurowany serwer. Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów"
               }
             },
             "switchToServer": {
@@ -1911,8 +1885,7 @@
                 "title": "Przełącz na ten serwer",
                 "description": "Spowoduje to wylogowanie z bieżącego serwera",
                 "confirm": "Przełącz na serwer",
-                "server": "Serwer",
-                "uri": "Odnośnik"
+                "server": "Serwer"
               }
             },
             "resetConfiguration": {
@@ -1963,37 +1936,6 @@
         "title": "Ustawienia ogólne",
         "description": "Ogólne ustawienia związane z instancją serwera Stump",
         "sections": {
-          "updateAvailable": {
-            "message": "Twój serwer jest nieaktualny. Zaktualizuj go do najnowszej wersji!"
-          },
-          "serverInfo": {
-            "title": "Informacja o serwerze",
-            "description": "Podstawowe informacje o Twojej instancji serwera Stump",
-            "build": {
-              "label": "Kompilacja",
-              "description": "Szczegóły dotyczące wersji i kompilacji",
-              "version": {
-                "semver": "Wersja",
-                "commitHash": "Dokładna rewizja",
-                "date": "Data kompilacji"
-              }
-            },
-            "nonStableChannel": {
-              "title": "Używasz niestabilnej wersji Stump",
-              "description": [
-                "Wygląda na to, że używasz",
-                "kanał kompilacji"
-              ]
-            }
-          },
-          "helpfulLinks": {
-            "title": "Przydatne odnośniki",
-            "description": "Odnośniki do zasobów, które mogą okazać się pomocne w zarządzaniu Twoim serwerem Stump",
-            "links": {
-              "documentation": "Dokumentacja",
-              "changelog": "Historia zmian"
-            }
-          },
           "serverPublicUrl": {
             "label": "Adres publiczny",
             "description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
@@ -2651,17 +2593,6 @@
         "buildDate": "Data kompilacji"
       }
     },
-    "serverSOS": {
-      "heading": "Serwer niedostępny",
-      "desktop": {
-        "message": "Wystąpił błąd sieciowy, który sugeruje, że Twój serwer Stump jest obecnie niedostępny. Upewnij się, że jest uruchomiony i dostępny z tego urządzenia.\nJeśli twój adres serwera uległ zmianie, możesz go zaktualizować za pomocą poniższego formularza"
-      },
-      "web": {
-        "message": "Wystąpił błąd sieciowy, który sugeruje, że Twój serwer Stump jest obecnie niedostępny. Upewnij się, że jest uruchomiony i dostępny z tego urządzenia"
-      },
-      "reconnected": "Połączono z serwerem! Przekierowywanie...",
-      "reconnectionFailed": "Niepowodzenie!"
-    },
     "serverStatusOverlay": {
       "heading": "Serwer nie jest połączony",
       "message": [
@@ -3253,7 +3184,13 @@
       "unknownSeriesName": "seria"
     },
     "errors": {
-      "unknown": "Nieznany błąd"
+      "unknown": "Nieznany błąd",
+      "serverConnectFailed": {
+        "heading": "Serwer niedostępny",
+        "reconnected": "Połączono z serwerem! Przekierowywanie...",
+        "reconnectionFailed": "Niepowodzenie!",
+        "message": "Wystąpił błąd sieciowy, który sugeruje, że Twój serwer Stump jest obecnie niedostępny. Upewnij się, że jest uruchomiony i dostępny z tego urządzenia"
+      }
     },
     "emptyState": {
       "noStumpServers": "Nie dodano żadnych serwerów Stump",
@@ -3312,7 +3249,6 @@
         },
         "basic": "Podstawowe"
       },
-      "serverNamePlaceholder": "Mój serwer",
       "catalogUrl": "Odnośnik do katalogu",
       "failedToConnect": "Połączenie z serwerem nie powiodło się",
       "didConnect": "Połączono",
@@ -3321,7 +3257,48 @@
       "enableOPDS": "Włącz OPDS",
       "validation": {
         "nameAlreadyExists": "Podana nazwa jest już używana",
-        "cannotSetAuthorizationHeader": "Nie można ustawić nagłówka uwierzytelnienia"
+        "cannotSetAuthorizationHeader": "Nie można ustawić nagłówka uwierzytelnienia",
+        "nameForbidden": "Ta nazwa jest już zarezerwowana",
+        "urlExists": "Serwer z takim adresem już istnieje"
+      },
+      "primaryUrlDescription": "Adres serwera Stump",
+      "name": {
+        "label": "Nazwa",
+        "description": "Przyjazna nazwa do identyfikacji tego serwera",
+        "placeholder": "Mój serwer"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Twój serwer jest nieaktualny. Zaktualizuj go do najnowszej wersji!"
+      },
+      "serverInfo": {
+        "title": "Informacja o serwerze",
+        "description": "Podstawowe informacje o Twojej instancji serwera Stump",
+        "build": {
+          "label": "Kompilacja",
+          "description": "Szczegóły dotyczące wersji i kompilacji",
+          "version": {
+            "semver": "Wersja",
+            "commitHash": "Dokładna rewizja",
+            "date": "Data kompilacji"
+          }
+        },
+        "nonStableChannel": {
+          "title": "Używasz niestabilnej wersji Stump",
+          "description": [
+            "Wygląda na to, że używasz",
+            "kanał kompilacji"
+          ]
+        }
+      },
+      "helpfulLinks": {
+        "title": "Przydatne odnośniki",
+        "description": "Odnośniki do zasobów, które mogą okazać się pomocne w zarządzaniu Twoim serwerem Stump",
+        "links": {
+          "documentation": "Dokumentacja",
+          "changelog": "Historia zmian"
+        }
       }
     }
   }

@@ -14,7 +14,7 @@ import ServerInfoSection from './ServerInfoSection'
 import ServerStats from './ServerStats'
 
 export default function GeneralServerSettingsScene() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	// TODO: make this a toast?
 	const { updateAvailable } = useCheckForServerUpdate()
@@ -35,7 +35,7 @@ export default function GeneralServerSettingsScene() {
 						<Alert variant="warning">
 							<AlertTriangle />
 							<AlertDescription>
-								{t('settingsScene.server/general.sections.updateAvailable.message')}
+								{translate('shared.serverSettings.updateAvailable.message')}
 							</AlertDescription>
 						</Alert>
 					)}

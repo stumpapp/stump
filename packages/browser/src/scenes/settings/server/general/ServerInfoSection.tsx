@@ -25,7 +25,7 @@ const IS_DEV = import.meta.env.DEV
 export default function ServerInfoSection() {
 	const version = useStumpVersion()
 
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 
 	const versionUrl = useMemo(
 		() => (version?.semver ? `${REPO_URL}/releases/tag/v${version.semver}` : REPO_URL),
@@ -72,12 +72,9 @@ export default function ServerInfoSection() {
 			await navigator.clipboard.writeText(debugInfoString)
 			setDidCopyDebugInfo(true)
 		} catch (error) {
-			toast.error(
-				t('settingsScene.server/general.sections.serverInfo.debugInfo.copyDebugInfoFailed'),
-				{
-					description: extractErrorMessage(error, translate('shared.common.unknownError')),
-				},
-			)
+			toast.error(translate('shared.serverSettings.serverInfo.debugInfo.copyDebugInfoFailed'), {
+				description: extractErrorMessage(error, translate('shared.common.unknownError')),
+			})
 			return
 		}
 	}
@@ -94,10 +91,10 @@ export default function ServerInfoSection() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<NewCard
-				label={t('settingsScene.server/general.sections.serverInfo.title')}
-				description={t('settingsScene.server/general.sections.serverInfo.description')}
+				label={translate('shared.serverSettings.serverInfo.title')}
+				description={translate('shared.serverSettings.serverInfo.description')}
 			>
-				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.version')}>
+				<NewCard.Row label={translate('shared.serverSettings.serverInfo.version')}>
 					<Link
 						href={versionUrl}
 						target="__blank"
@@ -112,7 +109,7 @@ export default function ServerInfoSection() {
 					</Link>
 				</NewCard.Row>
 
-				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.build')}>
+				<NewCard.Row label={translate('shared.serverSettings.serverInfo.build')}>
 					<Text size="sm" variant="muted">
 						{buildChannel
 							? toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)
@@ -120,7 +117,7 @@ export default function ServerInfoSection() {
 					</Text>
 				</NewCard.Row>
 
-				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.exactCommit')}>
+				<NewCard.Row label={translate('shared.serverSettings.serverInfo.exactCommit')}>
 					<Link
 						href={commitUrl}
 						target="__blank"
@@ -147,8 +144,8 @@ export default function ServerInfoSection() {
 				</NewCard.Row>
 
 				<NewCard.Row
-					label={t('settingsScene.server/general.sections.serverInfo.debugInfo.label')}
-					description={t('settingsScene.server/general.sections.serverInfo.debugInfo.description')}
+					label={translate('shared.serverSettings.serverInfo.debugInfo.label')}
+					description={translate('shared.serverSettings.serverInfo.debugInfo.description')}
 				>
 					<Button variant="outline" size="sm" onClick={onCopyDebugInfo} className="gap-x-2">
 						<CopyIcon className="size-3" />
@@ -161,14 +158,14 @@ export default function ServerInfoSection() {
 				<Alert variant="info">
 					<Info className="h-4 w-4" />
 					<AlertTitle>
-						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.title')}
+						{translate('shared.serverSettings.serverInfo.nonStableChannel.title')}
 					</AlertTitle>
 					<AlertDescription className="flex">
-						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.description.0')}{' '}
+						{translate('shared.serverSettings.serverInfo.nonStableChannel.description.0')}{' '}
 						<span className="font-semibold">
 							{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
 						</span>{' '}
-						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.description.1')}
+						{translate('shared.serverSettings.serverInfo.nonStableChannel.description.1')}
 					</AlertDescription>
 				</Alert>
 			)}

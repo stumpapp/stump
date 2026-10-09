@@ -289,7 +289,6 @@
         "autoSwitchToLocalDidNotWork": "Aplikacija nije uspjela preći na aktivni profil. Provjerite mrežnu vezu"
       },
       "localProfile": "Lokalni profil",
-      "primaryUrl": "Primarni URL",
       "autoSwitchToLocal": {
         "label": "Automatski pređite na lokalni profil",
         "description": "Pređite na lokalni profil kada je to moguće"
@@ -1996,45 +1995,17 @@
             "activeServer": {
               "tooltip": "Trenutni server"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Server s ovim nazivom već postoji",
-                "nameForbidden": "Ovaj naziv je rezerviran",
-                "urlExists": "Server s ovim URL-om već postoji"
-              },
-              "fields": {
-                "name": {
-                  "label": "Naziv",
-                  "description": "Prepoznatljiv naziv za identifikaciju ovog servera",
-                  "placeholder": "Moj server"
-                },
-                "uri": {
-                  "label": "URI",
-                  "description": "URL Stump servera",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Dodajte server",
-              "title": "Dodajte novi server",
-              "description": "Dodajte novi Stump server u desktop aplikaciju",
-              "confirm": "Dodajte server"
+              "description": "Dodajte novi Stump server u desktop aplikaciju"
             },
             "editServer": {
-              "tooltip": "Uredite server",
-              "title": "Uredite server",
-              "description": "Uredite podatke o ovom serveru",
-              "confirm": "Spremite promjene"
+              "description": "Uredite podatke o ovom serveru"
             },
             "deleteServer": {
-              "tooltip": "Izbrišite server",
               "confirmation": {
-                "title": "Izbrišite ovaj server",
                 "description": "Ovim ćete ukloniti server iz desktop aplikacije",
                 "disclaimerActiveServer": "Ovaj server je trenutno aktivan. Bit ćete odjavljeni",
-                "disclaimerLastServer": "Ovo je posljednji konfigurirani server. Bit ćete odjavljeni i morat ćete ponovo konfigurirati servere tokom postupka inicijalizacije",
-                "confirm": "Izbrišite server"
+                "disclaimerLastServer": "Ovo je posljednji konfigurirani server. Bit ćete odjavljeni i morat ćete ponovo konfigurirati servere tokom postupka inicijalizacije"
               }
             },
             "switchToServer": {
@@ -2043,8 +2014,7 @@
                 "title": "Prebacite se na ovaj server",
                 "description": "Ovim ćete se odjaviti s trenutnog servera",
                 "confirm": "Prebacite se na server",
-                "server": "Server",
-                "uri": "URL"
+                "server": "Server"
               }
             },
             "resetConfiguration": {
@@ -2095,37 +2065,6 @@
         "title": "Postavke servera",
         "description": "Opće postavke povezane s vašom instancom Stump servera",
         "sections": {
-          "updateAvailable": {
-            "message": "Vaš server nije ažuriran. Ažurirajte ga na najnoviju verziju!"
-          },
-          "serverInfo": {
-            "title": "Informacije o serveru",
-            "description": "Osnovni podaci o vašoj instanci Stump servera",
-            "build": {
-              "label": "Kompilacija",
-              "description": "Pojedinosti o verziji i kompilaciji",
-              "version": {
-                "semver": "Verzija",
-                "commitHash": "Tačan commit",
-                "date": "Datum kompilacije"
-              }
-            },
-            "nonStableChannel": {
-              "title": "Koristite nestabilnu verziju Stumpa",
-              "description": [
-                "Izgleda da koristite izdanje iz",
-                "kanala"
-              ]
-            }
-          },
-          "helpfulLinks": {
-            "title": "Korisne poveznice",
-            "description": "Poveznice na resurse koji mogu pomoći pri upravljanju vašom instancom Stump servera",
-            "links": {
-              "documentation": "Dokumentacija",
-              "changelog": "Dnevnik promjena"
-            }
-          },
           "serverPublicUrl": {
             "label": "Javni URL",
             "description": "URL putem kojeg je vaš server dostupan izvan vaše mreže, ako je primjenjivo. Ovo će omogućiti poveznice za pozivanje i druge funkcije"
@@ -2790,17 +2729,6 @@
         "commitHash": "Heš commita",
         "buildDate": "Datum kompilacije"
       }
-    },
-    "serverSOS": {
-      "heading": "Server nije dostupan",
-      "desktop": {
-        "message": "Došlo je do mrežne greške koja ukazuje na to da vaš Stump server trenutno nije dostupan. Provjerite je li pokrenut i dostupan s ovog uređaja.\nAko se URL vašeg servera promijenio, možete ga ažurirati pomoću obrasca u nastavku"
-      },
-      "web": {
-        "message": "Došlo je do mrežne greške koja ukazuje na to da vaš Stump server trenutno nije dostupan. Provjerite je li pokrenut i dostupan s ovog uređaja"
-      },
-      "reconnected": "Veza sa serverom ponovo je uspostavljena! Preusmjeravanje...",
-      "reconnectionFailed": "Došlo je do greške!"
     },
     "serverStatusOverlay": {
       "heading": "Nema veze sa serverom",
@@ -3491,7 +3419,13 @@
       "unknownSeriesName": "nepoznatog naziva"
     },
     "errors": {
-      "unknown": "Nepoznata greška"
+      "unknown": "Nepoznata greška",
+      "serverConnectFailed": {
+        "heading": "Server nije dostupan",
+        "reconnected": "Veza sa serverom ponovo je uspostavljena! Preusmjeravanje...",
+        "reconnectionFailed": "Došlo je do greške!",
+        "message": "Došlo je do mrežne greške koja ukazuje na to da vaš Stump server trenutno nije dostupan. Provjerite je li pokrenut i dostupan s ovog uređaja"
+      }
     },
     "emptyState": {
       "noStumpServers": "Nije dodan nijedan Stump server",
@@ -3557,7 +3491,6 @@
         "section": "Autentifikacija",
         "method": "Metoda"
       },
-      "serverNamePlaceholder": "Moj server",
       "catalogUrl": "URL kataloga",
       "failedToConnect": "Povezivanje sa serverom nije uspjelo",
       "didConnect": "Povezano",
@@ -3565,15 +3498,26 @@
       "setAsDefaultServer": "Postavite kao zadani server",
       "validation": {
         "nameAlreadyExists": "Naziv već postoji",
-        "cannotSetAuthorizationHeader": "Nije moguće postaviti zaglavlje Authorization"
+        "cannotSetAuthorizationHeader": "Nije moguće postaviti zaglavlje Authorization",
+        "nameForbidden": "Ovaj naziv je rezerviran",
+        "urlExists": "Server s ovim URL-om već postoji"
       },
       "createServer": "Kreirajte server",
       "updateServer": "Ažurirajte server",
       "basicInfo": "Osnovne informacije",
-      "primaryUrl": "Primarni URL",
+      "primaryUrl": {
+        "label": "Primarni URL",
+        "description": "URL Stump servera",
+        "placeholder": "https://stump.example.com"
+      },
       "optionalSettings": "Opcionalne postavke",
       "networking": "Mreža",
-      "advancedOptions": "Napredne opcije"
+      "advancedOptions": "Napredne opcije",
+      "name": {
+        "label": "Naziv",
+        "description": "Prepoznatljiv naziv za identifikaciju ovog servera",
+        "placeholder": "Moj server"
+      }
     },
     "imageReader": {
       "header": {
@@ -3582,6 +3526,39 @@
       "timerMenu": {
         "start": "Pokrenite mjerač vremena",
         "stop": "Zaustavite mjerač vremena"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Vaš server nije ažuriran. Ažurirajte ga na najnoviju verziju!"
+      },
+      "serverInfo": {
+        "title": "Informacije o serveru",
+        "description": "Osnovni podaci o vašoj instanci Stump servera",
+        "build": {
+          "label": "Kompilacija",
+          "description": "Pojedinosti o verziji i kompilaciji",
+          "version": {
+            "semver": "Verzija",
+            "commitHash": "Tačan commit",
+            "date": "Datum kompilacije"
+          }
+        },
+        "nonStableChannel": {
+          "title": "Koristite nestabilnu verziju Stumpa",
+          "description": [
+            "Izgleda da koristite izdanje iz",
+            "kanala"
+          ]
+        }
+      },
+      "helpfulLinks": {
+        "title": "Korisne poveznice",
+        "description": "Poveznice na resurse koji mogu pomoći pri upravljanju vašom instancom Stump servera",
+        "links": {
+          "documentation": "Dokumentacija",
+          "changelog": "Dnevnik promjena"
+        }
       }
     }
   }

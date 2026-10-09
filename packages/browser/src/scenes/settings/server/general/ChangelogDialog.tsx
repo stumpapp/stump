@@ -93,7 +93,7 @@ export function ChangelogDialog() {
 	const version = useStumpVersion()
 	const semver = version?.semver
 
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const { data: raw, error: fetchError } = useQuery({
 		enabled: open && !!semver,
 		gcTime: Infinity,
@@ -111,7 +111,10 @@ export function ChangelogDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<NewCard.Row
+				label={translate(getKey('label'))}
+				description={translate(getKey('description'))}
+			>
 				<Dialog.Trigger asChild>
 					<Button variant="outline" size="sm">
 						{translate('shared.common.view')}
@@ -123,7 +126,7 @@ export function ChangelogDialog() {
 				{fetchError && (
 					<Alert>
 						<AlertCircle />
-						<AlertTitle>{t(getKey('fetchFailed'))}</AlertTitle>
+						<AlertTitle>{translate(getKey('fetchFailed'))}</AlertTitle>
 						<AlertDescription>{fetchError.message}</AlertDescription>
 					</Alert>
 				)}
@@ -148,4 +151,4 @@ export function ChangelogDialog() {
 	)
 }
 
-const getKey = (key: string) => `settingsScene.server/general.sections.changelog.${key}`
+const getKey = (key: string) => `shared.serverSettings.changelog.${key}`

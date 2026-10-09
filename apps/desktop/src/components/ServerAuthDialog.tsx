@@ -26,8 +26,8 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const schema = useMemo(
 		() =>
 			z.object({
-				username: z.string().min(1, { message: t('authScene.form.validation.missingUsername') }),
-				password: z.string().min(1, { message: t('authScene.form.validation.missingPassword') }),
+				username: z.string().min(1, { message: t('webApp.authScene.form.validation.missingUsername') }),
+				password: z.string().min(1, { message: t('webApp.authScene.form.validation.missingPassword') }),
 			}),
 		[t],
 	)
@@ -101,7 +101,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Content>
 				<Dialog.Header>
-					<Dialog.Title>{t('common.login')}</Dialog.Title>
+					<Dialog.Title>{t('shared.common.logIn')}</Dialog.Title>
 					<Dialog.Description>You need to login to access this server</Dialog.Description>
 				</Dialog.Header>
 
@@ -111,11 +111,11 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						name="username"
 						render={({ field: { onChange, onBlur, value } }) => (
 							<Input
-								label={t('authScene.form.labels.username')}
+								label={t('webApp.authScene.form.labels.username')}
 								autoCorrect="off"
 								autoCapitalize="none"
 								autoComplete="username"
-								placeholder={t('authScene.form.labels.username')}
+								placeholder={t('webApp.authScene.form.labels.username')}
 								onBlur={onBlur}
 								onChange={(e) => onChange(e.target.value)}
 								value={value}
@@ -130,11 +130,11 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						name="password"
 						render={({ field: { onChange, onBlur, value } }) => (
 							<PasswordInput
-								label={t('authScene.form.labels.password')}
+								label={t('webApp.authScene.form.labels.password')}
 								autoCorrect="off"
 								autoCapitalize="none"
 								autoComplete="current-password"
-								placeholder={t('authScene.form.labels.password')}
+								placeholder={t('webApp.authScene.form.labels.password')}
 								onBlur={onBlur}
 								onChange={(e) => onChange(e.target.value)}
 								value={value}
@@ -146,10 +146,10 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 					<Dialog.Footer>
 						<Button type="submit" disabled={isLoggingIn}>
-							{isLoggingIn ? t('authScene.toasts.loggingIn') : t('authScene.form.buttons.login')}
+							{isLoggingIn ? t('webApp.authScene.toasts.loggingIn') : t('webApp.authScene.form.buttons.login')}
 						</Button>
 						<Button type="button" variant="outline" onClick={() => onClose()}>
-							{t('common.cancel')}
+							{t('shared.common.cancel')}
 						</Button>
 					</Dialog.Footer>
 				</form>
@@ -172,7 +172,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							disabled={isLoggingIn}
 							variant="outline"
 						>
-							{t('authScene.form.buttons.loginWithOidc')}
+							{t('webApp.authScene.form.buttons.loginWithOidc')}
 						</Button>
 					</div>
 				)}

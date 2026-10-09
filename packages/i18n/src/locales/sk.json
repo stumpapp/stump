@@ -14,7 +14,6 @@
         "autoSwitchToLocalDidNotWork": ""
       },
       "localProfile": "",
-      "primaryUrl": "",
       "autoSwitchToLocal": {
         "label": "",
         "description": ""
@@ -2042,45 +2041,17 @@
             "activeServer": {
               "tooltip": ""
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "",
-                "nameForbidden": "",
-                "urlExists": ""
-              },
-              "fields": {
-                "name": {
-                  "label": "",
-                  "description": "",
-                  "placeholder": ""
-                },
-                "uri": {
-                  "label": "",
-                  "description": "",
-                  "placeholder": ""
-                }
-              }
-            },
             "addServer": {
-              "trigger": "",
-              "title": "",
-              "description": "",
-              "confirm": ""
+              "description": ""
             },
             "editServer": {
-              "tooltip": "",
-              "title": "",
-              "description": "",
-              "confirm": ""
+              "description": ""
             },
             "deleteServer": {
-              "tooltip": "",
               "confirmation": {
-                "title": "",
                 "description": "",
                 "disclaimerActiveServer": "",
-                "disclaimerLastServer": "",
-                "confirm": ""
+                "disclaimerLastServer": ""
               }
             },
             "switchToServer": {
@@ -2089,8 +2060,7 @@
                 "title": "",
                 "description": "",
                 "confirm": "",
-                "server": "",
-                "uri": ""
+                "server": ""
               }
             },
             "resetConfiguration": {
@@ -2144,32 +2114,6 @@
         "title": "",
         "description": "",
         "sections": {
-          "updateAvailable": {
-            "message": ""
-          },
-          "serverInfo": {
-            "title": "",
-            "description": "",
-            "version": "",
-            "exactCommit": "",
-            "build": "",
-            "nonStableChannel": {
-              "title": "",
-              "description": [
-                "",
-                ""
-              ]
-            },
-            "debugInfo": {
-              "label": "",
-              "description": "",
-              "copyDebugInfoFailed": ""
-            }
-          },
-          "changelog": {
-            "label": "",
-            "description": ""
-          },
           "serverConfig": {
             "label": "",
             "description": "",
@@ -2177,14 +2121,6 @@
               "label": "",
               "description": "",
               "updateFailed": ""
-            }
-          },
-          "helpfulLinks": {
-            "title": "",
-            "description": "",
-            "links": {
-              "documentation": "",
-              "changelog": ""
             }
           },
           "customEmojis": {
@@ -2855,17 +2791,6 @@
         "commitHash": "",
         "buildDate": ""
       }
-    },
-    "serverSOS": {
-      "heading": "",
-      "desktop": {
-        "message": ""
-      },
-      "web": {
-        "message": ""
-      },
-      "reconnected": "",
-      "reconnectionFailed": ""
     },
     "serverStatusOverlay": {
       "heading": "",
@@ -3564,7 +3489,13 @@
       "unknownSeriesName": ""
     },
     "errors": {
-      "unknown": ""
+      "unknown": "",
+      "serverConnectFailed": {
+        "heading": "",
+        "reconnected": "",
+        "reconnectionFailed": "",
+        "message": ""
+      }
     },
     "emptyState": {
       "noStumpServers": "",
@@ -3624,9 +3555,12 @@
         },
         "basic": ""
       },
-      "serverNamePlaceholder": "",
       "catalogUrl": "",
-      "primaryUrl": "",
+      "primaryUrl": {
+        "label": "",
+        "description": "",
+        "placeholder": ""
+      },
       "failedToConnect": "",
       "didConnect": "",
       "checkConnection": "",
@@ -3634,10 +3568,17 @@
       "setAsDefaultServer": "",
       "validation": {
         "nameAlreadyExists": "",
-        "cannotSetAuthorizationHeader": ""
+        "cannotSetAuthorizationHeader": "",
+        "nameForbidden": "",
+        "urlExists": ""
       },
       "networking": "",
-      "advancedOptions": ""
+      "advancedOptions": "",
+      "name": {
+        "label": "",
+        "description": "",
+        "placeholder": ""
+      }
     },
     "imageReader": {
       "header": {
@@ -3656,6 +3597,42 @@
       },
       "nextInSeries": {
         "title": ""
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": ""
+      },
+      "serverInfo": {
+        "title": "",
+        "description": "",
+        "version": "",
+        "exactCommit": "",
+        "build": "",
+        "nonStableChannel": {
+          "title": "",
+          "description": [
+            "",
+            ""
+          ]
+        },
+        "debugInfo": {
+          "label": "",
+          "description": "",
+          "copyDebugInfoFailed": ""
+        }
+      },
+      "changelog": {
+        "label": "",
+        "description": ""
+      },
+      "helpfulLinks": {
+        "title": "",
+        "description": "",
+        "links": {
+          "documentation": "",
+          "changelog": ""
+        }
       }
     }
   }

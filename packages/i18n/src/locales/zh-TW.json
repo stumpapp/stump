@@ -14,7 +14,6 @@
         "autoSwitchToLocalDidNotWork": "無法切換至目前使用的設定檔。請檢查網路連線"
       },
       "localProfile": "本機設定檔",
-      "primaryUrl": "主要網址",
       "autoSwitchToLocal": {
         "label": "自動切換至本機設定檔",
         "description": "可以切換時，改用本機設定檔"
@@ -1264,45 +1263,17 @@
             "activeServer": {
               "tooltip": "目前使用的伺服器"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "已存在同名伺服器",
-                "nameForbidden": "此名稱被保留",
-                "urlExists": "已存在相同 URL 的伺服器"
-              },
-              "fields": {
-                "name": {
-                  "label": "名稱",
-                  "description": "用於識別此伺服器的易記名稱",
-                  "placeholder": "我的伺服器"
-                },
-                "uri": {
-                  "label": "URI",
-                  "description": "Stump 伺服器的 URL",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "新增伺服器",
-              "title": "新增新伺服器",
-              "description": "將新的 Stump 伺服器新增至桌面應用程式",
-              "confirm": "新增伺服器"
+              "description": "將新的 Stump 伺服器新增至桌面應用程式"
             },
             "editServer": {
-              "tooltip": "編輯伺服器",
-              "title": "編輯伺服器",
-              "description": "編輯此伺服器的詳細資訊",
-              "confirm": "儲存變更"
+              "description": "編輯此伺服器的詳細資訊"
             },
             "deleteServer": {
-              "tooltip": "刪除伺服器",
               "confirmation": {
-                "title": "刪除此伺服器",
                 "description": "這會從桌面應用程式中移除此伺服器",
                 "disclaimerActiveServer": "此伺服器目前正在使用。你將會登出",
-                "disclaimerLastServer": "這是最後一個設定的伺服器。你將被登出，並在初始化過程中重新設定任何伺服器",
-                "confirm": "刪除伺服器"
+                "disclaimerLastServer": "這是最後一個設定的伺服器。你將被登出，並在初始化過程中重新設定任何伺服器"
               }
             },
             "switchToServer": {
@@ -1311,8 +1282,7 @@
                 "title": "切換到此伺服器",
                 "description": "這將登出你目前的伺服器",
                 "confirm": "切換到伺服器",
-                "server": "伺服器",
-                "uri": "URL"
+                "server": "伺服器"
               }
             },
             "resetConfiguration": {
@@ -1353,32 +1323,6 @@
         "title": "常規設定",
         "description": "與你的 Stump 伺服器執行個體相關的常規設定",
         "sections": {
-          "updateAvailable": {
-            "message": "你的伺服器不是最新版本。請更新到最新版本！"
-          },
-          "serverInfo": {
-            "title": "伺服器資訊",
-            "description": "Stump 伺服器執行個體的基本詳細資訊",
-            "build": "建置資訊",
-            "version": "版本",
-            "exactCommit": "完整提交版本",
-            "nonStableChannel": {
-              "title": "你正在執行一個不穩定的 Stump 建置",
-              "description": [
-                "看起來你正在執行",
-                "建置頻道"
-              ]
-            },
-            "debugInfo": {
-              "label": "除錯資訊",
-              "description": "回報 GitHub 問題時，請複製並貼上這些資訊",
-              "copyDebugInfoFailed": "複製除錯資訊失敗"
-            }
-          },
-          "changelog": {
-            "label": "更新紀錄",
-            "description": "查看 Stump 最新版本的變更內容"
-          },
           "serverConfig": {
             "label": "伺服器設定",
             "description": "這裡提供部分可管理的設定選項",
@@ -1386,14 +1330,6 @@
               "label": "公開網址",
               "description": "伺服器可從外部網路連線的網址",
               "updateFailed": "更新網址失敗"
-            }
-          },
-          "helpfulLinks": {
-            "title": "幫助連結",
-            "description": "可能有助於管理 Stump 伺服器執行個體的資源連結",
-            "links": {
-              "documentation": "說明文件",
-              "changelog": "變更日誌"
             }
           },
           "customEmojis": {
@@ -2120,17 +2056,6 @@
         "commitHash": "提交雜湊",
         "buildDate": "建置日期"
       }
-    },
-    "serverSOS": {
-      "heading": "伺服器不可用",
-      "desktop": {
-        "message": "發生網路錯誤，Stump 伺服器目前無法使用。請確認伺服器正在執行，且此裝置可以連線。\n如果伺服器網址已變更，請使用下方表單更新"
-      },
-      "web": {
-        "message": "發生網路錯誤，Stump 伺服器目前無法使用。請確認伺服器正在執行，且此裝置可以連線"
-      },
-      "reconnected": "已重新連線至伺服器，正在重新導向……",
-      "reconnectionFailed": "重新連線失敗！"
     },
     "serverStatusOverlay": {
       "heading": "伺服器未連線",
@@ -3575,7 +3500,13 @@
       "unknownSeriesName": "系列"
     },
     "errors": {
-      "unknown": "未知錯誤"
+      "unknown": "未知錯誤",
+      "serverConnectFailed": {
+        "heading": "伺服器不可用",
+        "reconnected": "已重新連線至伺服器，正在重新導向……",
+        "reconnectionFailed": "重新連線失敗！",
+        "message": "發生網路錯誤，Stump 伺服器目前無法使用。請確認伺服器正在執行，且此裝置可以連線"
+      }
     },
     "emptyState": {
       "noStumpServers": "未新增 Stump 伺服器",
@@ -3635,9 +3566,12 @@
         },
         "basic": "基本"
       },
-      "serverNamePlaceholder": "我的伺服器",
       "catalogUrl": "目錄 URL",
-      "primaryUrl": "主要網址",
+      "primaryUrl": {
+        "label": "主要網址",
+        "description": "Stump 伺服器的 URL",
+        "placeholder": "https://stump.example.com"
+      },
       "failedToConnect": "連線到伺服器失敗",
       "didConnect": "已連線",
       "checkConnection": "檢查連線",
@@ -3645,10 +3579,17 @@
       "setAsDefaultServer": "設為預設伺服器",
       "validation": {
         "nameAlreadyExists": "名稱已存在",
-        "cannotSetAuthorizationHeader": "無法設定授權標頭"
+        "cannotSetAuthorizationHeader": "無法設定授權標頭",
+        "nameForbidden": "此名稱被保留",
+        "urlExists": "已存在相同 URL 的伺服器"
       },
       "networking": "網路設定",
-      "advancedOptions": "進階選項"
+      "advancedOptions": "進階選項",
+      "name": {
+        "label": "名稱",
+        "description": "用於識別此伺服器的易記名稱",
+        "placeholder": "我的伺服器"
+      }
     },
     "imageReader": {
       "header": {
@@ -3667,6 +3608,42 @@
       },
       "nextInSeries": {
         "title": "接下來："
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "你的伺服器不是最新版本。請更新到最新版本！"
+      },
+      "serverInfo": {
+        "title": "伺服器資訊",
+        "description": "Stump 伺服器執行個體的基本詳細資訊",
+        "build": "建置資訊",
+        "version": "版本",
+        "exactCommit": "完整提交版本",
+        "nonStableChannel": {
+          "title": "你正在執行一個不穩定的 Stump 建置",
+          "description": [
+            "看起來你正在執行",
+            "建置頻道"
+          ]
+        },
+        "debugInfo": {
+          "label": "除錯資訊",
+          "description": "回報 GitHub 問題時，請複製並貼上這些資訊",
+          "copyDebugInfoFailed": "複製除錯資訊失敗"
+        }
+      },
+      "changelog": {
+        "label": "更新紀錄",
+        "description": "查看 Stump 最新版本的變更內容"
+      },
+      "helpfulLinks": {
+        "title": "幫助連結",
+        "description": "可能有助於管理 Stump 伺服器執行個體的資源連結",
+        "links": {
+          "documentation": "說明文件",
+          "changelog": "變更日誌"
+        }
       }
     }
   }

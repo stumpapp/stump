@@ -84,8 +84,8 @@ export function CreateOrUpdateServerForm() {
 				</Card.Row>
 
 				<Card.InputRow
-					label={translate('shared.common.name')}
-					placeholder={translate(getKey(`serverNamePlaceholder`))}
+					label={translate(getKey('name.label'))}
+					placeholder={translate(getKey('name.placeholder'))}
 					value={name}
 					onChangeText={(text) =>
 						form.setValue('name', text, { shouldValidate: !!errors.name?.message })
@@ -96,7 +96,7 @@ export function CreateOrUpdateServerForm() {
 
 			<Card label={translate(getKey(`networking`))}>
 				<Card.InputRow
-					label={translate(getKey(`primaryUrl`))}
+					label={translate(getKey('primaryUrl.label'))}
 					placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${kind === 'opds-legacy' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 					value={url}
 					onChangeText={(text) => form.setValue('url', text, { shouldValidate: !!errors.url })}

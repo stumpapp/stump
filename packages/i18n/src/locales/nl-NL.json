@@ -622,22 +622,6 @@
         "title": "Algemene instellingen",
         "description": "Algemene instellingen gerelateerd aan je Stump server",
         "sections": {
-          "updateAvailable": {
-            "message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
-          },
-          "serverInfo": {
-            "title": "Serverinformatie",
-            "description": "Basisgegevens over uw Stump server instantie",
-            "build": {
-              "label": "Bouwversie",
-              "description": "Details over de versie en bouwversie",
-              "version": {
-                "semver": "Versie",
-                "commitHash": "Exacte commit",
-                "date": "Build-datum"
-              }
-            }
-          },
           "serverPublicUrl": {
             "label": "Openbare URL"
           }
@@ -740,17 +724,6 @@
         "manageLibrary": "Manage"
       }
     },
-    "serverSOS": {
-      "heading": "Server niet beschikbaar",
-      "desktop": {
-        "message": "Er is een netwerkfout opgetreden die erop wijst dat uw Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat.\nAls de URL van uw server is gewijzigd, kunt u deze bijwerken met behulp van het onderstaande formulier."
-      },
-      "web": {
-        "message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
-      },
-      "reconnected": "Opnieuw verbonden met server! Doorsturen...",
-      "reconnectionFailed": "Er is iets misgegaan!"
-    },
     "serverStatusOverlay": {
       "heading": "Server is niet verbonden",
       "message": [
@@ -827,6 +800,32 @@
     },
     "readerSettings": {
       "title": "Reader Settings"
+    },
+    "errors": {
+      "serverConnectFailed": {
+        "heading": "Server niet beschikbaar",
+        "reconnected": "Opnieuw verbonden met server! Doorsturen...",
+        "reconnectionFailed": "Er is iets misgegaan!",
+        "message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
+      },
+      "serverInfo": {
+        "title": "Serverinformatie",
+        "description": "Basisgegevens over uw Stump server instantie",
+        "build": {
+          "label": "Bouwversie",
+          "description": "Details over de versie en bouwversie",
+          "version": {
+            "semver": "Versie",
+            "commitHash": "Exacte commit",
+            "date": "Build-datum"
+          }
+        }
+      }
     }
   }
 }

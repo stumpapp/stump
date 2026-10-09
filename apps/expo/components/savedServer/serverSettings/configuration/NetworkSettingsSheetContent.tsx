@@ -119,7 +119,10 @@ export function NetworkSettingsSheetContent() {
 	return (
 		<View className="gap-8 flex-1">
 			<Card label="Current Server">
-				<AppSettingsRow icon={RadioTower} title={t(getKey('primaryUrl'))}>
+				<AppSettingsRow
+					icon={RadioTower}
+					title={translate('shared.addOrEditServer.primaryUrl.label')}
+				>
 					<Text className="text-foreground-muted">
 						{formatServerUrl(activeServer.url, shouldMaskUrls)}
 					</Text>

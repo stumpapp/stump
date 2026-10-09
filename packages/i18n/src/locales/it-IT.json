@@ -1932,45 +1932,17 @@
             "activeServer": {
               "tooltip": "Server attuale"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Un server con questo nome esiste già",
-                "nameForbidden": "Questo nome è riservato",
-                "urlExists": "Un server con questo URL esiste già"
-              },
-              "fields": {
-                "name": {
-                  "label": "Nome",
-                  "description": "Un nome intuitivo per identificare in modo univoco questo server",
-                  "placeholder": "Il mio server"
-                },
-                "uri": {
-                  "description": "L'URL del server Stump",
-                  "label": "URI",
-                  "placeholder": "https://stump.esempio.it"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Aggiungi server",
-              "title": "Aggiungi un nuovo server",
-              "description": "Aggiungi un nuovo server Stump all'applicazione desktop",
-              "confirm": "Aggiungi server"
+              "description": "Aggiungi un nuovo server Stump all'applicazione desktop"
             },
             "editServer": {
-              "tooltip": "Modifica server",
-              "title": "Modifica server",
-              "description": "Modifica i dettagli di questo server",
-              "confirm": "Salva modifiche"
+              "description": "Modifica i dettagli di questo server"
             },
             "deleteServer": {
-              "tooltip": "Elimina server",
               "confirmation": {
-                "title": "Elimina questo server",
                 "description": "Questa operazione rimuoverà il server dall'applicazione desktop",
                 "disclaimerActiveServer": "Questo server è attualmente attivo. Verrai disconnesso dal tuo account",
-                "disclaimerLastServer": "Questo è l'ultimo server configurato. Verrai disconnesso dal tuo account e dovrai riconfigurare i server durante il processo d'inizializzazione",
-                "confirm": "Elimina server"
+                "disclaimerLastServer": "Questo è l'ultimo server configurato. Verrai disconnesso dal tuo account e dovrai riconfigurare i server durante il processo d'inizializzazione"
               }
             },
             "switchToServer": {
@@ -1979,8 +1951,7 @@
                 "title": "Passa a questo server",
                 "description": "Verrai disconnesso dal server attuale",
                 "confirm": "Passa al server",
-                "server": "Server",
-                "uri": "URL"
+                "server": "Server"
               }
             },
             "resetConfiguration": {
@@ -2035,36 +2006,6 @@
         "title": "Impostazioni del server",
         "description": "Impostazioni generali relative alla tua istanza del server Stump",
         "sections": {
-          "updateAvailable": {
-            "message": "Il tuo server non è aggiornato. Aggiornalo all'ultima versione!"
-          },
-          "serverInfo": {
-            "title": "Informazioni sul server",
-            "description": "Dettagli di base sulla tua istanza del server Stump",
-            "build": "Build",
-            "nonStableChannel": {
-              "title": "Stai eseguendo una build non stabile di Stump",
-              "description": [
-                "Sembra che tu stia eseguendo la versione",
-                "del canale di build"
-              ]
-            },
-            "version": "Versione",
-            "exactCommit": "Commit esatto",
-            "debugInfo": {
-              "label": "Informazioni di debug",
-              "description": "Copia e incolla quando segnali problemi su GitHub",
-              "copyDebugInfoFailed": "Impossibile copiare le informazioni di debug"
-            }
-          },
-          "helpfulLinks": {
-            "title": "Link utili",
-            "description": "Collegamenti a risorse che possono essere utili per gestire l'istanza del tuo server Stump",
-            "links": {
-              "documentation": "Documentazione",
-              "changelog": "Changelog"
-            }
-          },
           "serverPublicUrl": {
             "label": "URL pubblico",
             "description": "L'URL da cui il server è accessibile dall'esterno della rete, se applicabile. Questo abiliterà i link di invito e altre funzionalità"
@@ -2089,10 +2030,6 @@
             "renameError": "Impossibile rinominare l'emoji",
             "deleteSuccess": "Emoji eliminata",
             "deleteError": "Impossibile eliminare l'emoji"
-          },
-          "changelog": {
-            "label": "Changelog",
-            "description": "Guarda cosa è cambiato nelle ultime versioni di Stump"
           },
           "serverConfig": {
             "label": "Configurazione server",
@@ -2738,17 +2675,6 @@
         "buildDate": "Data di build"
       }
     },
-    "serverSOS": {
-      "heading": "Server non disponibile",
-      "desktop": {
-        "message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo.\nSe l'URL del tuo server è cambiato, puoi aggiornarlo utilizzando il modulo sottostante"
-      },
-      "web": {
-        "message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo"
-      },
-      "reconnected": "Riconnesso al server! Reindirizzamento in corso...",
-      "reconnectionFailed": "Qualcosa è andato storto!"
-    },
     "serverStatusOverlay": {
       "heading": "Il server non è connesso",
       "message": [
@@ -3377,7 +3303,13 @@
       "unknownSeriesName": "serie"
     },
     "errors": {
-      "unknown": "Errore sconosciuto"
+      "unknown": "Errore sconosciuto",
+      "serverConnectFailed": {
+        "heading": "Server non disponibile",
+        "reconnected": "Riconnesso al server! Reindirizzamento in corso...",
+        "reconnectionFailed": "Qualcosa è andato storto!",
+        "message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo"
+      }
     },
     "emptyState": {
       "noStumpServers": "Nessun server Stump aggiunto",
@@ -3436,7 +3368,6 @@
         },
         "basic": "Base"
       },
-      "serverNamePlaceholder": "Il mio server",
       "catalogUrl": "URL catalogo",
       "failedToConnect": "Impossibile connettersi al server",
       "didConnect": "Connesso",
@@ -3445,7 +3376,52 @@
       "enableOPDS": "Abilita OPDS",
       "validation": {
         "nameAlreadyExists": "Nome già esistente",
-        "cannotSetAuthorizationHeader": "Impossibile impostare l'intestazione di autorizzazione"
+        "cannotSetAuthorizationHeader": "Impossibile impostare l'intestazione di autorizzazione",
+        "nameForbidden": "Questo nome è riservato",
+        "urlExists": "Un server con questo URL esiste già"
+      },
+      "primaryUrlDescription": "L'URL del server Stump",
+      "primaryUrlPlaceholder": "https://stump.esempio.it",
+      "name": {
+        "label": "Nome",
+        "description": "Un nome intuitivo per identificare in modo univoco questo server",
+        "placeholder": "Il mio server"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Il tuo server non è aggiornato. Aggiornalo all'ultima versione!"
+      },
+      "serverInfo": {
+        "title": "Informazioni sul server",
+        "description": "Dettagli di base sulla tua istanza del server Stump",
+        "build": "Build",
+        "nonStableChannel": {
+          "title": "Stai eseguendo una build non stabile di Stump",
+          "description": [
+            "Sembra che tu stia eseguendo la versione",
+            "del canale di build"
+          ]
+        },
+        "version": "Versione",
+        "exactCommit": "Commit esatto",
+        "debugInfo": {
+          "label": "Informazioni di debug",
+          "description": "Copia e incolla quando segnali problemi su GitHub",
+          "copyDebugInfoFailed": "Impossibile copiare le informazioni di debug"
+        }
+      },
+      "changelog": {
+        "label": "Changelog",
+        "description": "Guarda cosa è cambiato nelle ultime versioni di Stump"
+      },
+      "helpfulLinks": {
+        "title": "Link utili",
+        "description": "Collegamenti a risorse che possono essere utili per gestire l'istanza del tuo server Stump",
+        "links": {
+          "documentation": "Documentazione",
+          "changelog": "Changelog"
+        }
       }
     }
   }

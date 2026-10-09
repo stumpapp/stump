@@ -251,17 +251,6 @@
         "buildDate": "Data da Compilação"
       }
     },
-    "serverSOS": {
-      "heading": "Servidor indisponível",
-      "desktop": {
-        "message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
-      },
-      "web": {
-        "message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
-      },
-      "reconnected": "Reconectado ao servidor! Redirecionando...",
-      "reconnectionFailed": "Algo deu errado!"
-    },
     "serverStatusOverlay": {
       "heading": "Servidor não está conectado",
       "message": [
@@ -297,6 +286,14 @@
     },
     "readerSettings": {
       "title": "Reader Settings"
+    },
+    "errors": {
+      "serverConnectFailed": {
+        "heading": "Servidor indisponível",
+        "reconnected": "Reconectado ao servidor! Redirecionando...",
+        "reconnectionFailed": "Algo deu errado!",
+        "message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
+      }
     }
   }
 }

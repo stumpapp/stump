@@ -289,7 +289,6 @@
         "autoSwitchToLocalDidNotWork": "앱에서 활성 프로필로 전환하지 못했습니다. 네트워크 연결을 확인하세요"
       },
       "localProfile": "로컬 프로필",
-      "primaryUrl": "기본 URL",
       "autoSwitchToLocal": {
         "label": "로컬 프로필로 자동 전환",
         "description": "가능한 경우 로컬 프로필로 전환합니다"
@@ -997,45 +996,17 @@
             "activeServer": {
               "tooltip": "현재 서버"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "이 이름의 서버가 이미 있습니다",
-                "nameForbidden": "예약된 이름입니다",
-                "urlExists": "이 URL의 서버가 이미 있습니다"
-              },
-              "fields": {
-                "name": {
-                  "label": "이름",
-                  "description": "이 서버를 쉽게 알아볼 수 있는 이름입니다",
-                  "placeholder": "나의 서버"
-                },
-                "uri": {
-                  "label": "URI",
-                  "description": "Stump 서버의 URL입니다",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "서버 추가",
-              "title": "새 서버 추가",
-              "description": "데스크톱 앱에 새 Stump 서버를 추가합니다",
-              "confirm": "서버 추가"
+              "description": "데스크톱 앱에 새 Stump 서버를 추가합니다"
             },
             "editServer": {
-              "tooltip": "서버 수정",
-              "title": "서버 수정",
-              "description": "이 서버의 정보를 수정합니다",
-              "confirm": "변경 사항 저장"
+              "description": "이 서버의 정보를 수정합니다"
             },
             "deleteServer": {
-              "tooltip": "서버 삭제",
               "confirmation": {
-                "title": "이 서버 삭제",
                 "description": "데스크톱 앱에서 이 서버를 제거합니다",
                 "disclaimerActiveServer": "현재 사용 중인 서버입니다. 로그아웃됩니다",
-                "disclaimerLastServer": "마지막으로 남은 등록 서버입니다. 로그아웃되며, 초기 설정 과정에서 서버를 다시 등록해야 합니다",
-                "confirm": "서버 삭제"
+                "disclaimerLastServer": "마지막으로 남은 등록 서버입니다. 로그아웃되며, 초기 설정 과정에서 서버를 다시 등록해야 합니다"
               }
             },
             "switchToServer": {
@@ -1044,8 +1015,7 @@
                 "title": "이 서버로 전환",
                 "description": "현재 서버에서 로그아웃됩니다",
                 "confirm": "서버 전환",
-                "server": "서버",
-                "uri": "URL"
+                "server": "서버"
               }
             },
             "resetConfiguration": {
@@ -1090,36 +1060,6 @@
         "title": "서버 설정",
         "description": "Stump 서버의 일반 설정입니다",
         "sections": {
-          "updateAvailable": {
-            "message": "서버가 최신 상태가 아닙니다. 최신 버전으로 업데이트하세요!"
-          },
-          "serverInfo": {
-            "title": "서버 정보",
-            "description": "Stump 서버의 기본 정보입니다",
-            "build": "빌드",
-            "nonStableChannel": {
-              "title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다",
-              "description": [
-                "현재 사용 중인 빌드는",
-                "채널의 빌드입니다"
-              ]
-            },
-            "version": "버전",
-            "exactCommit": "커밋 해시",
-            "debugInfo": {
-              "label": "디버그 정보",
-              "description": "GitHub에 문제를 보고할 때 복사하여 붙여 넣으세요",
-              "copyDebugInfoFailed": "디버그 정보를 복사하지 못했습니다"
-            }
-          },
-          "helpfulLinks": {
-            "title": "유용한 링크",
-            "description": "Stump 서버 관리에 도움이 되는 자료의 링크입니다",
-            "links": {
-              "documentation": "문서",
-              "changelog": "변경 내역"
-            }
-          },
           "serverPublicUrl": {
             "label": "외부 접속 URL",
             "description": "네트워크 외부에서 서버에 접근할 수 있는 경우 해당 URL을 입력합니다. 초대 링크 등의 기능에 사용됩니다"
@@ -1144,10 +1084,6 @@
             "renameError": "이모지 이름을 변경하지 못했습니다",
             "deleteSuccess": "이모지를 삭제했습니다",
             "deleteError": "이모지를 삭제하지 못했습니다"
-          },
-          "changelog": {
-            "label": "변경 내역",
-            "description": "Stump의 최신 버전에서 달라진 내용을 확인합니다"
           },
           "serverConfig": {
             "label": "서버 설정",
@@ -2864,17 +2800,6 @@
         "signOut": "로그아웃"
       }
     },
-    "serverSOS": {
-      "heading": "서버를 사용할 수 없습니다",
-      "desktop": {
-        "message": "네트워크 오류가 발생하여 현재 Stump 서버를 사용할 수 없는 것으로 보입니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요.\n서버 URL이 바뀌었다면 아래 양식에서 수정할 수 있습니다"
-      },
-      "web": {
-        "message": "네트워크 오류가 발생하여 현재 Stump 서버를 사용할 수 없는 것으로 보입니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요"
-      },
-      "reconnected": "서버에 다시 연결했습니다! 이동하는 중...",
-      "reconnectionFailed": "문제가 발생했습니다!"
-    },
     "serverStatusOverlay": {
       "heading": "서버가 연결되어 있지 않습니다",
       "message": [
@@ -3589,7 +3514,13 @@
       "unknownSeriesName": "시리즈"
     },
     "errors": {
-      "unknown": "알 수 없는 오류"
+      "unknown": "알 수 없는 오류",
+      "serverConnectFailed": {
+        "heading": "서버를 사용할 수 없습니다",
+        "reconnected": "서버에 다시 연결했습니다! 이동하는 중...",
+        "reconnectionFailed": "문제가 발생했습니다!",
+        "message": "네트워크 오류가 발생하여 현재 Stump 서버를 사용할 수 없는 것으로 보입니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요"
+      }
     },
     "emptyState": {
       "noStumpServers": "추가한 Stump 서버가 없습니다",
@@ -3646,7 +3577,6 @@
         "section": "인증",
         "method": "방식"
       },
-      "serverNamePlaceholder": "나의 서버",
       "catalogUrl": "카탈로그 URL",
       "failedToConnect": "서버에 연결하지 못했습니다",
       "didConnect": "연결됨",
@@ -3654,15 +3584,26 @@
       "setAsDefaultServer": "기본 서버로 설정",
       "validation": {
         "nameAlreadyExists": "이미 존재하는 이름입니다",
-        "cannotSetAuthorizationHeader": "Authorization 헤더는 설정할 수 없습니다"
+        "cannotSetAuthorizationHeader": "Authorization 헤더는 설정할 수 없습니다",
+        "nameForbidden": "예약된 이름입니다",
+        "urlExists": "이 URL의 서버가 이미 있습니다"
       },
       "createServer": "서버 추가",
       "updateServer": "서버 수정",
       "basicInfo": "기본 정보",
-      "primaryUrl": "기본 URL",
+      "primaryUrl": {
+        "label": "기본 URL",
+        "description": "Stump 서버의 URL입니다",
+        "placeholder": "https://stump.example.com"
+      },
       "optionalSettings": "선택 설정",
       "networking": "네트워크",
-      "advancedOptions": "고급 옵션"
+      "advancedOptions": "고급 옵션",
+      "name": {
+        "label": "이름",
+        "description": "이 서버를 쉽게 알아볼 수 있는 이름입니다",
+        "placeholder": "나의 서버"
+      }
     },
     "imageReader": {
       "header": {
@@ -3681,6 +3622,42 @@
       },
       "nextInSeries": {
         "title": "다음 도서:"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "서버가 최신 상태가 아닙니다. 최신 버전으로 업데이트하세요!"
+      },
+      "serverInfo": {
+        "title": "서버 정보",
+        "description": "Stump 서버의 기본 정보입니다",
+        "build": "빌드",
+        "nonStableChannel": {
+          "title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다",
+          "description": [
+            "현재 사용 중인 빌드는",
+            "채널의 빌드입니다"
+          ]
+        },
+        "version": "버전",
+        "exactCommit": "커밋 해시",
+        "debugInfo": {
+          "label": "디버그 정보",
+          "description": "GitHub에 문제를 보고할 때 복사하여 붙여 넣으세요",
+          "copyDebugInfoFailed": "디버그 정보를 복사하지 못했습니다"
+        }
+      },
+      "changelog": {
+        "label": "변경 내역",
+        "description": "Stump의 최신 버전에서 달라진 내용을 확인합니다"
+      },
+      "helpfulLinks": {
+        "title": "유용한 링크",
+        "description": "Stump 서버 관리에 도움이 되는 자료의 링크입니다",
+        "links": {
+          "documentation": "문서",
+          "changelog": "변경 내역"
+        }
       }
     }
   }

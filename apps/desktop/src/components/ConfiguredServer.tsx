@@ -69,7 +69,7 @@ export default function ConfiguredServer({
 					</div>
 
 					<div className="gap-1 flex items-center">
-						<ToolTip content={t(getKey('editServer.tooltip'))} align="end">
+						<ToolTip content={t('shared.addOrEditServer.updateServer')} align="end">
 							<Button
 								variant="outline"
 								size="icon"
@@ -80,7 +80,7 @@ export default function ConfiguredServer({
 								<Settings2 className="h-3.5 w-3.5" />
 							</Button>
 						</ToolTip>
-						<ToolTip content={t(getKey('deleteServer.tooltip'))} align="end">
+						<ToolTip content={t('shared.savedServerActions.deleteServer.title')} align="end">
 							<Button
 								variant="outline"
 								size="icon"
@@ -98,5 +98,5 @@ export default function ConfiguredServer({
 	)
 }
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers'
+const LOCALE_KEY = 'webApp.settingsScene.app/desktop.sections.configuredServers'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

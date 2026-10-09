@@ -67,9 +67,9 @@ export default function CreateOrUpdateSavedServerForm({
 			<Input
 				fullWidth
 				id="name"
-				label={t(getKey('name.label'))}
-				description={t(getKey('name.description'))}
-				placeholder={t(getKey('name.placeholder'))}
+				label={t('shared.addOrEditServer.name.label')}
+				description={t('shared.addOrEditServer.name.description')}
+				placeholder={t('shared.addOrEditServer.name.placeholder')}
 				{...form.register('name')}
 				errorMessage={errors.name?.message}
 			/>
@@ -77,9 +77,9 @@ export default function CreateOrUpdateSavedServerForm({
 			<Input
 				fullWidth
 				id="url"
-				label={t(getKey('uri.label'))}
-				description={t(getKey('uri.description'))}
-				placeholder={t(getKey('uri.placeholder'))}
+				label={t('shared.addOrEditServer.primaryUrl.label')}
+				description={t('shared.addOrEditServer.primaryUrl.description')}
+				placeholder={t('shared.addOrEditServer.primaryUrl.placeholder')}
 				{...form.register('url')}
 				errorMessage={errors.url?.message}
 			/>
@@ -123,6 +123,3 @@ export default function CreateOrUpdateSavedServerForm({
 		</Form>
 	)
 }
-
-const LOCALE_BASE = 'settingsScene.app/desktop.sections.configuredServers.addOrEditServer.fields'
-const getKey = (key: string) => `${LOCALE_BASE}.${key}`

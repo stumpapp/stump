@@ -6,15 +6,13 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { ChangelogDialog } from './ChangelogDialog'
 
 export default function HelpfulLinks() {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
-		<NewCard label={t('settingsScene.server/general.sections.helpfulLinks.title')}>
+		<NewCard label={translate('shared.serverSettings.helpfulLinks.title')}>
 			<ChangelogDialog />
 
-			<NewCard.Row
-				label={t('settingsScene.server/general.sections.helpfulLinks.links.documentation')}
-			>
+			<NewCard.Row label={translate('shared.serverSettings.helpfulLinks.links.documentation')}>
 				<ButtonOrLink
 					href="https://www.stumpapp.dev/docs"
 					target="__blank"

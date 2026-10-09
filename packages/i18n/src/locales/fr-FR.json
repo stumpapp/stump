@@ -1241,44 +1241,17 @@
             "activeServer": {
               "tooltip": "Serveur actuel"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Un serveur avec ce nom existe déjà",
-                "nameForbidden": "Ce nom est réservé",
-                "urlExists": "Un serveur avec cette URL existe déjà"
-              },
-              "fields": {
-                "name": {
-                  "label": "Nom",
-                  "description": "Un nom convivial pour identifier ce serveur",
-                  "placeholder": "Mon serveur"
-                },
-                "uri": {
-                  "description": "L'URL du serveur Stump",
-                  "placeholder": "https://stump.exemple.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Ajouter un serveur",
-              "title": "Ajouter un nouveau serveur",
-              "description": "Ajouter un nouveau serveur Stump à l’application de bureau",
-              "confirm": "Ajouter un serveur"
+              "description": "Ajouter un nouveau serveur Stump à l’application de bureau"
             },
             "editServer": {
-              "tooltip": "Modifier le serveur",
-              "title": "Modifier le serveur",
-              "description": "Modifier les détails de ce serveur",
-              "confirm": "Sauvegarder les modifications"
+              "description": "Modifier les détails de ce serveur"
             },
             "deleteServer": {
-              "tooltip": "Supprimer le serveur",
               "confirmation": {
-                "title": "Supprimer ce serveur",
                 "description": "Cela supprimera le serveur de l’application de bureau",
                 "disclaimerActiveServer": "Ce serveur est actuellement actif. Vous serez déconnecté",
-                "disclaimerLastServer": "C’est le dernier serveur configuré. Vous serez déconnecté et devrez reconfigurer les serveurs lors du processus d’initialisation",
-                "confirm": "Supprimer le serveur"
+                "disclaimerLastServer": "C’est le dernier serveur configuré. Vous serez déconnecté et devrez reconfigurer les serveurs lors du processus d’initialisation"
               }
             },
             "switchToServer": {
@@ -1338,21 +1311,6 @@
         "title": "Paramètres généraux",
         "description": "Paramètres généraux liés à l'instance de votre serveur Stump",
         "sections": {
-          "updateAvailable": {
-            "message": "Votre serveur n'est pas à jour. Veuillez le mettre à jour vers la dernière version !"
-          },
-          "serverInfo": {
-            "title": "Informations du serveur",
-            "description": "Détails de base sur l'instance de votre serveur Stump",
-            "build": {
-              "label": "Version",
-              "description": "Détails à propos de la version",
-              "version": {
-                "commitHash": "Publication",
-                "date": "Date de compilation"
-              }
-            }
-          },
           "serverPublicUrl": {
             "label": "URL Publique",
             "description": "L’URL depuis laquelle votre serveur est accessible en dehors de votre réseau, si applicable. Cela activera les liens d’invitation et d’autres fonctionnalités"
@@ -1773,17 +1731,6 @@
         "buildDate": "Date de construction"
       }
     },
-    "serverSOS": {
-      "heading": "Serveur non disponible",
-      "desktop": {
-        "message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil.\nSi l'URL de votre serveur a changé, vous pouvez la mettre à jour à l'aide du formulaire ci-dessous"
-      },
-      "web": {
-        "message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
-      },
-      "reconnected": "Reconnecté au serveur ! Redirection...",
-      "reconnectionFailed": "Quelque chose s'est mal passé!"
-    },
     "serverStatusOverlay": {
       "heading": "Le serveur n'est pas connecté",
       "message": [
@@ -1902,6 +1849,42 @@
       },
       "typeface": {
         "description": "La police utilisée dans le lecteur"
+      }
+    },
+    "addOrEditServer": {
+      "validation": {
+        "nameForbidden": "Ce nom est réservé",
+        "urlExists": "Un serveur avec cette URL existe déjà"
+      },
+      "primaryUrlDescription": "L'URL du serveur Stump",
+      "primaryUrlPlaceholder": "https://stump.exemple.com",
+      "name": {
+        "description": "Un nom convivial pour identifier ce serveur"
+      }
+    },
+    "errors": {
+      "serverConnectFailed": {
+        "heading": "Serveur non disponible",
+        "reconnected": "Reconnecté au serveur ! Redirection...",
+        "reconnectionFailed": "Quelque chose s'est mal passé!",
+        "message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Votre serveur n'est pas à jour. Veuillez le mettre à jour vers la dernière version !"
+      },
+      "serverInfo": {
+        "title": "Informations du serveur",
+        "description": "Détails de base sur l'instance de votre serveur Stump",
+        "build": {
+          "label": "Version",
+          "description": "Détails à propos de la version",
+          "version": {
+            "commitHash": "Publication",
+            "date": "Date de compilation"
+          }
+        }
       }
     }
   }

@@ -1957,44 +1957,17 @@
             "activeServer": {
               "tooltip": "当前服务器"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "已存在同名服务器",
-                "nameForbidden": "此名称被保留",
-                "urlExists": "已存在相同 URL 的服务器"
-              },
-              "fields": {
-                "name": {
-                  "label": "名称",
-                  "description": "用于识别此服务器的友好名称",
-                  "placeholder": "我的服务器"
-                },
-                "uri": {
-                  "description": "Stump 服务器的 URL",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "添加服务器",
-              "title": "添加新服务器",
-              "description": "向桌面版应用添加新的 Stump 服务器",
-              "confirm": "添加服务器"
+              "description": "向桌面版应用添加新的 Stump 服务器"
             },
             "editServer": {
-              "tooltip": "编辑服务器",
-              "title": "编辑服务器",
-              "description": "编辑此服务器的详细信息",
-              "confirm": "保存更改"
+              "description": "编辑此服务器的详细信息"
             },
             "deleteServer": {
-              "tooltip": "删除服务器",
               "confirmation": {
-                "title": "删除此服务器",
                 "description": "这将从桌面版应用中移除该服务器",
                 "disclaimerActiveServer": "此服务器当前为活跃服务器。你将被登出",
-                "disclaimerLastServer": "这是最后一个配置的服务器。你将被登出，并在初始化过程中重新配置任何服务器",
-                "confirm": "删除服务器"
+                "disclaimerLastServer": "这是最后一个配置的服务器。你将被登出，并在初始化过程中重新配置任何服务器"
               }
             },
             "switchToServer": {
@@ -2003,8 +1976,7 @@
                 "title": "切换到此服务器",
                 "description": "这将登出你当前的服务器",
                 "confirm": "切换到服务器",
-                "server": "服务器",
-                "uri": "URL"
+                "server": "服务器"
               }
             },
             "resetConfiguration": {
@@ -2055,37 +2027,6 @@
         "title": "服务器设置",
         "description": "与您的 Stump 服务器实例相关的常规设置",
         "sections": {
-          "updateAvailable": {
-            "message": "您的服务器不是最新版本。请更新到最新版本！"
-          },
-          "serverInfo": {
-            "title": "服务器信息",
-            "description": "Stump 服务器实例的基本详细信息",
-            "build": {
-              "label": "构建",
-              "description": "关于版本和构建的细节",
-              "version": {
-                "semver": "版本",
-                "commitHash": "确切提交",
-                "date": "编译日期"
-              }
-            },
-            "nonStableChannel": {
-              "title": "您正在运行一个不稳定的 Stump 构建",
-              "description": [
-                "看起来您正在运行",
-                "构建频道"
-              ]
-            }
-          },
-          "helpfulLinks": {
-            "title": "帮助链接",
-            "description": "可能有助于管理 Stump 服务器实例的资源链接",
-            "links": {
-              "documentation": "文档",
-              "changelog": "更改日志"
-            }
-          },
           "serverPublicUrl": {
             "label": "公共 URL",
             "description": "如果适用，你的服务器从外部网络可访问的 URL。这将启用邀请链接和其他功能"
@@ -2748,17 +2689,6 @@
         "commitHash": "提交哈希",
         "buildDate": "构建日期"
       }
-    },
-    "serverSOS": {
-      "heading": "服务器不可用",
-      "desktop": {
-        "message": "出现网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以在此设备上访问。\n如果您的服务器 URL 已经更改，您可以使用下面的表单更新它"
-      },
-      "web": {
-        "message": "网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以从此设备访问"
-      },
-      "reconnected": "重连到服务器！正在重定向......",
-      "reconnectionFailed": "出了些问题！"
     },
     "serverStatusOverlay": {
       "heading": "服务器未连接",
@@ -3462,7 +3392,13 @@
       "unknownSeriesName": "系列"
     },
     "errors": {
-      "unknown": "未知错误"
+      "unknown": "未知错误",
+      "serverConnectFailed": {
+        "heading": "服务器不可用",
+        "reconnected": "重连到服务器！正在重定向......",
+        "reconnectionFailed": "出了些问题！",
+        "message": "网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以从此设备访问"
+      }
     },
     "emptyState": {
       "noStumpServers": "未添加 Stump 服务器",
@@ -3530,7 +3466,6 @@
           "label": "无"
         }
       },
-      "serverNamePlaceholder": "我的服务器",
       "catalogUrl": "目录 URL",
       "failedToConnect": "连接到服务器失败",
       "didConnect": "已连接",
@@ -3539,7 +3474,49 @@
       "enableOPDS": "启用 OPDS",
       "validation": {
         "nameAlreadyExists": "名称已存在",
-        "cannotSetAuthorizationHeader": "无法设置授权标头"
+        "cannotSetAuthorizationHeader": "无法设置授权标头",
+        "nameForbidden": "此名称被保留",
+        "urlExists": "已存在相同 URL 的服务器"
+      },
+      "primaryUrlDescription": "Stump 服务器的 URL",
+      "primaryUrlPlaceholder": "https://stump.example.com",
+      "name": {
+        "label": "名称",
+        "description": "用于识别此服务器的友好名称",
+        "placeholder": "我的服务器"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "您的服务器不是最新版本。请更新到最新版本！"
+      },
+      "serverInfo": {
+        "title": "服务器信息",
+        "description": "Stump 服务器实例的基本详细信息",
+        "build": {
+          "label": "构建",
+          "description": "关于版本和构建的细节",
+          "version": {
+            "semver": "版本",
+            "commitHash": "确切提交",
+            "date": "编译日期"
+          }
+        },
+        "nonStableChannel": {
+          "title": "您正在运行一个不稳定的 Stump 构建",
+          "description": [
+            "看起来您正在运行",
+            "构建频道"
+          ]
+        }
+      },
+      "helpfulLinks": {
+        "title": "帮助链接",
+        "description": "可能有助于管理 Stump 服务器实例的资源链接",
+        "links": {
+          "documentation": "文档",
+          "changelog": "更改日志"
+        }
       }
     }
   }

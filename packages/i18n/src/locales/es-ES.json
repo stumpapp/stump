@@ -190,7 +190,6 @@
         "autoSwitchToLocalDidNotWork": "La app no pudo cambiar al perfil activo. Por favor comprueba tu conección de red"
       },
       "localProfile": "Perfil local",
-      "primaryUrl": "URL primaria",
       "autoSwitchToLocal": {
         "label": "Cambiar al perfil local automáticamente",
         "description": "Cambiar al perfil local cuando sea posible"
@@ -1711,45 +1710,17 @@
             "activeServer": {
               "tooltip": "Servidor actual"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "Ya existe un servidor con este nombre",
-                "nameForbidden": "Este nombre está reservado",
-                "urlExists": "Ya existe un servidor con esta URL"
-              },
-              "fields": {
-                "name": {
-                  "label": "Nombre",
-                  "description": "Un nombre fácil para identificar este servidor",
-                  "placeholder": "Mi servidor"
-                },
-                "uri": {
-                  "label": "URI",
-                  "description": "la URL del servidor de Stump",
-                  "placeholder": "https://stump.example.com"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Añadir servidor",
-              "title": "Añadir un nuevo servidor",
-              "description": "Añadir un nuevo servidor de Stump a la aplicación de escritorio",
-              "confirm": "Añadir servidor"
+              "description": "Añadir un nuevo servidor de Stump a la aplicación de escritorio"
             },
             "editServer": {
-              "tooltip": "Editar servidor",
-              "title": "Editar servidor",
-              "description": "Editar los detalles de este servidor",
-              "confirm": "Guardar cambios"
+              "description": "Editar los detalles de este servidor"
             },
             "deleteServer": {
-              "tooltip": "Eliminar servidor",
               "confirmation": {
-                "title": "Eliminar este servidor",
                 "description": "Esto eliminará el servidor de la aplicación de escritorio",
                 "disclaimerActiveServer": "Este servidor está activo actualmente. Tu sesión cerrará",
-                "disclaimerLastServer": "Este es el último servidor configurado. Tu sesión se cerrará y tendrás que configurar cualquier servidor en el proceso de inicialización",
-                "confirm": "Eliminar servidor"
+                "disclaimerLastServer": "Este es el último servidor configurado. Tu sesión se cerrará y tendrás que configurar cualquier servidor en el proceso de inicialización"
               }
             },
             "switchToServer": {
@@ -1758,8 +1729,7 @@
                 "title": "Cambiar a este servidor",
                 "description": "Esto cerraŕa tu sesión en el servidor actual",
                 "confirm": "Cambiar al servidor",
-                "server": "Servidor",
-                "uri": "URL"
+                "server": "Servidor"
               }
             },
             "resetConfiguration": {
@@ -1797,37 +1767,9 @@
         "title": "Ajustes generales",
         "description": "Ajustes generales relacionados con tu instancia de servidor Stump",
         "sections": {
-          "updateAvailable": {
-            "message": "Tu servidor no está actualizado. ¡Por favor, actualiza a la última versión!"
-          },
-          "serverInfo": {
-            "title": "Información del servidor",
-            "description": "Detalles básicos sobre tu instancia de Stump",
-            "build": "Build",
-            "nonStableChannel": {
-              "title": "Estás ejecutando una compilación no estable de Stump",
-              "description": [
-                "Parece que estás ejecutando",
-                "canal de distribución"
-              ]
-            },
-            "exactCommit": "Commit exacto",
-            "debugInfo": {
-              "label": "Información de depuración",
-              "copyDebugInfoFailed": "Falló en copiar la información de deupración"
-            }
-          },
           "serverPublicUrl": {
             "label": "URL pública",
             "description": "La URL desde la que tu servidor es accesible fuera de tu red, si procede. Esto habilitará los enlaces de invitación y otras características"
-          },
-          "helpfulLinks": {
-            "title": "Enlaces útiles",
-            "description": "Enlaces a recursos que pueden ayudarte a gestionar tu instancia del servidor de Stump",
-            "links": {
-              "documentation": "Documentación",
-              "changelog": "Registro de cambios"
-            }
           },
           "customEmojis": {
             "title": "Emojis personalizados",
@@ -1849,9 +1791,6 @@
             "renameError": "Falló al renombrar emoji",
             "deleteSuccess": "Emoji eliminado",
             "deleteError": "Falló al eliminar emoji"
-          },
-          "changelog": {
-            "label": "Registro de cambios"
           },
           "serverConfig": {
             "description": "Un subgrupo de opciones de configuración disponible para gestionar aquí",
@@ -2406,17 +2345,6 @@
         "commitHash": "Hash de Confirmación",
         "buildDate": "Fecha de Construcción"
       }
-    },
-    "serverSOS": {
-      "heading": "Servidor no disponible",
-      "desktop": {
-        "message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Por favor, asegúrese de que se esté ejecutando y sea accesible desde este dispositivo.\nSi su URL del servidor ha cambiado, puede actualizarla utilizando el formulario a continuación"
-      },
-      "web": {
-        "message": "Se ha producido un error de red que sugiere que su servidor Stump no está disponible actualmente. Por favor, asegúrate de que se está ejecutando y de que es accesible desde este dispositivo"
-      },
-      "reconnected": "¡Reconectado al servidor! Redirigiendo...",
-      "reconnectionFailed": "¡Algo salió mal!"
     },
     "serverStatusOverlay": {
       "heading": "El servidor no está conectado",
@@ -3085,7 +3013,13 @@
       "unknownSeriesName": "serie"
     },
     "errors": {
-      "unknown": "Error desconocido"
+      "unknown": "Error desconocido",
+      "serverConnectFailed": {
+        "heading": "Servidor no disponible",
+        "reconnected": "¡Reconectado al servidor! Redirigiendo...",
+        "reconnectionFailed": "¡Algo salió mal!",
+        "message": "Se ha producido un error de red que sugiere que su servidor Stump no está disponible actualmente. Por favor, asegúrate de que se está ejecutando y de que es accesible desde este dispositivo"
+      }
     },
     "emptyState": {
       "noServers": "No hay servidores configurados",
@@ -3125,10 +3059,17 @@
       "updateServer": "Actualizar servidor",
       "optionalSettings": "Ajustes opcionales",
       "advancedOptions": "Opciones avanzadas",
-      "serverNamePlaceholder": "Mi Servidor",
       "catalogUrl": "URL del catálogo",
       "validation": {
-        "cannotSetAuthorizationHeader": "No se puede establecer el encabezado 'Authorization'"
+        "cannotSetAuthorizationHeader": "No se puede establecer el encabezado 'Authorization'",
+        "nameForbidden": "Este nombre está reservado",
+        "urlExists": "Ya existe un servidor con esta URL"
+      },
+      "primaryUrlDescription": "la URL del servidor de Stump",
+      "primaryUrlPlaceholder": "https://stump.example.com",
+      "name": {
+        "description": "Un nombre fácil para identificar este servidor",
+        "placeholder": "Mi Servidor"
       }
     },
     "imageReader": {
@@ -3141,6 +3082,39 @@
       },
       "nextInSeries": {
         "title": "A continuación:"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Tu servidor no está actualizado. ¡Por favor, actualiza a la última versión!"
+      },
+      "serverInfo": {
+        "title": "Información del servidor",
+        "description": "Detalles básicos sobre tu instancia de Stump",
+        "build": "Build",
+        "nonStableChannel": {
+          "title": "Estás ejecutando una compilación no estable de Stump",
+          "description": [
+            "Parece que estás ejecutando",
+            "canal de distribución"
+          ]
+        },
+        "exactCommit": "Commit exacto",
+        "debugInfo": {
+          "label": "Información de depuración",
+          "copyDebugInfoFailed": "Falló en copiar la información de deupración"
+        }
+      },
+      "changelog": {
+        "label": "Registro de cambios"
+      },
+      "helpfulLinks": {
+        "title": "Enlaces útiles",
+        "description": "Enlaces a recursos que pueden ayudarte a gestionar tu instancia del servidor de Stump",
+        "links": {
+          "documentation": "Documentación",
+          "changelog": "Registro de cambios"
+        }
       }
     }
   }

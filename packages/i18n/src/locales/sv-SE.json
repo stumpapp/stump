@@ -1415,44 +1415,17 @@
             "activeServer": {
               "tooltip": "Nuvarande server"
             },
-            "addOrEditServer": {
-              "validation": {
-                "nameExists": "En server med detta namn finns redan",
-                "nameForbidden": "Detta namn är reserverat",
-                "urlExists": "En server med denna URL finns redan"
-              },
-              "fields": {
-                "name": {
-                  "label": "Namn",
-                  "description": "Ett trevligt namn för att identifiera denna server",
-                  "placeholder": "Min server"
-                },
-                "uri": {
-                  "description": "Webbadressen till Stump-servern",
-                  "placeholder": "https://stump.exempel.se"
-                }
-              }
-            },
             "addServer": {
-              "trigger": "Lägg till server",
-              "title": "Lägg till en ny server",
-              "description": "Lägg till en ny Stump-server till skrivbordsprogrammet",
-              "confirm": "Lägg till server"
+              "description": "Lägg till en ny Stump-server till skrivbordsprogrammet"
             },
             "editServer": {
-              "tooltip": "Redigera server",
-              "title": "Redigera server",
-              "description": "Redigera detaljer för denna server",
-              "confirm": "Spara ändringar"
+              "description": "Redigera detaljer för denna server"
             },
             "deleteServer": {
-              "tooltip": "Ta bort server",
               "confirmation": {
-                "title": "Ta bort server",
                 "description": "Detta kommer att ta bort servern från skrivbordsprogrammet",
                 "disclaimerActiveServer": "Denna server är för närvarande aktiv. Du kommer att loggas ut",
-                "disclaimerLastServer": "Detta är den sista konfigurerade servern. Du kommer att loggas ut och måste konfigurera om alla servrar i initieringsprocessen",
-                "confirm": "Ta bort server"
+                "disclaimerLastServer": "Detta är den sista konfigurerade servern. Du kommer att loggas ut och måste konfigurera om alla servrar i initieringsprocessen"
               }
             },
             "switchToServer": {
@@ -1460,8 +1433,7 @@
               "confirmation": {
                 "title": "Byt till denna server",
                 "description": "Detta kommer att logga ut dig från din nuvarande server",
-                "confirm": "Byt till server",
-                "uri": "Länk"
+                "confirm": "Byt till server"
               }
             },
             "resetConfiguration": {
@@ -1512,31 +1484,6 @@
         "title": "Allmänna inställningar",
         "description": "Allmänna inställningar relaterade till din Stump-serverinstans",
         "sections": {
-          "updateAvailable": {
-            "message": "Din server är inte uppdaterad. Vänligen uppdatera till senaste versionen!"
-          },
-          "serverInfo": {
-            "title": "Serverinformation",
-            "description": "Grundläggande information om din Stump-serverinstans",
-            "build": {
-              "label": "Bygge",
-              "description": "Detaljer om versionen och bygget",
-              "version": {
-                "commitHash": "Exakt commit",
-                "date": "Byggdatum"
-              }
-            },
-            "nonStableChannel": {
-              "title": "Du kör en icke-stabil version av Stump",
-              "description": [
-                "Det ser ut som du kör",
-                "byggversionen"
-              ]
-            }
-          },
-          "helpfulLinks": {
-            "description": "Länkar till resurser som kan vara användbara när du hanterar din Stump-serverinstans"
-          },
           "serverPublicUrl": {
             "label": "Offentlig URL",
             "description": "Webbadressen som din server är tillgänglig från utanför nätverket, om det är möjligt. Detta kommer att aktivera inbjudningslänkar och andra funktioner"
@@ -1984,17 +1931,6 @@
         "buildDate": "Byggdatum"
       }
     },
-    "serverSOS": {
-      "heading": "Servern är inte tillgänglig",
-      "desktop": {
-        "message": "Ett nätverksfel som uppstod tyder på att din Stump-server för närvarande inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet.\nOm din serverlänk har ändrats, kan du uppdatera den med formuläret nedan"
-      },
-      "web": {
-        "message": "Ett nätverksfel som uppstod tyder på att din Stump-server inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet"
-      },
-      "reconnected": "Återansluten till servern! Omdirigerar...",
-      "reconnectionFailed": "Någonting gick fel!"
-    },
     "serverStatusOverlay": {
       "heading": "Servern är inte ansluten",
       "message": [
@@ -2241,6 +2177,50 @@
       },
       "customHeaders": {
         "label": "Anpassade huvuden"
+      },
+      "validation": {
+        "nameForbidden": "Detta namn är reserverat",
+        "urlExists": "En server med denna URL finns redan"
+      },
+      "primaryUrlDescription": "Webbadressen till Stump-servern",
+      "primaryUrlPlaceholder": "https://stump.exempel.se",
+      "name": {
+        "description": "Ett trevligt namn för att identifiera denna server"
+      }
+    },
+    "errors": {
+      "serverConnectFailed": {
+        "heading": "Servern är inte tillgänglig",
+        "reconnected": "Återansluten till servern! Omdirigerar...",
+        "reconnectionFailed": "Någonting gick fel!",
+        "message": "Ett nätverksfel som uppstod tyder på att din Stump-server inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet"
+      }
+    },
+    "serverSettings": {
+      "updateAvailable": {
+        "message": "Din server är inte uppdaterad. Vänligen uppdatera till senaste versionen!"
+      },
+      "serverInfo": {
+        "title": "Serverinformation",
+        "description": "Grundläggande information om din Stump-serverinstans",
+        "build": {
+          "label": "Bygge",
+          "description": "Detaljer om versionen och bygget",
+          "version": {
+            "commitHash": "Exakt commit",
+            "date": "Byggdatum"
+          }
+        },
+        "nonStableChannel": {
+          "title": "Du kör en icke-stabil version av Stump",
+          "description": [
+            "Det ser ut som du kör",
+            "byggversionen"
+          ]
+        }
+      },
+      "helpfulLinks": {
+        "description": "Länkar till resurser som kan vara användbara när du hanterar din Stump-serverinstans"
       }
     }
   }

@@ -3671,7 +3671,7 @@
       "search": {
         "placeholder": "Enter a query and press enter to search",
         "failed": "Search failed. Please try again.",
-        "noResults": "No results found.",
+        "noResults": "No Results Found.",
         "section": "Section {{position}}",
         "loadingMore": "Loading More…",
         "loadMore": "Load More Results"

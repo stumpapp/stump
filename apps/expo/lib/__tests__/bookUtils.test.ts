@@ -1,15 +1,55 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { formatSeriesPosition } from '../bookUtils'
+import { formatSeriesPosition, parseSeriesPosition } from '../bookUtils'
 
 describe('bookUtils', () => {
+	describe('parseSeriesPosition', () => {
+		it.each([
+			['0', 0],
+			[0, 0],
+			['0.5', 0.5],
+			['2', 2],
+			[' 2.5 ', 2.5],
+			[null, null],
+			[undefined, null],
+			['', null],
+			['  ', null],
+			['not-a-number', null],
+			['Infinity', null],
+			[NaN, null],
+		])('parses %s as %s', (value, expected) => {
+			expect(parseSeriesPosition(value)).toBe(expected)
+		})
+	})
+
 	describe('formatSeriesPosition', () => {
+		it.each([0, 0.5])('formats position %s without a total', (position) => {
+			const t = vi.fn(() => 'series label')
+			expect(formatSeriesPosition(position, null, { t, seriesName: 'Murderbot Diaries' })).toBe(
+				'series label',
+			)
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
+				position,
+				total: undefined,
+				seriesName: 'Murderbot Diaries',
+			})
+		})
+
 		it('returns null if position is null or undefined', () => {
 			const t = vi.fn()
 			expect(formatSeriesPosition(null, 5, { t })).toBeNull()
 			expect(formatSeriesPosition(undefined, 5, { t })).toBeNull()
 			expect(t).not.toHaveBeenCalled()
 		})
+
+		it.each([NaN, Infinity, -Infinity])(
+			'does not display a non-finite position (%s)',
+			(position) => {
+				const t = vi.fn()
+				expect(formatSeriesPosition(position, null, { t })).toBeNull()
+				expect(t).not.toHaveBeenCalled()
+			},
+		)
 
 		it('properly handles all prefix options', () => {
 			const t = vi.fn()

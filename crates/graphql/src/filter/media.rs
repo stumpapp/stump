@@ -1,7 +1,7 @@
 use async_graphql::InputObject;
 use models::{
 	entity::{media, media_tag, reading_session, tag},
-	shared::enums::{FileStatus, ReadingStatus},
+	shared::enums::{FileStatus, LibraryType, ReadingStatus},
 };
 use sea_orm::{
 	prelude::{DateTimeWithTimeZone, *},
@@ -12,9 +12,9 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-	apply_numeric_filter, apply_string_filter, media_metadata::MediaMetadataFilterInput,
-	series::SeriesFilterInput, ConceptualFilter, IntoFilter, NumericFilter,
-	StringLikeFilter,
+	apply_numeric_filter, apply_string_filter, library::apply_library_type_filter,
+	media_metadata::MediaMetadataFilterInput, series::SeriesFilterInput,
+	ConceptualFilter, IntoFilter, NumericFilter, StringLikeFilter,
 };
 
 fn apply_reading_status_filter(
@@ -82,6 +82,10 @@ pub struct MediaFilterInput {
 	pub updated_at: Option<NumericFilter<DateTimeWithTimeZone>>,
 	#[graphql(default)]
 	pub series_id: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
+	pub library_id: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
+	pub library_type: Option<ConceptualFilter<LibraryType>>,
 	#[graphql(default)]
 	pub status: Option<StringLikeFilter<FileStatus>>,
 	#[graphql(default)]
@@ -156,6 +160,13 @@ impl IntoFilter for MediaFilterInput {
 				self.series_id
 					.map(|f| apply_string_filter(media::Column::SeriesId, f)),
 			)
+			.add_option(
+				self.library_id
+					.map(|f| apply_string_filter(media::Column::LibraryId, f)),
+			)
+			.add_option(self.library_type.map(|filter| {
+				apply_library_type_filter(media::Column::LibraryId, filter)
+			}))
 			.add_option(
 				self.status
 					.map(|f| apply_string_filter(media::Column::Status, f)),

@@ -2,7 +2,6 @@ import { formatBytes } from '@stump/client'
 import { Badge, Heading, Link, Statistic, Text } from '@stump/components'
 import { BookCardFragment, BookOverviewSceneQuery, Tag } from '@stump/graphql'
 import { ExternalLink } from 'lucide-react'
-import { Suspense } from 'react'
 
 import BadgeList from '@/components/BadgeList'
 import ReadMore from '@/components/ReadMore'
@@ -41,11 +40,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 		<div className="gap-3 flex w-full flex-col">
 			<div className="gap-3 flex flex-wrap items-center">
 				<Heading size="lg">{media.resolvedName}</Heading>
-				{media.seriesId && (
-					<Suspense>
-						<BookLibrarySeriesLinks seriesId={media.seriesId} />
-					</Suspense>
-				)}
+				<BookLibrarySeriesLinks fragment={media} />
 			</div>
 
 			{hasStats && (

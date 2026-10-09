@@ -68,7 +68,7 @@ export default function BookOverviewScene() {
 						<BookOverviewSceneHeader media={media} book={fragmentData} completedAt={completedAt} />
 					</div>
 
-					<BooksAfterCursor cursor={media.id} />
+					{media.seriesId && <BooksAfterCursor cursor={media.id} />}
 
 					<div className="gap-y-2 flex flex-col">
 						<Heading size="sm">Metadata</Heading>

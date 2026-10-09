@@ -49,7 +49,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 		groups.push({
 			key: 'content-type',
 			mode: 'multi',
-			filterPath: 'series.libraryType.isAnyOf',
+			filterPath: 'libraryType.isAnyOf',
 			title: t('common.content'),
 			inline: true,
 			items: [

@@ -11,7 +11,7 @@ use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set};
+use sea_orm::{prelude::*, IntoActiveModel, Set};
 use stump_core::{
 	fs_utils::ContentType,
 	image::{
@@ -431,20 +431,13 @@ impl UploadMutation {
 		book.media = active.update(core.conn.as_ref()).await?;
 		bump_media_thumbnail_fallbacks(
 			core.conn.as_ref(),
+			&book.media.library_id,
 			book.media.series_id.as_deref(),
 		)
 		.await?;
 
 		let config = library_config::Entity::find()
-			.filter(
-				library_config::Column::LibraryId.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(book.media.series_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(library_config::Column::LibraryId.eq(&book.media.library_id))
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;
@@ -626,20 +619,13 @@ impl UploadMutation {
 		book.media = active.update(core.conn.as_ref()).await?;
 		bump_media_thumbnail_fallbacks(
 			core.conn.as_ref(),
+			&book.media.library_id,
 			book.media.series_id.as_deref(),
 		)
 		.await?;
 
 		let config = library_config::Entity::find()
-			.filter(
-				library_config::Column::LibraryId.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(book.media.series_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(library_config::Column::LibraryId.eq(&book.media.library_id))
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;

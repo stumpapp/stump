@@ -455,7 +455,7 @@ async fn insert_media(
 		for media_id in media_ids {
 			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
 				id: media_id,
-				series_id: series_id.to_string(),
+				series_id: Some(series_id.to_string()),
 				library_id: library_id.to_string(),
 			}));
 		}

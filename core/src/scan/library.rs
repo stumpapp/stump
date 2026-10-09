@@ -12,11 +12,7 @@ use models::{
 	},
 	shared::enums::FileStatus,
 };
-use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
-	QuerySelect, Set, TransactionTrait,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -127,7 +123,7 @@ impl LibraryScanJob {
 				.as_ref()
 				.is_some_and(|config| config.thumbnail_config.is_none())
 		{
-			bump_media_thumbnail_fallbacks(ctx.conn(), Some(series_id)).await?;
+			bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, Some(series_id)).await?;
 		}
 
 		Ok(())
@@ -961,7 +957,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -989,7 +985,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -1029,7 +1025,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: created_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -1068,7 +1064,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -1117,15 +1113,7 @@ pub async fn handle_missing_library(
 			media::Column::Status,
 			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.filter(
-			media::Column::SeriesId.in_subquery(
-				Query::select()
-					.column(series::Column::Id)
-					.from(series::Entity)
-					.and_where(series::Column::LibraryId.eq(library_id))
-					.to_owned(),
-			),
-		)
+		.filter(media::Column::LibraryId.eq(library_id))
 		.exec(&txn)
 		.await?
 		.rows_affected;

@@ -69,11 +69,11 @@ export default function BookManagementScene() {
 		const { series, library } = book
 
 		return [
-			{ label: library.name, to: paths.librarySeries(library.id) },
 			{
-				label: series.resolvedName,
-				to: paths.seriesOverview(series.id),
+				label: library.name,
+				to: series ? paths.librarySeries(library.id) : paths.libraryBooks(library.id),
 			},
+			...(series ? [{ label: series.resolvedName, to: paths.seriesOverview(series.id) }] : []),
 			{
 				label: book.resolvedName,
 				to: paths.bookOverview(book.id),

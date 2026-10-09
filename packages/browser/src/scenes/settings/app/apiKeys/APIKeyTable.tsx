@@ -120,7 +120,9 @@ export default function APIKeyTable() {
 									: translate('shared.common.notUsedYet')
 							}
 						>
-							{valid ? formatDistanceToNow(parsed, { addSuffix: true }) : translate('shared.common.never')}
+							{valid
+								? formatDistanceToNow(parsed, { addSuffix: true })
+								: translate('shared.common.never')}
 						</Text>
 					)
 				},

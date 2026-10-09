@@ -27,8 +27,14 @@ export default function ReadingMode() {
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: translate('shared.readerSettings.readingMode.options.PAGED'), value: ReadingModeType.Paged },
-					{ label: translate('shared.epubReader.controls.continuous'), value: ReadingModeType.ContinuousVertical },
+					{
+						label: translate('shared.readerSettings.readingMode.options.PAGED'),
+						value: ReadingModeType.Paged,
+					},
+					{
+						label: translate('shared.epubReader.controls.continuous'),
+						value: ReadingModeType.ContinuousVertical,
+					},
 				]}
 				value={readingMode}
 				onChange={handleChange}

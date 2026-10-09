@@ -139,8 +139,7 @@ export default function BookMenu({ data }: Props) {
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
 		onSuccess,
-		onError: (error) =>
-			onError(translate('shared.bookActions.deleteReadHistory.failure'), error),
+		onError: (error) => onError(translate('shared.bookActions.deleteReadHistory.failure'), error),
 	})
 
 	const confirmMarkAsRead = () => {

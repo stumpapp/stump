@@ -44,7 +44,8 @@ export default function ServerPublicURL() {
 		},
 		onError: (error) => {
 			toast.error(t(getKey('updateFailed')), {
-				description: error instanceof Error ? error.message : translate('shared.common.unknownError'),
+				description:
+					error instanceof Error ? error.message : translate('shared.common.unknownError'),
 			})
 		},
 	})

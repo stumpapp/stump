@@ -71,11 +71,7 @@ export function CurrentProgressCard({
 					value={page ?? '??'}
 					suffix={totalPages ? ` / ${totalPages}` : undefined}
 				/>
-				<Card.Stat
-					label={translate('shared.common.completed')}
-					value={percentage}
-					suffix={'%'}
-				/>
+				<Card.Stat label={translate('shared.common.completed')} value={percentage} suffix={'%'} />
 				{timeStats.map((stat, index) => (
 					<Card.Stat key={index} {...stat} />
 				))}

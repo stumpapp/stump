@@ -146,10 +146,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 							/>
 						)}
 						{metadata.year != null && metadata.year > 0 && (
-							<NewCard.Stat
-								label={translate('shared.bookMetadata.year')}
-								value={metadata.year}
-							/>
+							<NewCard.Stat label={translate('shared.bookMetadata.year')} value={metadata.year} />
 						)}
 					</NewCard.StatGroup>
 				</NewCard>

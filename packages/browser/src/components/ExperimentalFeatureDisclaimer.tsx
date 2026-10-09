@@ -11,7 +11,9 @@ export function ExperimentalFeatureDisclaimer() {
 		<Alert variant="warning">
 			<AlertCircle />
 			<AlertTitle>{translate('shared.common.experimentalDisclaimer.title')}</AlertTitle>
-			<AlertDescription>{translate('shared.common.experimentalDisclaimer.description')}</AlertDescription>
+			<AlertDescription>
+				{translate('shared.common.experimentalDisclaimer.description')}
+			</AlertDescription>
 		</Alert>
 	)
 }

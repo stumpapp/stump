@@ -2,10 +2,11 @@ import { Alert, AlertDescription, Button, cn, cx, Tabs, Text } from '@stump/comp
 import { AlertTriangle } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { SmartListFormSchema } from '../schema'
 import { FilterGroup } from './filterGroup'
 import GroupBy from './GroupBy'
-import { useTranslate } from '@/hooks/useTranslate'
 
 // TODO: error states throughout form elems
 

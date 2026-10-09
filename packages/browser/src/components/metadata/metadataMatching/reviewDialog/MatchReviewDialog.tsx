@@ -21,7 +21,9 @@ export function MatchReviewDialog() {
 			<Dialog.Content size="gargantuan" className="flex max-h-[85vh] flex-col">
 				<Dialog.Header>
 					<Dialog.Title>{entityName}</Dialog.Title>
-					<Dialog.Description>{isMedia ? translate('shared.common.book') : translate('shared.common.series')}</Dialog.Description>
+					<Dialog.Description>
+						{isMedia ? translate('shared.common.book') : translate('shared.common.series')}
+					</Dialog.Description>
 					<Dialog.Close />
 				</Dialog.Header>
 

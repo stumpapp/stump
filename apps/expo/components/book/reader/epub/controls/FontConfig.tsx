@@ -23,7 +23,10 @@ export default function FontConfig() {
 		{ label: translate(getKey('typeface.options.system')), value: '' },
 		{ label: translate(getKey('typeface.options.opendyslexic')), value: 'OpenDyslexic' },
 		{ label: translate(getKey('typeface.options.literata')), value: 'Literata' },
-		{ label: translate(getKey('typeface.options.atkinsonHyperlegible')), value: 'Atkinson-Hyperlegible' },
+		{
+			label: translate(getKey('typeface.options.atkinsonHyperlegible')),
+			value: 'Atkinson-Hyperlegible',
+		},
 		{ label: translate(getKey('typeface.options.charisSIL')), value: 'CharisSIL' },
 		{ label: translate(getKey('typeface.options.bitter')), value: 'Bitter' },
 	]

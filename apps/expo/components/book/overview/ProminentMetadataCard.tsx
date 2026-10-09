@@ -28,9 +28,7 @@ export function ProminentMetadataCard({ hidden, className, metadata }: BookMetad
 				{!!publisher && (
 					<Card.Stat label={translate('shared.bookMetadata.publisher')} value={publisher} />
 				)}
-				{!!volume && (
-					<Card.Stat label={translate('shared.bookMetadata.volume')} value={volume} />
-				)}
+				{!!volume && <Card.Stat label={translate('shared.bookMetadata.volume')} value={volume} />}
 				{!!issue && <Card.Stat label={translate('shared.bookMetadata.issue')} value={issue} />}
 				{year != null && year > 0 && (
 					<Card.Stat label={translate('shared.bookMetadata.year')} value={year} />

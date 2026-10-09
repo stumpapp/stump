@@ -167,8 +167,12 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 								}}
 								selection={tab}
 							>
-								<SwiftText modifiers={[tag('ALL')]}>{translate('shared.epubReader.annotationsSheet.tabs.all')}</SwiftText>
-								<SwiftText modifiers={[tag('NOTES')]}>{translate('shared.epubReader.annotationsSheet.tabs.notes')}</SwiftText>
+								<SwiftText modifiers={[tag('ALL')]}>
+									{translate('shared.epubReader.annotationsSheet.tabs.all')}
+								</SwiftText>
+								<SwiftText modifiers={[tag('NOTES')]}>
+									{translate('shared.epubReader.annotationsSheet.tabs.notes')}
+								</SwiftText>
 								<SwiftText modifiers={[tag('HIGHLIGHTS')]}>
 									{translate('shared.epubReader.annotationsSheet.tabs.highlights')}
 								</SwiftText>

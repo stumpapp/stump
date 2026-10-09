@@ -49,7 +49,9 @@ export default function NextInSeries() {
 
 				<div className="gap-4 flex flex-col">
 					<div>
-						<Label className="opacity-80">{translate('shared.imageReader.nextInSeries.title')}</Label>
+						<Label className="opacity-80">
+							{translate('shared.imageReader.nextInSeries.title')}
+						</Label>
 						<Text size="lg">{nextInSeries.name}</Text>
 					</div>
 

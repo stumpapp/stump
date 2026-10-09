@@ -126,8 +126,7 @@ export function PagedActionMenu({
 									className="text-foreground"
 								>
 									<Text className="text-lg">
-										{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL',
-										)}
+										{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
 									</Text>
 								</DropdownMenuRadioItem>
 								<DropdownMenuRadioItem
@@ -167,9 +166,7 @@ export function PagedActionMenu({
 
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger className="text-foreground">
-						<Text className="text-lg">
-							{translate('shared.readerSettings.readingTimer.label')}
-						</Text>
+						<Text className="text-lg">{translate('shared.readerSettings.readingTimer.label')}</Text>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="mt-1">
 						<DropdownMenuItem

@@ -1,4 +1,3 @@
-
 import { useTranslate } from '@/hooks/useTranslate'
 
 import GenericFilterMultiselect from './GenericFilterMultiselect'

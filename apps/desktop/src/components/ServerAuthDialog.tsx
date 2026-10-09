@@ -26,8 +26,12 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const schema = useMemo(
 		() =>
 			z.object({
-				username: z.string().min(1, { message: t('webApp.authScene.form.validation.missingUsername') }),
-				password: z.string().min(1, { message: t('webApp.authScene.form.validation.missingPassword') }),
+				username: z
+					.string()
+					.min(1, { message: t('webApp.authScene.form.validation.missingUsername') }),
+				password: z
+					.string()
+					.min(1, { message: t('webApp.authScene.form.validation.missingPassword') }),
 			}),
 		[t],
 	)
@@ -146,7 +150,9 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 					<Dialog.Footer>
 						<Button type="submit" disabled={isLoggingIn}>
-							{isLoggingIn ? t('webApp.authScene.toasts.loggingIn') : t('webApp.authScene.form.buttons.login')}
+							{isLoggingIn
+								? t('webApp.authScene.toasts.loggingIn')
+								: t('webApp.authScene.form.buttons.login')}
 						</Button>
 						<Button type="button" variant="outline" onClick={() => onClose()}>
 							{t('shared.common.cancel')}

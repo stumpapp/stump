@@ -341,7 +341,10 @@ export function useReadiumNavigator({
 				if (!cancelled) {
 					setLoadState({
 						status: 'error',
-						message: error instanceof Error ? error.message : translate('shared.epubReader.errors.openFailed'),
+						message:
+							error instanceof Error
+								? error.message
+								: translate('shared.epubReader.errors.openFailed'),
 					})
 				}
 			}

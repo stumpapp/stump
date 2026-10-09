@@ -55,11 +55,15 @@ export default function LocationManager() {
 					<Tabs value={activeTab} variant="primary" activeOnHover>
 						<Tabs.List className="border-none">
 							<Tabs.Trigger value="contents" asChild onClick={() => handleTabChange('contents')}>
-								<Text className="cursor-pointer truncate">{translate('shared.epubReader.tableOfContents')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.tableOfContents')}
+								</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="bookmarks" asChild onClick={() => handleTabChange('bookmarks')}>
-								<Text className="cursor-pointer truncate">{translate('shared.epubReader.bookmarks')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.bookmarks')}
+								</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger
@@ -67,7 +71,9 @@ export default function LocationManager() {
 								asChild
 								onClick={() => handleTabChange('annotations')}
 							>
-								<Text className="cursor-pointer truncate">{translate('shared.epubReader.annotations')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.annotations')}
+								</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>

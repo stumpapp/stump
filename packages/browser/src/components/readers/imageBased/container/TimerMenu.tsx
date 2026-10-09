@@ -25,7 +25,9 @@ export default function TimerMenu() {
 
 			<Dropdown.Content align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
 				<Dropdown.Item onClick={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}>
-					{trackElapsedTime ? translate('shared.imageReader.timerMenu.stop') : translate('shared.imageReader.timerMenu.start')}
+					{trackElapsedTime
+						? translate('shared.imageReader.timerMenu.stop')
+						: translate('shared.imageReader.timerMenu.start')}
 				</Dropdown.Item>
 
 				<Dropdown.Item onClick={timer.reset}>

@@ -34,12 +34,8 @@ export default function SettingsDialog() {
 							onValueChange={(value) => setModality(value as 'book' | 'global')}
 						>
 							<Tabs.List>
-								<Tabs.Trigger value="book">
-									{translate('shared.common.book')}
-								</Tabs.Trigger>
-								<Tabs.Trigger value="global">
-									{translate('shared.common.global')}
-								</Tabs.Trigger>
+								<Tabs.Trigger value="book">{translate('shared.common.book')}</Tabs.Trigger>
+								<Tabs.Trigger value="global">{translate('shared.common.global')}</Tabs.Trigger>
 							</Tabs.List>
 						</Tabs>
 

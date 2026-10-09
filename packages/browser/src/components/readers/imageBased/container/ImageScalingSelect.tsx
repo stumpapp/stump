@@ -38,7 +38,10 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 						label: translate('shared.readerSettings.imageScaling.options.AUTO'),
 						value: 'AUTO',
 					},
-					{ label: translate('shared.readerSettings.imageScaling.options.HEIGHT'), value: 'HEIGHT' },
+					{
+						label: translate('shared.readerSettings.imageScaling.options.HEIGHT'),
+						value: 'HEIGHT',
+					},
 					{ label: translate('shared.readerSettings.imageScaling.options.WIDTH'), value: 'WIDTH' },
 					{ label: translate('shared.readerSettings.imageScaling.options.NONE'), value: 'NONE' },
 				]}

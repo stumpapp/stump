@@ -41,15 +41,10 @@ export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
 	return (
 		<Card label={translate('shared.common.details')}>
 			{extension && (
-				<Card.Row
-					label={translate('shared.bookMetadata.format')}
-					value={extension.toUpperCase()}
-				/>
+				<Card.Row label={translate('shared.bookMetadata.format')} value={extension.toUpperCase()} />
 			)}
 			{!!size && <Card.Row label={translate('shared.bookMetadata.size')} value={size} />}
-			{language && (
-				<Card.Row label={translate('shared.bookMetadata.language')} value={language} />
-			)}
+			{language && <Card.Row label={translate('shared.bookMetadata.language')} value={language} />}
 			{ageRating != null && ageRating > 0 && (
 				<Card.Row label={translate('shared.bookMetadata.ageRating')} value={`${ageRating}+`} />
 			)}

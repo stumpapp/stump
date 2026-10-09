@@ -120,7 +120,9 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 						Cancel
 					</Button>
 					<Button type="submit" form="create-or-update-view">
-						{isCreating ? translate('shared.common.create') : translate('shared.common.saveChanges')}
+						{isCreating
+							? translate('shared.common.create')
+							: translate('shared.common.saveChanges')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

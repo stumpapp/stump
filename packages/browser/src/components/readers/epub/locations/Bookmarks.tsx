@@ -49,7 +49,9 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 				const hasLocator = !!bookmark.locator?.href
 				const isNavigable = hasLocator
 				const subtitle =
-					bookmark.locator?.chapterTitle || bookmark.locator?.href || translate('shared.epubReader.bookmark')
+					bookmark.locator?.chapterTitle ||
+					bookmark.locator?.href ||
+					translate('shared.epubReader.bookmark')
 
 				return (
 					<button

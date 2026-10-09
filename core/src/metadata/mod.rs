@@ -1,5 +1,6 @@
 pub mod error;
 pub mod media;
+pub mod membership;
 pub mod provider;
 pub mod series;
 pub(crate) mod utils;

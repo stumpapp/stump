@@ -222,19 +222,21 @@ impl LibraryQuery {
 			},
 		};
 
+		let missing_entities_sql = r#"
+			SELECT m.id, m.name, m."path", 'BOOK' AS type FROM media m
+			WHERE m.status <> 'READY' AND m.library_id = $1
+			UNION ALL
+			SELECT s.id, s.name, s."path", 'SERIES' AS type FROM series s
+			WHERE s.library_id = $1 AND (
+				s.status <> 'READY' OR NOT EXISTS (
+					SELECT 1 FROM media m WHERE m.series_id = s.id
+				)
+			)
+		"#;
 		let total_count_result = conn
 			.query_one(db_statement(
 				conn,
-				r"
-                SELECT COUNT(*) as count FROM (
-                    SELECT m.id FROM media m
-                    INNER JOIN series s ON m.series_id = s.id
-                    WHERE m.status = 'MISSING' AND s.library_id = $1
-                    UNION ALL
-                    SELECT s.id FROM series s
-                    WHERE s.status = 'MISSING' AND s.library_id = $1
-                ) AS subquery;
-                ",
+				format!("SELECT COUNT(*) AS count FROM ({missing_entities_sql}) AS missing_entities"),
 				[library_id.as_str().into()],
 			))
 			.await?
@@ -254,27 +256,13 @@ impl LibraryQuery {
 		let result = conn
 			.query_all(db_statement(
 				conn,
-				r#"
-				SELECT
-                    id,
-                    "path",
-                    CASE
-                        WHEN id IN (SELECT id FROM media) THEN 'BOOK'
-                        WHEN id IN (SELECT id FROM series) THEN 'SERIES'
-                        ELSE 'unknown'
-                    END AS type
-                FROM
-                    (
-                        SELECT m.id, m."path" FROM media m
-                        INNER JOIN series s ON m.series_id = s.id
-                        WHERE m.status = 'MISSING' AND s.library_id = $1
-                        UNION ALL
-                        SELECT s.id, s."path" FROM series s
-                        WHERE s.status = 'MISSING' AND s.library_id = $1
-                    ) AS missing_entities
-                ORDER BY "path" ASC
-                LIMIT $2 OFFSET $3;
-                "#,
+				format!(
+					r#"
+					SELECT * FROM ({missing_entities_sql}) AS missing_entities
+					ORDER BY COALESCE("path", name) ASC, id ASC
+					LIMIT $2 OFFSET $3
+				"#
+				),
 				[library_id.as_str().into(), limit.into(), offset.into()],
 			))
 			.await?;

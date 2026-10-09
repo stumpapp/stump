@@ -286,6 +286,7 @@ impl PatchLibraryConfigInput {
 			library_pattern: library_pattern
 				.map(Set)
 				.unwrap_or(Unchanged(model.library_pattern)),
+			organization_mode: Unchanged(model.organization_mode),
 			library_type: library_type
 				.map(Set)
 				.unwrap_or(Unchanged(model.library_type)),

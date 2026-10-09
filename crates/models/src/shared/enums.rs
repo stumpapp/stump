@@ -336,6 +336,58 @@ pub enum LibraryPattern {
 	db_type = "String(StringLen::None)"
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SeriesKind {
+	#[default]
+	Filesystem,
+	Virtual,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OrganizationMode {
+	#[default]
+	Filesystem,
+	Metadata,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LibraryViewMode {
 	#[default]
 	Series,

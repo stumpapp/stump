@@ -104,7 +104,7 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoC
 					</button>
 				)}
 
-				<Tabs value={activeTab} size="sm">
+				<Tabs value={activeTab ?? ''} size="sm">
 					<Tabs.List>
 						{tabs.map((tab) => (
 							<Tabs.Trigger key={tab.to} value={tab.to} asChild>

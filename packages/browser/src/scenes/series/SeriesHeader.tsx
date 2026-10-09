@@ -101,7 +101,7 @@ export default function SeriesHeader() {
 			onHover: () => prefetchSeriesBooks(id),
 			to: paths.seriesOverview(id),
 		},
-		...(canAccessFiles
+		...(canAccessFiles && path != null
 			? [
 					{
 						isActive: !!location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),

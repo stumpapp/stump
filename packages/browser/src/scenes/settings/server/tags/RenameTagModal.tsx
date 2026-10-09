@@ -69,7 +69,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 					}}
 				>
 					<Input
-						label={t(getKey('name.label'))}
+						label={translate('shared.common.name')}
 						placeholder={t(getKey('name.placeholder'))}
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -87,7 +87,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 						size="sm"
 						onClick={handleRename}
 					>
-						{t(getKey('submit'))}
+						{translate('shared.common.rename')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

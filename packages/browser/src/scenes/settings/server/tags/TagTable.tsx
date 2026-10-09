@@ -47,7 +47,7 @@ export default function TagTable() {
 			columnHelper.accessor('name', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						{t(getColumnKey('name'))}
+						{translate('shared.common.name')}
 					</Text>
 				),
 				cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
@@ -67,7 +67,7 @@ export default function TagTable() {
 							<Dropdown.Content align="end">
 								<Dropdown.Group>
 									<Dropdown.Item onClick={() => setRenamingTag(tag)}>
-										<span>{t(getActionKey('rename'))}</span>
+										<span>{translate('shared.common.rename')}</span>
 									</Dropdown.Item>
 									<Dropdown.Item onClick={() => setDeletingTag(tag)}>
 										<span>{translate('shared.common.delete')}</span>
@@ -175,6 +175,5 @@ export default function TagTable() {
 const columnHelper = createColumnHelper<Tag>()
 
 const LOCALE_BASE = 'settingsScene.server/tags.sections.table'
-const getColumnKey = (key: string) => `${LOCALE_BASE}.columns.${key}`
-const getActionKey = (key: string) => `${LOCALE_BASE}.actionMenu.${key}`
+
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

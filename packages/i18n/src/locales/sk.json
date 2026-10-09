@@ -2035,25 +2035,6 @@
             "label": "",
             "description": "",
             "getStarted": "",
-            "unreachableServer": {
-              "tooltip": ""
-            },
-            "activeServer": {
-              "tooltip": ""
-            },
-            "addServer": {
-              "description": ""
-            },
-            "editServer": {
-              "description": ""
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "",
-                "disclaimerActiveServer": "",
-                "disclaimerLastServer": ""
-              }
-            },
             "switchToServer": {
               "tooltip": "",
               "confirmation": {
@@ -2684,12 +2665,6 @@
             "empty": {
               "title": "",
               "action": ""
-            },
-            "columns": {
-              "name": ""
-            },
-            "actionMenu": {
-              "rename": ""
             }
           },
           "createTag": {
@@ -2698,10 +2673,8 @@
               "heading": "",
               "description": "",
               "name": {
-                "label": "",
                 "placeholder": ""
-              },
-              "submit": ""
+              }
             }
           },
           "renameTag": {
@@ -2709,16 +2682,13 @@
               "heading": "",
               "description": "",
               "name": {
-                "label": "",
                 "placeholder": ""
-              },
-              "submit": ""
+              }
             }
           },
           "deleteTag": {
             "title": "",
-            "description": "",
-            "confirm": ""
+            "description": ""
           }
         }
       }
@@ -2743,24 +2713,10 @@
         "settings": ""
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "",
-        "previous": ""
-      },
-      "popover": {
-        "heading": "",
-        "buttons": {
-          "confirm": "",
-          "cancel": ""
-        }
-      }
-    },
     "signOutModal": {
       "title": "",
       "message": "",
       "buttons": {
-        "cancel": "",
         "signOut": ""
       }
     },
@@ -2774,8 +2730,6 @@
         "noBookClubs": "",
         "settings": "",
         "themeToggle": "",
-        "goForward": "",
-        "goBack": "",
         "noSmartlists": "",
         "createSmartlist": "",
         "seeAll": ""
@@ -2784,21 +2738,7 @@
         "scanLibrary": "",
         "manageLibrary": "",
         "deleteLibrary": ""
-      },
-      "versionInformation": {
-        "heading": "",
-        "semVer": "",
-        "commitHash": "",
-        "buildDate": ""
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "",
-      "message": [
-        "",
-        "",
-        ""
-      ]
     },
     "slidingList": {
       "empty": "",

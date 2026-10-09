@@ -1989,25 +1989,6 @@
             "label": "Konfigurirani serveri",
             "description": "Spisak Stump servera na koje se možete povezati",
             "getStarted": "Dodajte server da biste započeli",
-            "unreachableServer": {
-              "tooltip": "Server nije dostupan"
-            },
-            "activeServer": {
-              "tooltip": "Trenutni server"
-            },
-            "addServer": {
-              "description": "Dodajte novi Stump server u desktop aplikaciju"
-            },
-            "editServer": {
-              "description": "Uredite podatke o ovom serveru"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Ovim ćete ukloniti server iz desktop aplikacije",
-                "disclaimerActiveServer": "Ovaj server je trenutno aktivan. Bit ćete odjavljeni",
-                "disclaimerLastServer": "Ovo je posljednji konfigurirani server. Bit ćete odjavljeni i morat ćete ponovo konfigurirati servere tokom postupka inicijalizacije"
-              }
-            },
             "switchToServer": {
               "tooltip": "Prebacite se na server",
               "confirmation": {
@@ -2622,12 +2603,6 @@
             "empty": {
               "title": "Nema oznaka",
               "action": "Kreirajte prvu oznaku da biste započeli"
-            },
-            "columns": {
-              "name": "Naziv"
-            },
-            "actionMenu": {
-              "rename": "Preimenujte"
             }
           },
           "createTag": {
@@ -2636,10 +2611,8 @@
               "heading": "Kreirajte novu oznaku",
               "description": "Oznake se mogu dodijeliti knjigama, serijalima i bibliotekama",
               "name": {
-                "label": "Naziv",
                 "placeholder": "Unesite naziv oznake"
-              },
-              "submit": "Kreirajte"
+              }
             }
           },
           "renameTag": {
@@ -2647,16 +2620,13 @@
               "heading": "Preimenujte oznaku",
               "description": "Promijenite naziv ove oznake na svim stavkama kojima je dodijeljena",
               "name": {
-                "label": "Naziv",
                 "placeholder": "Unesite novi naziv oznake"
-              },
-              "submit": "Preimenujte"
+              }
             }
           },
           "deleteTag": {
             "title": "Izbrišite oznaku",
-            "description": "Ova oznaka bit će uklonjena iz svih knjiga, serijala i biblioteka. Ova radnja se ne može poništiti.",
-            "confirm": "Izbrišite"
+            "description": "Ova oznaka bit će uklonjena iz svih knjiga, serijala i biblioteka. Ova radnja se ne može poništiti."
           }
         }
       }
@@ -2681,24 +2651,10 @@
         "settings": "Idite na postavke"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Sljedeća",
-        "previous": "Prethodna"
-      },
-      "popover": {
-        "heading": "Idite na stranicu",
-        "buttons": {
-          "confirm": "Idi",
-          "cancel": "Otkažite"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Odjava",
       "message": "Jeste li sigurni da se želite odjaviti?",
       "buttons": {
-        "cancel": "Otkažite",
         "signOut": "Odjavite se"
       }
     },
@@ -2712,8 +2668,6 @@
         "noBookClubs": "Nema čitalačkih klubova",
         "settings": "Postavke",
         "themeToggle": "Promijenite temu",
-        "goForward": "Naprijed",
-        "goBack": "Nazad",
         "noSmartlists": "Nema pametnih lista",
         "createSmartlist": "Kreirajte pametnu listu",
         "seeAll": "Prikažite sve"
@@ -2722,21 +2676,7 @@
         "scanLibrary": "Skenirajte",
         "manageLibrary": "Postavke",
         "deleteLibrary": "Izbrišite"
-      },
-      "versionInformation": {
-        "heading": "Informacije o verziji",
-        "semVer": "Semantička verzija",
-        "commitHash": "Heš commita",
-        "buildDate": "Datum kompilacije"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Nema veze sa serverom",
-      "message": [
-        "Provjerite internetsku vezu",
-        "Kliknite ovdje",
-        "da biste promijenili URL servera"
-      ]
     },
     "slidingList": {
       "empty": "Nema stavki za prikaz",

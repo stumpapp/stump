@@ -1235,25 +1235,6 @@
             "label": "Serveurs configurés",
             "description": "La liste des serveurs Stump auxquels vous pouvez vous connecter",
             "getStarted": "Ajouter un serveur pour commencer",
-            "unreachableServer": {
-              "tooltip": "Serveur introuvable"
-            },
-            "activeServer": {
-              "tooltip": "Serveur actuel"
-            },
-            "addServer": {
-              "description": "Ajouter un nouveau serveur Stump à l’application de bureau"
-            },
-            "editServer": {
-              "description": "Modifier les détails de ce serveur"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Cela supprimera le serveur de l’application de bureau",
-                "disclaimerActiveServer": "Ce serveur est actuellement actif. Vous serez déconnecté",
-                "disclaimerLastServer": "C’est le dernier serveur configuré. Vous serez déconnecté et devrez reconfigurer les serveurs lors du processus d’initialisation"
-              }
-            },
             "switchToServer": {
               "tooltip": "Changer de serveur",
               "confirmation": {
@@ -1682,24 +1663,10 @@
         "settings": "Aller aux paramètres"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Suivant",
-        "previous": "Précédent"
-      },
-      "popover": {
-        "heading": "Aller à la page",
-        "buttons": {
-          "confirm": "Aller",
-          "cancel": "Annuler"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Déconnexion",
       "message": "Êtes-vous sûr(e) de vouloir vous déconnecter ?",
       "buttons": {
-        "cancel": "Annuler",
         "signOut": "Se déconnecter"
       }
     },
@@ -1713,8 +1680,6 @@
         "noBookClubs": "Aucun club de lecture",
         "settings": "Paramètres",
         "themeToggle": "Changer de thème",
-        "goForward": "Aller en avant",
-        "goBack": "Aller en arrière",
         "noSmartlists": "Aucune liste intelligente",
         "createSmartlist": "Créer une liste intelligente",
         "seeAll": "Afficher tout"
@@ -1723,21 +1688,7 @@
         "scanLibrary": "Scanner",
         "manageLibrary": "Gérer",
         "deleteLibrary": "Supprimer"
-      },
-      "versionInformation": {
-        "heading": "Informations de version",
-        "semVer": "Version sémantique",
-        "commitHash": "Empreinte de publication",
-        "buildDate": "Date de construction"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Le serveur n'est pas connecté",
-      "message": [
-        "Veuillez vérifier votre connexion internet",
-        "Cliquez ici",
-        "pour changer l'URL de votre serveur"
-      ]
     },
     "slidingList": {
       "empty": "Aucun élément à afficher",

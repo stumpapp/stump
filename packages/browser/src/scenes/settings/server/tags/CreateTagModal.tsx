@@ -71,7 +71,7 @@ export default function CreateTagModal() {
 					}}
 				>
 					<Input
-						label={t(getKey('modal.name.label'))}
+						label={translate('shared.common.name')}
 						placeholder={t(getKey('modal.name.placeholder'))}
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -85,7 +85,7 @@ export default function CreateTagModal() {
 					</Button>
 
 					<Button disabled={isPending || !name.trim()} size="sm" onClick={handleCreate}>
-						{t(getKey('modal.submit'))}
+						{translate('shared.common.create')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

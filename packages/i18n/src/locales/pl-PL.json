@@ -1860,25 +1860,6 @@
             "label": "Skonfigurowane serwery",
             "description": "Lista serwerów Stump, do których możesz się połączyć",
             "getStarted": "Aby rozpocząć, dodaj serwer",
-            "unreachableServer": {
-              "tooltip": "Serwer niedostępny"
-            },
-            "activeServer": {
-              "tooltip": "Bieżący serwer"
-            },
-            "addServer": {
-              "description": "Dodaj nowy serwer Stump do aplikacji desktopowej"
-            },
-            "editServer": {
-              "description": "Edytuj szczegóły tego serwera"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Spowoduje to usunięcie serwera z aplikacji desktopowej",
-                "disclaimerActiveServer": "Ten serwer jest aktualnie aktywny. Nastąpi wylogowanie",
-                "disclaimerLastServer": "Jest to ostatni skonfigurowany serwer. Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów"
-              }
-            },
             "switchToServer": {
               "tooltip": "Przełącz na serwer",
               "confirmation": {
@@ -2485,12 +2466,6 @@
             "empty": {
               "title": "Brak etykiet",
               "action": "Utwórz swoją pierwszą etykietę, aby rozpocząć"
-            },
-            "columns": {
-              "name": "Nazwa"
-            },
-            "actionMenu": {
-              "rename": "Zmień nazwę"
             }
           },
           "createTag": {
@@ -2499,10 +2474,8 @@
               "heading": "Utwórz nową etykietę",
               "description": "Etykiety mogą być przypisywane do książek, serii lub bibliotek",
               "name": {
-                "label": "Nazwa",
                 "placeholder": "Wprowadź nazwę etykiety"
-              },
-              "submit": "Utwórz"
+              }
             }
           },
           "renameTag": {
@@ -2510,16 +2483,13 @@
               "heading": "Zmień nazwę etykiety",
               "description": "Zmień nazwę tej etykiety we wszystkich przypisanych pozycjach",
               "name": {
-                "label": "Nazwa",
                 "placeholder": "Wprowadź nową nazwę etykiety"
-              },
-              "submit": "Zmień nazwę"
+              }
             }
           },
           "deleteTag": {
             "title": "Usuń etykietę",
-            "description": "Etykieta zostanie usunięta ze wszystkich książek, serii i bibliotek. Operacji tej nie można cofnąć.",
-            "confirm": "Usuń"
+            "description": "Etykieta zostanie usunięta ze wszystkich książek, serii i bibliotek. Operacji tej nie można cofnąć."
           }
         }
       }
@@ -2544,24 +2514,10 @@
         "settings": "Przejdź do ustawień"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Następny",
-        "previous": "Poprzedni"
-      },
-      "popover": {
-        "heading": "Przejdź do strony",
-        "buttons": {
-          "confirm": "Przejdź",
-          "cancel": "Anuluj"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Wyloguj się",
       "message": "Czy na pewno chcesz się wylogować?",
       "buttons": {
-        "cancel": "Anuluj",
         "signOut": "Wyloguj się"
       }
     },
@@ -2575,8 +2531,6 @@
         "noBookClubs": "Brak klubów książki",
         "settings": "Ustawienia",
         "themeToggle": "Przełącz motyw",
-        "goForward": "Przejdź dalej",
-        "goBack": "Wróć",
         "noSmartlists": "Brak inteligentnych list",
         "createSmartlist": "Utwórz inteligentną listę",
         "seeAll": "Pokaż wszystko"
@@ -2585,21 +2539,7 @@
         "scanLibrary": "Skanuj",
         "manageLibrary": "Zarządzaj",
         "deleteLibrary": "Usuń"
-      },
-      "versionInformation": {
-        "heading": "Informacja o wersji",
-        "semVer": "Wersja semantyczna",
-        "commitHash": "Identyfikator rewizji",
-        "buildDate": "Data kompilacji"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Serwer nie jest połączony",
-      "message": [
-        "Sprawdź swoje połączenie z internetem",
-        "Kliknij tutaj",
-        "aby zmienić odnośnik serwera"
-      ]
     },
     "slidingList": {
       "empty": "Brak pozycji do wyświetlenia",

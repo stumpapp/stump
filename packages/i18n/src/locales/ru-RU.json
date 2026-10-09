@@ -1200,25 +1200,6 @@
             "label": "Настроенные серверы",
             "description": "Список серверов Stump, к которым можно подключаться",
             "getStarted": "Для начала добавьте сервер",
-            "unreachableServer": {
-              "tooltip": "Сервер недоступен"
-            },
-            "activeServer": {
-              "tooltip": "Текущий сервер"
-            },
-            "addServer": {
-              "description": "Добавить новый сервер Stump в десктопное приложение"
-            },
-            "editServer": {
-              "description": "Редактировать сведения об этом сервере"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Это удалит сервер из десктопного приложения",
-                "disclaimerActiveServer": "Этот сервер в настоящее время активен. Вы выйдите из системы",
-                "disclaimerLastServer": "Это последний настроенный сервер. Вы выйдете из системы и должны будете перенастроить все серверы в процессе инициализации"
-              }
-            },
             "switchToServer": {
               "tooltip": "Переключиться на сервер",
               "confirmation": {
@@ -1651,24 +1632,10 @@
         "settings": "Перейти к настройкам"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Далее",
-        "previous": "Назад"
-      },
-      "popover": {
-        "heading": "Перейти",
-        "buttons": {
-          "confirm": "Перейти",
-          "cancel": "Отмена"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Выйти",
       "message": "Вы действительно хотите выйти?",
       "buttons": {
-        "cancel": "Отмена",
         "signOut": "Выйти"
       }
     },
@@ -1682,8 +1649,6 @@
         "noBookClubs": "Нет книжных клубов",
         "settings": "Настройки",
         "themeToggle": "Изменить тему",
-        "goForward": "Вперёд",
-        "goBack": "Назад",
         "noSmartlists": "Нет умных списков",
         "createSmartlist": "Создать умный список",
         "seeAll": "Показать все"
@@ -1692,21 +1657,7 @@
         "scanLibrary": "Сканирование",
         "manageLibrary": "Manage",
         "deleteLibrary": "Удалить"
-      },
-      "versionInformation": {
-        "heading": "Версия",
-        "semVer": "Семантическая версия",
-        "commitHash": "Хэш коммита",
-        "buildDate": "Дата сборки"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Сервер не подключен",
-      "message": [
-        "Пожалуйста, проверьте ваше интернет-соединение",
-        "Нажмите сюда",
-        "чтобы изменить URL сервера"
-      ]
     },
     "slidingList": {
       "empty": "Нет элементов для отображения",

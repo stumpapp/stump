@@ -2019,25 +2019,6 @@
             "label": "Server",
             "description": "Liste der Stump Server, mit denen sich verbunden werden kann",
             "getStarted": "Server hinzufügen, um loszulegen",
-            "unreachableServer": {
-              "tooltip": "Server nicht erreichbar"
-            },
-            "activeServer": {
-              "tooltip": "Aktueller Server"
-            },
-            "addServer": {
-              "description": "Einen neuen Stump Server zur Desktopanwendung hinzufügen"
-            },
-            "editServer": {
-              "description": "Details dieses Servers bearbeiten"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Dadurch wird der Server von der Desktopanwendung entfernt",
-                "disclaimerActiveServer": "Dieser Server ist derzeit aktiv. Du wirst ausgeloggt",
-                "disclaimerLastServer": "Dies ist der letzte konfigurierte Server. Du wirst ausgeloggt und musst im Initialisierungsprozess erneut einen Server konfigurieren"
-              }
-            },
             "switchToServer": {
               "tooltip": "Zu Server wechseln",
               "confirmation": {
@@ -2676,13 +2657,7 @@
               "title": "Keine Tags",
               "action": "Erstelle deinen ersten Tag um loszulegen"
             },
-            "actionMenu": {
-              "rename": "Umbenennen"
-            },
-            "title": "Tags",
-            "columns": {
-              "name": "Name"
-            }
+            "title": "Tags"
           },
           "createTag": {
             "trigger": "Tag erstellen",
@@ -2690,10 +2665,8 @@
               "heading": "Erstelle einen neuen Tag",
               "description": "Tags können Büchern, Reihen und Bibliotheken zugewiesen werden",
               "name": {
-                "placeholder": "Tag-Name eingeben",
-                "label": "Name"
-              },
-              "submit": "Erstellen"
+                "placeholder": "Tag-Name eingeben"
+              }
             }
           },
           "renameTag": {
@@ -2701,16 +2674,13 @@
               "heading": "Tag umbenennen",
               "description": "Ändere den Namen dieses Tags über alle zugewiesenen Elemente",
               "name": {
-                "placeholder": "Neuen Tag-Namen eingeben",
-                "label": "Name"
-              },
-              "submit": "Umbenennen"
+                "placeholder": "Neuen Tag-Namen eingeben"
+              }
             }
           },
           "deleteTag": {
             "title": "Tag löschen",
-            "description": "Dieser Tag wird von allen Büchern, Serien und Bibliotheken entfernt. Dies kann nicht rückgängig gemacht werden.",
-            "confirm": "Löschen"
+            "description": "Dieser Tag wird von allen Büchern, Serien und Bibliotheken entfernt. Dies kann nicht rückgängig gemacht werden."
           }
         },
         "title": "Tags"
@@ -2736,24 +2706,10 @@
         "settings": "Zu den Einstellungen gehen"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Weiter",
-        "previous": "Zurück"
-      },
-      "popover": {
-        "heading": "Gehe zur Seite",
-        "buttons": {
-          "confirm": "Los",
-          "cancel": "Abbrechen"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Abmelden",
       "message": "Bist du sicher, dass du dich abmelden willst?",
       "buttons": {
-        "cancel": "Abbrechen",
         "signOut": "Abmelden"
       }
     },
@@ -2767,8 +2723,6 @@
         "noBookClubs": "Keine Buchclubs",
         "settings": "Einstellungen",
         "themeToggle": "Design wechseln",
-        "goForward": "Weiter",
-        "goBack": "Gehe Zurück",
         "noSmartlists": "Keine intelligenten Listen",
         "createSmartlist": "Intelligente Liste erstellen",
         "seeAll": "Alles anzeigen"
@@ -2777,21 +2731,7 @@
         "scanLibrary": "Scannen",
         "manageLibrary": "Einstellungen",
         "deleteLibrary": "Löschen"
-      },
-      "versionInformation": {
-        "heading": "Versionsinformationen",
-        "semVer": "Semantische Version",
-        "buildDate": "Build-Datum",
-        "commitHash": "Commit Hash"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Server ist nicht verbunden",
-      "message": [
-        "Bitte die Internetverbindung überprüfen",
-        "Hier klicken",
-        ", um die Server URL zu ändern"
-      ]
     },
     "slidingList": {
       "empty": "Keine Elemente zur Ansicht verfügbar",

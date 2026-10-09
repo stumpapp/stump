@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -19,6 +20,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 	const navigate = useNavigate()
 
 	const { logout, user } = useAppContext()
+	const { t, translate } = useTranslate()
 
 	const platform = useAppStore((store) => store.platform)
 	const paths = usePaths()
@@ -30,9 +32,10 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 	return (
 		<>
 			<ConfirmationModal
-				title="Sign out"
-				description="Are you sure you want sign out?"
-				confirmText="Sign out"
+				title={t('signOutModal.title')}
+				description={t('signOutModal.message')}
+				confirmText={t('signOutModal.buttons.signOut')}
+				cancelText={translate('shared.common.cancel')}
 				confirmVariant="destructive"
 				isOpen={isSignOutConfirmOpen}
 				onClose={() => setIsSignOutConfirmOpen(false)}
@@ -114,7 +117,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 									isDestructive
 									className={itemClasses(isSidebar, true)}
 								>
-									Sign out
+									{t('signOutModal.buttons.signOut')}
 								</Dropdown.Item>
 							</Dropdown.Group>
 						</Dropdown.Content>

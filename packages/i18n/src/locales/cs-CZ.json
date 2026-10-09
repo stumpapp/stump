@@ -1202,25 +1202,6 @@
             "label": "Nastavené servery",
             "description": "Seznam serverů Stump, ke kterým se můžete připojit",
             "getStarted": "Přidejte server pro začátek",
-            "unreachableServer": {
-              "tooltip": "Server je nedostupný"
-            },
-            "activeServer": {
-              "tooltip": "Aktuální server"
-            },
-            "addServer": {
-              "description": "Přidat nový server Stump do aplikace"
-            },
-            "editServer": {
-              "description": "Upravit detaily tohoto serveru"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Tímto odstraníte server z desktopové aplikace",
-                "disclaimerActiveServer": "Tento server je aktuálně aktivní. Budete odhlášeni",
-                "disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace"
-              }
-            },
             "switchToServer": {
               "tooltip": "Přepnout na server",
               "confirmation": {
@@ -1650,24 +1631,10 @@
         "settings": "Přejít do nastavení"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Další",
-        "previous": "Předchozí"
-      },
-      "popover": {
-        "heading": "Přejít na stránku",
-        "buttons": {
-          "confirm": "Přejít",
-          "cancel": "Zrušit"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Odhlásit se",
       "message": "Opravdu se chcete odhlásit?",
       "buttons": {
-        "cancel": "Zrušit",
         "signOut": "Odhlásit se"
       }
     },
@@ -1681,8 +1648,6 @@
         "noBookClubs": "Žádné knižní kluby",
         "settings": "Nastavení",
         "themeToggle": "Přepnout motiv",
-        "goForward": "Jít vpřed",
-        "goBack": "Jít zpět",
         "noSmartlists": "Žádné chytré seznamy",
         "createSmartlist": "Vytvořit chytrý seznam",
         "seeAll": "Zobrazit vše"
@@ -1691,21 +1656,7 @@
         "scanLibrary": "Skenovat",
         "manageLibrary": "Manage",
         "deleteLibrary": "Smazat"
-      },
-      "versionInformation": {
-        "heading": "Informace o verzi",
-        "semVer": "Sémantická verze",
-        "commitHash": "Hash revize",
-        "buildDate": "Datum vytvoření"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Server není připojen",
-      "message": [
-        "Zkontrolujte prosím připojení k internetu",
-        "Klikněte zde",
-        "pro změnu URL adresy serveru"
-      ]
     },
     "slidingList": {
       "empty": "Žádné položky k zobrazení",

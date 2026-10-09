@@ -1951,25 +1951,6 @@
             "label": "已配置的服务器",
             "description": "你可以连接的 Stump 服务器列表",
             "getStarted": "添加一个服务器以开始使用",
-            "unreachableServer": {
-              "tooltip": "服务器不可达"
-            },
-            "activeServer": {
-              "tooltip": "当前服务器"
-            },
-            "addServer": {
-              "description": "向桌面版应用添加新的 Stump 服务器"
-            },
-            "editServer": {
-              "description": "编辑此服务器的详细信息"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "这将从桌面版应用中移除该服务器",
-                "disclaimerActiveServer": "此服务器当前为活跃服务器。你将被登出",
-                "disclaimerLastServer": "这是最后一个配置的服务器。你将被登出，并在初始化过程中重新配置任何服务器"
-              }
-            },
             "switchToServer": {
               "tooltip": "切换到服务器",
               "confirmation": {
@@ -2582,12 +2563,6 @@
             "empty": {
               "title": "无标签",
               "action": "创建您的第一个标签以开始使用"
-            },
-            "columns": {
-              "name": "名称"
-            },
-            "actionMenu": {
-              "rename": "重命名"
             }
           },
           "createTag": {
@@ -2596,10 +2571,8 @@
               "heading": "创建新标签",
               "description": "标签可以分配给书籍、系列和书库",
               "name": {
-                "label": "名称",
                 "placeholder": "输入标签名称"
-              },
-              "submit": "创建"
+              }
             }
           },
           "renameTag": {
@@ -2607,16 +2580,13 @@
               "heading": "重命名标签",
               "description": "更改所有已分配项中的标签名称",
               "name": {
-                "label": "名称",
                 "placeholder": "输入新标签名称"
-              },
-              "submit": "重命名"
+              }
             }
           },
           "deleteTag": {
             "title": "删除标签",
-            "description": "此标签将从所有书籍、系列和书库中移除。此操作不可撤销。",
-            "confirm": "删除"
+            "description": "此标签将从所有书籍、系列和书库中移除。此操作不可撤销。"
           }
         }
       }
@@ -2641,24 +2611,10 @@
         "settings": "前往设置"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "下一页",
-        "previous": "上一页"
-      },
-      "popover": {
-        "heading": "转到页面",
-        "buttons": {
-          "confirm": "跳转",
-          "cancel": "取消"
-        }
-      }
-    },
     "signOutModal": {
       "title": "退出登录",
       "message": "您确定要退出登录吗？",
       "buttons": {
-        "cancel": "取消",
         "signOut": "退出登录"
       }
     },
@@ -2672,8 +2628,6 @@
         "noBookClubs": "暂无读书俱乐部",
         "settings": "设置",
         "themeToggle": "切换主题",
-        "goForward": "向前",
-        "goBack": "后退",
         "noSmartlists": "暂无智能列表",
         "createSmartlist": "创建智能列表",
         "seeAll": "查看全部"
@@ -2682,21 +2636,7 @@
         "scanLibrary": "扫描",
         "manageLibrary": "设置",
         "deleteLibrary": "删除"
-      },
-      "versionInformation": {
-        "heading": "版本信息",
-        "semVer": "语义化版本",
-        "commitHash": "提交哈希",
-        "buildDate": "构建日期"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "服务器未连接",
-      "message": [
-        "请检查您的网络连接",
-        "点击此处",
-        "更改您的服务器 URL"
-      ]
     },
     "slidingList": {
       "empty": "没有可显示的项目",

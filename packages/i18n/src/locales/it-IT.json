@@ -1926,25 +1926,6 @@
             "label": "Server configurati",
             "description": "L'elenco dei server Stump a cui è possibile connettersi",
             "getStarted": "Aggiungi un server per iniziare",
-            "unreachableServer": {
-              "tooltip": "Server non raggiungibile"
-            },
-            "activeServer": {
-              "tooltip": "Server attuale"
-            },
-            "addServer": {
-              "description": "Aggiungi un nuovo server Stump all'applicazione desktop"
-            },
-            "editServer": {
-              "description": "Modifica i dettagli di questo server"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Questa operazione rimuoverà il server dall'applicazione desktop",
-                "disclaimerActiveServer": "Questo server è attualmente attivo. Verrai disconnesso dal tuo account",
-                "disclaimerLastServer": "Questo è l'ultimo server configurato. Verrai disconnesso dal tuo account e dovrai riconfigurare i server durante il processo d'inizializzazione"
-              }
-            },
             "switchToServer": {
               "tooltip": "Passa al server",
               "confirmation": {
@@ -2567,12 +2548,6 @@
             "empty": {
               "title": "Nessun tag",
               "action": "Crea il tuo primo tag per iniziare"
-            },
-            "columns": {
-              "name": "Nome"
-            },
-            "actionMenu": {
-              "rename": "Rinomina"
             }
           },
           "createTag": {
@@ -2581,10 +2556,8 @@
               "heading": "Crea nuovo tag",
               "description": "I tag possono essere assegnati a libri, serie e librerie",
               "name": {
-                "label": "Nome",
                 "placeholder": "Inserisci nome tag"
-              },
-              "submit": "Crea"
+              }
             }
           },
           "renameTag": {
@@ -2592,16 +2565,13 @@
               "heading": "Rinomina tag",
               "description": "Modifica il nome di questo tag su tutti gli elementi assegnati",
               "name": {
-                "label": "Nome",
                 "placeholder": "Inserisci nuovo nome tag"
-              },
-              "submit": "Rinomina"
+              }
             }
           },
           "deleteTag": {
             "title": "Elimina tag",
-            "description": "Questo tag verrà rimosso da tutti i libri, serie e librerie. Questa operazione non può essere annullata.",
-            "confirm": "Elimina"
+            "description": "Questo tag verrà rimosso da tutti i libri, serie e librerie. Questa operazione non può essere annullata."
           }
         }
       }
@@ -2626,24 +2596,10 @@
         "settings": "Vai alle impostazioni"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Avanti",
-        "previous": "Indietro"
-      },
-      "popover": {
-        "heading": "Vai alla pagina",
-        "buttons": {
-          "confirm": "Vai",
-          "cancel": "Annulla"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Disconnessione",
       "message": "Sei sicuro di voler uscire?",
       "buttons": {
-        "cancel": "Annulla",
         "signOut": "Esci"
       }
     },
@@ -2657,8 +2613,6 @@
         "noBookClubs": "Nessun club del libro",
         "settings": "Impostazioni",
         "themeToggle": "Cambia tema",
-        "goForward": "Vai avanti",
-        "goBack": "Torna indietro",
         "noSmartlists": "Nessuna lista smart",
         "createSmartlist": "Create lista smart",
         "seeAll": "Mostra tutti"
@@ -2667,21 +2621,7 @@
         "scanLibrary": "Scansiona",
         "manageLibrary": "Impostazioni",
         "deleteLibrary": "Elimina"
-      },
-      "versionInformation": {
-        "heading": "Informazioni sulla versione",
-        "semVer": "Versione semantica",
-        "commitHash": "Hash del commit",
-        "buildDate": "Data di build"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Il server non è connesso",
-      "message": [
-        "Controlla la tua connessione internet",
-        "Fai clic qui",
-        "per cambiare l'URL del tuo server"
-      ]
     },
     "slidingList": {
       "empty": "Nessun elemento da visualizzare",

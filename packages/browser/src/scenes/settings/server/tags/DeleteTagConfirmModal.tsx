@@ -22,7 +22,7 @@ type Props = {
 
 export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const client = useQueryClient()
 
@@ -46,7 +46,7 @@ export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 		<ConfirmationModal
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			confirmText={translate('shared.common.delete')}
 			confirmVariant="destructive"
 			isOpen={!!tag}
 			onClose={onClose}

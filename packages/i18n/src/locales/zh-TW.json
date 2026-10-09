@@ -1257,25 +1257,6 @@
             "label": "已設定的伺服器",
             "description": "可供你連線的 Stump 伺服器清單",
             "getStarted": "新增一個伺服器以開始使用",
-            "unreachableServer": {
-              "tooltip": "伺服器無法連線"
-            },
-            "activeServer": {
-              "tooltip": "目前使用的伺服器"
-            },
-            "addServer": {
-              "description": "將新的 Stump 伺服器新增至桌面應用程式"
-            },
-            "editServer": {
-              "description": "編輯此伺服器的詳細資訊"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "這會從桌面應用程式中移除此伺服器",
-                "disclaimerActiveServer": "此伺服器目前正在使用。你將會登出",
-                "disclaimerLastServer": "這是最後一個設定的伺服器。你將被登出，並在初始化過程中重新設定任何伺服器"
-              }
-            },
             "switchToServer": {
               "tooltip": "切換到伺服器",
               "confirmation": {
@@ -1949,12 +1930,6 @@
             "empty": {
               "title": "無標籤",
               "action": "建立你的第一個標籤以開始使用"
-            },
-            "columns": {
-              "name": "名稱"
-            },
-            "actionMenu": {
-              "rename": "重新命名"
             }
           },
           "createTag": {
@@ -1963,10 +1938,8 @@
               "heading": "建立新標籤",
               "description": "標籤可以分配給書籍、系列和書庫",
               "name": {
-                "label": "名稱",
                 "placeholder": "輸入標籤名稱"
-              },
-              "submit": "建立"
+              }
             }
           },
           "renameTag": {
@@ -1974,16 +1947,13 @@
               "heading": "重新命名標籤",
               "description": "變更所有已分配項中的標籤名稱",
               "name": {
-                "label": "名稱",
                 "placeholder": "輸入新標籤名稱"
-              },
-              "submit": "重新命名"
+              }
             }
           },
           "deleteTag": {
             "title": "刪除標籤",
-            "description": "此標籤將從所有書籍、系列和書庫中移除。此操作不可撤銷。",
-            "confirm": "刪除"
+            "description": "此標籤將從所有書籍、系列和書庫中移除。此操作不可撤銷。"
           }
         }
       }
@@ -2008,24 +1978,10 @@
         "settings": "前往設定"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "下一頁",
-        "previous": "上一頁"
-      },
-      "popover": {
-        "heading": "轉到頁面",
-        "buttons": {
-          "confirm": "跳轉",
-          "cancel": "取消"
-        }
-      }
-    },
     "signOutModal": {
       "title": "登出",
       "message": "確定要登出嗎？",
       "buttons": {
-        "cancel": "取消",
         "signOut": "登出"
       }
     },
@@ -2039,8 +1995,6 @@
         "noBookClubs": "暫無讀書會",
         "settings": "設定",
         "themeToggle": "切換主題",
-        "goForward": "向前",
-        "goBack": "後退",
         "noSmartlists": "暫無智慧清單",
         "createSmartlist": "建立智慧清單",
         "seeAll": "檢視全部"
@@ -2049,21 +2003,7 @@
         "scanLibrary": "掃描",
         "manageLibrary": "設定",
         "deleteLibrary": "刪除"
-      },
-      "versionInformation": {
-        "heading": "版本資訊",
-        "semVer": "語義化版本",
-        "commitHash": "提交雜湊",
-        "buildDate": "建置日期"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "伺服器未連線",
-      "message": [
-        "請檢查你的網路連線",
-        "點選此處",
-        "變更你的伺服器 URL"
-      ]
     },
     "slidingList": {
       "empty": "沒有可顯示的專案",

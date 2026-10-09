@@ -117,7 +117,7 @@ export default function Home() {
 				isOpen={!!deletingServer}
 				onClose={() => setDeletingServer(null)}
 				onConfirm={onDeleteServer}
-				isLastServer={savedServers.length === 1}
+				serverName={deletingServer?.name ?? ''}
 			/>
 
 			<EditServerModal

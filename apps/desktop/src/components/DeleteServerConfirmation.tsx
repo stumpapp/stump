@@ -1,13 +1,11 @@
-import { Alert, AlertTitle, ConfirmationModal } from '@stump/components'
+import { ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { AlertCircle } from 'lucide-react'
-import { useCallback } from 'react'
 
 type Props = {
 	isOpen: boolean
 	onClose: () => void
 	onConfirm: () => void
-	isLastServer: boolean
+	serverName: string
 }
 
 // TODO: loading state
@@ -15,31 +13,14 @@ export default function DeleteServerConfirmation({
 	isOpen,
 	onClose,
 	onConfirm,
-	isLastServer,
+	serverName,
 }: Props) {
 	const { t } = useLocaleContext()
-
-	const renderDisclaimer = useCallback(() => {
-		if (isLastServer) {
-			return null
-		}
-
-		const message = t(
-			isLastServer ? getKey('disclaimerLastServer') : getKey('disclaimerActiveServer'),
-		)
-
-		return (
-			<Alert variant={isLastServer ? 'destructive' : 'warning'}>
-				<AlertCircle />
-				<AlertTitle>{message}</AlertTitle>
-			</Alert>
-		)
-	}, [isLastServer, t])
 
 	return (
 		<ConfirmationModal
 			title={t('shared.savedServerActions.deleteServer.title')}
-			description={t(getKey('description'))}
+			description={t('shared.savedServerActions.deleteServer.confirmation', { serverName })}
 			confirmText={t('shared.savedServerActions.deleteServer.title')}
 			isOpen={isOpen}
 			onClose={onClose}
@@ -47,12 +28,6 @@ export default function DeleteServerConfirmation({
 			confirmVariant="destructive"
 			trigger={null}
 			size="md"
-		>
-			{renderDisclaimer()}
-		</ConfirmationModal>
+		/>
 	)
 }
-
-const LOCALE_KEY =
-	'webApp.settingsScene.app/desktop.sections.configuredServers.deleteServer.confirmation'
-const getKey = (key: string) => `${LOCALE_KEY}.${key}`

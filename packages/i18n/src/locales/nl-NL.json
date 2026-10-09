@@ -688,24 +688,10 @@
         "settings": "Ga naar instellingen"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Volgende",
-        "previous": "Vorige"
-      },
-      "popover": {
-        "heading": "Ga naar pagina",
-        "buttons": {
-          "confirm": "Start",
-          "cancel": "Annuleren"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Uitloggen",
       "message": "Weet je zeker dat je wilt uitloggen?",
       "buttons": {
-        "cancel": "Annuleren",
         "signOut": "Uitloggen"
       }
     },
@@ -723,14 +709,6 @@
         "scanLibrary": "Scannen",
         "manageLibrary": "Manage"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Server is niet verbonden",
-      "message": [
-        "Controleer je internetverbinding",
-        "Klik hier",
-        "om de server-URL te wijzigen"
-      ]
     },
     "slidingList": {
       "empty": "Geen items om weer te geven",

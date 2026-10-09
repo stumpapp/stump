@@ -1180,25 +1180,6 @@
             "label": "Yapılandırılmış sunucular",
             "description": "Bağlanabileceğiniz Stump sunucularının listesi",
             "getStarted": "Başlamak için bir sunucu ekleyin",
-            "unreachableServer": {
-              "tooltip": "Sunucuya ulaşılamıyor"
-            },
-            "activeServer": {
-              "tooltip": "Mevcut sunucu"
-            },
-            "addServer": {
-              "description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle"
-            },
-            "editServer": {
-              "description": "Bu sunucunun detaylarını düzenle"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Bu işlem, sunucuyu masaüstü uygulamasından kaldıracaktır",
-                "disclaimerActiveServer": "Bu sunucu şu anda aktif. Oturumunuz kapatılacak",
-                "disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir"
-              }
-            },
             "switchToServer": {
               "tooltip": "Sunucuya geç",
               "confirmation": {

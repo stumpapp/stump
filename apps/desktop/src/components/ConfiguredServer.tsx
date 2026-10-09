@@ -31,10 +31,10 @@ export default function ConfiguredServer({
 					<ToolTip
 						content={
 							isReachable === true
-								? t(getKey('reachableServer.tooltip'))
+								? t('shared.serverStatus.reachable')
 								: isReachable === false
-									? t(getKey('unreachableServer.tooltip'))
-									: t(getKey('checkingServer.tooltip'))
+									? t('shared.serverStatus.unreachable')
+									: t('shared.serverStatus.checking')
 						}
 						align="start"
 					>
@@ -55,7 +55,7 @@ export default function ConfiguredServer({
 								{server.name}
 							</Text>
 							{isActive && (
-								<ToolTip content={t(getKey('activeServer.tooltip'))} align="center">
+								<ToolTip content={t('shared.serverStatus.current')} align="center">
 									<BadgeCheck
 										className="h-3.5 w-3.5 text-fill-success/75 shrink-0"
 										strokeWidth={0.95}
@@ -97,6 +97,3 @@ export default function ConfiguredServer({
 		</NewCard>
 	)
 }
-
-const LOCALE_KEY = 'webApp.settingsScene.app/desktop.sections.configuredServers'
-const getKey = (key: string) => `${LOCALE_KEY}.${key}`

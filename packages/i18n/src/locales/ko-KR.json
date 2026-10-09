@@ -990,25 +990,6 @@
             "label": "등록된 서버",
             "description": "연결할 수 있는 Stump 서버 목록입니다",
             "getStarted": "서버를 추가하여 시작하세요",
-            "unreachableServer": {
-              "tooltip": "서버에 연결할 수 없습니다"
-            },
-            "activeServer": {
-              "tooltip": "현재 서버"
-            },
-            "addServer": {
-              "description": "데스크톱 앱에 새 Stump 서버를 추가합니다"
-            },
-            "editServer": {
-              "description": "이 서버의 정보를 수정합니다"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "데스크톱 앱에서 이 서버를 제거합니다",
-                "disclaimerActiveServer": "현재 사용 중인 서버입니다. 로그아웃됩니다",
-                "disclaimerLastServer": "마지막으로 남은 등록 서버입니다. 로그아웃되며, 초기 설정 과정에서 서버를 다시 등록해야 합니다"
-              }
-            },
             "switchToServer": {
               "tooltip": "서버 전환",
               "confirmation": {
@@ -1801,12 +1782,6 @@
             "empty": {
               "title": "태그가 없습니다",
               "action": "첫 태그를 만들어 시작하세요"
-            },
-            "columns": {
-              "name": "이름"
-            },
-            "actionMenu": {
-              "rename": "이름 변경"
             }
           },
           "createTag": {
@@ -1815,10 +1790,8 @@
               "heading": "새 태그 만들기",
               "description": "태그는 책, 시리즈, 라이브러리에 지정할 수 있습니다",
               "name": {
-                "label": "이름",
                 "placeholder": "태그 이름을 입력하세요"
-              },
-              "submit": "생성"
+              }
             }
           },
           "renameTag": {
@@ -1826,16 +1799,13 @@
               "heading": "태그 이름 변경",
               "description": "이 태그가 지정된 모든 항목에서 태그 이름을 변경합니다",
               "name": {
-                "label": "이름",
                 "placeholder": "새 태그 이름을 입력하세요"
-              },
-              "submit": "이름 변경"
+              }
             }
           },
           "deleteTag": {
             "title": "태그 삭제",
-            "description": "모든 책, 시리즈, 라이브러리에서 이 태그를 제거합니다. 이 작업은 되돌릴 수 없습니다.",
-            "confirm": "삭제"
+            "description": "모든 책, 시리즈, 라이브러리에서 이 태그를 제거합니다. 이 작업은 되돌릴 수 없습니다."
           }
         }
       }
@@ -1855,17 +1825,9 @@
         "noBookClubs": "북클럽이 없습니다",
         "settings": "설정",
         "themeToggle": "테마 전환",
-        "goForward": "앞으로 이동",
-        "goBack": "뒤로 이동",
         "noSmartlists": "스마트 목록이 없습니다",
         "createSmartlist": "스마트 목록 만들기",
         "seeAll": "모두 보기"
-      },
-      "versionInformation": {
-        "heading": "버전 정보",
-        "semVer": "시맨틱 버전",
-        "commitHash": "커밋 해시",
-        "buildDate": "빌드 날짜"
       }
     },
     "thumbnailDropdown": {
@@ -2779,34 +2741,12 @@
         "settings": "설정으로 이동"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "다음",
-        "previous": "이전"
-      },
-      "popover": {
-        "heading": "페이지로 이동",
-        "buttons": {
-          "confirm": "이동",
-          "cancel": "취소"
-        }
-      }
-    },
     "signOutModal": {
       "title": "로그아웃",
       "message": "로그아웃하시겠습니까?",
       "buttons": {
-        "cancel": "취소",
         "signOut": "로그아웃"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "서버가 연결되어 있지 않습니다",
-      "message": [
-        "인터넷 연결을 확인하세요",
-        "서버 URL 변경",
-        "링크를 클릭하세요"
-      ]
     },
     "slidingList": {
       "empty": "표시할 항목이 없습니다",

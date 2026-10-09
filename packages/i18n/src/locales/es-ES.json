@@ -1704,25 +1704,6 @@
             "label": "Servidores configurados",
             "description": "La lista de servidores de Stump a los que puedes conectarte",
             "getStarted": "Añade un servidor para empezar",
-            "unreachableServer": {
-              "tooltip": "Servidor inaccesible"
-            },
-            "activeServer": {
-              "tooltip": "Servidor actual"
-            },
-            "addServer": {
-              "description": "Añadir un nuevo servidor de Stump a la aplicación de escritorio"
-            },
-            "editServer": {
-              "description": "Editar los detalles de este servidor"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Esto eliminará el servidor de la aplicación de escritorio",
-                "disclaimerActiveServer": "Este servidor está activo actualmente. Tu sesión cerrará",
-                "disclaimerLastServer": "Este es el último servidor configurado. Tu sesión se cerrará y tendrás que configurar cualquier servidor en el proceso de inicialización"
-              }
-            },
             "switchToServer": {
               "tooltip": "Cambiar al servidor",
               "confirmation": {
@@ -2262,10 +2243,8 @@
         "sections": {
           "createTag": {
             "modal": {
-              "submit": "Crear",
               "description": "Las etiquetas se pueden asignar a libros, series y librerías",
               "name": {
-                "label": "Nombre",
                 "placeholder": "Ingrese el nombre de la etiqueta"
               }
             }
@@ -2297,24 +2276,10 @@
         "create": "Crear biblioteca"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Siguiente",
-        "previous": "Anterior"
-      },
-      "popover": {
-        "heading": "Ir a la página",
-        "buttons": {
-          "confirm": "Ir",
-          "cancel": "Cancelar"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Cerrar sesión",
       "message": "¿Está seguro de que desea cerrar sesión?",
       "buttons": {
-        "cancel": "Cancelar",
         "signOut": "Cerrar sesión"
       }
     },
@@ -2328,8 +2293,6 @@
         "noBookClubs": "No hay clubs de lectura",
         "settings": "Ajustes",
         "themeToggle": "Alternar Tema",
-        "goForward": "Ir Adelante",
-        "goBack": "Ir Atrás",
         "noSmartlists": "Sin listas inteligentes",
         "createSmartlist": "Crear lista inteligente",
         "seeAll": "Ver todo"
@@ -2338,21 +2301,7 @@
         "scanLibrary": "Escanear",
         "manageLibrary": "Administrar",
         "deleteLibrary": "Eliminar"
-      },
-      "versionInformation": {
-        "heading": "Información de la Versión",
-        "semVer": "Versión semántica",
-        "commitHash": "Hash de Confirmación",
-        "buildDate": "Fecha de Construcción"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "El servidor no está conectado",
-      "message": [
-        "Por favor, verifique su conexión a internet",
-        "Haga clic aquí",
-        "para cambiar su URL del servidor"
-      ]
     },
     "slidingList": {
       "empty": "No hay elementos para mostrar",

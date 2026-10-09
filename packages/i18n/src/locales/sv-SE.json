@@ -1409,25 +1409,6 @@
             "label": "Konfigurerade servrar",
             "description": "Listan över Stump-servrar som du kan ansluta till",
             "getStarted": "Lägg till en server för att komma igång",
-            "unreachableServer": {
-              "tooltip": "Servern kan inte nås"
-            },
-            "activeServer": {
-              "tooltip": "Nuvarande server"
-            },
-            "addServer": {
-              "description": "Lägg till en ny Stump-server till skrivbordsprogrammet"
-            },
-            "editServer": {
-              "description": "Redigera detaljer för denna server"
-            },
-            "deleteServer": {
-              "confirmation": {
-                "description": "Detta kommer att ta bort servern från skrivbordsprogrammet",
-                "disclaimerActiveServer": "Denna server är för närvarande aktiv. Du kommer att loggas ut",
-                "disclaimerLastServer": "Detta är den sista konfigurerade servern. Du kommer att loggas ut och måste konfigurera om alla servrar i initieringsprocessen"
-              }
-            },
             "switchToServer": {
               "tooltip": "Byt till server",
               "confirmation": {
@@ -1882,24 +1863,10 @@
         "settings": "Gå till Inställningar"
       }
     },
-    "pagination": {
-      "buttons": {
-        "next": "Nästa",
-        "previous": "Föregående"
-      },
-      "popover": {
-        "heading": "Gå till sida",
-        "buttons": {
-          "confirm": "Gå till",
-          "cancel": "Avbryt"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Logga ut",
       "message": "Är du säker på att du vill logga ut?",
       "buttons": {
-        "cancel": "Avbryt",
         "signOut": "Logga ut"
       }
     },
@@ -1913,8 +1880,6 @@
         "noBookClubs": "Inga bokklubbar",
         "settings": "Inställningar",
         "themeToggle": "Växla Tema",
-        "goForward": "Gå Framåt",
-        "goBack": "Gå Tillbaka",
         "noSmartlists": "Inga smarta listor",
         "createSmartlist": "Skapa smart lista",
         "seeAll": "Se alla"
@@ -1923,21 +1888,7 @@
         "scanLibrary": "Skanna",
         "manageLibrary": "Manage",
         "deleteLibrary": "Radera"
-      },
-      "versionInformation": {
-        "heading": "Versionsinformation",
-        "semVer": "Semantisk Version",
-        "commitHash": "Hash för bygg-commit",
-        "buildDate": "Byggdatum"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Servern är inte ansluten",
-      "message": [
-        "Vänligen kontrollera din internetanslutning",
-        "Klicka här",
-        "för att ändra din serverlänk"
-      ]
     },
     "slidingList": {
       "empty": "Inga föremål att visa",

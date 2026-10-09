@@ -213,51 +213,21 @@
       "bookCount": "Número Total de Livros",
       "diskUsage": "Uso de disco"
     },
-    "pagination": {
-      "buttons": {
-        "next": "Próxima",
-        "previous": "Anterior"
-      },
-      "popover": {
-        "heading": "Ir para a página",
-        "buttons": {
-          "confirm": "Ir",
-          "cancel": "Cancelar"
-        }
-      }
-    },
     "signOutModal": {
       "title": "Terminar Sessão",
       "message": "Você tem certeza que deseja sair?",
       "buttons": {
-        "cancel": "Cancelar",
         "signOut": "Terminar Sessão"
       }
     },
     "sidebar": {
       "buttons": {
         "settings": "Configurações",
-        "themeToggle": "Alternar tema",
-        "goForward": "Ir adiante",
-        "goBack": "Retornar"
+        "themeToggle": "Alternar tema"
       },
       "libraryOptions": {
         "manageLibrary": "Manage"
-      },
-      "versionInformation": {
-        "heading": "Informações da versão",
-        "semVer": "Versionamento Semântico",
-        "commitHash": "Hash do Commit",
-        "buildDate": "Data da Compilação"
       }
-    },
-    "serverStatusOverlay": {
-      "heading": "Servidor não está conectado",
-      "message": [
-        "Por favor, verifique sua conexão com a internet",
-        "Clique aqui",
-        "para mudar a URL de seu servidor"
-      ]
     },
     "slidingList": {
       "empty": "Nenhum item para exibir",

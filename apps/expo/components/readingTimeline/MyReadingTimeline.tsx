@@ -129,7 +129,7 @@ export function MyReadingTimeline() {
 }
 
 function StackHeader() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const order = useReadingTimelineDisplayStore((state) => state.order)
 	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
@@ -184,7 +184,7 @@ function StackHeader() {
 							order: order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc,
 						})
 					}
-					subtitle={t(`sorting.sortDirectionDate.${order}`)}
+					subtitle={translate(`shared.sorting.sortDirectionDate.${order}`)}
 				>
 					Sort Order
 				</Stack.Toolbar.MenuAction>

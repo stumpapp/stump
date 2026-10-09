@@ -1,5 +1,4 @@
 import { Button, NewCard, Sheet, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -23,7 +22,7 @@ import DefaultReadingDirection from './DefaultReadingDirection'
 // dance of global vs book-level vs format-level vs library-level settings :)
 // TODO(i8n): keys/values
 export default function ReaderDefaultSettingsScene() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const { bookPreferences, clearStore } = useReaderStore(
 		useShallow((state) => ({
@@ -68,7 +67,7 @@ export default function ReaderDefaultSettingsScene() {
 							description={t(getSectionKey('imageBasedBooks.description'))}
 							trigger={
 								<Button size="sm" variant="outline">
-									{t('common.edit')}
+									{translate('shared.common.edit')}
 								</Button>
 							}
 							size="lg"
@@ -89,7 +88,7 @@ export default function ReaderDefaultSettingsScene() {
 							description={t(getSectionKey('textBasedBooks.description'))}
 							trigger={
 								<Button size="sm" variant="outline">
-									{t('common.edit')}
+									{translate('shared.common.edit')}
 								</Button>
 							}
 							size="default"

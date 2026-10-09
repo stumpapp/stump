@@ -1,6 +1,5 @@
 import { Button, Dialog, NativeSelect, Text } from '@stump/components'
 import { MergeStrategy } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'

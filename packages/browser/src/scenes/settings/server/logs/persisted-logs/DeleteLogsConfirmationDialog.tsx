@@ -1,9 +1,10 @@
 import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, AlertDescription, Button, ConfirmationModal } from '@stump/components'
 import { graphql, PersistedLogsQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation DeleteLogs {

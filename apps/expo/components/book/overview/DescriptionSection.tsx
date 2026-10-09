@@ -16,7 +16,7 @@ type Props = {
 }
 
 export default function DescriptionSection({ description }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const sheetRef = useRef<TrueSheet | null>(null)
 
@@ -45,7 +45,7 @@ export default function DescriptionSection({ description }: Props) {
 						>
 							<View className="px-4 py-2">
 								<Text className="text-base font-semibold" style={{ color: textColor }}>
-									{t('common.readMore')}
+									{translate('shared.common.readMore')}
 								</Text>
 							</View>
 						</GlassView>

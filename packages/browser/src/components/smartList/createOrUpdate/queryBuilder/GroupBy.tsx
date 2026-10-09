@@ -1,5 +1,4 @@
 import { Label, NativeSelect, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 

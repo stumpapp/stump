@@ -25,7 +25,7 @@ export default function ServerConnectionErrorScene() {
 	const isDesktop = platform !== 'browser'
 
 	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	useEffect(() => {
 		async function checkServer() {
@@ -61,7 +61,7 @@ export default function ServerConnectionErrorScene() {
 			toast.promise(
 				new Promise((resolve) => setTimeout(resolve, 2000)).then(() => setGoHome(true)),
 				{
-					error: t('serverSOS.reconnectFailed'),
+					error: t('serverSOS.reconnectionFailed'),
 					loading: t('serverSOS.reconnected'),
 					success: t('serverSOS.reconnected'),
 				},
@@ -96,7 +96,7 @@ export default function ServerConnectionErrorScene() {
 							onClick={() => setShowServers(true)}
 						>
 							<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
-								{t('common.goToServers')}
+								{translate('shared.common.goToServers')}
 							</span>
 
 							<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
@@ -121,7 +121,7 @@ export default function ServerConnectionErrorScene() {
 							<ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
 
 							<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
-								{t('common.seeError')}
+								{translate('shared.common.seeError')}
 							</span>
 						</button>
 					</div>

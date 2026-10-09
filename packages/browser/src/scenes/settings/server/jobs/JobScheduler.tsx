@@ -1,12 +1,13 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle, Button, ConfirmationModal } from '@stump/components'
 import { graphql, ScheduledJobsQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { AlertCircleIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrEditScheduledJobDialog } from './CreateOrEditScheduledJobDialog'
 import { ScheduledJobRow } from './ScheduledJobRow'

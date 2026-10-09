@@ -1,6 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 

@@ -1,6 +1,5 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { BadgeAlert, BadgeCheck, BadgeX } from 'lucide-react'
 

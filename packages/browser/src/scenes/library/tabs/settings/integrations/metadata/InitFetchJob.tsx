@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle, Button, Heading, Text } from '@stump/components'
 import { extractErrorMessage, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { toast } from 'sonner'
 

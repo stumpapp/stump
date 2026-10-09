@@ -1,7 +1,6 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'

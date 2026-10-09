@@ -1,6 +1,5 @@
 import { Card, Spacer, Text } from '@stump/components'
 import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 import { Link } from 'react-router'

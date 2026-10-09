@@ -1,5 +1,4 @@
 import { Button, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense, useState } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'

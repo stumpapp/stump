@@ -74,7 +74,7 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 	fields,
 	actions,
 }: Props<O>) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const sortConfig = extractSortConfig(sort, fields)
 
@@ -98,14 +98,14 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 	const getSubtitle = (field: string) => {
 		if (field !== sortConfig.field) return undefined
 		if (DATE_FIELDS.includes(field)) {
-			return t(`sorting.sortDirectionDate.${sortConfig.direction}`)
+			return translate(`shared.sorting.sortDirectionDate.${sortConfig.direction}`)
 		}
-		return t(`sorting.sortDirectionString.${sortConfig.direction}`)
+		return translate(`shared.sorting.sortDirectionString.${sortConfig.direction}`)
 	}
 
 	const sortItems: MenuItemDef[] = fields.map((fieldDef) => ({
 		key: fieldDef.field,
-		label: t(`sorting.sortField.${fieldDef.field}`),
+		label: translate(`shared.sorting.sortField.${fieldDef.field}`),
 		isOn: sortConfig.field === fieldDef.field,
 		subtitle: getSubtitle(fieldDef.field),
 		onPress: () => onSortFieldPress(fieldDef),
@@ -122,14 +122,14 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 				{
 					key: 'grid',
 					icon: { ios: 'rectangle.grid.2x2', android: Grid2X2 },
-					label: t('common.grid'),
+					label: translate('shared.common.grid'),
 					isOn: layout === InterfaceLayout.Grid,
 					onPress: () => setLayout(InterfaceLayout.Grid),
 				},
 				{
 					key: 'list',
 					icon: { ios: 'list.bullet', android: List },
-					label: t('common.list'),
+					label: translate('shared.common.list'),
 					isOn: layout === InterfaceLayout.Table,
 					onPress: () => setLayout(InterfaceLayout.Table),
 				},
@@ -154,8 +154,8 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 
 	groups.push({
 		key: 'sort-fields',
-		title: t('sorting.labelEllipsis'),
-		label: t('sorting.labelEllipsis'),
+		title: translate('shared.sorting.labelEllipsis'),
+		label: translate('shared.sorting.labelEllipsis'),
 		inline: true,
 		items: sortItems,
 	})

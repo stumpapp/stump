@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, Club } from 'lucide-react'
 import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'

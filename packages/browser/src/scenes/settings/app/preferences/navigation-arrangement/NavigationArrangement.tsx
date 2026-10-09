@@ -23,7 +23,6 @@ import {
 	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -83,7 +82,7 @@ export default function NavigationArrangementRow() {
 }
 
 export function NavigationArrangementSheet() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 	const {
@@ -248,7 +247,7 @@ export function NavigationArrangementSheet() {
 			description={t(getKey('description'))}
 			trigger={
 				<Button size="sm" variant="outline">
-					{t('common.edit')}
+					{translate('shared.common.edit')}
 				</Button>
 			}
 		>

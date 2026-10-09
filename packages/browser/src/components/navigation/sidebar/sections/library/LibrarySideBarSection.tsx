@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -41,7 +40,7 @@ export default function LibrarySideBarSection({
 	const location = useLocation()
 	const paths = usePaths()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {
@@ -101,7 +100,7 @@ export default function LibrarySideBarSection({
 					asLabel
 					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
 				>
-					{t('sidebar.buttons.libraries')}
+					{translate('shared.common.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
 					{links.includes(FilterableArrangementEntityLink.ShowAll) && (

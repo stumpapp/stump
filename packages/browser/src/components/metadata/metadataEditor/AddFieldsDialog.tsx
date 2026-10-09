@@ -1,5 +1,4 @@
 import { Badge, Button, Dialog, TextArea } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import lowerFirst from 'lodash/lowerFirst'
 import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -14,8 +13,8 @@ type Props<Field extends string> = {
 export default function AddFieldsDialog<Field extends string>({ binding, onSave }: Props<Field>) {
 	const [isOpen, setIsOpen] = useState(false)
 
-	const { t } = useTranslate()
-	const label = lowerFirst(t(getLabelKey(binding)))
+	const { t, translate } = useTranslate()
+	const label = lowerFirst(translate(`shared.bookMetadata.${binding}`))
 
 	const [value, setValue] = useState('')
 
@@ -44,7 +43,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 			<Dialog.Content>
 				<Dialog.Header>
 					<Dialog.Title>
-						{t('common.add')} {label}
+						{translate('shared.common.add')} {label}
 					</Dialog.Title>
 					<Dialog.Description>{t('metadataEditor.addFields.description')}</Dialog.Description>
 					<Dialog.Close />
@@ -52,7 +51,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 
 				<div className="gap-y-4 flex flex-col">
 					<TextArea
-						placeholder={`${t('common.enter')} ${label}...`}
+						placeholder={`${translate('shared.common.enter')} ${label}...`}
 						rows={4}
 						value={value}
 						onChange={(e) => setValue(e.target.value)}
@@ -67,7 +66,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 
 				<Dialog.Footer>
 					<Button variant="outline" onClick={() => setIsOpen(false)}>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 					<Button
 						disabled={parsedValues.length === 0}
@@ -76,14 +75,10 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 							setIsOpen(false)
 						}}
 					>
-						{t('common.add')}
+						{translate('shared.common.add')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>
 		</Dialog>
 	)
 }
-
-const LOCALE_BASE = `metadataEditor`
-const getKey = (key: string) => `${LOCALE_BASE}.${key}`
-const getLabelKey = (binding: string) => getKey(`labels.${binding}`)

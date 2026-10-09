@@ -1,5 +1,4 @@
 import { ButtonOrLink, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'

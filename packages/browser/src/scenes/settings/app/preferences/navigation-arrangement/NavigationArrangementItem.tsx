@@ -6,7 +6,6 @@ import {
 	NavigationArrangementQuery,
 	SystemArrangement,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Bolt, Eye, EyeOff } from 'lucide-react'
 import { useCallback, useState } from 'react'
 

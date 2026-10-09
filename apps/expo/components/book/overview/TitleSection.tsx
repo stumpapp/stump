@@ -11,12 +11,12 @@ export type TitleSectionProps = {
 }
 
 export function TitleSection({ title, subtitle, series, library }: TitleSectionProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<View className="gap-1.5">
 			<Heading size="lg" className="leading-6 text-center">
-				{title || t('common.unknownTitle')}
+				{title || translate('shared.common.unknownTitle')}
 			</Heading>
 
 			{subtitle && <Text className="text-lg text-foreground-muted text-center">{subtitle}</Text>}

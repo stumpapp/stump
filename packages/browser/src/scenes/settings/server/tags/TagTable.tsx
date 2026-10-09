@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Card, Dropdown, Text } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,
@@ -33,7 +32,7 @@ export default function TagTable() {
 		data: { tags },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('tags'))
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const sortedTags = useMemo(
 		() => [...(tags || [])].sort((a, b) => a.name.localeCompare(b.name)),
@@ -71,7 +70,7 @@ export default function TagTable() {
 										<span>{t(getActionKey('rename'))}</span>
 									</Dropdown.Item>
 									<Dropdown.Item onClick={() => setDeletingTag(tag)}>
-										<span>{t('common.delete')}</span>
+										<span>{translate('shared.common.delete')}</span>
 									</Dropdown.Item>
 								</Dropdown.Group>
 							</Dropdown.Content>

@@ -21,7 +21,7 @@ import { useSavedServerStore } from '~/stores/savedServer'
 
 export default function Screen() {
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		data: preferencesBytes,
 		refetch,
@@ -63,7 +63,7 @@ export default function Screen() {
 			SystemAlert.alert(
 				t(getKey('deleteDownloads.deleteFailed.title')),
 				t(getKey('deleteDownloads.deleteFailed.description'), {
-					serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),
+					serverName: server?.name ? `'${server.name}'` : translate('shared.common.thisServer'),
 				}),
 			)
 		}
@@ -77,11 +77,15 @@ export default function Screen() {
 		SystemAlert.alert(
 			t(getKey('deleteDownloads.label')),
 			t(getKey('deleteDownloads.confirmation'), {
-				serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),
+				serverName: server?.name ? `'${server.name}'` : translate('shared.common.thisServer'),
 			}),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
-				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteDownloads },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
+				{
+					text: translate('shared.common.delete'),
+					style: 'destructive',
+					onPress: onDeleteDownloads,
+				},
 			],
 		)
 	}
@@ -102,7 +106,7 @@ export default function Screen() {
 				<View className="gap-8 px-4 pt-8 flex-1 bg-background">
 					<View className="gap-4 flex-1">
 						<Card
-							label={t('common.downloads')}
+							label={translate('shared.common.downloads')}
 							listEmptyStyle={{
 								icon: HardDriveDownload,
 								message: t(getKey('noDownloads')),
@@ -118,7 +122,7 @@ export default function Screen() {
 							{(files.length > 0 || downloadedFilesSum > 0) && (
 								<Card.Row label={t(getKey('deleteDownloads.label'))}>
 									<Button size="sm" roundness="full" variant="destructive" onPress={handleDelete}>
-										<Text>{t('common.delete')}</Text>
+										<Text>{translate('shared.common.delete')}</Text>
 									</Button>
 								</Card.Row>
 							)}
@@ -142,7 +146,7 @@ export default function Screen() {
 										variant="destructive"
 										onPress={onClearPreferences}
 									>
-										<Text>{t('common.clear')}</Text>
+										<Text>{translate('shared.common.clear')}</Text>
 									</Button>
 								</Card.Row>
 							)}

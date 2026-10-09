@@ -8,7 +8,6 @@ import {
 	Dialog,
 	NewCard,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, ExternalLink } from 'lucide-react'
 import { memo, useState } from 'react'
@@ -70,7 +69,7 @@ const ChangelogSection = memo(({ version, subsections }: SectionProps) => (
 ChangelogSection.displayName = 'ChangelogSection'
 
 const SeeMoreFooter = () => {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	return (
 		<div className="pb-6 flex items-center justify-center">
 			<ButtonOrLink
@@ -80,7 +79,7 @@ const SeeMoreFooter = () => {
 				variant="outline"
 				size="sm"
 			>
-				{t('common.seeMore')}
+				{translate('shared.common.seeMore')}
 
 				<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
 			</ButtonOrLink>
@@ -94,7 +93,7 @@ export function ChangelogDialog() {
 	const version = useStumpVersion()
 	const semver = version?.semver
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { data: raw, error: fetchError } = useQuery({
 		enabled: open && !!semver,
 		gcTime: Infinity,
@@ -115,7 +114,7 @@ export function ChangelogDialog() {
 			<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
 				<Dialog.Trigger asChild>
 					<Button variant="outline" size="sm">
-						{t('common.view')}
+						{translate('shared.common.view')}
 					</Button>
 				</Dialog.Trigger>
 			</NewCard.Row>

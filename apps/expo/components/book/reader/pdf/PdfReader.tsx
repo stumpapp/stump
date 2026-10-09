@@ -99,8 +99,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				scroll: bookPreferences.readingMode !== ReadingMode.Paged,
 				// TODO(pdf): Implement this preference
 				backgroundColor: '#000000',
-				readingProgression:
-					bookPreferences.readingDirection === ReadingDirection.Rtl ? 'rtl' : 'ltr',
+				readingProgression: bookPreferences.readingDirection?.toLowerCase() as 'ltr' | 'rtl',
 				spread:
 					bookPreferences.doublePageBehavior === 'off'
 						? 'never' // Stump uses 'off' readium uses 'never' but same otherwsie

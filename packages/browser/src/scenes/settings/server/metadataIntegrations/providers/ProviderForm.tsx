@@ -10,7 +10,6 @@ import {
 	Text,
 } from '@stump/components'
 import { MergeStrategy } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { startOfDay } from 'date-fns'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 

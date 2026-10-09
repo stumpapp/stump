@@ -16,7 +16,7 @@ export function PagedActionMenu({
 	onResetTimer,
 	onShowSettings,
 }: PagedActionMenuProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const {
@@ -55,7 +55,7 @@ export function PagedActionMenu({
 					<NativeDropdownMenu.Sub>
 						<NativeDropdownMenu.SubTrigger key="preset">
 							<NativeDropdownMenu.ItemTitle>
-								{t('readerSettings.readingMode.label')}
+								{translate('shared.readerSettings.readingMode.label')}
 							</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'book.pages' }} />
 						</NativeDropdownMenu.SubTrigger>
@@ -67,7 +67,7 @@ export function PagedActionMenu({
 								onValueChange={() => handleUpdateSettings({ readingMode: ReadingMode.Paged })}
 							>
 								<NativeDropdownMenu.ItemTitle>
-									{t('readerSettings.readingMode.options.PAGED')}
+									{translate('shared.readerSettings.readingMode.options.PAGED')}
 								</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>
 
@@ -79,7 +79,7 @@ export function PagedActionMenu({
 								}
 							>
 								<NativeDropdownMenu.ItemTitle>
-									{t('readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
+									{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
 								</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>
 
@@ -91,7 +91,7 @@ export function PagedActionMenu({
 								}
 							>
 								<NativeDropdownMenu.ItemTitle>
-									{t('readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
+									{translate('shared.readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
 								</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>
 						</NativeDropdownMenu.SubContent>
@@ -109,7 +109,7 @@ export function PagedActionMenu({
 						}
 					>
 						<NativeDropdownMenu.ItemTitle>
-							{t('readerSettings.readingDirection.label')}
+							{translate('shared.readerSettings.readingDirection.label')}
 						</NativeDropdownMenu.ItemTitle>
 						<NativeDropdownMenu.ItemIcon
 							ios={{
@@ -125,7 +125,7 @@ export function PagedActionMenu({
 						<NativeDropdownMenu.Sub>
 							<NativeDropdownMenu.SubTrigger key="preset">
 								<NativeDropdownMenu.ItemTitle>
-									{t('readerSettings.readingTimer.label')}
+									{translate('shared.readerSettings.readingTimer.label')}
 								</NativeDropdownMenu.ItemTitle>
 								<NativeDropdownMenu.ItemIcon
 									ios={{
@@ -140,7 +140,9 @@ export function PagedActionMenu({
 									value={!!trackElapsedTime}
 									onValueChange={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
 								>
-									<NativeDropdownMenu.ItemTitle>{t('common.enabled')}</NativeDropdownMenu.ItemTitle>
+									<NativeDropdownMenu.ItemTitle>
+										{translate('shared.common.enabled')}
+									</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.CheckboxItem>
 								<NativeDropdownMenu.Item
 									key="reset"
@@ -149,7 +151,7 @@ export function PagedActionMenu({
 									onSelect={onResetTimer}
 								>
 									<NativeDropdownMenu.ItemTitle>
-										{t('readerSettings.readingTimer.resetTimer')}
+										{translate('shared.readerSettings.readingTimer.resetTimer')}
 									</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.Item>
 							</NativeDropdownMenu.SubContent>
@@ -161,7 +163,7 @@ export function PagedActionMenu({
 					<NativeDropdownMenu.Group>
 						<NativeDropdownMenu.Item key="globalSettings" onSelect={onShowSettings}>
 							<NativeDropdownMenu.ItemTitle>
-								{t('readerSettings.allSettings')}
+								{translate('shared.readerSettings.allSettings')}
 							</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon
 								ios={{

@@ -1,6 +1,5 @@
 import { NativeSelect } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -11,7 +10,7 @@ type Props = {
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	/**
 	 * A change handler for the reading direction select, asserting that the value
@@ -34,8 +33,14 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: t('imageReader.settings.readingDirection.options.leftToRight'), value: 'LTR' },
-					{ label: t('imageReader.settings.readingDirection.options.rightToLeft'), value: 'RTL' },
+					{
+						label: translate('shared.readerSettings.readingDirection.options.LTR'),
+						value: 'LTR',
+					},
+					{
+						label: translate('shared.readerSettings.readingDirection.options.RTL'),
+						value: 'RTL',
+					},
 				]}
 				value={direction}
 				onChange={handleChange}

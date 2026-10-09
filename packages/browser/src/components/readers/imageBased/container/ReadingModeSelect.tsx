@@ -1,6 +1,5 @@
 import { NativeSelect } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -11,7 +10,7 @@ type Props = {
 }
 
 export default function ReadingModeSelect({ value, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	/**
 	 * A change handler for the reading mode select, asserting that the value
@@ -35,14 +34,17 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 				size="sm"
 				options={[
 					{
-						label: t('imageReader.settings.readingMode.options.verticalScroll'),
+						label: translate('shared.readerSettings.readingMode.options.CONTINUOUS_VERTICAL'),
 						value: 'CONTINUOUS_VERTICAL',
 					},
 					{
-						label: t('imageReader.settings.readingMode.options.horizontalScroll'),
+						label: translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL'),
 						value: 'CONTINUOUS_HORIZONTAL',
 					},
-					{ label: t('imageReader.settings.readingMode.options.paged'), value: 'PAGED' },
+					{
+						label: translate('shared.readerSettings.readingMode.options.PAGED'),
+						value: 'PAGED',
+					},
 				]}
 				value={value}
 				onChange={handleChange}

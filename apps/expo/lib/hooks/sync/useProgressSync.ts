@@ -84,7 +84,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const { syncProgress } = useProgressSync()
 
@@ -102,10 +102,10 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 				extra: { serverId },
 			})
 			toast.error(t('progressSync.syncFailed'), {
-				description: error instanceof Error ? error.message : t('errors.unknown'),
+				description: error instanceof Error ? error.message : translate('shared.errors.unknown'),
 			})
 		}
-	}, [enabled, syncProgress, serverId, t])
+	}, [enabled, syncProgress, serverId, t, translate])
 
 	useFocusEffect(
 		useCallback(

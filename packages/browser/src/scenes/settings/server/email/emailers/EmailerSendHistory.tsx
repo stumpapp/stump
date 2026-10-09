@@ -1,7 +1,6 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Drawer, Text, ToolTip } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useCallback, useMemo, useState } from 'react'

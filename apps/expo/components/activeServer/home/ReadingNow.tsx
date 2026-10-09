@@ -192,7 +192,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { width, isTablet } = useDisplay()
 
 	const router = useRouter()
@@ -382,7 +382,10 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 									opacity: 0.9,
 								}}
 							>
-								{t('common.pageXOfY', { current: currentPage, total: data.pages })}
+								{translate('shared.common.pageXOfY', {
+									current: currentPage,
+									total: data.pages,
+								})}
 							</Text>
 
 							<Text

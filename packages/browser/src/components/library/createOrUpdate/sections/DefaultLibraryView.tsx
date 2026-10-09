@@ -1,6 +1,5 @@
 import { Heading, RadioGroup, Text, WideSwitch } from '@stump/components'
 import { LibraryViewMode } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 

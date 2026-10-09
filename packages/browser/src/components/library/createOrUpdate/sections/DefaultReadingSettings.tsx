@@ -1,5 +1,4 @@
 import { Label, NativeSelect, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -9,7 +8,7 @@ import { CreateOrUpdateLibrarySchema } from '../schema'
 export default function DefaultReadingSettings() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	return (
 		<>
@@ -31,11 +30,17 @@ export default function DefaultReadingSettings() {
 				</div>
 
 				<div className="gap-2 flex flex-col">
-					<Label>{t(getKey('readingDirection.label'))}</Label>
+					<Label>{translate('shared.readerSettings.readingDirection.label')}</Label>
 					<NativeSelect
 						options={[
-							{ label: 'Left to right', value: 'LTR' },
-							{ label: 'Right to left', value: 'RTL' },
+							{
+								label: translate('shared.readerSettings.readingDirection.options.LTR'),
+								value: 'LTR',
+							},
+							{
+								label: translate('shared.readerSettings.readingDirection.options.RTL'),
+								value: 'RTL',
+							},
 						]}
 						{...form.register('defaultReadingDir')}
 					/>

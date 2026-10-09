@@ -9,18 +9,21 @@ type Props = {
 }
 
 export default function ReadingModeSelect({ mode, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<Picker
 			options={[
-				{ label: t(getOption(ReadingMode.Paged)), value: ReadingMode.Paged },
 				{
-					label: t(getOption(ReadingMode.ContinuousHorizontal)),
+					label: translate(getOption(ReadingMode.Paged)),
+					value: ReadingMode.Paged,
+				},
+				{
+					label: translate(getOption(ReadingMode.ContinuousHorizontal)),
 					value: ReadingMode.ContinuousHorizontal,
 				},
 				{
-					label: t(getOption(ReadingMode.ContinuousVertical)),
+					label: translate(getOption(ReadingMode.ContinuousVertical)),
 					value: ReadingMode.ContinuousVertical,
 				},
 			]}
@@ -30,6 +33,6 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.readingMode'
+const LOCALE_BASE = 'shared.readerSettings.readingMode'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 const getOption = (mode: ReadingMode) => getKey(`options.${mode}`)

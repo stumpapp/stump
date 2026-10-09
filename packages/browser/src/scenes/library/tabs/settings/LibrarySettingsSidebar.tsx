@@ -1,5 +1,4 @@
 import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 

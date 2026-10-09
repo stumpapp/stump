@@ -1,5 +1,4 @@
 import { Card, Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { useTranslate } from '@/hooks/useTranslate'

@@ -1,5 +1,4 @@
 import { Button, NewCard, RawSwitch, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'

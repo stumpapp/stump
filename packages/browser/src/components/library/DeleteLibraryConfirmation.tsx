@@ -1,7 +1,6 @@
 import { useGraphQLMutation } from '@stump/client'
 import { TypeToConfirmModal } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -20,7 +19,7 @@ const mutation = graphql(`
 	}
 `)
 
-const LOCALE_KEY = 'common.deleteConfirmation'
+const LOCALE_KEY = 'shared.common.deleteConfirmation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
 type Props = {
@@ -41,7 +40,7 @@ export default function DeleteLibraryConfirmation({
 	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const {
 		mutate: deleteLibrary,
@@ -84,9 +83,9 @@ export default function DeleteLibraryConfirmation({
 
 	return (
 		<TypeToConfirmModal
-			title={t(getKey('title'), entityI18nValues)}
-			description={t(getKey('description'), entityI18nValues)}
-			confirmText={t(getKey('confirm'), entityI18nValues)}
+			title={translate(getKey('title'), entityI18nValues)}
+			description={translate(getKey('description'), entityI18nValues)}
+			confirmText={translate(getKey('confirm'), entityI18nValues)}
 			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}
@@ -94,7 +93,7 @@ export default function DeleteLibraryConfirmation({
 			confirmIsLoading={isPending}
 			trigger={trigger}
 			confirmationValue={libraryName}
-			instructionText={t(getKey('typeToConfirm'), entityI18nValues)}
+			instructionText={translate(getKey('typeToConfirm'), entityI18nValues)}
 		/>
 	)
 }

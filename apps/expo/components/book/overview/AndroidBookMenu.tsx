@@ -50,7 +50,7 @@ export default function AndroidBookMenu({
 	deleteCurrentSession,
 	deleteReadHistory,
 }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -167,7 +167,7 @@ export default function AndroidBookMenu({
 						<DropdownMenuItem
 							onPress={() => router.push(`/stump/${serverId}/books/${book.id}/reading-timeline`)}
 						>
-							<Text className="text-lg">{t('readingTimeline.title')}</Text>
+							<Text className="text-lg">{translate('shared.readingTimeline.title')}</Text>
 							<Icon as={Clock} size={20} className={cn('text-foreground-muted ml-auto')} />
 						</DropdownMenuItem>
 					</>

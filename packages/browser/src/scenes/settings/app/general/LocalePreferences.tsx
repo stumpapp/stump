@@ -1,6 +1,5 @@
 import { Alert, AlertDescription, AlertTitle, Button, ButtonOrLink } from '@stump/components'
 import { dismissAlert } from '@stump/components/alert'
-import { useLocaleContext } from '@stump/i18n'
 import { Languages } from 'lucide-react'
 import { useState } from 'react'
 

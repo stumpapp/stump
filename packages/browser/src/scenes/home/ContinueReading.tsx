@@ -1,7 +1,6 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Heading, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { BookMarked } from 'lucide-react'
@@ -106,7 +105,7 @@ export default function ContinueReadingContainer() {
 
 function ContinueReading() {
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const {
 		preferences: { thumbnailRatio },
@@ -133,15 +132,15 @@ function ContinueReading() {
 	if (!nodes.length) {
 		return (
 			<div className="space-y-2 flex flex-col">
-				<Heading size="sm">{t('homeScene.continueReading.title')}</Heading>
+				<Heading size="sm">{translate('shared.homeSections.continueReading.label')}</Heading>
 				<div className="space-x-3 px-4 py-4 flex items-start justify-start rounded-lg border border-dashed border-border">
 					<span className="p-2 rounded-lg border border-border bg-muted">
 						<BookMarked className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
-						<Text>{t('homeScene.continueReading.emptyState.heading')}</Text>
+						<Text>{translate('shared.homeSections.continueReading.emptyText')}</Text>
 						<Text size="sm" variant="muted">
-							{t('homeScene.continueReading.emptyState.message')}
+							{translate('shared.homeSections.continueReading.emptyMessage')}
 						</Text>
 					</div>
 				</div>
@@ -153,7 +152,7 @@ function ContinueReading() {
 
 	return (
 		<HorizontalCardList
-			title={t('homeScene.continueReading.title')}
+			title={translate('shared.homeSections.continueReading.label')}
 			items={cards}
 			height={listHeight}
 			onFetchMore={handleFetchMore}

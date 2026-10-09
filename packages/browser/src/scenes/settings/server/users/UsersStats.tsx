@@ -1,7 +1,6 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { STAT_COLORS, StatCard, StatCardProps } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
@@ -32,7 +31,7 @@ export const prefetchUserStats = async (sdk: Api, client: QueryClient) =>
 	})
 
 export default function UsersStats() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { isDarkVariant } = useTheme()
 	const { data } = useSuspenseGraphQL(query, ['userStats'])
 
@@ -62,7 +61,7 @@ export default function UsersStats() {
 					{
 						label: t(getKey('topReader')),
 						value: powerReader.username,
-						suffix: t('common.xBooks', {
+						suffix: translate('shared.common.xBooks', {
 							count: powerReader.finishedReadingSessionsCount,
 						}),
 						colors: STAT_COLORS.system,

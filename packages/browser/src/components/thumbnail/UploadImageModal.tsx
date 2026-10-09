@@ -1,5 +1,4 @@
 import { Button, cx, Dialog, IconButton, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
@@ -17,7 +16,7 @@ type Props = {
 }
 
 export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [filePreview, setFilePreview] = useState<string | null>(null)
@@ -31,7 +30,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				toast.error(
 					isTooLarge
 						? t(withLocaleKey('fileTooLarge'))
-						: firstError?.message || t('common.unknownError'),
+						: firstError?.message || translate('shared.common.unknownError'),
 				)
 			} else if (acceptedFiles.length > 1 || !acceptedFiles.length) {
 				toast.error(
@@ -127,7 +126,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 				<Dialog.Footer>
 					<Button variant="outline" onClick={onClose}>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 					<Button onClick={handleConfirm} disabled={!selectedFile}>
 						{t('thumbnailSelector.actions.confirmSelection')}

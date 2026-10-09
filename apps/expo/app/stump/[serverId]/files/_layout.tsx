@@ -8,7 +8,7 @@ import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -23,7 +23,7 @@ export default function Screen() {
 					name="index"
 					options={{
 						headerShown: true,
-						headerTitle: t('stumpServer.browse.files'),
+						headerTitle: translate('shared.common.files'),
 						headerLeft:
 							Platform.OS === 'android'
 								? undefined

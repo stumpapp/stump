@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle, ConfirmationModal } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
@@ -32,7 +31,7 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 	const client = useQueryClient()
 	const { sdk } = useSDK()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { mutate, isPending: isDeleting } = useGraphQLMutation(mutation, {
 		mutationKey: [sdk.cacheKeys.smartListDelete, id],
 		onSettled: (_, error) => {
@@ -71,7 +70,7 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 			{errorMessage && (
 				<Alert variant="destructive">
 					<AlertCircle />
-					<AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
+					<AlertTitle>{translate('shared.common.somethingWentWrong')}</AlertTitle>
 					<AlertDescription>{errorMessage}</AlertDescription>
 				</Alert>
 			)}

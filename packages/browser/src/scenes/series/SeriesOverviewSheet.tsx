@@ -1,7 +1,7 @@
 import { formatBytesSeparate, parseGraphQLDateTime, useGraphQL } from '@stump/client'
 import { Badge, Link, NewCard, STAT_COLORS } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { BookCheck, BookOpen, Clock, ExternalLink, HardDrive } from 'lucide-react'
 
@@ -40,7 +40,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 	const {
 		series: { id, resolvedName, resolvedDescription, stats, tags, createdAt, updatedAt },
 	} = useSeriesContext()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const { data } = useGraphQL(query, ['seriesById', id, 'infoSheet'], {
 		id,
@@ -64,13 +64,13 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 	const resolvedStats = stats
 		? [
 				{
-					label: t('common.infoSheetStats.inProgress'),
+					label: translate('shared.common.infoSheetStats.inProgress'),
 					icon: BookOpen,
 					value: stats.inProgressBooks,
 					colors: STAT_COLORS.inProgress,
 				},
 				{
-					label: t('common.infoSheetStats.completedBooks'),
+					label: translate('shared.common.infoSheetStats.completedBooks'),
 					icon: BookCheck,
 					value: stats.completedBooks,
 					suffix: ` / ${stats.bookCount}`,
@@ -79,7 +79,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 				...(formattedTime
 					? [
 							{
-								label: t('common.infoSheetStats.readingTime'),
+								label: translate('shared.common.infoSheetStats.readingTime'),
 								icon: Clock,
 								value: formattedTime[0]?.value ?? '??',
 								suffix: formattedTime[0]?.unit ?? undefined,
@@ -90,7 +90,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 				...(formattedSize
 					? [
 							{
-								label: t('common.infoSheetStats.size'),
+								label: translate('shared.common.infoSheetStats.size'),
 								icon: HardDrive,
 								value: formattedSize.value,
 								suffix: formattedSize.unit,
@@ -114,7 +114,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 		>
 			{links.length > 0 && (
 				<div className="gap-1 flex flex-col">
-					<NewCard.ListLabel>{t('metadataEditor.labels.links')}</NewCard.ListLabel>
+					<NewCard.ListLabel>{translate('shared.bookMetadata.links')}</NewCard.ListLabel>
 					<BadgeList>
 						{links.map((link) => {
 							let label = link.replace(/^(https?:\/\/)?(www\.)?/, '')
@@ -141,12 +141,15 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 					<NewCard.StatGroup>
 						{!!metadata.publisher && (
 							<NewCard.Stat
-								label={t('metadataEditor.labels.publisher')}
+								label={translate('shared.bookMetadata.publisher')}
 								value={metadata.publisher}
 							/>
 						)}
 						{metadata.year != null && metadata.year > 0 && (
-							<NewCard.Stat label={t('metadataEditor.labels.year')} value={metadata.year} />
+							<NewCard.Stat
+								label={translate('shared.bookMetadata.year')}
+								value={metadata.year}
+							/>
 						)}
 					</NewCard.StatGroup>
 				</NewCard>
@@ -154,7 +157,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 
 			{!!upNext?.length && (
 				<MultiRowHorizontalCardList
-					title={t('common.upNext')}
+					title={translate('shared.common.upNext')}
 					items={upNext}
 					keyExtractor={(node) => node.id}
 					renderItem={(node) => <SimpleBookCard book={node} />}
@@ -163,12 +166,12 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 				/>
 			)}
 
-			<NewCard label={t('common.info')}>
+			<NewCard label={translate('shared.common.info')}>
 				<NewCard.Row
 					// TODO: create a new updated_at timestamp that is more user-friendly,
 					// this one is literally whether the entity was updated which does not
 					// account for e.g. books added "to the series"
-					label={t('common.lastUpdated')}
+					label={translate('shared.common.lastUpdated')}
 					value={
 						lastUpdatedAt
 							? intlFormat(lastUpdatedAt, {
@@ -176,15 +179,15 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 									day: 'numeric',
 									year: 'numeric',
 								})
-							: t('common.never')
+							: translate('shared.common.never')
 					}
 				/>
 				<NewCard.Row
-					label={t('common.created')}
+					label={translate('shared.common.created')}
 					value={
 						createdAtDate
 							? intlFormat(createdAtDate, { month: 'long', day: 'numeric', year: 'numeric' })
-							: t('common.unknown')
+							: translate('shared.common.unknown')
 					}
 				/>
 			</NewCard>

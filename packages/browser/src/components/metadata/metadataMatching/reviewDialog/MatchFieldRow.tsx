@@ -1,5 +1,4 @@
 import { CheckBox, cn, IconButton, Text, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -17,7 +16,7 @@ type Props = {
 }
 
 export function MatchFieldRow({ comparison }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		strategy,
 		excludedFields,
@@ -58,7 +57,7 @@ export function MatchFieldRow({ comparison }: Props) {
 		>
 			<div className="gap-1 flex items-center">
 				<Text size="sm" className="font-medium">
-					{t(`metadataEditor.labels.${binding}`)}
+					{translate(`shared.bookMetadata.${binding}`)}
 				</Text>
 			</div>
 

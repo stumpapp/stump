@@ -1,6 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 

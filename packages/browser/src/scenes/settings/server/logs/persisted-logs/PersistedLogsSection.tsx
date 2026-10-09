@@ -1,6 +1,7 @@
 import { Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteLogsConfirmationDialog from './DeleteLogsConfirmationDialog'
 import PersistedLogsTable from './PersistedLogsTable'

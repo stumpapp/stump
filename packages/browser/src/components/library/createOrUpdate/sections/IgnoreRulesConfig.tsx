@@ -9,7 +9,6 @@ import {
 	Text,
 	ToolTip,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
 import { Check, Edit, Lock, Slash, SquareAsterisk, Trash, Unlock, X } from 'lucide-react'
@@ -32,7 +31,7 @@ export default function IgnoreRulesConfig() {
 		append,
 		remove,
 	} = useFieldArray({ control: form.control, name: 'ignoreRules' })
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const isCreatingLibrary = !ctx?.library
 
@@ -115,7 +114,7 @@ export default function IgnoreRulesConfig() {
 		return (
 			<div>
 				<Button
-					title={hasChanges ? undefined : t('common.noChanges')}
+					title={hasChanges ? undefined : translate('shared.common.noChanges')}
 					type="submit"
 					disabled={!hasChanges}
 					className="mt-4"

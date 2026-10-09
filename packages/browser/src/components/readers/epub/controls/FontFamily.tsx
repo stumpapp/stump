@@ -1,5 +1,4 @@
 import { ComboBox, Label } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
@@ -10,7 +9,7 @@ import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSe
 import { useEpubReaderContext } from '../context'
 
 export default function FontFamily() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
@@ -33,7 +32,7 @@ export default function FontFamily() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="font-family">{t(getKey('fontFamily.label'))}</Label>
+			<Label htmlFor="font-family">{translate(getKey('label'))}</Label>
 			<ComboBox
 				size="full"
 				options={[{ value: '', label: 'Default', fontClassName: '' }].concat(
@@ -46,5 +45,5 @@ export default function FontFamily() {
 	)
 }
 
-const LOCAL_BASE = 'settingsScene.app/reader.sections.textBasedBooks.sections'
+const LOCAL_BASE = 'shared.epubSettings.typeface'
 const getKey = (key: string) => `${LOCAL_BASE}.${key}`

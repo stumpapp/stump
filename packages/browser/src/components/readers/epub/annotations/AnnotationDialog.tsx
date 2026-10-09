@@ -1,5 +1,4 @@
 import { Button, Dialog, Text, TextArea } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useState } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -29,7 +28,7 @@ export default function AnnotationDialog({
 	onSave,
 	onDelete,
 }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const [note, setNote] = useState(initialNote ?? '')
 
 	useEffect(() => {
@@ -55,8 +54,8 @@ export default function AnnotationDialog({
 				)}
 
 				<TextArea
-					label={t('epubReader.annotation.note')}
-					placeholder={t('epubReader.annotation.optionalNote')}
+					label={translate('shared.epubReader.annotation.note')}
+					placeholder={translate('shared.epubReader.annotation.optionalNote')}
 					value={note}
 					onChange={(event) => setNote(event.target.value)}
 					rows={4}
@@ -72,7 +71,7 @@ export default function AnnotationDialog({
 							onClick={onDelete}
 							className="sm:mr-auto"
 						>
-							{t('common.delete')}
+							{translate('shared.common.delete')}
 						</Button>
 					)}
 					<Button
@@ -81,10 +80,10 @@ export default function AnnotationDialog({
 						disabled={isPending}
 						onClick={() => onOpenChange(false)}
 					>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 					<Button size="sm" disabled={isPending} onClick={() => onSave(note.trim())}>
-						{t('common.save')}
+						{translate('shared.common.save')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

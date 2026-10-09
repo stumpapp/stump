@@ -26,7 +26,7 @@ export default function Screen() {
 		checkPermission,
 		activeServer: { id: serverId },
 	} = useStumpServer()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const items = [
 		{
@@ -43,14 +43,14 @@ export default function Screen() {
 		},
 		{
 			id: 'files',
-			title: t('stumpServer.browse.files'),
+			title: translate('shared.common.files'),
 			to: '/stump/[serverId]/files',
 			icon: FolderTree,
 			permission: UserPermission.FileExplorer,
 		},
 		{
 			id: 'libraries',
-			title: t('stumpServer.browse.libraries'),
+			title: translate('shared.common.libraries'),
 			to: '/stump/[serverId]/libraries',
 			icon: LibraryBig,
 		},
@@ -63,7 +63,7 @@ export default function Screen() {
 
 		{
 			id: 'smart-lists',
-			title: t('stumpServer.browse.smartLists'),
+			title: translate('shared.common.smartLists'),
 			icon: Rows3,
 			permission: UserPermission.AccessSmartList,
 			to: '/stump/[serverId]/smart-lists',
@@ -120,7 +120,7 @@ export default function Screen() {
 						</View>
 
 						<Heading size="xl" className="px-4">
-							{t('stumpServer.recentlyAddedSeries.label')}
+							{translate('shared.homeSections.recentlyAddedSeries.label')}
 						</Heading>
 					</View>
 				}

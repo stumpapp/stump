@@ -29,7 +29,7 @@ export function KeyboardDraftNumberToolbar({
 	messages,
 }: KeyboardDraftNumberToolbarProps) {
 	const colors = useColors()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { progress, height } = useReanimatedKeyboardAnimation()
 
 	const animatedStyle = useAnimatedStyle(() => {
@@ -68,7 +68,9 @@ export function KeyboardDraftNumberToolbar({
 
 						<Pressable onPress={onPress} hitSlop={10}>
 							<Text className="font-medium" style={{ fontSize: 16 }}>
-								{draft.isValid && !draft.isInitial ? messages.button : t('common.dismiss')}
+								{draft.isValid && !draft.isInitial
+									? messages.button
+									: translate('shared.common.dismiss')}
 							</Text>
 						</Pressable>
 					</View>

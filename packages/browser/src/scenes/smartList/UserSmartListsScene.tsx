@@ -9,7 +9,6 @@ import {
 	usePreviousIsDifferent,
 } from '@stump/components'
 import { graphql, SmartListsInput } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useEffect, useState } from 'react'

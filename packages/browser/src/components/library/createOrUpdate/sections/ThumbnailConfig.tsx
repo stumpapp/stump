@@ -10,7 +10,6 @@ import {
 	WideSwitch,
 } from '@stump/components'
 import { SupportedImageFormat } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
@@ -36,7 +35,7 @@ export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryManagementSafe()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const [resizeMethod, enabled] = useWatch({
 		control: form.control,
@@ -301,7 +300,7 @@ export default function ThumbnailConfigForm() {
 							type="submit"
 							// disabled={!isDifferent}
 						>
-							{t('common.saveChanges')}
+							{translate('shared.common.saveChanges')}
 						</Button>
 					</div>
 				)}

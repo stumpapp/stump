@@ -6,7 +6,6 @@ import {
 	useFragment,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'

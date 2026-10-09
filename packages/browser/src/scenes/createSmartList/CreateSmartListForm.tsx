@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 

@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { Suspense } from 'react'
 

@@ -1,7 +1,6 @@
 import { useGraphQL } from '@stump/client'
 import { Card, Preformatted, Sheet, Text, usePrevious } from '@stump/components'
 import { FragmentType, graphql, JobTableQuery, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 

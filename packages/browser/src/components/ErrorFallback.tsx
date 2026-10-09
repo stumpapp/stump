@@ -1,5 +1,4 @@
 import { Button, ButtonOrLink, useBodyLock } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 import { FallbackProps } from 'react-error-boundary'
 import { toast } from 'sonner'

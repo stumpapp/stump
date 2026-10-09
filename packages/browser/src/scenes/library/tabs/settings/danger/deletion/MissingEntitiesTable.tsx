@@ -1,7 +1,6 @@
 import { useGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Link, Text } from '@stump/components'
 import { graphql, LogModelOrdering, MissingEntity, MissingEntityType } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { keepPreviousData } from '@tanstack/react-query'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'

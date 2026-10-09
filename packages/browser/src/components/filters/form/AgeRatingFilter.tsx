@@ -1,5 +1,4 @@
 import { Input, Label, RadioGroup } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -15,7 +14,7 @@ type Props = {
  * 2. X and up (where X is a number from 0 to 18)
  */
 export default function AgeRatingFilter({ variant = 'media' }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const form = useFormContext<{
 		metadata: {
 			ageRating: number | null
@@ -48,7 +47,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 
 	return (
 		<div>
-			<Label>{t('mediaFilterForm.ageRatingFilter.label')}</Label>
+			<Label>{translate('shared.bookMetadata.ageRating')}</Label>
 			<RadioGroup
 				value={selection !== null ? 'custom' : 'any-age'}
 				onValueChange={handleSelection}

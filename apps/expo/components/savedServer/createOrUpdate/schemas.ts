@@ -8,17 +8,19 @@ import {
 	ServerConfig,
 } from '~/stores/savedServer'
 
-const LOCALE_BASE = 'addOrEditServer'
+const LOCALE_BASE = 'shared.addOrEditServer'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 
-export const createHeaderSchema = (t: (key: string) => string) =>
+export const createHeaderSchema = (
+	translate: (fullKey: string, options?: Record<string, unknown>) => string,
+) =>
 	z
 		.object({
 			key: z.string().nonempty(),
 			value: z.string().nonempty(),
 		})
 		.refine((value) => value.key.toLowerCase() !== 'authorization', {
-			message: t(getKey('validations.cannotSetAuthorizationHeader')),
+			message: translate(getKey(`validation.cannotSetAuthorizationHeader`)),
 		})
 
 export const authMode = z.union([
@@ -33,14 +35,17 @@ export const authMode = z.union([
 	z.literal('login'),
 ])
 
-export const createSchema = (names: string[], t: (key: string) => string) =>
+export const createSchema = (
+	names: string[],
+	translate: (fullKey: string, options?: Record<string, unknown>) => string,
+) =>
 	z.object({
 		name: z
 			.string()
 			.nonempty()
 			.min(1)
 			.refine((value) => !names.includes(value), {
-				message: t(getKey('validations.nameAlreadyExists')),
+				message: translate(getKey(`validation.nameAlreadyExists`)),
 			}),
 		url: z.string().url(),
 		enableLocalProfile: z.boolean().default(false),
@@ -54,7 +59,7 @@ export const createSchema = (names: string[], t: (key: string) => string) =>
 		token: z.string().optional(),
 		basicUser: z.string().optional(),
 		basicPassword: z.string().optional(),
-		customHeaders: z.array(createHeaderSchema(t)).optional(),
+		customHeaders: z.array(createHeaderSchema(translate)).optional(),
 	})
 export type CreateOrUpdateServerData = z.infer<ReturnType<typeof createSchema>>
 

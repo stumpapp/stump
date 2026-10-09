@@ -1,5 +1,4 @@
 import { NewCard, RawSwitch } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTranslate } from '@/hooks/useTranslate'

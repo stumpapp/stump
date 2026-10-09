@@ -32,7 +32,7 @@ const NEW_THEME_DEFAULTS: StoredConfig = {
 }
 
 export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTheme }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
 
@@ -177,31 +177,31 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 				<Input
 					value={name}
 					onChangeText={setName}
-					placeholder={t(getKey('placeholder'))}
+					placeholder={translate(getKey('placeholder'))}
 					editable={isCreateMode || !isDefaultTheme}
 				/>
 
 				<ColorPickerRow
-					label={t(getKey('background'))}
+					label={translate(getKey('background'))}
 					value={customTheme.colors?.background ?? '#FFFFFF'}
 					onChange={onChangeBackground}
 				/>
 
 				<ColorPickerRow
-					label={t(getKey('text'))}
+					label={translate(getKey('text'))}
 					value={customTheme.colors?.foreground ?? '#000000'}
 					onChange={onChangeForeground}
 				/>
 
 				<ColorPickerRow
-					label={t(getKey('highlight'))}
+					label={translate(getKey('highlight'))}
 					value={customTheme.colors?.highlight ?? '#FFEB3B'}
 					onChange={onChangeHighlight}
 				/>
 
 				<View className="bg-black/10 dark:bg-white/10 h-px" />
 
-				<Text className="text-xl">{t(getKey('premadeThemes'))}</Text>
+				<Text className="text-xl">{translate(getKey('premadeThemes'))}</Text>
 				<View className="gap-y-2 flex-row flex-wrap">
 					{PREMADE_THEMES.map((theme) => (
 						<View className="px-1 w-1/4" key={theme.name}>
@@ -295,5 +295,5 @@ const PREMADE_THEMES: PremadeTheme[] = [
 	},
 ]
 
-const LOCALE_BASE = 'epubSettings.customizeTheme'
+const LOCALE_BASE = 'shared.epubSettings.customizeTheme'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

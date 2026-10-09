@@ -5,7 +5,6 @@ import {
 	ReadiumLocatorInput,
 	type ReadiumWebReaderQuery,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
@@ -81,7 +80,7 @@ export function useEpubAnnotations({
 	isIncognito,
 	initialAnnotations,
 }: UseEpubAnnotationsArgs) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const queryClient = useQueryClient()
 	const queryKey = useMemo(() => ['readiumWebReader', mediaId] as const, [mediaId])
 	const cachedAnnotations = useSyncExternalStore(
@@ -144,7 +143,7 @@ export function useEpubAnnotations({
 		onError: (error, _variables, context) => {
 			queryClient.setQueryData(queryKey, context?.previous)
 			console.error('[useEpubAnnotations] createAnnotation failed', error)
-			toast.error(t('epubReader.annotation.saveFailed'))
+			toast.error(translate('shared.epubReader.annotation.saveFailed'))
 		},
 		onSettled: () => queryClient.invalidateQueries({ queryKey }),
 	})
@@ -171,7 +170,7 @@ export function useEpubAnnotations({
 		onError: (error, _variables, context) => {
 			queryClient.setQueryData(queryKey, context?.previous)
 			console.error('[useEpubAnnotations] updateAnnotation failed', error)
-			toast.error(t('epubReader.annotation.updateFailed'))
+			toast.error(translate('shared.epubReader.annotation.updateFailed'))
 		},
 		onSettled: () => queryClient.invalidateQueries({ queryKey }),
 	})
@@ -189,7 +188,7 @@ export function useEpubAnnotations({
 		onError: (error, _variables, context) => {
 			queryClient.setQueryData(queryKey, context?.previous)
 			console.error('[useEpubAnnotations] deleteAnnotation failed', error)
-			toast.error(t('epubReader.annotation.deleteFailed'))
+			toast.error(translate('shared.epubReader.annotation.deleteFailed'))
 		},
 		onSettled: () => queryClient.invalidateQueries({ queryKey }),
 	})
@@ -197,7 +196,7 @@ export function useEpubAnnotations({
 	const createAnnotation = useCallback(
 		(locator: ReaderLocator, annotationText?: string) => {
 			if (isIncognito) {
-				toast.info(t('epubReader.annotation.disabledInIncognito'))
+				toast.info(translate('shared.epubReader.annotation.disabledInIncognito'))
 				return undefined
 			}
 

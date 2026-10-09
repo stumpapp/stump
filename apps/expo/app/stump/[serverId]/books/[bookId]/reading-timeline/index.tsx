@@ -18,14 +18,14 @@ const query = graphql(`
 // - order asc/desc
 // - group by day/month
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()
 	const {
 		data: { mediaById },
 		refetch,
 	} = useSuspenseGraphQL(query, ['mediaById', bookId, 'readingTimeline'], { bookId })
 	// TODO(errors): some custom error that allows me to throw with custom title/message
-	if (!mediaById) throw new Error(t('errors.bookNotFound.label'))
+	if (!mediaById) throw new Error(translate('shared.errors.bookNotFound.title'))
 
 	return <BookReadingTimeline fragmentRef={mediaById} refetch={refetch} />
 }

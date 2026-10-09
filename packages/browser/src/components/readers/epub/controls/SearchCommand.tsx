@@ -1,5 +1,4 @@
 import { cn, Command } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import type { EpubSearchResult } from '@stump/sdk'
 import { Loader2, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -46,7 +45,7 @@ export function groupByChapter(
 }
 
 export default function SearchCommand() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		controls: { searchBook, onGoToLocator },
 	} = useEpubReaderContext()
@@ -109,7 +108,7 @@ export default function SearchCommand() {
 			} catch (err) {
 				if (controller.signal.aborted || requestId !== requestIdRef.current) return
 				console.error('[SearchCommand] search failed', err)
-				setError(t('epubReader.search.failed'))
+				setError(translate('shared.epubReader.search.failed'))
 			} finally {
 				if (requestId === requestIdRef.current) {
 					setIsSearching(false)
@@ -187,8 +186,11 @@ export default function SearchCommand() {
 	}, [open, doSearch])
 
 	const serverGroups = useMemo(
-		() => groupByChapter(serverResults, (position) => t('epubReader.search.section', { position })),
-		[serverResults, t],
+		() =>
+			groupByChapter(serverResults, (position) =>
+				translate('shared.epubReader.search.section', { position }),
+			),
+		[serverResults, translate],
 	)
 
 	const renderContent = () => {
@@ -202,7 +204,7 @@ export default function SearchCommand() {
 		if (!hasSearched) return null
 		if (error) return <Command.Empty>{error}</Command.Empty>
 		if (!serverResults.length)
-			return <Command.Empty>{t('epubReader.search.noResults')}</Command.Empty>
+			return <Command.Empty>{translate('shared.epubReader.search.noResults')}</Command.Empty>
 
 		return (
 			<>
@@ -236,10 +238,10 @@ export default function SearchCommand() {
 						{isLoadingMore ? (
 							<span className="gap-x-2 flex items-center">
 								<Loader2 className="h-3 w-3 animate-spin" />
-								{t('epubReader.search.loadingMore')}
+								{translate('shared.epubReader.search.loadingMore')}
 							</span>
 						) : (
-							t('epubReader.search.loadMore')
+							translate('shared.epubReader.search.loadMore')
 						)}
 					</Command.Item>
 				)}
@@ -260,7 +262,7 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder={t('epubReader.search.placeholder')}
+						placeholder={translate('shared.epubReader.search.placeholder')}
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}

@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Heading, Text } from '@stump/components'
 import { graphql, LibraryScanRecord } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useState } from 'react'
 

@@ -11,7 +11,6 @@ import {
 	Text,
 } from '@stump/components'
 import { EmailerListItemFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 

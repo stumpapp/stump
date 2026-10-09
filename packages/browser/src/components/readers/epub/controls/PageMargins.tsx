@@ -1,5 +1,4 @@
 import { Label, NativeSelect } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -9,7 +8,7 @@ import { useEpubReaderContext } from '../context'
 const OPTIONS = [0.5, 1, 1.5, 2]
 
 export default function PageMargins() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()
@@ -29,7 +28,7 @@ export default function PageMargins() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="page-margins">{t('epubReader.controls.pageMargins')}</Label>
+			<Label htmlFor="page-margins">{translate('shared.epubSettings.pageMargins')}</Label>
 			<NativeSelect
 				id="page-margins"
 				size="sm"

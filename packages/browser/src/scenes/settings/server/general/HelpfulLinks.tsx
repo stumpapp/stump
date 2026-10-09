@@ -1,5 +1,4 @@
 import { ButtonOrLink, NewCard } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -7,7 +6,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { ChangelogDialog } from './ChangelogDialog'
 
 export default function HelpfulLinks() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	return (
 		<NewCard label={t('settingsScene.server/general.sections.helpfulLinks.title')}>
@@ -23,7 +22,7 @@ export default function HelpfulLinks() {
 					size="sm"
 					variant="outline"
 				>
-					{t('common.open')}
+					{translate('shared.common.open')}
 					<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
 				</ButtonOrLink>
 			</NewCard.Row>
@@ -36,7 +35,7 @@ export default function HelpfulLinks() {
 					size="sm"
 					variant="outline"
 				>
-					{t('common.open')}
+					{translate('shared.common.open')}
 					<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
 				</ButtonOrLink>
 			</NewCard.Row>

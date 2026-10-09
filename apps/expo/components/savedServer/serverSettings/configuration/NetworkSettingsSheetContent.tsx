@@ -16,7 +16,7 @@ import { useWifiSsid } from '~/providers/WifiSsidProvider'
 import { usePreferencesStore } from '~/stores'
 
 export function NetworkSettingsSheetContent() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { activeServer, patchServer } = useServerSettingsContext()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
 
@@ -43,7 +43,7 @@ export function NetworkSettingsSheetContent() {
 
 	const onSaveChangedUrl = () => {
 		const trimmedUrl = localUrl.trim()
-		const urlSchema = z.string().url({ message: t('common.invalidUrl') })
+		const urlSchema = z.string().url({ message: translate('shared.common.invalidUrl') })
 		const result = urlSchema.safeParse(trimmedUrl)
 		if (!result.success) {
 			setLocalUrlError(result.error.message)
@@ -63,8 +63,8 @@ export function NetworkSettingsSheetContent() {
 	const onSwapUrls = () => {
 		const currentLocalUrl = activeServer.localProfile?.url
 		if (!currentLocalUrl) {
-			toast.error(t('swapUrls.noLocalUrlSet.title'), {
-				description: t('swapUrls.noLocalUrlSet.description'),
+			toast.error(t('serverNetworkSettings.swapUrls.noLocalUrlSet.title'), {
+				description: t('serverNetworkSettings.swapUrls.noLocalUrlSet.description'),
 			})
 			return
 		}
@@ -129,7 +129,7 @@ export function NetworkSettingsSheetContent() {
 					<Text className="text-foreground-muted">
 						{activeServer.localProfile?.url
 							? formatServerUrl(activeServer.localProfile.url, shouldMaskUrls)
-							: t('common.notConfigured')}
+							: translate('shared.common.notConfigured')}
 					</Text>
 				</AppSettingsRow>
 
@@ -148,7 +148,7 @@ export function NetworkSettingsSheetContent() {
 								t(getKey('swapUrls.confirmationText')),
 								[
 									{
-										text: t('common.cancel'),
+										text: translate('shared.common.cancel'),
 										style: 'cancel',
 									},
 									{
@@ -241,7 +241,7 @@ export function NetworkSettingsSheetContent() {
 											}),
 											[
 												{
-													text: t('common.cancel'),
+													text: translate('shared.common.cancel'),
 													style: 'cancel',
 												},
 												{

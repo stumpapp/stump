@@ -1,6 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
 import { ReadingMode as ReadingModeType } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 
 import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -8,7 +7,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useEpubReaderContext } from '../context'
 
 export default function ReadingMode() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()
@@ -23,13 +22,13 @@ export default function ReadingMode() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-mode">{t('epubReader.controls.readingMode')}</Label>
+			<Label htmlFor="reading-mode">{translate('shared.readerSettings.readingMode.label')}</Label>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: t('epubReader.controls.paged'), value: ReadingModeType.Paged },
-					{ label: t('epubReader.controls.continuous'), value: ReadingModeType.ContinuousVertical },
+					{ label: translate('shared.readerSettings.readingMode.options.PAGED'), value: ReadingModeType.Paged },
+					{ label: translate('shared.epubReader.controls.continuous'), value: ReadingModeType.ContinuousVertical },
 				]}
 				value={readingMode}
 				onChange={handleChange}

@@ -1,6 +1,6 @@
 import { formatBytesSeparate, usePrefetchFiles } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
-import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation } from 'react-router'
@@ -18,7 +18,7 @@ import { usePrefetchLibrarySeries } from './tabs/series/queries'
 
 export default function LibraryHeader() {
 	const location = useLocation()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		library: { id, name, path, stats, config },
 	} = useLibraryContext()
@@ -80,7 +80,7 @@ export default function LibraryHeader() {
 			? [
 					{
 						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/files(\/.*)?$/),
-						label: t('libraryHeader.tabs.files'),
+						label: translate('shared.common.files'),
 						onHover: () => handlePrefetchFiles(),
 						to: paths.libraryFileExplorer(id),
 					},

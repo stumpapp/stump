@@ -25,7 +25,7 @@ type Props = {
 }
 
 export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onSaved }: Props) => {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore(
 		useShallow((store) => ({
@@ -94,7 +94,7 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 								className="text-lg"
 								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
-								{t('common.cancel')}
+								{translate('shared.common.cancel')}
 							</Text>
 						)}
 					</Pressable>
@@ -105,7 +105,7 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 								className="text-lg font-medium"
 								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
-								{t('common.done')}
+								{translate('shared.common.done')}
 							</Text>
 						)}
 					</Pressable>

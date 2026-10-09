@@ -33,7 +33,7 @@ export function PagedActionMenu({
 	onResetTimer,
 	onShowSettings,
 }: PagedActionMenuProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const {
@@ -105,7 +105,9 @@ export function PagedActionMenu({
 				<DropdownMenuGroup>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger className="text-foreground">
-							<Text className="text-lg">{t('readerSettings.readingMode.label')}</Text>
+							<Text className="text-lg">
+								{translate('shared.readerSettings.readingMode.label')}
+							</Text>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent className="mt-1">
 							<DropdownMenuRadioGroup
@@ -115,14 +117,17 @@ export function PagedActionMenu({
 								}}
 							>
 								<DropdownMenuRadioItem value={ReadingMode.Paged} className="text-foreground">
-									<Text className="text-lg">{t('readerSettings.readingMode.options.PAGED')}</Text>
+									<Text className="text-lg">
+										{translate('shared.readerSettings.readingMode.options.PAGED')}
+									</Text>
 								</DropdownMenuRadioItem>
 								<DropdownMenuRadioItem
 									value={ReadingMode.ContinuousHorizontal}
 									className="text-foreground"
 								>
 									<Text className="text-lg">
-										{t('readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
+										{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL',
+										)}
 									</Text>
 								</DropdownMenuRadioItem>
 								<DropdownMenuRadioItem
@@ -130,7 +135,7 @@ export function PagedActionMenu({
 									className="text-foreground"
 								>
 									<Text className="text-lg">
-										{t('readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
+										{translate('shared.readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
 									</Text>
 								</DropdownMenuRadioItem>
 							</DropdownMenuRadioGroup>
@@ -149,7 +154,9 @@ export function PagedActionMenu({
 						})
 					}
 				>
-					<Text className="text-lg">{t('readerSettings.readingDirection.label')}</Text>
+					<Text className="text-lg">
+						{translate('shared.readerSettings.readingDirection.label')}
+					</Text>
 					<Icon
 						as={readingDirection === ReadingDirection.Ltr ? SquareArrowRight : SquareArrowLeft}
 						size={20}
@@ -160,7 +167,9 @@ export function PagedActionMenu({
 
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger className="text-foreground">
-						<Text className="text-lg">{t('readerSettings.readingTimer.label')}</Text>
+						<Text className="text-lg">
+							{translate('shared.readerSettings.readingTimer.label')}
+						</Text>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="mt-1">
 						<DropdownMenuItem
@@ -168,7 +177,7 @@ export function PagedActionMenu({
 							onPress={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
 							closeOnPress={false}
 						>
-							<Text className="text-lg">{t('common.enabled')}</Text>
+							<Text className="text-lg">{translate('shared.common.enabled')}</Text>
 							<View className="ml-auto">
 								<Switch
 									size="tiny"
@@ -187,7 +196,9 @@ export function PagedActionMenu({
 								onPress={onResetTimer}
 								variant="destructive"
 							>
-								<Text className="text-lg">{t('readerSettings.readingTimer.resetTimer')}</Text>
+								<Text className="text-lg">
+									{translate('shared.readerSettings.readingTimer.resetTimer')}
+								</Text>
 							</DropdownMenuItem>
 						)}
 					</DropdownMenuSubContent>
@@ -198,7 +209,7 @@ export function PagedActionMenu({
 						<DropdownMenuSeparator variant="group" />
 
 						<DropdownMenuItem className="text-foreground" onPress={onShowSettings}>
-							<Text className="text-lg">{t('readerSettings.allSettings')}</Text>
+							<Text className="text-lg">{translate('shared.readerSettings.allSettings')}</Text>
 							<Icon as={Settings2} size={20} className="text-foreground-muted ml-auto" />
 						</DropdownMenuItem>
 					</>

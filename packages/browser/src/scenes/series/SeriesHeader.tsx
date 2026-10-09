@@ -2,7 +2,7 @@ import { useGraphQLMutation, usePrefetchFiles } from '@stump/client'
 import { formatBytesSeparate } from '@stump/client'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
-import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowUpRight, BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
 import { useState } from 'react'
@@ -36,7 +36,7 @@ export default function SeriesHeader() {
 			library: { id: libraryId },
 		},
 	} = useSeriesContext()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const location = useLocation()
 	const navigate = useNavigate()
@@ -80,7 +80,7 @@ export default function SeriesHeader() {
 		{
 			items: [
 				{
-					label: t('seriesHeader.actions.goToLibrary'),
+					label: translate('shared.bookActions.goToLibrary'),
 					leftIcon: <ArrowUpRight className="mr-2 h-4 w-4" />,
 					onClick: () => {
 						navigate(paths.librarySeries(libraryId))
@@ -106,7 +106,7 @@ export default function SeriesHeader() {
 			? [
 					{
 						isActive: !!location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),
-						label: t('seriesHeader.tabs.files'),
+						label: translate('shared.common.files'),
 						onHover: () =>
 							prefetchFiles({
 								path,

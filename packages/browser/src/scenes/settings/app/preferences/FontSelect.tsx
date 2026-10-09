@@ -1,6 +1,5 @@
 import { ComboBox, NewCard } from '@stump/components'
 import { SupportedFont } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 

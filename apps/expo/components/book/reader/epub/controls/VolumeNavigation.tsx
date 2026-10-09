@@ -5,7 +5,7 @@ import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function VolumeNavigation() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { volumeButtonsNavigate, setGlobalSettings } = useReaderStore(
 		useShallow((state) => ({
 			volumeButtonsNavigate: state.globalSettings.volumeButtonsNavigate,
@@ -14,7 +14,7 @@ export default function VolumeNavigation() {
 	)
 
 	return (
-		<Card.Row label={t('epubSettings.volumeButtonsNavigate')}>
+		<Card.Row label={translate('shared.epubSettings.volumeButtonsNavigate')}>
 			<Switch
 				variant="brand"
 				checked={volumeButtonsNavigate ?? false}

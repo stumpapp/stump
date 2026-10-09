@@ -12,7 +12,7 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function MaxPageViewingSeconds() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const colors = useColors()
 
 	const patch = usePreferencesStore((state) => state.patch)
@@ -89,7 +89,7 @@ export default function MaxPageViewingSeconds() {
 					draft={draft}
 					onPress={handlePress}
 					messages={{
-						button: t('common.save'),
+						button: translate('shared.common.save'),
 						invalidDefined: t(getKey('errors.minimumValue')),
 						undefined: t(getKey('errors.integer')),
 					}}

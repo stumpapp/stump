@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 

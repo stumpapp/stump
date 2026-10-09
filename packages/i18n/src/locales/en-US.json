@@ -51,11 +51,6 @@
         }
       }
     },
-    "epubMenu": {
-      "tableOfContents": "Table of Contents",
-      "bookmarksAndAnnotations": "Bookmarks & Annotations",
-      "appearance": "Appearance"
-    },
     "tabs": {
       "servers": "Servers",
       "localLibrary": "Library",
@@ -341,14 +336,6 @@
       "openedBookSentence": "Opened book at {{pageFragment}}",
       "closedBookSentence": "Closed book at {{pageFragment}}"
     },
-    "annotationsSheet": {
-      "tabs": {
-        "all": "All",
-        "bookmarks": "Bookmarks",
-        "highlights": "Highlights",
-        "notes": "Notes"
-      }
-    },
     "widgets": {
       "readingNow": {
         "nothingInProgress": "Nothing in Progress"
@@ -409,17 +396,8 @@
         "partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
         "searchFailed": "Failed to search metadata providers",
         "form": {
-          "title": {
-            "label": "Title"
-          },
           "author": {
             "label": "Author"
-          },
-          "isbn": {
-            "label": "ISBN"
-          },
-          "year": {
-            "label": "Year"
           },
           "number": {
             "label": "Issue Number"
@@ -1174,7 +1152,6 @@
     },
     "mediaFilterForm": {
       "ageRatingFilter": {
-        "label": "Age Rating",
         "anyAge": {
           "label": "Any Age",
           "description": "No age rating filter will be applied"
@@ -1280,7 +1257,6 @@
     },
     "seriesOverviewScene": {
       "buttons": {
-        "continueReading": "Continue Reading",
         "downloadSeries": "Download Series"
       }
     },
@@ -1444,8 +1420,8 @@
             },
             "enumValue": {
               "selectPlaceholder": "Select value",
-              "READING": "Reading",
-              "ABANDONED": "Abandoned"
+              "selectMultiplePlaceholder": "Select values",
+              "emptyState": "No Values to Display"
             }
           }
         }
@@ -2032,17 +2008,11 @@
       "app/reader": {
         "helmet": "Reader Settings",
         "title": "Reader Settings",
-        "description": "Default preferences for reading. Some of these are local-only to your current device",
+        "description": "Default preferences for reading",
         "sections": {
           "universal": {
             "label": "Universal",
-            "description": "Settings which apply to all types of books",
-            "sections": {
-              "readingDirection": {
-                "label": "Reading Direction",
-                "description": "The direction in which the reader will progress through pages"
-              }
-            }
+            "description": "Settings which apply to all types of books"
           },
           "formats": {
             "label": "Formats",
@@ -2064,21 +2034,7 @@
           },
           "textBasedBooks": {
             "label": "Ebook Reader",
-            "description": "Default settings for text-based books",
-            "sections": {
-              "fontSize": {
-                "label": "Font Size",
-                "description": "The size of the font used in the reader"
-              },
-              "fontFamily": {
-                "label": "Font Family",
-                "description": "The font used in the reader"
-              },
-              "lineHeight": {
-                "label": "Line Height",
-                "description": "The height of the lines in the reader"
-              }
-            }
+            "description": "Default settings for text-based books"
           },
           "data": {
             "sections": {
@@ -3143,105 +3099,6 @@
         "label": "Manage Metadata Matches",
         "description": "Allows the user to search external providers for a book and accept or reject candidate matches"
       }
-    },
-    "epubReader": {
-      "reading": "Reading",
-      "appearance": "Appearance",
-      "themeAndOptions": "Theme and Options",
-      "locationManager": "Location Manager",
-      "contents": "Contents",
-      "bookmarks": "Bookmarks",
-      "annotations": "Annotations",
-      "noBookmarks": "No Bookmarks",
-      "bookmark": "Bookmark",
-      "noAnnotations": "No Annotations",
-      "annotation": {
-        "addNote": "Add Note",
-        "edit": "Edit Annotation",
-        "note": "Note",
-        "optionalNote": "Add an Optional Note…",
-        "selectionActions": "Selection Actions",
-        "disabledInIncognito": "Annotations are disabled in incognito mode",
-        "saveFailed": "Failed to save annotation",
-        "updateFailed": "Failed to update annotation",
-        "deleteFailed": "Failed to delete annotation"
-      },
-      "search": {
-        "placeholder": "Enter a query and press enter to search",
-        "failed": "Search failed. Please try again.",
-        "noResults": "No results found.",
-        "section": "Section {{position}}",
-        "loadingMore": "Loading More…",
-        "loadMore": "Load More Results"
-      },
-      "controls": {
-        "columnCount_one": "{{count}} column",
-        "columnCount_other": "{{count}} columns",
-        "readingMode": "Reading Mode",
-        "paged": "Paged",
-        "continuous": "Continuous",
-        "previousPage": "Previous Page",
-        "nextPage": "Next Page",
-        "toggleControls": "Toggle Reader Controls"
-      },
-      "errors": {
-        "openFailed": "Failed to open EPUB with Readium.",
-        "navigateFailed": "Failed to navigate to location"
-      }
-    },
-    "imageReader": {
-      "header": {
-        "goToMediaOverview": "Go to Media Overview"
-      },
-      "settingsDialog": {
-        "scopes": {
-          "book": "Book",
-          "global": "Global"
-        }
-      },
-      "timerMenu": {
-        "start": "Start Timer",
-        "stop": "Stop Timer"
-      },
-      "footer": {
-        "readingTime": "Reading Time: {{time}}",
-        "pageOf": "{{current}} of {{total}}"
-      },
-      "goToPage": {
-        "label": "Go to Page",
-        "submit": "Go"
-      },
-      "nextInSeries": {
-        "title": "Next Up:",
-        "read": "Read"
-      },
-      "settings": {
-        "readerSettings": {
-          "sections": {
-            "preferences": "Preferences"
-          },
-          "preferences": {
-            "panZoomWithoutCtrl": "Pan and zoom without Ctrl / Cmd"
-          }
-        },
-        "imageScaling": {
-          "label": "Image Scaling",
-          "options": {
-            "height": "Height",
-            "width": "Width",
-            "original": "Original"
-          }
-        },
-        "readingDirection": {
-          "label": "Reading Direction"
-        },
-        "readingMode": {
-          "options": {
-            "verticalScroll": "Vertical Scroll",
-            "horizontalScroll": "Horizontal Scroll"
-          }
-        }
-      }
     }
   },
   "shared": {
@@ -3373,7 +3230,9 @@
       "smartLists": "Smart Lists",
       "files": "Files",
       "search": "Search",
-      "invalidUrl": "Please enter a valid URL"
+      "invalidUrl": "Please enter a valid URL",
+      "global": "Global",
+      "preferences": "Preferences"
     },
     "libraryType": {
       "BOOK": "Books",
@@ -3456,6 +3315,7 @@
       },
       "readingDirection": {
         "label": "Reading Direction",
+        "description": "The direction in which the reader will progress through pages",
         "options": {
           "LTR": "Left to Right",
           "RTL": "Right to Left"
@@ -3500,7 +3360,8 @@
       },
       "allSettings": "All Settings",
       "separateSecondPage": "Separate Second Page",
-      "tapSidesToNavigate": "Tap Sides to Navigate"
+      "tapSidesToNavigate": "Tap Sides to Navigate",
+      "panZoomWithoutCtrl": "Pan and zoom without Ctrl / Cmd"
     },
     "homeSections": {
       "onDeck": {
@@ -3529,10 +3390,11 @@
         "customizeHome": "Customize Your Home Page"
       }
     },
-    "filtering": {
-      "currentlyReading": "Currently Reading",
-      "notStarted": "Not Started",
-      "finished": "Finished"
+    "readingStatus": {
+      "READING": "Currently Reading",
+      "FINISHED": "Finished",
+      "NOT_STARTED": "Not Started",
+      "ABANDONED": "Abandoned"
     },
     "bookActions": {
       "markAsRead": {
@@ -3593,6 +3455,7 @@
       "title": "Epub Reader Settings",
       "typeface": {
         "label": "Typeface",
+        "description": "The font used in the reader",
         "options": {
           "system": "System",
           "opendyslexic": "OpenDyslexic",
@@ -3602,7 +3465,10 @@
           "bitter": "Bitter"
         }
       },
-      "fontSize": "Font Size",
+      "fontSize": {
+        "label": "Font Size",
+        "description": "The size of the font used in the reader"
+      },
       "fontWeight": {
         "label": "Font Weight",
         "options": {
@@ -3643,7 +3509,10 @@
         }
       },
       "typeScale": "Type Scale",
-      "lineHeight": "Line Height",
+      "lineHeight": {
+        "label": "Line Height",
+        "description": "The height of the lines in the reader"
+      },
       "paragraphIndent": "Paragraph Indent",
       "paragraphSpacing": "Paragraph Spacing",
       "wordSpacing": "Word Spacing",
@@ -3758,6 +3627,77 @@
       },
       "networking": "Networking",
       "advancedOptions": "Advanced Options"
+    },
+    "imageReader": {
+      "header": {
+        "goToMediaOverview": "Go to Media Overview"
+      },
+      "timerMenu": {
+        "start": "Start Timer",
+        "stop": "Stop Timer"
+      },
+      "footer": {
+        "readingTime": "Reading Time: {{time}}"
+      },
+      "goToPage": {
+        "label": "Go to Page",
+        "submit": "Go"
+      },
+      "nextInSeries": {
+        "title": "Next Up:"
+      }
+    },
+    "epubReader": {
+      "reading": "Reading",
+      "appearance": "Appearance",
+      "themeAndOptions": "Theme and Options",
+      "locationManager": "Location Manager",
+      "bookmarks": "Bookmarks",
+      "annotations": "Annotations",
+      "noBookmarks": "No Bookmarks",
+      "bookmark": "Bookmark",
+      "noAnnotations": "No Annotations",
+      "annotation": {
+        "addNote": "Add Note",
+        "edit": "Edit Annotation",
+        "note": "Note",
+        "optionalNote": "Add an Optional Note…",
+        "selectionActions": "Selection Actions",
+        "disabledInIncognito": "Annotations are disabled in incognito mode",
+        "saveFailed": "Failed to save annotation",
+        "updateFailed": "Failed to update annotation",
+        "deleteFailed": "Failed to delete annotation"
+      },
+      "search": {
+        "placeholder": "Enter a query and press enter to search",
+        "failed": "Search failed. Please try again.",
+        "noResults": "No results found.",
+        "section": "Section {{position}}",
+        "loadingMore": "Loading More…",
+        "loadMore": "Load More Results"
+      },
+      "controls": {
+        "columnCount_one": "{{count}} column",
+        "columnCount_other": "{{count}} columns",
+        "continuous": "Continuous",
+        "previousPage": "Previous Page",
+        "nextPage": "Next Page",
+        "toggleControls": "Toggle Reader Controls"
+      },
+      "errors": {
+        "openFailed": "Failed to open EPUB with Readium.",
+        "navigateFailed": "Failed to navigate to location"
+      },
+      "tableOfContents": "Table of Contents",
+      "bookmarksAndAnnotations": "Bookmarks & Annotations",
+      "annotationsSheet": {
+        "tabs": {
+          "all": "All",
+          "bookmarks": "Bookmarks",
+          "highlights": "Highlights",
+          "notes": "Notes"
+        }
+      }
     }
   }
 }

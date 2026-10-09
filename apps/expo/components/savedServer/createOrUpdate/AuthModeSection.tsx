@@ -7,11 +7,11 @@ import { useTranslate } from '~/lib/hooks'
 
 import { CreateOrUpdateServerData } from './schemas'
 
-const LOCALE_BASE = 'addOrEditServer'
+const LOCALE_BASE = 'shared.addOrEditServer'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 
 export function AuthModeSection() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { control } = useFormContext<CreateOrUpdateServerData>()
 
 	const authMode = useWatch({
@@ -29,7 +29,9 @@ export function AuthModeSection() {
 	if (authMode === 'login' || authMode === 'none') {
 		return (
 			<Card.Row>
-				<Text className="text-foreground-muted">{t(getKey(`auth.${authMode}.description`))}</Text>
+				<Text className="text-foreground-muted">
+					{translate(getKey(`auth.${authMode}.description`))}
+				</Text>
 			</Card.Row>
 		)
 	} else if (authMode === 'basic') {
@@ -39,7 +41,7 @@ export function AuthModeSection() {
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<Card.InputRow
-							label={t('common.username')}
+							label={translate('shared.common.username')}
 							autoCorrect={false}
 							autoCapitalize="none"
 							placeholder="oromei"
@@ -56,7 +58,7 @@ export function AuthModeSection() {
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<Card.InputRow
-							label={t('common.password')}
+							label={translate('shared.common.password')}
 							autoCorrect={false}
 							autoCapitalize="none"
 							placeholder="*************"
@@ -81,7 +83,7 @@ export function AuthModeSection() {
 						label="Token"
 						autoCorrect={false}
 						autoCapitalize="none"
-						placeholder={t(getKey('auth.token.placeholder'))}
+						placeholder={translate(getKey(`auth.token.placeholder`))}
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}

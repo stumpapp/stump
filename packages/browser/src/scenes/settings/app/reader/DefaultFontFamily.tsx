@@ -1,5 +1,4 @@
 import { ComboBox, Label } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -9,7 +8,7 @@ import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSe
 import { useReaderStore } from '@/stores'
 
 export default function DefaultFontFamily() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		settings: { fontFamily },
 		setSettings,
@@ -33,7 +32,7 @@ export default function DefaultFontFamily() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="font-family">{t(getKey('fontFamily.label'))}</Label>
+			<Label htmlFor="font-family">{translate('shared.epubSettings.typeface.label')}</Label>
 			<ComboBox
 				size="full"
 				options={[{ value: '', label: 'Default', fontClassName: '' }].concat(
@@ -45,6 +44,3 @@ export default function DefaultFontFamily() {
 		</div>
 	)
 }
-
-const LOCAL_BASE = 'settingsScene.app/reader.sections.textBasedBooks.sections'
-const getKey = (key: string) => `${LOCAL_BASE}.${key}`

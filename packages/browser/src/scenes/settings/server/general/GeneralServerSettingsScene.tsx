@@ -1,6 +1,5 @@
 import { useCheckForServerUpdate } from '@stump/client'
 import { Alert, AlertDescription } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'

@@ -58,7 +58,7 @@ type Props = {
 }
 
 export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const data = useFragment(fragment, fragmentRef)
 	const [isRefreshing, onRefresh] = useRefetch(refetch)
@@ -98,7 +98,7 @@ export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 			sessions,
 		}))
 
-		const dateRange = t('readingTimeline.readthroughDateRange', {
+		const dateRange = translate('shared.readingTimeline.readthroughDateRange', {
 			startDate: intlFormat(readthrough.startedAt, {
 				year: 'numeric',
 				month: 'long',
@@ -110,7 +110,7 @@ export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 						month: 'long',
 						day: 'numeric',
 					})
-				: t('common.presentTime'),
+				: translate('shared.common.presentTime'),
 		})
 
 		return (
@@ -129,7 +129,7 @@ export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 					<View className="gap-4 w-full flex-row items-center">
 						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
 						<Text className="text-foreground-muted font-medium shrink-0">
-							{t('readingTimeline.startOfReadthrough', {
+							{translate('shared.readingTimeline.startOfReadthrough', {
 								readthroughNumber: readthrough.readthroughNumber,
 							})}
 						</Text>

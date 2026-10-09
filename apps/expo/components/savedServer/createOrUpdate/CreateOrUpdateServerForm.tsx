@@ -22,7 +22,7 @@ import { CreateOrUpdateServerData } from './schemas'
  * must instantiate the form and pass it down via FormProvider
  */
 export function CreateOrUpdateServerForm() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateServerData>()
 	const { errors } = useFormState({ control: form.control })
@@ -50,14 +50,14 @@ export function CreateOrUpdateServerForm() {
 		if (!isValid) {
 			form.setError('url', {
 				type: 'manual',
-				message: t(getKey('failedToConnect')),
+				message: translate(getKey(`failedToConnect`)),
 			})
 		} else {
 			form.clearErrors('url')
 			setDidConnect(true)
 		}
 		setIsCheckingConnection(false)
-	}, [kind, url, form, setDidConnect, t])
+	}, [kind, url, form, setDidConnect, translate])
 
 	useEffect(() => {
 		if (didConnect) {
@@ -70,8 +70,8 @@ export function CreateOrUpdateServerForm() {
 
 	return (
 		<View className="gap-8">
-			<Card label={t(getKey('basicInfo'))}>
-				<Card.Row label={t(getKey('kind'))}>
+			<Card label={translate(getKey(`basicInfo`))}>
+				<Card.Row label={translate(getKey(`kind`))}>
 					<Picker
 						value={kind}
 						options={[
@@ -84,8 +84,8 @@ export function CreateOrUpdateServerForm() {
 				</Card.Row>
 
 				<Card.InputRow
-					label={t('common.name')}
-					placeholder={t(getKey('serverNamePlaceholder'))}
+					label={translate('shared.common.name')}
+					placeholder={translate(getKey(`serverNamePlaceholder`))}
 					value={name}
 					onChangeText={(text) =>
 						form.setValue('name', text, { shouldValidate: !!errors.name?.message })
@@ -94,9 +94,9 @@ export function CreateOrUpdateServerForm() {
 				/>
 			</Card>
 
-			<Card label={t(getKey('networking'))}>
+			<Card label={translate(getKey(`networking`))}>
 				<Card.InputRow
-					label={t(getKey('primaryUrl'))}
+					label={translate(getKey(`primaryUrl`))}
 					placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${kind === 'opds-legacy' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 					value={url}
 					onChangeText={(text) => form.setValue('url', text, { shouldValidate: !!errors.url })}
@@ -120,10 +120,14 @@ export function CreateOrUpdateServerForm() {
 									</View>
 								)}
 								{!isCheckingConnection && didConnect && (
-									<Text className="text-base text-fill-success">{t(getKey('didConnect'))}</Text>
+									<Text className="text-base text-fill-success">
+										{translate(getKey(`didConnect`))}
+									</Text>
 								)}
 								{!isCheckingConnection && !didConnect && (
-									<Text className="text-base text-foreground-subtle">{t('common.test')}</Text>
+									<Text className="text-base text-foreground-subtle">
+										{translate('shared.common.test')}
+									</Text>
 								)}
 							</Button>
 
@@ -137,7 +141,10 @@ export function CreateOrUpdateServerForm() {
 
 				<Pressable onPress={() => TrueSheet.present('advancedNetworkSettingsSheet')}>
 					{({ pressed }) => (
-						<Card.Row label={t(getKey('advancedOptions'))} style={pressed && { opacity: 0.7 }}>
+						<Card.Row
+							label={translate(getKey(`advancedOptions`))}
+							style={pressed && { opacity: 0.7 }}
+						>
 							<Icon as={ChevronRight} size={20} className="text-foreground-muted" />
 						</Card.Row>
 					)}
@@ -146,18 +153,18 @@ export function CreateOrUpdateServerForm() {
 				<AdvancedNetworkSettingsSheet />
 			</Card>
 
-			<Card label={t(getKey('auth.section'))}>
-				<Card.Row label={t(getKey('auth.method'))}>
+			<Card label={translate(getKey('auth.section'))}>
+				<Card.Row label={translate(getKey('auth.method'))}>
 					<Controller
 						control={form.control}
 						render={({ field: { onChange, value } }) => (
 							<Picker
 								value={value}
 								options={[
-									{ label: t(getKey('auth.none.label')), value: 'none' },
-									{ label: t(getKey('auth.login.label')), value: 'login' },
-									{ label: t(getKey('auth.basic')), value: 'basic' },
-									{ label: t(getKey('auth.token.label')), value: 'token' },
+									{ label: translate(getKey('auth.none.label')), value: 'none' },
+									{ label: translate(getKey('auth.login.label')), value: 'login' },
+									{ label: translate(getKey('auth.basic')), value: 'basic' },
+									{ label: translate(getKey('auth.token.label')), value: 'token' },
 								]}
 								onValueChange={(v) => onChange(v)}
 							/>
@@ -169,8 +176,8 @@ export function CreateOrUpdateServerForm() {
 				<AuthModeSection />
 			</Card>
 
-			<Card label={t(getKey('optionalSettings'))}>
-				<Card.Row label={t(getKey('setAsDefaultServer'))}>
+			<Card label={translate(getKey('optionalSettings'))}>
+				<Card.Row label={translate(getKey('setAsDefaultServer'))}>
 					<Switch
 						checked={isDefault}
 						onCheckedChange={(checked) => form.setValue('defaultServer', checked)}
@@ -181,5 +188,5 @@ export function CreateOrUpdateServerForm() {
 	)
 }
 
-const LOCALE_BASE = 'addOrEditServer'
+const LOCALE_BASE = 'shared.addOrEditServer'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

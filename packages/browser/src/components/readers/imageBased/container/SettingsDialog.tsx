@@ -1,5 +1,4 @@
 import { Dialog, Tabs } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Settings2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -10,7 +9,7 @@ import ControlButton from './ControlButton'
 import ReaderSettings from './ReaderSettings'
 
 export default function SettingsDialog() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { book, currentPage } = useImageBaseReaderContext()
 
 	const [modality, setModality] = useState<'book' | 'global'>('book')
@@ -36,10 +35,10 @@ export default function SettingsDialog() {
 						>
 							<Tabs.List>
 								<Tabs.Trigger value="book">
-									{t('imageReader.settingsDialog.scopes.book')}
+									{translate('shared.common.book')}
 								</Tabs.Trigger>
 								<Tabs.Trigger value="global">
-									{t('imageReader.settingsDialog.scopes.global')}
+									{translate('shared.common.global')}
 								</Tabs.Trigger>
 							</Tabs.List>
 						</Tabs>

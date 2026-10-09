@@ -1,5 +1,4 @@
 import { Label, NativeSelect } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 
 import { useTranslate } from '@/hooks/useTranslate'

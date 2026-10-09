@@ -15,7 +15,7 @@ import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useSavedServers } from '~/stores'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { data, isLoading, isRefetching, refetch } = useQuery({
 		queryKey: ['app-usage'],
 		queryFn: getAppUsage,
@@ -65,7 +65,7 @@ export default function Screen() {
 
 					<View className="gap-4 flex-1">
 						<Card
-							label={t('common.servers')}
+							label={translate('shared.common.servers')}
 							listEmptyStyle={{
 								icon: Server,
 								iconSlash: true,

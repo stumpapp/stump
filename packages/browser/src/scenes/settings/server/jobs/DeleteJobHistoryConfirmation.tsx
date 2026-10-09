@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, ConfirmationModal, Text } from '@stump/components'
 import { graphql, JobTableQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 

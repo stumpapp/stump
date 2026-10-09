@@ -10,7 +10,6 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ImagePlus, Pencil, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
@@ -62,7 +61,7 @@ const deleteMutation = graphql(`
 // TODO: disable upload if not enabled, but retain ui to delete existing resources
 // (e.g., if upload temp enabled, uploaded stuff, disabled, come back)
 export default function ServerEmojisSection() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canManageEmojis = useMemo(
@@ -108,18 +107,18 @@ export default function ServerEmojisSection() {
 		(acceptedFiles: File[], fileRejections: FileRejection[]) => {
 			if (fileRejections.length > 0) {
 				const firstError = fileRejections[0]?.errors[0]
-				toast.error(firstError?.message ?? t('common.fileUpload.someFilesRejected'))
+				toast.error(firstError?.message ?? translate('shared.common.fileUpload.someRejected'))
 				return
 			}
 
 			if (acceptedFiles.length !== 1) {
-				toast.error(t('common.fileUpload.tooManyFiles'))
+				toast.error(translate('shared.common.fileUpload.tooManyFiles'))
 				return
 			}
 
 			const file = acceptedFiles.at(0)
 			if (!file) {
-				toast.error(t('common.fileUpload.noValidFiles'))
+				toast.error(translate('shared.common.fileUpload.noValidFiles'))
 				return
 			}
 
@@ -168,7 +167,7 @@ export default function ServerEmojisSection() {
 
 		const name = sanitizedName(emojiName)
 		if (!name) {
-			toast.error(t('customEmojis.invalidName'))
+			toast.error(t('settingsScene.server/general.sections.customEmojis.invalidName'))
 			return
 		}
 
@@ -253,7 +252,7 @@ export default function ServerEmojisSection() {
 				<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
 					<Dialog.Trigger asChild>
 						<Button size="sm" variant="outline">
-							{t('common.edit')}
+							{translate('shared.common.edit')}
 						</Button>
 					</Dialog.Trigger>
 				</NewCard.Row>
@@ -307,14 +306,16 @@ export default function ServerEmojisSection() {
 										size="sm"
 										variant="outline"
 									>
-										{t('common.cancel')}
+										{translate('shared.common.cancel')}
 									</Button>
 									<Button
 										disabled={!selectedFile || !emojiName.trim() || isUploading}
 										onClick={handleUpload}
 										size="sm"
 									>
-										{isUploading ? t('common.uploadingEllipsis') : t('common.upload')}
+										{isUploading
+											? translate('shared.common.uploadingEllipsis')
+											: translate('shared.common.upload')}
 									</Button>
 								</div>
 							</div>
@@ -349,10 +350,10 @@ export default function ServerEmojisSection() {
 														placeholder="emoji_name"
 													/>
 													<Button size="sm" onClick={cancelRename} variant="outline">
-														{t('common.cancel')}
+														{translate('shared.common.cancel')}
 													</Button>
 													<Button size="sm" disabled={isRenaming} onClick={confirmRename}>
-														{t('common.save')}
+														{translate('shared.common.save')}
 													</Button>
 												</div>
 											) : (
@@ -397,7 +398,7 @@ export default function ServerEmojisSection() {
 			<ConfirmationModal
 				title={t(getKey('deleteModal.title'))}
 				description={t(getKey('deleteModal.description'))}
-				confirmText={t('common.delete')}
+				confirmText={translate('shared.common.delete')}
 				confirmVariant="destructive"
 				isOpen={!!deletingEmoji}
 				onClose={() => setDeletingEmoji(null)}

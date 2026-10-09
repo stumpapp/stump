@@ -17,7 +17,6 @@ import {
 	MetadataFetchStatus,
 	useFragment,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'

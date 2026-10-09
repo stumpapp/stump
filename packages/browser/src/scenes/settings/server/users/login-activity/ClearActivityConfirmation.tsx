@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, ConfirmationModal } from '@stump/components'
 import { graphql, LoginActivityTableQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 

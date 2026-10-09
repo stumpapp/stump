@@ -1,5 +1,4 @@
 import { Button, Dialog } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -12,7 +11,7 @@ type Props = {
 }
 
 export default function CustomScanDialog({ onScan }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const handleScan = useCallback(
@@ -38,10 +37,10 @@ export default function CustomScanDialog({ onScan }: Props) {
 
 				<Dialog.Footer>
 					<Button variant="outline" onClick={() => setIsOpen(false)}>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 					<Button type="submit" form={FORM_ID}>
-						{t('common.scan')}
+						{translate('shared.common.scan')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

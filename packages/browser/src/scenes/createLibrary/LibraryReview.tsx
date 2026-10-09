@@ -1,6 +1,5 @@
 import { Heading, Label, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { PropsWithChildren } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -13,7 +12,7 @@ export default function LibraryReview() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const state = useWatch({ control: form.control })
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const renderThumbnailSettings = () => {
 		if (!state.thumbnailConfig?.enabled || !state.thumbnailConfig?.resizeMethod) {
@@ -115,14 +114,14 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('oneshotsDirectory'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.oneshotsDirectory || t('common.none')}
+						{state.oneshotsDirectory || translate('shared.common.none')}
 					</Text>
 				</div>
 
 				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.description || t('common.none')}
+						{state.description || translate('shared.common.none')}
 					</Text>
 				</div>
 

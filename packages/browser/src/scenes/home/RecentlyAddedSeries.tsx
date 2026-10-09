@@ -1,7 +1,6 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { BookCopy } from 'lucide-react'
@@ -87,7 +86,7 @@ export const usePrefetchRecentlyAddedSeries = () => {
 }
 
 function RecentlyAddedSeries() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -123,9 +122,9 @@ function RecentlyAddedSeries() {
 				<BookCopy className="h-8 w-8 text-muted-foreground" />
 			</span>
 			<div>
-				<Text>{t('homeScene.recentlyAddedSeries.emptyState.heading')}</Text>
+				<Text>{translate('shared.homeSections.recentlyAddedSeries.emptyText')}</Text>
 				<Text size="sm" variant="muted">
-					{t('homeScene.recentlyAddedSeries.emptyState.message')}
+					{translate('shared.homeSections.recentlyAddedSeries.emptyMessage')}
 				</Text>
 			</div>
 		</div>
@@ -133,7 +132,7 @@ function RecentlyAddedSeries() {
 
 	return (
 		<MultiRowHorizontalCardList
-			title={t('homeScene.recentlyAddedSeries.title')}
+			title={translate('shared.homeSections.recentlyAddedSeries.label')}
 			items={nodes}
 			keyExtractor={(series) => series.id}
 			renderItem={(series) => (

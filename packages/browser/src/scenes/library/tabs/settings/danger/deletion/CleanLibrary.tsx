@@ -9,7 +9,6 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql, LibraryMissingEntitiesQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'

@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Input } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -26,7 +25,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 	const [name, setName] = useState('')
 
 	const client = useQueryClient()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 
 	const { mutate: renameTag, isPending } = useGraphQLMutation(mutation, {
@@ -80,7 +79,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 
 				<Dialog.Footer>
 					<Button variant="outline" disabled={isPending} onClick={onClose} size="sm">
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 
 					<Button

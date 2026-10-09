@@ -26,7 +26,7 @@ type Props = {
 }
 
 export default function IdentifiersSheet({ identifiers }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const sheetRef = useRef<TrueSheet | null>(null)
 	const [isOpen, setIsOpen] = useState(false)
@@ -47,7 +47,7 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 					>
 						<View className="px-4 py-2">
 							<Text className="text-base font-semibold" style={{ color: textColor }}>
-								{t('bookMetadata.identifiers')}
+								{translate('shared.bookMetadata.identifiers')}
 							</Text>
 						</View>
 					</GlassView>
@@ -66,10 +66,13 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 				onDidDismiss={() => setIsOpen(false)}
 			>
 				<ScrollView className="gap-2 px-4 py-6 flex-1">
-					<Card label={t('bookMetadata.identifiers')}>
+					<Card label={translate('shared.bookMetadata.identifiers')}>
 						{identifiers.stumpId && <Card.Row label="Stump" value={identifiers.stumpId} />}
 						{identifiers.identifier && (
-							<Card.Row label={t('bookMetadata.identifier')} value={identifiers.identifier} />
+							<Card.Row
+								label={translate('shared.bookMetadata.identifier')}
+								value={identifiers.identifier}
+							/>
 						)}
 						{identifiers.amazon && <Card.Row label="Amazon" value={identifiers.amazon} />}
 						{identifiers.calibre && <Card.Row label="Calibre" value={identifiers.calibre} />}

@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import { Input } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
@@ -26,7 +25,7 @@ const query = graphql(`
 `)
 
 export default function ServerPublicURL() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const client = useQueryClient()
 	const {
@@ -45,7 +44,7 @@ export default function ServerPublicURL() {
 		},
 		onError: (error) => {
 			toast.error(t(getKey('updateFailed')), {
-				description: error instanceof Error ? error.message : t('common.unknownError'),
+				description: error instanceof Error ? error.message : translate('shared.common.unknownError'),
 			})
 		},
 	})

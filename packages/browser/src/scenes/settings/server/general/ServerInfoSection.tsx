@@ -11,7 +11,6 @@ import {
 	TEXT_VARIANTS,
 } from '@stump/components'
 import { extractErrorMessage } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import toUpper from 'lodash/toUpper'
 import { Copy, CopyCheck, Info } from 'lucide-react'
@@ -26,7 +25,7 @@ const IS_DEV = import.meta.env.DEV
 export default function ServerInfoSection() {
 	const version = useStumpVersion()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const versionUrl = useMemo(
 		() => (version?.semver ? `${REPO_URL}/releases/tag/v${version.semver}` : REPO_URL),
@@ -76,7 +75,7 @@ export default function ServerInfoSection() {
 			toast.error(
 				t('settingsScene.server/general.sections.serverInfo.debugInfo.copyDebugInfoFailed'),
 				{
-					description: extractErrorMessage(error, t('common.unknownError')),
+					description: extractErrorMessage(error, translate('shared.common.unknownError')),
 				},
 			)
 			return
@@ -117,7 +116,7 @@ export default function ServerInfoSection() {
 					<Text size="sm" variant="muted">
 						{buildChannel
 							? toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)
-							: t('common.unknown')}
+							: translate('shared.common.unknown')}
 					</Text>
 				</NewCard.Row>
 
@@ -153,7 +152,7 @@ export default function ServerInfoSection() {
 				>
 					<Button variant="outline" size="sm" onClick={onCopyDebugInfo} className="gap-x-2">
 						<CopyIcon className="size-3" />
-						{t('common.copy')}
+						{translate('shared.common.copy')}
 					</Button>
 				</NewCard.Row>
 			</NewCard>

@@ -29,7 +29,7 @@ export function CurrentProgressCard({
 	progressData,
 }: CurrentProgressCardProps) {
 	const { isTablet } = useDisplay()
-	const { t, locale } = useTranslate()
+	const { translate, locale } = useTranslate()
 
 	if (hidden) return
 
@@ -42,13 +42,13 @@ export function CurrentProgressCard({
 	const lastReadString = lastRead ? formatDistanceToNow(lastRead, { addSuffix: true }) : undefined
 
 	const readTimeStat = {
-		label: t('common.readTime'),
-		value: readingTimeString ?? t('common.unknown'),
+		label: translate('shared.common.readTime'),
+		value: readingTimeString ?? translate('shared.common.unknown'),
 	}
 
 	const lastReadStat = {
 		label: 'Last Read',
-		value: lastReadString ?? t('common.unknown'),
+		value: lastReadString ?? translate('shared.common.unknown'),
 	}
 
 	const timeStats = []
@@ -62,16 +62,20 @@ export function CurrentProgressCard({
 		<Card>
 			{showChapterTitle && chapterTitle && (
 				<Card.StatGroup>
-					<Card.Stat label={t('common.chapter')} value={chapterTitle} />
+					<Card.Stat label={translate('shared.common.chapter')} value={chapterTitle} />
 				</Card.StatGroup>
 			)}
 			<Card.StatGroup>
 				<Card.Stat
-					label={t('common.page')}
+					label={translate('shared.common.page')}
 					value={page ?? '??'}
 					suffix={totalPages ? ` / ${totalPages}` : undefined}
 				/>
-				<Card.Stat label={t('common.completed')} value={percentage} suffix={'%'} />
+				<Card.Stat
+					label={translate('shared.common.completed')}
+					value={percentage}
+					suffix={'%'}
+				/>
 				{timeStats.map((stat, index) => (
 					<Card.Stat key={index} {...stat} />
 				))}
@@ -94,7 +98,7 @@ export function LastFinishedCard({
 	readingTimeSeconds,
 }: LastFinishedCardProps) {
 	const { isTablet } = useDisplay()
-	const { t, locale } = useTranslate()
+	const { translate, locale } = useTranslate()
 
 	if (hidden) return
 
@@ -102,21 +106,24 @@ export function LastFinishedCard({
 		? isTablet
 			? formatHumanDuration(readingTimeSeconds)
 			: formatNarrowDuration(readingTimeSeconds, { locale })
-		: t('common.unknown')
+		: translate('shared.common.unknown')
 
 	const lastCompletedDistance =
 		typeof lastCompletedAt === 'string'
 			? formatDistanceToNowStrict(new Date(lastCompletedAt), { addSuffix: true })
-			: t('common.unknown')
+			: translate('shared.common.unknown')
 
 	return (
 		<Card>
 			<Card.StatGroup>
 				{readthroughNumber && readthroughNumber > 1 && (
-					<Card.Stat label={t('common.readthrough')} value={toOrdinal(readthroughNumber)} />
+					<Card.Stat
+						label={translate('shared.common.readthrough')}
+						value={toOrdinal(readthroughNumber)}
+					/>
 				)}
-				<Card.Stat label={t('common.finished')} value={lastCompletedDistance} />
-				<Card.Stat label={t('common.readTime')} value={readingTime} />
+				<Card.Stat label={translate('shared.common.finished')} value={lastCompletedDistance} />
+				<Card.Stat label={translate('shared.common.readTime')} value={readingTime} />
 			</Card.StatGroup>
 		</Card>
 	)

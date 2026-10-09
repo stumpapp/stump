@@ -1,5 +1,4 @@
 import { Badge, cn, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'

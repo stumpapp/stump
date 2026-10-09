@@ -1,7 +1,7 @@
 import { useJobStore, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { graphql, JobStatus, JobTableQuery, UserPermission } from '@stump/graphql'
-import { formatElapsedDuration, useLocaleContext } from '@stump/i18n'
+import { formatElapsedDuration } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
@@ -11,6 +11,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import JobActionMenu from './JobActionMenu.tsx'
 import JobDataInspector from './JobDataInspector.tsx'

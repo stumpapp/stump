@@ -42,7 +42,7 @@ function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['continueReading', serverID],
@@ -99,7 +99,7 @@ function ContinueReading() {
 			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
 				<View className="flex">
 					<Heading size="xl" className="px-4">
-						{t('stumpServer.continueReading.label')}
+						{translate('shared.homeSections.continueReading.label')}
 					</Heading>
 
 					<FlashList
@@ -114,7 +114,7 @@ function ContinueReading() {
 						ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 						ListEmptyComponent={
 							<Text className="px-4 text-foreground-muted">
-								{t('stumpServer.continueReading.emptyText')}
+								{translate('shared.homeSections.continueReading.emptyText')}
 							</Text>
 						}
 					/>

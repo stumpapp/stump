@@ -7,7 +7,7 @@ import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function FontConfig() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			fontFamily: state.globalSettings.fontFamily ?? '',
@@ -20,19 +20,19 @@ export default function FontConfig() {
 	)
 
 	const fontOptions: PickerOption[] = [
-		{ label: t(getKey('typeface.options.system')), value: '' },
-		{ label: t(getKey('typeface.options.opendyslexic')), value: 'OpenDyslexic' },
-		{ label: t(getKey('typeface.options.literata')), value: 'Literata' },
-		{ label: t(getKey('typeface.options.atkinsonHyperlegible')), value: 'Atkinson-Hyperlegible' },
-		{ label: t(getKey('typeface.options.charisSIL')), value: 'CharisSIL' },
-		{ label: t(getKey('typeface.options.bitter')), value: 'Bitter' },
+		{ label: translate(getKey('typeface.options.system')), value: '' },
+		{ label: translate(getKey('typeface.options.opendyslexic')), value: 'OpenDyslexic' },
+		{ label: translate(getKey('typeface.options.literata')), value: 'Literata' },
+		{ label: translate(getKey('typeface.options.atkinsonHyperlegible')), value: 'Atkinson-Hyperlegible' },
+		{ label: translate(getKey('typeface.options.charisSIL')), value: 'CharisSIL' },
+		{ label: translate(getKey('typeface.options.bitter')), value: 'Bitter' },
 	]
 
 	const fontWeightOptions: PickerOption[] = [
-		{ label: t(getKey('fontWeight.options.light')), value: '300' },
-		{ label: t(getKey('fontWeight.options.normal')), value: '400' },
-		{ label: t(getKey('fontWeight.options.medium')), value: '500' },
-		{ label: t(getKey('fontWeight.options.bold')), value: '700' },
+		{ label: translate(getKey('fontWeight.options.light')), value: '300' },
+		{ label: translate(getKey('fontWeight.options.normal')), value: '400' },
+		{ label: translate(getKey('fontWeight.options.medium')), value: '500' },
+		{ label: translate(getKey('fontWeight.options.bold')), value: '700' },
 	]
 
 	const ensureNumber = (value: string, cb: (num: number) => void) => {
@@ -44,7 +44,7 @@ export default function FontConfig() {
 
 	return (
 		<Card>
-			<Card.Row label={t(getKey('typeface.label'))}>
+			<Card.Row label={translate(getKey('typeface.label'))}>
 				<Picker
 					value={store.fontFamily}
 					options={fontOptions}
@@ -52,7 +52,7 @@ export default function FontConfig() {
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('fontSize'))}>
+			<Card.Row label={translate(getKey('fontSize.label'))}>
 				<Stepper
 					value={store.fontSize}
 					onChange={(val) => store.setSettings({ fontSize: val })}
@@ -60,11 +60,11 @@ export default function FontConfig() {
 					max={32}
 					step={0.5}
 					formatValue={(val) => val.toString()}
-					accessibilityLabel={t(getKey('fontSize'))}
+					accessibilityLabel={translate(getKey('fontSize.label'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('fontWeight.label'))}>
+			<Card.Row label={translate(getKey('fontWeight.label'))}>
 				<Picker
 					value={String(store.fontWeight)}
 					options={fontWeightOptions}
@@ -74,15 +74,15 @@ export default function FontConfig() {
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('textNormalization'))}>
+			<Card.Row label={translate(getKey('textNormalization'))}>
 				<Switch
 					checked={store.textNormalization}
 					onCheckedChange={(checked) => store.setSettings({ textNormalization: checked })}
-					accessibilityLabel={t(getKey('textNormalization'))}
+					accessibilityLabel={translate(getKey('textNormalization'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('verticalText'))}>
+			<Card.Row label={translate(getKey('verticalText'))}>
 				<Switch
 					checked={store.verticalText}
 					onCheckedChange={(checked) => store.setSettings({ verticalText: checked })}
@@ -93,5 +93,5 @@ export default function FontConfig() {
 	)
 }
 
-const LOCALE_BASE = 'epubSettings'
+const LOCALE_BASE = 'shared.epubSettings'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

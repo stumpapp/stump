@@ -1,5 +1,4 @@
 import { Button, cn, Input, Text, TextArea, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 

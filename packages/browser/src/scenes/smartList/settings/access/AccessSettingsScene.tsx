@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
 import { EntityVisibility } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 

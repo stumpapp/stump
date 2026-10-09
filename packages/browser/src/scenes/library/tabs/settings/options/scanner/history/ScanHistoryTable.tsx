@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Button, Card, Dropdown, Text } from '@stump/components'
 import { graphql, ScanHistoryTableQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,

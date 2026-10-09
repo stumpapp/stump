@@ -9,7 +9,6 @@ import {
 	Text,
 	ToolTip,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Construction, Filter } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'

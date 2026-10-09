@@ -1,4 +1,3 @@
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { Search } from '@/components/filters'

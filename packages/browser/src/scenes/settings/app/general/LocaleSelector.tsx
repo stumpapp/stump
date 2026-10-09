@@ -1,5 +1,5 @@
 import { ComboBox } from '@stump/components'
-import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
+import { isLocale, localeNames } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'

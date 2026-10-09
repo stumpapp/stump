@@ -1,5 +1,4 @@
 import { Button, Label, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { useTranslate } from '@/hooks/useTranslate'
 

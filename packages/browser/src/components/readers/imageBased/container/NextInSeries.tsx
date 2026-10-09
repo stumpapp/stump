@@ -1,6 +1,5 @@
 import { Button, ButtonOrLink, cn, HoverCard, Label, Popover, Text } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowRight, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -13,7 +12,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { NextInSeriesBookRef, useImageBaseReaderContext } from '../context'
 
 export default function NextInSeries() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const [isHidden, setIsHidden] = useState(false)
 
 	const { book, currentPage } = useImageBaseReaderContext()
@@ -50,7 +49,7 @@ export default function NextInSeries() {
 
 				<div className="gap-4 flex flex-col">
 					<div>
-						<Label className="opacity-80">{t('imageReader.nextInSeries.title')}</Label>
+						<Label className="opacity-80">{translate('shared.imageReader.nextInSeries.title')}</Label>
 						<Text size="lg">{nextInSeries.name}</Text>
 					</div>
 
@@ -60,7 +59,7 @@ export default function NextInSeries() {
 					/>
 
 					<ButtonOrLink variant="secondary" href={paths.bookReader(nextInSeries.id)}>
-						{t('imageReader.nextInSeries.read')}
+						{translate('shared.common.read')}
 					</ButtonOrLink>
 				</div>
 			</>

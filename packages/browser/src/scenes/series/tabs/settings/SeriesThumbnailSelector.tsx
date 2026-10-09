@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -59,7 +58,7 @@ type Props = {
 
 export default function SeriesThumbnailSelector({ fragment }: Props) {
 	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const { sdk } = useSDK()
 	const queryClient = useQueryClient()
@@ -175,7 +174,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 										setPage(undefined)
 									}}
 								>
-									{t('common.goBack')}
+									{translate('shared.common.goBack')}
 								</span>
 							)}
 						</Dialog.Description>
@@ -186,7 +185,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}

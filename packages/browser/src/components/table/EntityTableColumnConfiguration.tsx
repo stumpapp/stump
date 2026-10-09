@@ -20,7 +20,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button, IconButton, Sheet, Text, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ColumnSort } from '@stump/sdk'
 import partition from 'lodash/partition'
 import { Columns, Eye, EyeOff } from 'lucide-react'
@@ -38,7 +37,7 @@ type Props = {
 }
 
 export default function EntityTableColumnConfiguration({ entity, configuration, onSave }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -280,7 +279,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 			footer={
 				<div className="-mt-4 gap-x-4 py-2 flex w-full items-center">
 					<Button className="w-full" onClick={handleSave}>
-						{t('common.save')}
+						{translate('shared.common.save')}
 					</Button>
 					<Button
 						variant="outline"
@@ -290,7 +289,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 							setIsOpen(false)
 						}}
 					>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 				</div>
 			}

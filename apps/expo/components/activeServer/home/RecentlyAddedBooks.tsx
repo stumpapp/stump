@@ -34,7 +34,7 @@ function RecentlyAddedBooks() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedBooks', serverID],
@@ -65,7 +65,7 @@ function RecentlyAddedBooks() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				{t('stumpServer.recentlyAddedBooks.label')}
+				{translate('shared.homeSections.recentlyAddedBooks.label')}
 			</Heading>
 
 			<FlashList
@@ -80,7 +80,7 @@ function RecentlyAddedBooks() {
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				ListEmptyComponent={
 					<Text className="text-foreground-muted">
-						{t('stumpServer.recentlyAddedBooks.emptyText)')}
+						{translate('shared.homeSections.recentlyAddedBooks.emptyText')}
 					</Text>
 				}
 			/>

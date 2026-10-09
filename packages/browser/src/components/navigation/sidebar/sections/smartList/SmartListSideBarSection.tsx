@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -29,7 +28,7 @@ export default function SmartListSideBarSection({
 	const location = useLocation()
 	const paths = usePaths()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: { smartLists: lists },
@@ -67,7 +66,7 @@ export default function SmartListSideBarSection({
 					asLabel
 					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
 				>
-					{t('sidebar.buttons.smartlists')}
+					{translate('shared.common.smartLists')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
 					{links.includes(FilterableArrangementEntityLink.ShowAll) && (

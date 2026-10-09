@@ -1,5 +1,4 @@
 import { cn, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'

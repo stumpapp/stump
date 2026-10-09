@@ -1,5 +1,4 @@
 import { Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
 import { ContentContainer, SceneContainer } from '@/components/container'

@@ -1,12 +1,12 @@
 import { Heading, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteJobHistoryConfirmation from './DeleteJobHistoryConfirmation.tsx'
 import JobScheduler from './JobScheduler.tsx'

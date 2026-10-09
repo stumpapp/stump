@@ -11,7 +11,6 @@ import {
 	useBoolean,
 } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Edit, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
@@ -46,7 +45,7 @@ const deleteMutation = graphql(`
 `)
 
 export default function AvatarPicker() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { user, setUser } = useUser()
 	const [isModalOpen, { on, off }] = useBoolean(false)
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -187,10 +186,10 @@ export default function AvatarPicker() {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={off}>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button onClick={handleConfirm} disabled={!selectedFile}>
-							{t('common.upload')}
+							{translate('shared.common.upload')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
@@ -221,7 +220,7 @@ export default function AvatarPicker() {
 									variant="secondary"
 								>
 									<Edit className="mr-2 h-3 w-3" />
-									{t('common.edit')}
+									{translate('shared.common.edit')}
 								</Button>
 							}
 							groups={[

@@ -1,4 +1,3 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'

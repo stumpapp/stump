@@ -20,7 +20,7 @@ type Metadata = {
 }
 
 export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	if (hidden) return null
 
@@ -39,12 +39,19 @@ export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
 	} = metadata
 
 	return (
-		<Card label={t('common.details')}>
-			{extension && <Card.Row label={t('bookMetadata.format')} value={extension.toUpperCase()} />}
-			{!!size && <Card.Row label={t('bookMetadata.size')} value={size} />}
-			{language && <Card.Row label={t('bookMetadata.language')} value={language} />}
+		<Card label={translate('shared.common.details')}>
+			{extension && (
+				<Card.Row
+					label={translate('shared.bookMetadata.format')}
+					value={extension.toUpperCase()}
+				/>
+			)}
+			{!!size && <Card.Row label={translate('shared.bookMetadata.size')} value={size} />}
+			{language && (
+				<Card.Row label={translate('shared.bookMetadata.language')} value={language} />
+			)}
 			{ageRating != null && ageRating > 0 && (
-				<Card.Row label={t('bookMetadata.ageRating')} value={`${ageRating}+`} />
+				<Card.Row label={translate('shared.bookMetadata.ageRating')} value={`${ageRating}+`} />
 			)}
 			{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
 			{published && (
@@ -61,7 +68,7 @@ export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
 			)}
 			{!!downloadedAt && (
 				<Card.Row
-					label={t('bookMetadata.downloadedAt')}
+					label={translate('shared.bookMetadata.downloadedAt')}
 					value={intlFormat(new Date(downloadedAt), {
 						month: 'long',
 						day: 'numeric',

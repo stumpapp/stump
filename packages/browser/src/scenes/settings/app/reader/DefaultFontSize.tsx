@@ -1,5 +1,4 @@
 import { Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -7,7 +6,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 export default function DefaultFontSize() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		settings: { fontSize },
 		setSettings,
@@ -28,8 +27,8 @@ export default function DefaultFontSize() {
 	return (
 		<div className="py-1.5">
 			<Input
-				label={t(getKey('fontSize.label'))}
-				description={t(getKey('fontSize.description'))}
+				label={translate('shared.epubSettings.fontSize.label')}
+				description={translate('shared.epubSettings.fontSize.description')}
 				value={fontSize ?? 13}
 				onChange={onValueChange}
 				type="number"
@@ -38,6 +37,3 @@ export default function DefaultFontSize() {
 		</div>
 	)
 }
-
-const LOCAL_BASE = 'settingsScene.app/reader.sections.textBasedBooks.sections'
-const getKey = (key: string) => `${LOCAL_BASE}.${key}`

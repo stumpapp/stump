@@ -9,7 +9,6 @@ import {
 	usePrevious,
 } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'

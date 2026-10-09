@@ -1,6 +1,5 @@
 import { NativeSelect, NewCard } from '@stump/components'
 import { InterfaceRoundness, ThumbnailPlaceholderStyle } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'

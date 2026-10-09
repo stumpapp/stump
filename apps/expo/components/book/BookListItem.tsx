@@ -48,7 +48,7 @@ type Props = {
 
 export default function BookListItem({ layout, book, onPress }: Props) {
 	const router = useRouter()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -93,7 +93,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 		<>
 			{currentPage != null && (
 				<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-					<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
+					<Text size="sm">{`${translate('shared.common.page')} ${currentPage}`}</Text>
 					<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${data.pages}`}</Text>
 				</View>
 			)}
@@ -102,7 +102,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 					<Text size="sm">{data.pages}</Text>
 					<Text size="xs" className="pb-0.5 text-foreground-muted">
 						{' '}
-						{t('common.pages').toLocaleLowerCase()}
+						{translate('shared.common.pages').toLocaleLowerCase()}
 					</Text>
 				</View>
 			)}

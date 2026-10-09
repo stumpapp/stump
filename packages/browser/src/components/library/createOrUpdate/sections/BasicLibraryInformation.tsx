@@ -1,6 +1,5 @@
 import { Input, InputGroup, Label, Text, TextArea } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { Suspense } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'

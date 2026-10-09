@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Construction } from 'lucide-react'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'

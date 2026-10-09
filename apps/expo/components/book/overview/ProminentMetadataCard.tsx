@@ -16,7 +16,7 @@ type Metadata = {
 }
 
 export function ProminentMetadataCard({ hidden, className, metadata }: BookMetadataCardProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	if (hidden) return null
 
@@ -25,11 +25,17 @@ export function ProminentMetadataCard({ hidden, className, metadata }: BookMetad
 	return (
 		<Card className={className}>
 			<Card.StatGroup>
-				{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
-				{!!volume && <Card.Stat label={t('bookMetadata.volume')} value={volume} />}
-				{!!issue && <Card.Stat label={t('bookMetadata.issue')} value={issue} />}
-				{year != null && year > 0 && <Card.Stat label={t('bookMetadata.year')} value={year} />}
-				{pages && <Card.Stat label={t('common.pages')} value={pages} />}
+				{!!publisher && (
+					<Card.Stat label={translate('shared.bookMetadata.publisher')} value={publisher} />
+				)}
+				{!!volume && (
+					<Card.Stat label={translate('shared.bookMetadata.volume')} value={volume} />
+				)}
+				{!!issue && <Card.Stat label={translate('shared.bookMetadata.issue')} value={issue} />}
+				{year != null && year > 0 && (
+					<Card.Stat label={translate('shared.bookMetadata.year')} value={year} />
+				)}
+				{pages && <Card.Stat label={translate('shared.common.pages')} value={pages} />}
 			</Card.StatGroup>
 		</Card>
 	)

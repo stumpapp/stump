@@ -1,5 +1,4 @@
 import { cx, NativeSelect, NewCard } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'

@@ -1,6 +1,5 @@
 import { NativeSelect } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -11,7 +10,7 @@ type Props = {
 }
 
 export default function ImageScalingSelect({ value, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	/**
 	 * A change handler for the image scaling select, asserting that the value
@@ -35,10 +34,13 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 				id="image-scaling-fit"
 				size="sm"
 				options={[
-					{ label: t('imageReader.settings.imageScaling.options.auto'), value: 'AUTO' },
-					{ label: t('imageReader.settings.imageScaling.options.height'), value: 'HEIGHT' },
-					{ label: t('imageReader.settings.imageScaling.options.width'), value: 'WIDTH' },
-					{ label: t('imageReader.settings.imageScaling.options.original'), value: 'NONE' },
+					{
+						label: translate('shared.readerSettings.imageScaling.options.AUTO'),
+						value: 'AUTO',
+					},
+					{ label: translate('shared.readerSettings.imageScaling.options.HEIGHT'), value: 'HEIGHT' },
+					{ label: translate('shared.readerSettings.imageScaling.options.WIDTH'), value: 'WIDTH' },
+					{ label: translate('shared.readerSettings.imageScaling.options.NONE'), value: 'NONE' },
 				]}
 				value={value}
 				onChange={handleChange}

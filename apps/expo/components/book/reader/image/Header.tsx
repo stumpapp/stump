@@ -20,7 +20,7 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const { book, resetTimer, serverId } = useImageBasedReader()
 	const activeServerCtx = useActiveServerSafe()
@@ -32,17 +32,17 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const confirmResetTimer = () => {
 		SystemAlert.alert(
-			t('readerSettings.readingTimer.resetTimer'),
-			t('readerSettings.readingTimer.confirmation.message', {
+			translate('shared.readerSettings.readingTimer.resetTimer'),
+			translate('shared.readerSettings.readingTimer.confirmation.message', {
 				bookName: book.name,
 				action:
 					activeServerCtx?.activeServer.kind === 'stump'
-						? t('readerSettings.readingTimer.confirmation.action.multi-session')
-						: t('readerSettings.readingTimer.confirmation.action.single-session'),
+						? translate('shared.readerSettings.readingTimer.confirmation.action.multi-session')
+						: translate('shared.readerSettings.readingTimer.confirmation.action.single-session'),
 			}),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
-				{ text: t('common.reset'), style: 'destructive', onPress: resetTimer },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
+				{ text: translate('shared.common.reset'), style: 'destructive', onPress: resetTimer },
 			],
 		)
 	}

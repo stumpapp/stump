@@ -1,6 +1,5 @@
 import { cn, DropdownMenu, IconButton } from '@stump/components'
 import type { MetadataField } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	ArrowLeft,
 	ArrowRight,

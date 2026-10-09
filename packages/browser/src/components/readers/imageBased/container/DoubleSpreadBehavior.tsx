@@ -1,6 +1,5 @@
 import { DoublePageBehavior, isDoublePageBehavior } from '@stump/client'
 import { NativeSelect } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -11,7 +10,7 @@ type Props = {
 }
 
 export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
 			if (isDoublePageBehavior(e.target.value)) {
@@ -27,19 +26,19 @@ export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
 		<div>
 			<NativeSelect
 				id="double-spread-behavior"
-				aria-label={t('imageReader.settings.doublePageBehavior.label')}
+				aria-label={translate('shared.readerSettings.doublePageBehavior.label')}
 				size="sm"
 				options={[
 					{
-						label: t('imageReader.settings.doublePageBehavior.options.auto'),
+						label: translate('shared.readerSettings.doublePageBehavior.options.auto'),
 						value: 'auto',
 					},
 					{
-						label: t('imageReader.settings.doublePageBehavior.options.always'),
+						label: translate('shared.readerSettings.doublePageBehavior.options.always'),
 						value: 'always',
 					},
 					{
-						label: t('imageReader.settings.doublePageBehavior.options.off'),
+						label: translate('shared.readerSettings.doublePageBehavior.options.off'),
 						value: 'off',
 					},
 				]}

@@ -35,7 +35,7 @@ export default function LoginOrClaimScene() {
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
 	const { sdk } = useSDK()
-	const { t, tShared } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		isClaimed,
 		isCheckingClaimed,
@@ -225,7 +225,7 @@ export default function LoginOrClaimScene() {
 								onClick={() => setShowServers(true)}
 							>
 								<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
-									{tShared('common.goToServers')}
+									{translate('shared.common.goToServers')}
 								</span>
 
 								<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />

@@ -1,5 +1,4 @@
 import { Alert, AlertDescription } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'

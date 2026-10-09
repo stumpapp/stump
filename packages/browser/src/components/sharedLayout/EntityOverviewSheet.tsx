@@ -1,5 +1,4 @@
 import { SheetPrimitive as Sheet, StatCard, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 
 import { useTheme } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -27,7 +26,7 @@ export function EntityOverviewSheet({
 	stats,
 	children,
 }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { isDarkVariant } = useTheme()
 
 	return (
@@ -49,7 +48,7 @@ export function EntityOverviewSheet({
 									))}
 									{tags.length > 10 && (
 										<Text size="sm" className="text-muted-foreground">
-											{t('common.andXMoreTrailing', { count: tags.length - 10 })}
+											{translate('shared.common.andXMoreTrailing', { count: tags.length - 10 })}
 										</Text>
 									)}
 								</div>

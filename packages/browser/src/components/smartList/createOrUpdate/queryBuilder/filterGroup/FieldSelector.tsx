@@ -1,5 +1,4 @@
 import { Button, cn, Command, Popover } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, ArrowRight, ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
@@ -20,7 +19,7 @@ export function FieldSelector({ idx }: Props) {
 
 	const [source, setSource] = useState<FilterSource | null>(null)
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
@@ -93,6 +92,7 @@ export function FieldSelector({ idx }: Props) {
 			return (
 				<div>
 					{options.map((option) => {
+						const sharedKey = getSharedBookMetadataKey(source, option.value)
 						return (
 							<Command.Item
 								key={option.value}
@@ -103,7 +103,9 @@ export function FieldSelector({ idx }: Props) {
 								className={cn('transition-all duration-75', { 'text-brand': false })}
 								value={option.value}
 							>
-								{t(getAttributeKey(source, option.value))}
+								{sharedKey
+									? translate(`shared.bookMetadata.${sharedKey}`)
+									: t(getAttributeKey(source, option.value))}
 							</Command.Item>
 						)
 					})}
@@ -229,3 +231,17 @@ const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 const getSourceKey = (source: FilterSource, key: string) => `${LOCALE_KEY}.source.${source}.${key}`
 const getAttributeKey = (source: FilterSource, key: string) =>
 	getSourceKey(source, `attributes.${key}`)
+
+// FIXME: i hate this, make query builder conform to everywhere else so i do not need this shit
+const getSharedBookMetadataKey = (source: FilterSource, field: string) => {
+	if (source === 'book_meta') {
+		if (field === 'genres') return 'genre'
+		if (field === 'colorists') return 'colorist'
+		return field
+	}
+	if (source === 'series_meta') {
+		return field === 'year' ? undefined : field
+	}
+	if (source === 'book' && (field === 'size' || field === 'status')) return field
+	return undefined
+}

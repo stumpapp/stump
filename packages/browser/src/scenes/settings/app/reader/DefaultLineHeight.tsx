@@ -1,5 +1,4 @@
 import { Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -7,7 +6,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 export default function DefaultLineHeight() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		settings: { lineHeight },
 		setSettings,
@@ -28,8 +27,8 @@ export default function DefaultLineHeight() {
 	return (
 		<div className="py-1.5">
 			<Input
-				label={t(getKey('lineHeight.label'))}
-				description={t(getKey('lineHeight.description'))}
+				label={translate('shared.epubSettings.lineHeight.label')}
+				description={translate('shared.epubSettings.lineHeight.description')}
 				value={lineHeight ?? 1.5}
 				onChange={onValueChange}
 				type="number"
@@ -40,6 +39,3 @@ export default function DefaultLineHeight() {
 		</div>
 	)
 }
-
-const LOCAL_BASE = 'settingsScene.app/reader.sections.textBasedBooks.sections'
-const getKey = (key: string) => `${LOCAL_BASE}.${key}`

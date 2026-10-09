@@ -152,7 +152,7 @@ type HeaderProps = {
 }
 
 function ListHeader({ tab, setTab }: HeaderProps) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	return (
 		<View className="px-4 pb-2 w-full">
@@ -167,13 +167,13 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 								}}
 								selection={tab}
 							>
-								<SwiftText modifiers={[tag('ALL')]}>{t('annotationsSheet.tabs.all')}</SwiftText>
-								<SwiftText modifiers={[tag('NOTES')]}>{t('annotationsSheet.tabs.notes')}</SwiftText>
+								<SwiftText modifiers={[tag('ALL')]}>{translate('shared.epubReader.annotationsSheet.tabs.all')}</SwiftText>
+								<SwiftText modifiers={[tag('NOTES')]}>{translate('shared.epubReader.annotationsSheet.tabs.notes')}</SwiftText>
 								<SwiftText modifiers={[tag('HIGHLIGHTS')]}>
-									{t('annotationsSheet.tabs.highlights')}
+									{translate('shared.epubReader.annotationsSheet.tabs.highlights')}
 								</SwiftText>
 								<SwiftText modifiers={[tag('BOOKMARKS')]}>
-									{t('annotationsSheet.tabs.bookmarks')}
+									{translate('shared.epubReader.annotationsSheet.tabs.bookmarks')}
 								</SwiftText>
 							</Picker>
 						</Host>
@@ -183,19 +183,19 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 					<Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
 						<Tabs.List className="flex-row">
 							<Tabs.Trigger value="ALL">
-								<Text>{t('annotationsSheet.tabs.all')}</Text>
+								<Text>{translate('shared.epubReader.annotationsSheet.tabs.all')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="NOTES">
-								<Text>{t('annotationsSheet.tabs.notes')}</Text>
+								<Text>{translate('shared.epubReader.annotationsSheet.tabs.notes')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="HIGHLIGHTS">
-								<Text>{t('annotationsSheet.tabs.highlights')}</Text>
+								<Text>{translate('shared.epubReader.annotationsSheet.tabs.highlights')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="BOOKMARKS">
-								<Text>{t('annotationsSheet.tabs.bookmarks')}</Text>
+								<Text>{translate('shared.epubReader.annotationsSheet.tabs.bookmarks')}</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>
@@ -227,7 +227,7 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 				minute: '2-digit',
 			})
 		: null
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<View className="w-full">
@@ -237,7 +237,7 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 					{
 						items: [
 							{
-								label: t('common.delete'),
+								label: translate('shared.common.delete'),
 								icon: { ios: 'trash', android: Trash },
 								role: 'destructive',
 								onPress: onDelete,
@@ -289,7 +289,7 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 				minute: '2-digit',
 			})
 		: null
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<View className="w-full">
@@ -299,7 +299,7 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 					{
 						items: [
 							{
-								label: t('common.delete'),
+								label: translate('shared.common.delete'),
 								icon: { ios: 'trash', android: Trash },
 								role: 'destructive',
 								onPress: onDelete,

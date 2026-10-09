@@ -123,7 +123,7 @@ export default function IgnoreRulesConfig() {
 				</Button>
 			</div>
 		)
-	}, [ctx, ignoreRules, t])
+	}, [ctx, ignoreRules, t, translate])
 
 	return (
 		<div className="max-w-2xl gap-6 flex grow flex-col">
@@ -329,7 +329,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 				{renderGlob()}
 
 				<div
-					className={cn('transition-opacity-[opacity_0.3s] space-x-2 flex items-center', {
+					className={cn('transition-opacity-[opacity_0.3s] gap-x-2 flex items-center', {
 						'opacity-0 group-hover:opacity-100': !isEditing,
 					})}
 				>

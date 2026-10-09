@@ -45,7 +45,7 @@ export function groupByChapter(
 }
 
 export default function SearchCommand() {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		controls: { searchBook, onGoToLocator },
 	} = useEpubReaderContext()
@@ -116,7 +116,7 @@ export default function SearchCommand() {
 				}
 			}
 		},
-		[searchBook, abortInFlightRequest, t],
+		[searchBook, abortInFlightRequest, translate],
 	)
 
 	const doSearch = useCallback(() => {

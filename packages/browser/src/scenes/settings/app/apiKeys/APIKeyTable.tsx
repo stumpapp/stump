@@ -173,7 +173,7 @@ export default function APIKeyTable() {
 				size: 20,
 			}),
 		],
-		[t],
+		[translate, t],
 	)
 
 	const table = useReactTable({

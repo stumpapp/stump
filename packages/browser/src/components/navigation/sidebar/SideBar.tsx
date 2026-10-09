@@ -129,7 +129,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, prefetchHome, isMobile, paths, basePath],
+		[t, location.pathname, prefetchHome, isMobile, paths, basePath, translate],
 	)
 
 	const sections = useMemo(

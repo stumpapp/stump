@@ -86,7 +86,7 @@ export function useReadiumNavigator({
 	onTextCleared,
 	onDecorationActivated,
 }: UseReadiumNavigatorArgs): UseReadiumNavigatorResult {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const [loadState, setLoadState] = useState<LoadState>({ status: 'idle' })
 	const [navButtons, setNavButtons] = useState({ canGoBackward: false, canGoForward: false })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)
@@ -390,7 +390,7 @@ export function useReadiumNavigator({
 		containerRef,
 		enqueueNavigation,
 		syncNavButtons,
-		t,
+		translate,
 	])
 
 	useEffect(() => {

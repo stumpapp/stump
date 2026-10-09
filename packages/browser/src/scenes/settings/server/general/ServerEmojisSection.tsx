@@ -57,7 +57,6 @@ const deleteMutation = graphql(`
 	}
 `)
 
-// TODO: fold into server config section, button to open dialog to manage emojis
 // TODO: disable upload if not enabled, but retain ui to delete existing resources
 // (e.g., if upload temp enabled, uploaded stuff, disabled, come back)
 export default function ServerEmojisSection() {
@@ -138,7 +137,7 @@ export default function ServerEmojisSection() {
 				return URL.createObjectURL(file)
 			})
 		},
-		[t],
+		[translate],
 	)
 
 	const { getRootProps, getInputProps, isDragActive, isFileDialogActive } = useDropzone({

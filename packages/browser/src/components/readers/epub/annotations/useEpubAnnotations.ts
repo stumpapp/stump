@@ -80,7 +80,7 @@ export function useEpubAnnotations({
 	isIncognito,
 	initialAnnotations,
 }: UseEpubAnnotationsArgs) {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const queryClient = useQueryClient()
 	const queryKey = useMemo(() => ['readiumWebReader', mediaId] as const, [mediaId])
 	const cachedAnnotations = useSyncExternalStore(
@@ -208,7 +208,7 @@ export function useEpubAnnotations({
 
 			return createMutation({ input })
 		},
-		[mediaId, isIncognito, createMutation, t],
+		[mediaId, isIncognito, createMutation, translate],
 	)
 
 	const updateAnnotation = useCallback(

@@ -43,7 +43,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				setFilePreview(URL.createObjectURL(file))
 			}
 		},
-		[t],
+		[translate, t],
 	)
 
 	const { getRootProps, getInputProps } = useDropzone({
@@ -86,9 +86,9 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				<Dialog.Header>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
-				<div className="gap-y-2 py-2 scrollbar-hide flex h-[300px] flex-col">
-					<div className="flex h-[100px] items-center justify-center">
-						<div className={cx('relative', { 'h-[100px]': filePreview })}>
+				<div className="gap-y-2 py-2 h-75 scrollbar-hide flex flex-col">
+					<div className="h-25 flex items-center justify-center">
+						<div className={cx('relative', { 'h-25': filePreview })}>
 							{filePreview && (
 								<>
 									<div className="-right-2 -top-2 absolute flex items-center justify-center">

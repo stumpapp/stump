@@ -18,7 +18,7 @@ import GoToPage from './GoToPage'
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
@@ -52,7 +52,7 @@ export default function ReaderFooter() {
 					.join('-'),
 				total: book.pages,
 			}),
-		[currentSet, book.pages, t],
+		[currentSet, book.pages, translate],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -132,7 +132,7 @@ export default function ReaderFooter() {
 						))}
 					</div>
 					{!isCurrentSet && (
-						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+						<Text size="sm" className="text-gray-45 shrink-0 text-center">
 							{[...indexes]
 								.sort((a, b) => a - b)
 								.map((i) => i + 1)
@@ -194,7 +194,7 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">
+						<Text className="text-sm text-gray-450">
 							{translate('shared.imageReader.footer.readingTime', { time: formattedReadTime })}
 						</Text>
 					)}
@@ -210,7 +210,7 @@ export default function ReaderFooter() {
 							triggerLabel={pageRangeLabel}
 						/>
 					) : (
-						<Text className="text-sm text-[#898d94]">{pageRangeLabel}</Text>
+						<Text className="text-sm text-gray-450">{pageRangeLabel}</Text>
 					)}
 				</div>
 			</div>

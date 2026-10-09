@@ -80,7 +80,7 @@ export default function TagTable() {
 				size: 20,
 			}),
 		],
-		[t],
+		[translate],
 	)
 
 	const table = useReactTable({
@@ -132,7 +132,7 @@ export default function TagTable() {
 							{table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
-									className="!top-0 h-10 px-2 shadow-sm sticky z-[2] bg-muted/50"
+									className="top-0! h-10 px-2 shadow-sm sticky z-2 bg-muted/50"
 									style={getCommonPinningStyles(header.column)}
 								>
 									<div

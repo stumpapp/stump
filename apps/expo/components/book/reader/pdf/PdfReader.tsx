@@ -1,5 +1,5 @@
 import { useSDKSafe } from '@stump/client'
-import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'

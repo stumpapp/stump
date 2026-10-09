@@ -1016,7 +1016,7 @@
                 "jobOutput": "Job Output",
                 "logs": "Logs"
               },
-              "logsPresent": "Logs were persisted for this job",
+              "logsPresent": "This job had runtime logs saved to the database",
               "seeLogs": "See Logs"
             },
             "table": {
@@ -2972,6 +2972,7 @@
       "andXMoreTrailing": "...and {{count}} more",
       "cancel": "Cancel",
       "clear": "Clear",
+      "configure": "Configure",
       "confirm": "Confirm",
       "copy": "Copy",
       "created": "Created",
@@ -3019,6 +3020,7 @@
       "goToServers": "Go to Servers",
       "rename": "Rename",
       "returnHome": "Return Home",
+      "run": "Run",
       "tryAgain": "Try Again",
       "notConfigured": "Not Configured",
       "notReady": "This feature is not ready",

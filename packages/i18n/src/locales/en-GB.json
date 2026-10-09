@@ -834,7 +834,7 @@
                 "jobOutput": "Job Output",
                 "logs": "Logs"
               },
-              "logsPresent": "Logs were persisted for this job",
+              "logsPresent": "This job had runtime logs saved to the database",
               "seeLogs": "See Logs"
             },
             "table": {

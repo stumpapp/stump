@@ -1,4 +1,4 @@
-import { Button, Label, Text } from '@stump/components'
+import { Button, NewCard } from '@stump/components'
 
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -6,36 +6,31 @@ import { useLibraryManagement } from '../../context'
 import CustomScanDialog from './customScan'
 
 export default function ScannerActionsSection() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { scan } = useLibraryManagement()
 
 	if (!scan) return null
 
 	return (
-		<div className="gap-y-6 flex flex-col">
-			<div className="gap-y-3 flex flex-col">
-				<div>
-					<Label className="text-base">{t(getKey('defaultScan.heading'))}</Label>
-					<Text variant="muted">{t(getKey('defaultScan.description'))}</Text>
-				</div>
-				<div>
-					<Button size="sm" onClick={() => scan()}>
-						{t(getKey('defaultScan.heading'))}
-					</Button>
-				</div>
-			</div>
+		<NewCard>
+			<NewCard.Row
+				label={t(getKey('defaultScan.heading'))}
+				description={t(getKey('defaultScan.description'))}
+			>
+				<Button size="sm" onClick={() => scan()} variant="outline">
+					{translate('shared.common.run')}
+				</Button>
+			</NewCard.Row>
 
-			<div className="gap-y-3 flex flex-col">
-				<div>
-					<Label className="text-base">{t(getKey('configureScan.heading'))}</Label>
-					<Text variant="muted">{t(getKey('configureScan.description'))}</Text>
-				</div>
-
+			<NewCard.Row
+				label={t(getKey('configureScan.heading'))}
+				description={t(getKey('defaultScan.description'))}
+			>
 				<div>
 					<CustomScanDialog onScan={scan} />
 				</div>
-			</div>
-		</div>
+			</NewCard.Row>
+		</NewCard>
 	)
 }
 

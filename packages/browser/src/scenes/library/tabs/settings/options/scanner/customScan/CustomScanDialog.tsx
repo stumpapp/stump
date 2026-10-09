@@ -25,7 +25,9 @@ export default function CustomScanDialog({ onScan }: Props) {
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<Dialog.Trigger asChild>
-				<Button size="sm">{t(getKey('heading'))}</Button>
+				<Button size="sm" variant="outline">
+					{translate('shared.common.configure')}
+				</Button>
 			</Dialog.Trigger>
 			<Dialog.Content>
 				<Dialog.Header>

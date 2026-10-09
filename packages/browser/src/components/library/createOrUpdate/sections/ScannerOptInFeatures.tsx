@@ -1,4 +1,5 @@
-import { Alert, AlertDescription, CheckBox, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, NewCard } from '@stump/components'
+import { Info } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -82,54 +83,50 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 	return (
 		<div className="gap-y-6 flex flex-col">
-			<div className="gap-y-1.5 flex flex-col">
-				<Heading size="sm">{t(getKey('section.heading'))}</Heading>
-				<Text size="sm" variant="muted">
-					{t(getKey('section.description'))}
-				</Text>
-			</div>
+			<NewCard label={t(getKey('section.heading'))} description={t(getKey('section.description'))}>
+				<NewCard.CheckboxRow
+					id="processMetadata"
+					label={t(getKey('processMetadata.label'))}
+					description={t(getKey('processMetadata.description'))}
+					checked={processMetadata}
+					onClick={handleProcessMetadataChange}
+					{...form.register('processMetadata')}
+				/>
+
+				<NewCard.CheckboxRow
+					id="watch"
+					label={t(getKey('watch.label'))}
+					description={t(getKey('watch.description'))}
+					checked={watch}
+					onClick={handleWatchChange}
+					{...form.register('watch')}
+				/>
+
+				<NewCard.CheckboxRow
+					id="generateFileHashes"
+					label={t(getKey('generateFileHashes.label'))}
+					description={t(getKey('generateFileHashes.description'))}
+					checked={generateFileHashes}
+					onClick={handleGenerateFileHashesChange}
+					{...form.register('generateFileHashes')}
+				/>
+
+				<NewCard.CheckboxRow
+					id="generateKoreaderHashes"
+					label={t(getKey('koreaderHashes.label'))}
+					description={t(getKey('koreaderHashes.description'))}
+					checked={koreaderHashes}
+					onClick={handleGenerateKoreaderHashesChange}
+					{...form.register('generateKoreaderHashes')}
+				/>
+			</NewCard>
 
 			{isCreating && (
 				<Alert variant="info">
+					<Info />
 					<AlertDescription>{t(getKey('section.disclaimer'))}</AlertDescription>
 				</Alert>
 			)}
-
-			<CheckBox
-				id="processMetadata"
-				label={t(getKey('processMetadata.label'))}
-				description={t(getKey('processMetadata.description'))}
-				checked={processMetadata}
-				onClick={handleProcessMetadataChange}
-				{...form.register('processMetadata')}
-			/>
-
-			<CheckBox
-				id="watch"
-				label={t(getKey('watch.label'))}
-				description={t(getKey('watch.description'))}
-				checked={watch}
-				onClick={handleWatchChange}
-				{...form.register('watch')}
-			/>
-
-			<CheckBox
-				id="generateFileHashes"
-				label={t(getKey('generateFileHashes.label'))}
-				description={t(getKey('generateFileHashes.description'))}
-				checked={generateFileHashes}
-				onClick={handleGenerateFileHashesChange}
-				{...form.register('generateFileHashes')}
-			/>
-
-			<CheckBox
-				id="generateKoreaderHashes"
-				label={t(getKey('koreaderHashes.label'))}
-				description={t(getKey('koreaderHashes.description'))}
-				checked={koreaderHashes}
-				onClick={handleGenerateKoreaderHashesChange}
-				{...form.register('generateKoreaderHashes')}
-			/>
 		</div>
 	)
 }

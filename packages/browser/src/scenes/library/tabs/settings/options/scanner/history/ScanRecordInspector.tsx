@@ -1,5 +1,5 @@
 import { useGraphQL } from '@stump/client'
-import { Alert, AlertDescription, ButtonOrLink, cn, Label, Sheet, Text } from '@stump/components'
+import { ButtonOrLink, cn, Label, NewCard, Preformatted, Sheet } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { intlFormat } from 'date-fns'
 import { useMemo } from 'react'
@@ -12,7 +12,10 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryManagement } from '../../../context'
 import { LibraryScanRecord } from './ScanHistoryTable'
 
-// TODO: finish selection for outputData
+// TODO(chore): realizing this is effectively a narrower-version of
+// the job inspector. not going to inflate the diff even more here outside
+// small ui fixes (the locale shifts are already so heavy) but should just
+// refactor to use that instead of this scan-specific one
 
 const query = graphql(`
 	query ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {
@@ -100,17 +103,15 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				})}
 			>
 				<div className="px-4 py-2" data-testid="lib-meta">
-					<Label className="text-muted-foreground">{t(getFieldKey('library'))}</Label>
-					{record ? (
-						<Text size="sm">{name}</Text>
-					) : (
-						<div className="h-6 w-32 animate-pulse rounded-md bg-accent" />
-					)}
-				</div>
-
-				<div className="px-4 py-2" data-testid="name-meta">
-					<Label className="text-muted-foreground">{t(getFieldKey('date'))}</Label>
-					<Text size="sm">{scannedAtFormatted}</Text>
+					<NewCard>
+						<NewCard.Row
+							label={t(getFieldKey('library'))}
+							value={
+								record ? name : <div className="h-6 w-32 animate-pulse rounded-md bg-accent" />
+							}
+						/>
+						<NewCard.Row label={t(getFieldKey('date'))} value={scannedAtFormatted} />
+					</NewCard>
 				</div>
 
 				{displayedData?.options?.config && (
@@ -124,35 +125,27 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 					</div>
 				)}
 
+				{/*TODO: one day it would be fun to have a prettier ui for each type of output*/}
 				{associatedJob?.outputData && (
-					<div className="gap-y-3 px-4 py-2 flex flex-col">
-						<Label className="text-muted-foreground">{t(getFieldKey('jobOutput'))}</Label>
-						<div className="p-4 rounded-xl bg-muted">
-							<pre className="text-xs text-muted-foreground">
-								{JSON.stringify(associatedJob.outputData, null, 2)}
-							</pre>
-						</div>
+					<div className="px-4 py-2">
+						<Preformatted title={t(getFieldKey('jobOutput'))} content={associatedJob.outputData} />
 					</div>
 				)}
 
 				{!!associatedJob?.logs?.length && (
-					<div className="gap-y-3 px-4 py-2 flex flex-col">
-						<Label className="text-muted-foreground">{t(getFieldKey('logs'))}</Label>
-
-						<Alert variant="warning" className="p-2">
-							<AlertDescription className="text-sm text-foreground">
-								{t(getKey('logsPresent'))} ({associatedJob.logs.length})
-							</AlertDescription>
-						</Alert>
-
-						<div>
-							<ButtonOrLink
-								href={`/settings/server/logs?jobId=${associatedJob.id}`}
-								variant="secondary"
-							>
-								{t(getFieldKey('seeLogs'))}
-							</ButtonOrLink>
-						</div>
+					<div className="gap-y-3 px-4 py-2">
+						<NewCard label={t(getFieldKey('logs'))}>
+							<NewCard.Row label={t(getKey('logsPresent'))}>
+								<div>
+									<ButtonOrLink
+										href={`/settings/server/logs?jobId=${associatedJob.id}`}
+										variant="secondary"
+									>
+										{t(getKey('seeLogs'))}
+									</ButtonOrLink>
+								</div>
+							</NewCard.Row>
+						</NewCard>
 					</div>
 				)}
 			</div>

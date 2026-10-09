@@ -25,13 +25,13 @@ export default function RemoveAllTokensConfirm({ onConfirmClear }: Props) {
 				title={t(getKey('title'))}
 				description={t(getKey('description'))}
 				confirmText={t(getKey('confirm'))}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				trigger={
 					<Button
 						type="button"
-						variant="danger"
+						variant="destructive"
 						onClick={() => setShowConfirmation(true)}
-						className="flex-shrink-0"
+						className="shrink-0"
 						size="sm"
 					>
 						{t(getKey('trigger'))}

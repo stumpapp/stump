@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { forwardRef } from 'react'
 
+import { Label } from '../form'
+import { RawCheckBox, RawCheckBoxProps, RawCheckBoxRef } from '../input/raw'
 import { Text } from '../text'
 import { cn } from '../utils'
 
@@ -29,6 +31,7 @@ export type NewCardProps = {
 
 export type NewCardRowProps = {
 	label?: ReactNode
+	htmlFor?: string
 	description?: ReactNode
 	value?: ReactNode
 	renderDivider?: boolean
@@ -53,6 +56,7 @@ function CardBackground({ className, ...props }: ComponentPropsWithoutRef<'div'>
 
 function BaseRowComponent({
 	label,
+	htmlFor,
 	description,
 	renderDivider = true,
 	children,
@@ -61,6 +65,8 @@ function BaseRowComponent({
 	disabled,
 	...props
 }: NewCardRowProps) {
+	const LabelComponent = htmlFor ? Label : Text
+
 	return (
 		<div className={cn('w-full first:border-t-0', renderDivider && 'border-t border-border/70')}>
 			<div
@@ -76,9 +82,9 @@ function BaseRowComponent({
 				{label && (
 					<div className="min-w-0 flex-1">
 						<div className="gap-0.5 flex flex-col">
-							<Text size="sm" className="leading-tight font-medium">
+							<LabelComponent htmlFor={htmlFor} size="sm" className="leading-tight font-medium">
 								{label}
-							</Text>
+							</LabelComponent>
 							{description && (
 								<Text size="sm" variant="muted" className="leading-tight">
 									{description}
@@ -144,6 +150,27 @@ function Stat({ label, value, suffix }: StatProps) {
 	)
 }
 
+const CheckboxRow = forwardRef<
+	RawCheckBoxRef,
+	RawCheckBoxProps & { label: string; description?: string }
+>(({ label, description, className, ...props }, ref) => {
+	return (
+		<BaseRowComponent
+			label={label}
+			description={description}
+			className={cn(
+				'flex-row-reverse! items-center',
+				{ 'cursor-not-allowed opacity-60': props.disabled },
+				className,
+			)}
+			htmlFor={props.id}
+		>
+			<RawCheckBox ref={ref} {...props} />
+		</BaseRowComponent>
+	)
+})
+CheckboxRow.displayName = 'CheckboxRow'
+
 const NewCardRoot = forwardRef<HTMLDivElement, NewCardProps>(
 	({ label, actions, description, tone = 'default', children, className, ...props }, ref) => {
 		// const count = React.Children.count(children)
@@ -192,12 +219,15 @@ type NewCardComponent = typeof NewCardRoot & {
 	Stat: typeof Stat
 	ListLabel: typeof ListLabel
 	Background: typeof CardBackground
+	CheckboxRow: typeof CheckboxRow
 }
 
+// TODO: maybe just rename to CardList or sm
 export const NewCard = Object.assign(NewCardRoot, {
 	Row,
 	StatGroup,
 	Stat,
 	ListLabel,
 	Background: CardBackground,
+	CheckboxRow,
 }) as NewCardComponent

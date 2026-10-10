@@ -10,8 +10,8 @@ import SearchCommand from '../SearchCommand'
 
 vi.mock('@stump/i18n', () => ({
 	...vi.importActual('@stump/i18n'),
-	useLocaleContext: () => ({
-		t: (key: string, options?: { position?: number }) => {
+	useCreateTranslate: () => ({
+		translate: (key: string, options?: { position?: number }) => {
 			if (key === 'epubReader.search.placeholder') {
 				return 'Enter a query and press enter to search'
 			}

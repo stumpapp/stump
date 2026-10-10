@@ -11,7 +11,7 @@ import { CreateOrUpdateEmailerSchema } from '../schema'
 vi.mock('../TestEmailerButton', () => ({ default: () => <div>TestEmailerButton</div> }))
 
 vi.mock('@stump/i18n', () => ({
-	useLocaleContext: () => ({ t: (s: string) => s }),
+	useCreateTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
 }))
 
 const validEmailer: CreateOrUpdateEmailerSchema = {

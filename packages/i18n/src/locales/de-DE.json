@@ -3089,7 +3089,8 @@
       "files": "Dateien",
       "search": "Suche",
       "preferences": "Präferenzen",
-      "global": "Global"
+      "global": "Global",
+      "ok": "Okay"
     },
     "libraryType": {
       "BOOK": "Bücher",

@@ -5,11 +5,12 @@ import {
 	graphql,
 	ProviderApiKeyInputValidateKeyMutation,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangleIcon } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateProviderConfigSchema } from './schema'
 
@@ -26,7 +27,7 @@ const verificationMutation = graphql(`
 export function ProviderApiKeyInput() {
 	const form = useFormContext<CreateProviderConfigSchema>()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { errors } = useFormState({ control: form.control })
 
 	const [provider, value] = useWatch({

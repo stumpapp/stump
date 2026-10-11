@@ -1,6 +1,5 @@
 import { cn, DropdownMenu, IconButton } from '@stump/components'
 import type { MetadataField } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	ArrowLeft,
 	ArrowRight,
@@ -11,6 +10,8 @@ import {
 	RotateCcw,
 	Unlock,
 } from 'lucide-react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { FIELD_EDITOR_MAP, isArrayField } from '../fieldEditorConfig'
 import type { PerFieldStrategy } from '../types'
@@ -25,7 +26,7 @@ type Props = {
 
 // TODO: dont show merge lists option unless arr
 export function FieldActionMenu({ field, disabled, onEditManually }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { fieldOverrides, setFieldOverride, clearFieldOverride, getLockedFields } =
 		useMatchReviewStore()
 	const toggleLockedField = useToggleLockedField()

@@ -41,7 +41,7 @@ export function MyReadingTimelineMenu() {
 }
 
 function IosTimelineMenu() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const order = useReadingTimelineDisplayStore((state) => state.order)
 	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
@@ -95,7 +95,7 @@ function IosTimelineMenu() {
 							order: order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc,
 						})
 					}
-					subtitle={t(`sorting.sortDirectionDate.${order}`)}
+					subtitle={translate(`shared.sorting.sortDirectionDate.${order}`)}
 				>
 					Sort Order
 				</Stack.Toolbar.MenuAction>
@@ -105,7 +105,7 @@ function IosTimelineMenu() {
 }
 
 function AndroidTimelineMenu() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const insets = useSafeAreaInsets()
 
 	const order = useReadingTimelineDisplayStore((state) => state.order)
@@ -191,7 +191,7 @@ function AndroidTimelineMenu() {
 					<View className="flex-1 justify-center">
 						<Text className="text-lg">Sort Order</Text>
 						<Text className="text-sm text-foreground-muted">
-							{t(`sorting.sortDirectionDate.${order}`)}
+							{translate(`shared.sorting.sortDirectionDate.${order}`)}
 						</Text>
 					</View>
 					<Icon as={ArrowDownUp} size={20} className={cn('text-foreground-muted ml-auto')} />

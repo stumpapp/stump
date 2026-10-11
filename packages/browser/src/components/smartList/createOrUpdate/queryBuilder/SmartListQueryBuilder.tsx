@@ -1,7 +1,8 @@
 import { Alert, AlertDescription, Button, cn, cx, Tabs, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListFormSchema } from '../schema'
 import { FilterGroup } from './filterGroup'
@@ -20,7 +21,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<>

@@ -9,7 +9,6 @@ import {
 	usePreviousIsDifferent,
 } from '@stump/components'
 import { graphql, SmartListsInput } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useEffect, useState } from 'react'
@@ -17,6 +16,7 @@ import { useDebouncedValue } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import SmartListCard from './SmartListCard'
@@ -45,7 +45,7 @@ const query = graphql(`
 
 export default function UserSmartListsScene() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	/**
 	 * The local value state for the search input
 	 */

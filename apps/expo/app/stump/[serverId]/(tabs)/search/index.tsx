@@ -21,7 +21,7 @@ export default function Screen() {
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const trackSearch = useSearchStore((store) => store.trackSearch)
 
 	const client = useQueryClient()
@@ -63,7 +63,7 @@ export default function Screen() {
 			headerTransparent: Platform.OS === 'ios',
 			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
-				placeholder: t('search.placeholder'),
+				placeholder: translate('shared.common.search'),
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
 					setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
@@ -77,7 +77,7 @@ export default function Screen() {
 				textColor: colors.foreground.DEFAULT,
 			},
 		})
-	}, [navigation, setQuery, onSearch, colors, t])
+	}, [navigation, setQuery, onSearch, colors, t, translate])
 
 	if (!isInputFocused) {
 		return (

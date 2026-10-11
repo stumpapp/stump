@@ -11,14 +11,14 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function EpubSettings() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
 	return (
 		<>
 			<AppSettingsRow
 				icon={Pilcrow}
 				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
-				title={t('epubSettings.title')}
+				title={translate('shared.epubSettings.title')}
 				onPress={() => openSheet('settings')}
 				isLink
 			>

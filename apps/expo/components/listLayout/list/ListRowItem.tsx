@@ -33,7 +33,7 @@ export function ListRowItem({
 	infoItems,
 	...thumbnailProps
 }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { width: thumbnailWidth, height } = useListRowItemSize()
 
@@ -90,12 +90,15 @@ export function ListRowItem({
 									className="pl-1 text-foreground-muted shrink-0"
 								>
 									{latestCompletionDate
-										? `${t('common.lastCompleted')} ${intlFormat(latestCompletionDate, {
-												month: 'short',
-												day: 'numeric',
-												year: 'numeric',
-											})}`
-										: t('common.completed')}
+										? `${translate('shared.common.lastCompleted')} ${intlFormat(
+												latestCompletionDate,
+												{
+													month: 'short',
+													day: 'numeric',
+													year: 'numeric',
+												},
+											)}`
+										: translate('shared.common.completed')}
 								</Text>
 
 								<View

@@ -6,7 +6,6 @@ import {
 	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Book, Home } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -15,6 +14,7 @@ import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
@@ -55,7 +55,7 @@ export default function TopNavigation() {
 	const location = useLocation()
 
 	const [ref, size] = useDimensionsRef()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {
@@ -99,7 +99,7 @@ export default function TopNavigation() {
 						onMouseEnter={() => prefetchHome()}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
-						{t('sidebar.buttons.home')}
+						{translate('shared.common.home')}
 					</TopBarNavLink>
 				))
 				.with(SystemArrangement.Explore, () => (
@@ -130,7 +130,7 @@ export default function TopNavigation() {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, size, prefetchHome, paths],
+		[t, location.pathname, size, prefetchHome, paths, translate],
 	)
 
 	const sections = useMemo(

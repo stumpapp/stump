@@ -1,13 +1,13 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, Club } from 'lucide-react'
 import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
@@ -36,7 +36,7 @@ export default function BookClubNavigationItem({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs'))
 
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canCreateBookClub = checkPermission(UserPermission.CreateBookClub)

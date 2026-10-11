@@ -1,12 +1,12 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, FileStack, List } from 'lucide-react'
 import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
@@ -34,7 +34,7 @@ export default function SmartListNavigationItem({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('smartLists'))
 
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const { prefetch } = usePrefetchSmartList()
 
@@ -84,7 +84,7 @@ export default function SmartListNavigationItem({
 		<NavigationMenu.Item>
 			<NavigationMenu.Trigger className="bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
 				<List className="mr-2 h-4 w-4" />
-				{t('sidebar.buttons.smartlists')}
+				{translate('shared.common.smartLists')}
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
 				<div

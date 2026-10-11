@@ -1,13 +1,13 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import OptionalFeaturesSection from './features'
 
 export default function DesktopSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<SceneContainer>

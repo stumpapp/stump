@@ -47,7 +47,7 @@ import { DownloadSortOption, useDownloadsState } from './store'
 import { SYNC_CONFLICTS_SHEET_NAME } from './syncConflicts'
 
 export function useLocalLibrarySortAndDisplayMenu() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const sortConfig = useDownloadsState((state) => state.sort)
 	const setSortConfig = useDownloadsState((state) => state.setSort)
@@ -92,10 +92,10 @@ export function useLocalLibrarySortAndDisplayMenu() {
 	const getSortSubtitle = useCallback(
 		(option: DownloadSortOption) => {
 			if (sortConfig.option !== option) return undefined
-			const localeKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionText'
-			return t(getSortKey(`${localeKey}.${sortConfig.direction}`))
+			const localeKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionString'
+			return translate(getSortKey(`${localeKey}.${sortConfig.direction}`))
 		},
-		[sortConfig, t],
+		[sortConfig, translate],
 	)
 
 	const onDeleteAllDownloads = async () => {
@@ -108,8 +108,12 @@ export function useLocalLibrarySortAndDisplayMenu() {
 			t(getActionsKey('deleteAllDownloads.confirmation')),
 			t(getActionsKey('deleteAllDownloads.disclaimer')),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
-				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteAllDownloads },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
+				{
+					text: translate('shared.common.delete'),
+					style: 'destructive',
+					onPress: onDeleteAllDownloads,
+				},
 			],
 		)
 	}
@@ -138,7 +142,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						subtitle={getSortSubtitle('NAME')}
 						onPress={() => handleSortSelection('NAME')}
 					>
-						{t(getSortKey('sortBy.NAME'))}
+						{translate(getSortKey(`sortField.NAME`))}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						icon="clock"
@@ -146,7 +150,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						subtitle={getSortSubtitle('ADDED_AT')}
 						onPress={() => handleSortSelection('ADDED_AT')}
 					>
-						{t(getSortKey('sortBy.ADDED_AT'))}
+						{translate(getSortKey(`sortField.ADDED_AT`))}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						icon="books.vertical.fill"
@@ -154,7 +158,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						subtitle={getSortSubtitle('SERIES')}
 						onPress={() => handleSortSelection('SERIES')}
 					>
-						{t(getSortKey('sortBy.SERIES'))}
+						{translate(getSortKey(`sortField.SERIES`))}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 				<Stack.Toolbar.Menu inline>
@@ -163,7 +167,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						onPress={() => setIsSelecting(true)}
 						disabled={downloadsCount === 0}
 					>
-						{t('common.select')}
+						{translate('shared.common.select')}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						icon="arrow.trianglehead.2.clockwise.rotate.90"
@@ -256,7 +260,7 @@ function AndroidSortAndActionsMenu({
 	onSeeProblems,
 	onDeleteAll,
 }: AndroidMenuProps) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -272,8 +276,8 @@ function AndroidSortAndActionsMenu({
 	const renderAndroidSortLabel = (option: DownloadSortOption, direction: 'ASC' | 'DESC') => {
 		if (option !== sortConfig.option) return null
 
-		const localeKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionText'
-		return t(getSortKey(`${localeKey}.${direction}`))
+		const localeKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionString'
+		return translate(getSortKey(`${localeKey}.${direction}`))
 	}
 
 	const renderSortText = (label: string, subtitle: string | null) => (
@@ -322,7 +326,7 @@ function AndroidSortAndActionsMenu({
 						<View className="gap-4 flex flex-1 flex-row items-center">
 							<Icon as={ALargeSmall} size={20} className="text-foreground-muted ml-auto" />
 							{renderSortText(
-								t(getSortKey('sortBy.NAME')),
+								translate(getSortKey(`sortField.NAME`)),
 								renderAndroidSortLabel('NAME', sortConfig.direction),
 							)}
 						</View>
@@ -338,7 +342,7 @@ function AndroidSortAndActionsMenu({
 						<View className="gap-4 flex flex-1 flex-row items-center">
 							<Icon as={Clock} size={20} className="text-foreground-muted ml-auto" />
 							{renderSortText(
-								t(getSortKey('sortBy.ADDED_AT')),
+								translate(getSortKey(`sortField.ADDED_AT`)),
 								renderAndroidSortLabel('ADDED_AT', sortConfig.direction),
 							)}
 						</View>
@@ -354,7 +358,7 @@ function AndroidSortAndActionsMenu({
 						<View className="gap-4 flex flex-1 flex-row items-center">
 							<Icon as={LibraryBig} size={20} className="text-foreground-muted ml-auto" />
 							{renderSortText(
-								t(getSortKey('sortBy.SERIES')),
+								translate(getSortKey(`sortField.SERIES`)),
 								renderAndroidSortLabel('SERIES', sortConfig.direction),
 							)}
 						</View>
@@ -371,7 +375,7 @@ function AndroidSortAndActionsMenu({
 					<View className="gap-4 flex w-full flex-row items-center justify-between">
 						<View className="gap-4 flex flex-row items-center">
 							<Icon as={CheckCircle} size={20} className="text-foreground-muted ml-auto" />
-							<Text className="text-lg">{t('common.select')}</Text>
+							<Text className="text-lg">{translate('shared.common.select')}</Text>
 						</View>
 					</View>
 				</DropdownMenuItem>
@@ -446,7 +450,7 @@ function AndroidSortAndActionsMenu({
 	)
 }
 
-const SORT_BASE = 'localLibrary.downloadsHeaderSortMenu'
+const SORT_BASE = 'shared.sorting'
 const getSortKey = (key: string) => `${SORT_BASE}.${key}`
 
 const ACTIONS_BASE = 'localLibrary.downloadsHeaderMenu'

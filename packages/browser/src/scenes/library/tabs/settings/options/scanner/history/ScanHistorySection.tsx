@@ -1,9 +1,10 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Heading, Text } from '@stump/components'
 import { graphql, LibraryScanRecord } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../../../context'
 import ScanHistoryTable from './ScanHistoryTable'
@@ -15,7 +16,7 @@ const mutation = graphql(`
 `)
 
 export default function ScanningSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		library: { id },

@@ -16,7 +16,7 @@ import { useSavedServers } from '~/stores'
 import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, deleteServer, getServerConfig } = useSavedServers()
 	const router = useRouter()
 	const { width } = useWindowDimensions()
@@ -67,21 +67,21 @@ export default function Screen() {
 	const handleDeleteServer = useCallback(
 		(server: SavedServer) => {
 			SystemAlert.alert(
-				t('savedServerActions.deleteServer.title'),
-				t('savedServerActions.deleteServer.confirmation', {
+				translate('shared.savedServerActions.deleteServer.title'),
+				translate('shared.savedServerActions.deleteServer.confirmation', {
 					serverName: `'${server.name}'`,
 				}),
 				[
-					{ text: t('common.cancel'), style: 'cancel' },
+					{ text: translate('shared.common.cancel'), style: 'cancel' },
 					{
-						text: t('common.delete'),
+						text: translate('shared.common.delete'),
 						style: 'destructive',
 						onPress: () => deleteServer(server.id),
 					},
 				],
 			)
 		},
-		[deleteServer, t],
+		[deleteServer, translate],
 	)
 
 	const onSelectForEdit = useCallback(
@@ -105,8 +105,8 @@ export default function Screen() {
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<EmptyState
-					title={t('emptyState.noServers')}
-					message={t('emptyState.cta')}
+					title={translate('shared.emptyState.noServers')}
+					message={translate('shared.emptyState.cta')}
 					actions={
 						<>
 							<Button
@@ -116,7 +116,7 @@ export default function Screen() {
 								className="relative"
 								onPress={() => Linking.openURL('https://www.stumpapp.dev/docs/apps/mobile')}
 							>
-								<Text>{t('emptyState.seeDocumentation')}</Text>
+								<Text>{translate('shared.emptyState.seeDocumentation')}</Text>
 
 								<Icon
 									as={ExternalLink}

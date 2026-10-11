@@ -14,6 +14,8 @@ import {
 import { useLibraryManagement } from '../../context'
 import ThumbnailManagementSection from './ThumbnailManagementSection'
 
+// TODO(chore): this page is so ugly :'(
+
 export default function ThumbnailSettingsScene() {
 	const { library, patch } = useLibraryManagement()
 

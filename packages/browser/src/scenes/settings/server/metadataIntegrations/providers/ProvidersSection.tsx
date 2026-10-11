@@ -1,8 +1,9 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateProviderDialog } from './CreateProviderDialog'
 import { ExistingProviderCard } from './ExistingProviderCard'
@@ -20,7 +21,7 @@ function ProviderCards() {
 	const {
 		data: { metadataProviderConfigs: providers },
 	} = useSuspenseGraphQL(query, ['metadataProviderConfigs'])
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	if (providers.length === 0) {
 		return (
@@ -42,7 +43,7 @@ function ProviderCards() {
 }
 
 export default function ProvidersSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="gap-4 flex flex-col">

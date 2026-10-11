@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -12,6 +11,7 @@ import {
 	formDefaults,
 } from '@/components/bookClub/createOrUpdateForm'
 import { BasicBookClubInformation } from '@/components/bookClub/createOrUpdateForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useBookClubManagement } from '../context'
 
@@ -28,7 +28,7 @@ const query = graphql(`
 export default function BasicSettingsScene() {
 	const { sdk } = useSDK()
 	const { club, patch } = useBookClubManagement()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		data: { bookClubs: existingClubs },

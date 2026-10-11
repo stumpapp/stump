@@ -6,7 +6,7 @@ import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function PublisherStyles() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			allowPublisherStyles: state.globalSettings.allowPublisherStyles,
@@ -23,7 +23,7 @@ export default function PublisherStyles() {
 				}}
 				className="text-lg"
 			>
-				{t('epubSettings.publisherStyles')}
+				{translate('shared.epubSettings.publisherStyles')}
 			</Text>
 
 			<View>
@@ -32,7 +32,7 @@ export default function PublisherStyles() {
 					onCheckedChange={() => {
 						store.setAllowPublisherStyles({ allowPublisherStyles: !store.allowPublisherStyles })
 					}}
-					accessibilityLabel={t('epubSettings.publisherStyles')}
+					accessibilityLabel={translate('shared.epubSettings.publisherStyles')}
 					accessibilityState={{ checked: store.allowPublisherStyles }}
 				/>
 			</View>

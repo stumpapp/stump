@@ -1,10 +1,10 @@
 import { Card, Spacer, Text } from '@stump/components'
 import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from './graphql'
@@ -30,7 +30,7 @@ export default function SmartListCard({ data }: Props) {
 	const paths = usePaths()
 	const { id, name, filters, description } = useFragment(fragment, data)
 	const { prefetch } = usePrefetchSmartList()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { meta } = useSmartListMeta({
 		id,

@@ -1,9 +1,10 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation DeleteTagConfirmModal($tags: [String!]!) {
@@ -21,7 +22,7 @@ type Props = {
 
 export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const client = useQueryClient()
 
@@ -45,7 +46,7 @@ export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 		<ConfirmationModal
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			confirmText={translate('shared.common.delete')}
 			confirmVariant="destructive"
 			isOpen={!!tag}
 			onClose={onClose}

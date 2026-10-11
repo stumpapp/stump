@@ -21,7 +21,7 @@ import { ImageBasedReaderContext } from './context'
 
 export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 	const context = useContext(ImageBasedReaderContext)
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const colors = useColors()
 
 	const accentColor = usePalette({ light: 300, dark: 900, opacity: 0.4 })
@@ -75,12 +75,12 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 					>
 						<View className="gap-8 w-full flex-1">
 							<View className="flex flex-row items-center justify-between">
-								<Heading size="lg">{t('common.settings')}</Heading>
+								<Heading size="lg">{translate('shared.common.settings')}</Heading>
 
 								{!!context && (
 									<View className="gap-1 flex-row items-center">
 										<Text className="text-foreground-muted">
-											{t('readerSettings.overrideGlobalSettings')}
+											{translate('shared.readerSettings.overrideGlobalSettings')}
 										</Text>
 										<Switch
 											checked={overrideGlobalSettings}

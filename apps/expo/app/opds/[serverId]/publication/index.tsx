@@ -55,7 +55,7 @@ import { usePreferencesStore } from '~/stores'
 import { usePublicationContext } from './context'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverId, kind },
@@ -152,7 +152,7 @@ export default function Screen() {
 	const seriesPosition = formatSeriesPosition(belongsToSeries?.position ?? null, 0, {
 		seriesName: belongsToSeries?.name ?? null,
 
-		t,
+		translate,
 	})
 	const seriesText = seriesPosition ?? belongsToSeries?.name
 	const belongsToCollection = Array.isArray(belongsTo?.collection)

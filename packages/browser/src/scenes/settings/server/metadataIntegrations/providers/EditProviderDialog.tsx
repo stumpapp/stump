@@ -2,12 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { Button, ConfirmationModal, Dialog, Form, ToolTip } from '@stump/components'
 import { ExistingProviderCardFragment, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import { Cog } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { PROVIDER_LABELS } from './constants'
 import ProviderForm from './ProviderForm'
@@ -45,7 +46,7 @@ export function EditProviderDialog({ provider }: Props) {
 		resolver: zodResolver(createConfig),
 	})
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const onSuccess = async () => {
 		await client.invalidateQueries({
@@ -112,13 +113,13 @@ export function EditProviderDialog({ provider }: Props) {
 							onClick={() => setIsDeleteDialogOpen(true)}
 							disabled={isPending}
 						>
-							{t('common.delete')}
+							{translate('shared.common.delete')}
 						</Button>
 
 						<div className="flex-1" />
 
 						<Button variant="outline" onClick={handleClose} disabled={isPending}>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 
 						<Button
@@ -127,7 +128,7 @@ export function EditProviderDialog({ provider }: Props) {
 							disabled={isPending}
 							isLoading={isEditPending}
 						>
-							{t('common.saveChanges')}
+							{translate('shared.common.saveChanges')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

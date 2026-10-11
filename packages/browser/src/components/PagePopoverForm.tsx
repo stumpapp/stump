@@ -4,6 +4,8 @@ import { useMemo, useRef } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 interface PagePopoverFormProps {
 	pos: number
 	currentPage: number
@@ -21,6 +23,8 @@ export default function PagePopoverForm({
 	trigger,
 }: PagePopoverFormProps) {
 	const inputRef = useRef<HTMLInputElement | null>(null)
+
+	const { translate } = useTranslate()
 
 	const [isOpen, { on, off }] = useBoolean()
 
@@ -72,7 +76,7 @@ export default function PagePopoverForm({
 				<div className="gap-2 flex flex-col">
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
 						<Input
-							label="Jump to another page"
+							label={translate('shared.imageReader.goToPage.label')}
 							type="number"
 							autoFocus
 							max={totalPages}

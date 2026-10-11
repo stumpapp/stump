@@ -1,11 +1,11 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Button, ComboBox, Dialog, Input } from '@stump/components'
 import { EmailerSendTo, graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query EmailBookDropdownDevice {
@@ -56,7 +56,7 @@ type Props = {
 } & ContainerProps
 
 function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: { emailDevices: devices },
@@ -142,7 +142,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 								setCurrentEmail('')
 							}}
 						>
-							{t('common.add')}
+							{translate('shared.common.add')}
 						</Button>
 					</div>
 				</div>

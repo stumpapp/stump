@@ -1,10 +1,10 @@
 import { ComboBox, NativeSelect } from '@stump/components'
 import { ReadingStatus } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { isConceptualOperator, SmartListFormSchema } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 import { FieldDef } from './FilterValue'
@@ -23,7 +23,7 @@ const CONCEPTUAL_FIELD_OPTIONS: Record<string, string[]> = {
 }
 
 export default function EnumValue({ idx }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
@@ -41,8 +41,11 @@ export default function EnumValue({ idx }: Props) {
 
 	const options = useMemo(() => {
 		const fieldOptions = CONCEPTUAL_FIELD_OPTIONS[fieldDef.field] || []
-		return fieldOptions.map((opt) => ({ label: t(getKey(opt)), value: opt }))
-	}, [fieldDef.field, t])
+		return fieldOptions.map((opt) => ({
+			label: translate(`shared.readingStatus.${opt}`),
+			value: opt,
+		}))
+	}, [fieldDef.field, translate])
 
 	const isMultiSelect = useMemo(() => {
 		const op = fieldDef.operation

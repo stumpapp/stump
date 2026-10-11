@@ -1,10 +1,10 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
@@ -18,7 +18,7 @@ import UsersStats from './UsersStats'
 
 // TODO(sea-orm): Re-add stats
 export default function UsersScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	// TODO(permissions): isServerOwner will be replaced by discrete permissions
 	// once https://github.com/stumpapp/stump/tree/improve-permissioning is merged
 	// ^ so once it is, use those (prolly stats-specific ones?) instead

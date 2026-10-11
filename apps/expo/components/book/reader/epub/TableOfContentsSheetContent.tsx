@@ -30,7 +30,7 @@ type Props = {
 
 export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
 	const colors = useColors()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { getRequestHeaders } = useEpubReaderContext()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const { height } = useDisplay()
@@ -156,7 +156,10 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 
 						<View className="flex-row items-center justify-between">
 							<Text className="text-[#898d94]">
-								{t('common.pageXOfY', { current: currentPage, total: totalPages })}
+								{translate('shared.common.pageXOfY', {
+									current: currentPage,
+									total: totalPages,
+								})}
 							</Text>
 
 							<GlassView
@@ -172,7 +175,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 									placeholderTextColor="#898d94"
 									keyboardType="number-pad"
 									selectionColor={selectionColor}
-									placeholder={t('tableOfContents.goToPagePlaceholder')}
+									placeholder={translate('shared.tableOfContents.goToPagePlaceholder')}
 									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
 									onChangeText={(text) => goToPage.setString(text)}
 									value={goToPage.string}
@@ -241,7 +244,7 @@ const TableOfContentsListItem = ({
 	nextChapterActive: boolean
 }) => {
 	const { readerRef } = useEpubReaderContext()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
@@ -310,7 +313,7 @@ const TableOfContentsListItem = ({
 								)}
 								style={currentChapterActive && { color: palette.text }}
 							>
-								{item.position || t('common.notAvailable')}
+								{item.position || translate('shared.common.notAvailable')}
 							</Text>
 						</View>
 					</>
@@ -342,7 +345,7 @@ const ScrollToChapterIndicator = ({
 	onPress: () => void
 	className?: string
 }) => {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const textColor = usePalette('accent')
 
@@ -361,7 +364,7 @@ const ScrollToChapterIndicator = ({
 				>
 					<View className="px-4 py-2">
 						<Text className="text-base font-semibold" style={{ color: textColor }}>
-							{t('tableOfContents.showCurrentChapter')}
+							{translate('shared.tableOfContents.showCurrentChapter')}
 						</Text>
 					</View>
 				</GlassView>

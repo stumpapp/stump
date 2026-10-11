@@ -1,7 +1,8 @@
 import { Dialog, Tabs, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { List } from 'lucide-react'
 import { useCallback, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import AnnotationsList from '../annotations/AnnotationsList'
 import ControlButton from '../controls/ControlButton'
@@ -11,7 +12,7 @@ import TableOfContents from './TableOfContents'
 type LocationTab = 'contents' | 'annotations' | 'bookmarks'
 
 export default function LocationManager() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 	const [activeTab, setActiveTab] = useState<LocationTab>('contents')
 
@@ -45,7 +46,7 @@ export default function LocationManager() {
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Trigger asChild>
-				<ControlButton title={t('epubReader.locationManager')}>
+				<ControlButton title={translate('shared.epubReader.locationManager')}>
 					<List className="h-4 w-4" />
 				</ControlButton>
 			</Dialog.Trigger>
@@ -54,11 +55,15 @@ export default function LocationManager() {
 					<Tabs value={activeTab} variant="primary" activeOnHover>
 						<Tabs.List className="border-none">
 							<Tabs.Trigger value="contents" asChild onClick={() => handleTabChange('contents')}>
-								<Text className="cursor-pointer truncate">{t('epubReader.contents')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.tableOfContents')}
+								</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="bookmarks" asChild onClick={() => handleTabChange('bookmarks')}>
-								<Text className="cursor-pointer truncate">{t('epubReader.bookmarks')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.bookmarks')}
+								</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger
@@ -66,7 +71,9 @@ export default function LocationManager() {
 								asChild
 								onClick={() => handleTabChange('annotations')}
 							>
-								<Text className="cursor-pointer truncate">{t('epubReader.annotations')}</Text>
+								<Text className="cursor-pointer truncate">
+									{translate('shared.epubReader.annotations')}
+								</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>

@@ -2,13 +2,14 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { formatHumanDuration, useLocaleContext } from '@stump/i18n'
+import { formatHumanDuration } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
@@ -17,7 +18,7 @@ import GoToPage from './GoToPage'
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
@@ -44,14 +45,14 @@ export default function ReaderFooter() {
 	// reused as the "go to page" trigger text in paged mode.
 	const pageRangeLabel = useMemo(
 		() =>
-			t('imageReader.footer.pageOf', {
+			translate('shared.common.pageXOfY', {
 				current: [...currentSet]
 					.map((idx) => idx + 1)
 					.sort((a, b) => a - b)
 					.join('-'),
 				total: book.pages,
 			}),
-		[currentSet, book.pages, t],
+		[currentSet, book.pages, translate],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -131,7 +132,7 @@ export default function ReaderFooter() {
 						))}
 					</div>
 					{!isCurrentSet && (
-						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+						<Text size="sm" className="text-gray-45 shrink-0 text-center">
 							{[...indexes]
 								.sort((a, b) => a - b)
 								.map((i) => i + 1)
@@ -193,8 +194,8 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">
-							{t('imageReader.footer.readingTime', { time: formattedReadTime })}
+						<Text className="text-sm text-gray-450">
+							{translate('shared.imageReader.footer.readingTime', { time: formattedReadTime })}
 						</Text>
 					)}
 
@@ -209,7 +210,7 @@ export default function ReaderFooter() {
 							triggerLabel={pageRangeLabel}
 						/>
 					) : (
-						<Text className="text-sm text-[#898d94]">{pageRangeLabel}</Text>
+						<Text className="text-sm text-gray-450">{pageRangeLabel}</Text>
 					)}
 				</div>
 			</div>

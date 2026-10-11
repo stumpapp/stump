@@ -2,12 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { ContentContainer } from '@/components/container'
 import { useSteppedFormContext } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListQueryBuilder } from '../../components/smartList/createOrUpdate/queryBuilder'
 import { createSchema, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
@@ -29,7 +29,7 @@ const query = graphql(`
 `)
 
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { currentStep, setStep } = useSteppedFormContext()
 

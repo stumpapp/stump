@@ -8,7 +8,7 @@ import { useSavedServers } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function DefaultServer() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { savedServers, setDefaultServer } = useSavedServers()
 
 	const defaultServer = savedServers.find((server) => server.defaultServer)
@@ -23,7 +23,7 @@ export default function DefaultServer() {
 				value={defaultServer?.id || 'none'}
 				options={[
 					{
-						label: t('common.none'),
+						label: translate('shared.common.none'),
 						value: 'none',
 					},
 					...savedServers.map((server) => ({

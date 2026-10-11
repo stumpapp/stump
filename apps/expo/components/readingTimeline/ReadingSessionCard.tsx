@@ -107,7 +107,7 @@ export function ReadingSessionCard({
 	groupedBy = 'day',
 }: Props) {
 	const router = useRouter()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -194,7 +194,7 @@ export function ReadingSessionCard({
 
 									<View className="gap-1.5 flex-row">
 										<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-											<Text size="sm">{`${t('common.page')} ${endPage}`}</Text>
+											<Text size="sm">{`${translate('shared.common.page')} ${endPage}`}</Text>
 											<Text
 												size="xs"
 												className="pb-0.5 text-foreground-muted"

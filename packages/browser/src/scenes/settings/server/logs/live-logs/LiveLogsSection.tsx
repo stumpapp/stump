@@ -1,10 +1,11 @@
 import { Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import LiveLogsFeed from './LiveLogsFeed'
 
 export default function LiveLogsSection() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>

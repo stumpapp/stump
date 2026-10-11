@@ -10,14 +10,14 @@ import { useTranslate } from '~/lib/hooks'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ImageReaderSettings() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<>
 			<AppSettingsRow
 				icon={GalleryThumbnails}
 				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
-				title={t('readerSettings.title')}
+				title={translate('shared.readerSettings.title')}
 				onPress={() => TrueSheet.present('imageReaderSettings')}
 				isLink
 			>

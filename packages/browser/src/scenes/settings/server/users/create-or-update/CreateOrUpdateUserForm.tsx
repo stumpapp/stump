@@ -2,13 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, AlertDescription, Button, Form, Heading, Text } from '@stump/components'
 import { CreateUserInput, extractErrorMessage, graphql, UpdateUserInput } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import AccountDetails from './AccountDetails'
@@ -57,7 +57,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const isCreating = !user
 	const schema = useMemo(

@@ -11,7 +11,7 @@ type Params = {
 }
 
 export function useSeriesFilterMenu({ libraryType = true }: Params = {}) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const filters = useSeriesFilterStore((store) => store.filters)
 	const setFilters = useSeriesFilterStore((store) => store.setFilters)
 
@@ -26,19 +26,19 @@ export function useSeriesFilterMenu({ libraryType = true }: Params = {}) {
 					key: 'not-started',
 					value: ReadingStatus.NotStarted,
 					icon: { ios: 'clock.badge', android: ClockFading },
-					label: t('filtering.notStarted'),
+					label: translate('shared.readingStatus.NOT_STARTED'),
 				},
 				{
 					key: 'reading',
 					value: ReadingStatus.Reading,
 					icon: { ios: 'eyeglasses', android: Glasses },
-					label: t('filtering.currentlyReading'),
+					label: translate('shared.readingStatus.READING'),
 				},
 				{
 					key: 'finished',
 					value: ReadingStatus.Finished,
 					icon: { ios: 'checkmark.circle', android: CheckCircle },
-					label: t('filtering.finished'),
+					label: translate('shared.readingStatus.FINISHED'),
 				},
 			],
 		},
@@ -49,26 +49,26 @@ export function useSeriesFilterMenu({ libraryType = true }: Params = {}) {
 			key: 'content-type',
 			mode: 'multi',
 			filterPath: 'libraryType.isAnyOf',
-			title: t('common.content'),
+			title: translate('shared.common.content'),
 			inline: true,
 			items: [
 				{
 					key: 'book',
 					value: LibraryType.Book,
 					icon: { ios: 'book', android: BookOpen },
-					label: t('libraryType.BOOK'),
+					label: translate('shared.libraryType.BOOK'),
 				},
 				{
 					key: 'comic',
 					icon: { ios: { xcasset: 'comic.bubble' }, android: Book },
 					value: LibraryType.Comic,
-					label: t('libraryType.COMIC'),
+					label: translate('shared.libraryType.COMIC'),
 				},
 				{
 					key: 'manga',
 					icon: { ios: { xcasset: 'manga' }, android: Book },
 					value: LibraryType.Manga,
-					label: t('libraryType.MANGA'),
+					label: translate('shared.libraryType.MANGA'),
 				},
 			],
 		})

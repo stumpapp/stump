@@ -9,7 +9,7 @@ import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { imageMetadata } = useDerivedColorPalette()
 
 	const listColors = usePreferencesStore((store) => store.tintListBackground)
@@ -29,7 +29,7 @@ export default function Screen() {
 				<Stack.Screen
 					name="index"
 					options={{
-						headerTitle: t('readingTimeline.title'),
+						headerTitle: translate('shared.readingTimeline.title'),
 						headerShown: true,
 						headerTransparent: Platform.OS === 'ios',
 						headerBackground: Platform.OS === 'android' ? () => <View /> : undefined,

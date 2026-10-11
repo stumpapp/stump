@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { graphql, LibrarySideBarSectionQuery, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
@@ -10,6 +9,7 @@ import { useMediaMatch } from 'rooks'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const mutation = graphql(`
@@ -31,7 +31,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 
 	const [isDeleting, setIsDeleting] = useState(false)
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { checkPermission } = useAppContext()
 	const { sdk } = useSDK()
 	const { mutate: startScan } = useGraphQLMutation(mutation, {
@@ -108,7 +108,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 										{
 											disabled: isOnExplorer,
 											href: paths.libraryFileExplorer(library.id),
-											label: t(getLocaleKey('fileExplorer')),
+											label: translate('shared.common.files'),
 											leftIcon: <FolderSearch2 className={iconStyle} />,
 										},
 									]

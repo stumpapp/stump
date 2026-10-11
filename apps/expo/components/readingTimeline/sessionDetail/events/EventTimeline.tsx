@@ -79,7 +79,7 @@ type Props = {
 }
 
 export function EventTimeline({ fragmentRef }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -212,7 +212,7 @@ export function EventTimeline({ fragmentRef }: Props) {
 								style={pressed ? { opacity: 0.8 } : undefined}
 							>
 								<Text className="text-foreground-muted">
-									{t(`sorting.sortDirectionDate.${order}`)}
+									{translate(`shared.sorting.sortDirectionDate.${order}`)}
 								</Text>
 
 								<Icon

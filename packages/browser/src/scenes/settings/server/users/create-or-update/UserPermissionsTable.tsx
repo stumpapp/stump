@@ -1,17 +1,17 @@
 import { CheckBox, Heading, Link, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { CreateOrUpdateUserSchema } from './schema'
 
 export default function UserPermissionsTable() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 

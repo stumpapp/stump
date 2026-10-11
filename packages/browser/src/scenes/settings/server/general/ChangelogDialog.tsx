@@ -8,12 +8,13 @@ import {
 	Dialog,
 	NewCard,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, ExternalLink } from 'lucide-react'
 import { memo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Virtuoso } from 'react-virtuoso'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import MarkdownPreview from '../../../../components/markdown/MarkdownPreview'
 
@@ -68,7 +69,7 @@ const ChangelogSection = memo(({ version, subsections }: SectionProps) => (
 ChangelogSection.displayName = 'ChangelogSection'
 
 const SeeMoreFooter = () => {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	return (
 		<div className="pb-6 flex items-center justify-center">
 			<ButtonOrLink
@@ -78,7 +79,7 @@ const SeeMoreFooter = () => {
 				variant="outline"
 				size="sm"
 			>
-				{t('common.seeMore')}
+				{translate('shared.common.seeMore')}
 
 				<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
 			</ButtonOrLink>
@@ -92,7 +93,7 @@ export function ChangelogDialog() {
 	const version = useStumpVersion()
 	const semver = version?.semver
 
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const { data: raw, error: fetchError } = useQuery({
 		enabled: open && !!semver,
 		gcTime: Infinity,
@@ -110,10 +111,13 @@ export function ChangelogDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<NewCard.Row
+				label={translate(getKey('label'))}
+				description={translate(getKey('description'))}
+			>
 				<Dialog.Trigger asChild>
 					<Button variant="outline" size="sm">
-						{t('common.view')}
+						{translate('shared.common.view')}
 					</Button>
 				</Dialog.Trigger>
 			</NewCard.Row>
@@ -122,7 +126,7 @@ export function ChangelogDialog() {
 				{fetchError && (
 					<Alert>
 						<AlertCircle />
-						<AlertTitle>{t(getKey('fetchFailed'))}</AlertTitle>
+						<AlertTitle>{translate(getKey('fetchFailed'))}</AlertTitle>
 						<AlertDescription>{fetchError.message}</AlertDescription>
 					</Alert>
 				)}
@@ -147,4 +151,4 @@ export function ChangelogDialog() {
 	)
 }
 
-const getKey = (key: string) => `settingsScene.server/general.sections.changelog.${key}`
+const getKey = (key: string) => `shared.serverSettings.changelog.${key}`

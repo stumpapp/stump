@@ -23,7 +23,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -88,8 +88,8 @@ export default function Screen() {
 				}
 				ListEmptyComponent={
 					<ListEmpty
-						title={t('emptyState.noSmartLists.label')}
-						message={t('emptyState.noSmartLists.description')}
+						title={translate('shared.emptyState.noSmartLists.label')}
+						message={translate('shared.emptyState.noSmartLists.description')}
 						actions={
 							<>
 								<RefreshButton
@@ -99,7 +99,7 @@ export default function Screen() {
 									onPress={() => handleRefetch()}
 									isRefreshing={isRefetching}
 								>
-									<Text>{t('common.refresh')}</Text>
+									<Text>{translate('shared.common.refresh')}</Text>
 								</RefreshButton>
 							</>
 						}

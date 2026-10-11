@@ -1,11 +1,11 @@
 import { cn, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { useRouterContext } from '@/context/RouterContext'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
@@ -18,7 +18,7 @@ export default function LibrarySettingsHeader() {
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')

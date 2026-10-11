@@ -1,9 +1,9 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Card, Heading } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from '../context'
@@ -20,7 +20,7 @@ const query = graphql(`
 
 export default function EmailersList() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { canCreateEmailer } = useEmailerSettingsContext()
 

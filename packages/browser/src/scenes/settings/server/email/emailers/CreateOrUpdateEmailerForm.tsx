@@ -11,9 +11,10 @@ import {
 	Text,
 } from '@stump/components'
 import { EmailerListItemFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schema'
 import TestEmailerButton from './TestEmailerButton'
@@ -27,7 +28,7 @@ type Props = {
 
 // TODO: Some of the descriptions are LONG. Use tooltips where necessary, instead of inline descriptions.
 export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSubmit }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const schema = useMemo(
 		() =>

@@ -1,8 +1,8 @@
 import { Button, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 
 import DeleteBookClubConfirmation from '@/components/bookClub/DeleteBookClubConfirmation'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useBookClubManagement } from '../context'
 
@@ -10,7 +10,7 @@ export default function DeleteBookClubSection() {
 	const {
 		club: { id },
 	} = useBookClubManagement()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [showConfirmation, setShowConfirmation] = useState(false)
 

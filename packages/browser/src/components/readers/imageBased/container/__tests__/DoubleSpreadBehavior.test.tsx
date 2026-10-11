@@ -22,7 +22,7 @@ describe('DoubleSpreadBehavior', () => {
 	it('renders the localized label and options', () => {
 		renderSubject()
 
-		const select = screen.getByRole('combobox', { name: 'Double Paged' })
+		const select = screen.getByRole('combobox', { name: 'Double paged' })
 		expect(
 			within(select)
 				.getAllByRole('option')

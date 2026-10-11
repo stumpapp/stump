@@ -137,7 +137,7 @@ const query = graphql(`
 
 export default function Screen() {
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -213,7 +213,7 @@ export default function Screen() {
 		(Number(book.metadata?.number) || book.seriesPosition) ?? null,
 		book.series.metadata?.totalIssues ?? null,
 		{
-			t,
+			translate,
 			seriesName,
 		},
 	)
@@ -238,11 +238,11 @@ export default function Screen() {
 		const { page, percentageCompleted } = book.readProgress || {}
 
 		if (page || percentageCompleted) {
-			return <Text>{t('common.continue')}</Text>
+			return <Text>{translate('shared.common.continue')}</Text>
 		} else if (book.readHistory?.length) {
-			return <Text>{t('common.readAgain')}</Text>
+			return <Text>{translate('shared.common.readAgain')}</Text>
 		} else {
-			return <Text>{t('common.read')}</Text>
+			return <Text>{translate('shared.common.read')}</Text>
 		}
 	}
 
@@ -381,7 +381,7 @@ export default function Screen() {
 					/>
 
 					<MetadataBadgeSection
-						label={t('bookMetadata.genres')}
+						label={translate('shared.bookMetadata.genres')}
 						items={genres.map((genre) => ({
 							label: genre,
 							onPress: () => onClickFilterField('genres', genre),
@@ -391,7 +391,7 @@ export default function Screen() {
 					{!noAcknowledgements && (
 						<View className="gap-6">
 							<MetadataBadgeSection
-								label={t('bookMetadata.writers')}
+								label={translate('shared.bookMetadata.writers')}
 								items={writers.map((writer) => ({
 									label: writer,
 									onPress: () => onClickFilterField('writers', writer),
@@ -399,7 +399,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label={t('bookMetadata.colorists')}
+								label={translate('shared.bookMetadata.colorists')}
 								items={colorists.map((colorist) => ({
 									label: colorist,
 									onPress: () => onClickFilterField('colorists', colorist),
@@ -407,7 +407,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label={t('bookMetadata.inkers')}
+								label={translate('shared.bookMetadata.inkers')}
 								items={inkers.map((inker) => ({
 									label: inker,
 									onPress: () => onClickFilterField('inkers', inker),
@@ -415,7 +415,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label={t('bookMetadata.letterers')}
+								label={translate('shared.bookMetadata.letterers')}
 								items={letterers.map((letterer) => ({
 									label: letterer,
 									onPress: () => onClickFilterField('letterers', letterer),
@@ -423,7 +423,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label={t('bookMetadata.coverArtists')}
+								label={translate('shared.bookMetadata.coverArtists')}
 								items={coverArtists.map((coverArtist) => ({
 									label: coverArtist,
 									onPress: () => onClickFilterField('coverArtists', coverArtist),
@@ -433,7 +433,7 @@ export default function Screen() {
 					)}
 
 					<MetadataBadgeSection
-						label={t('bookMetadata.characters')}
+						label={translate('shared.bookMetadata.characters')}
 						items={characters.map((character) => ({
 							label: character,
 							onPress: () => onClickFilterField('characters', character),
@@ -444,7 +444,9 @@ export default function Screen() {
 
 					{links.length > 0 && (
 						<View className="gap-2 flex w-full">
-							<ListLabel className="ios:px-4 px-2">{t('bookMetadata.links')}</ListLabel>
+							<ListLabel className="ios:px-4 px-2">
+								{translate('shared.bookMetadata.links')}
+							</ListLabel>
 
 							<View className="ios:px-4 gap-2 px-2 flex flex-row flex-wrap">
 								{links.map((link) => (

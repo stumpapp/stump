@@ -3,7 +3,6 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 // import { useBookClubsQuery } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -16,6 +15,7 @@ import {
 } from '@/components/bookClub/createOrUpdateForm'
 import { ContentContainer } from '@/components/container'
 import { useSteppedFormContext } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateClubReview from './CreateClubReview'
 
@@ -34,7 +34,7 @@ type Props = {
 
 export default function CreateBookClubForm({ onSubmit }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { currentStep, setStep } = useSteppedFormContext()
 
 	const {

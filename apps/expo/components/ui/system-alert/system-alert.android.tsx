@@ -133,7 +133,7 @@ type SystemAlertButtonProps = {
 }
 
 function SystemAlertButton({ button, onPress }: SystemAlertButtonProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { isDarkColorScheme } = useColorScheme()
 
 	const colors = useColors()
@@ -153,7 +153,7 @@ function SystemAlertButton({ button, onPress }: SystemAlertButtonProps) {
 						button.style === 'destructive' ? colors.fill.danger.DEFAULT : colors.foreground.DEFAULT,
 				}}
 			>
-				<AndroidText>{button.text ?? t('common.ok')}</AndroidText>
+				<AndroidText>{button.text ?? translate('shared.common.ok')}</AndroidText>
 			</TextButton>
 		</ButtonContainer>
 	)

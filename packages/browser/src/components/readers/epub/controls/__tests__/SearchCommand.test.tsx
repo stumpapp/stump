@@ -11,14 +11,15 @@ import SearchCommand from '../SearchCommand'
 vi.mock('@stump/i18n', () => ({
 	...vi.importActual('@stump/i18n'),
 	useCreateTranslate: () => ({
+		t: (s: string) => s,
 		translate: (key: string, options?: { position?: number }) => {
-			if (key === 'epubReader.search.placeholder') {
+			if (key === 'shared.epubReader.search.placeholder') {
 				return 'Enter a query and press enter to search'
 			}
-			if (key === 'epubReader.search.loadMore') {
+			if (key === 'shared.epubReader.search.loadMore') {
 				return 'Load more results'
 			}
-			if (key === 'epubReader.search.section') {
+			if (key === 'shared.epubReader.search.section') {
 				return `Section ${options?.position}`
 			}
 

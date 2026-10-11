@@ -57,7 +57,7 @@ describe('APIKeyInspector', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		vi.mocked(useAppContext).mockReturnValue(useAppContextRet)
-		vi.mocked(useCreateTranslate).mockReturnValue({ t: translate } as any)
+		vi.mocked(useCreateTranslate).mockReturnValue({ t: translate, translate } as any)
 	})
 
 	it('should render a key with explicit permissions properly', () => {

@@ -105,6 +105,7 @@ export default function GoToPage({
 					type="button"
 					className="text-sm text-gray-450 underline-offset-2 hover:underline"
 					aria-label={resolvedLabel}
+					data-testid="goto-page-trigger"
 				>
 					{resolvedTriggerLabel}
 				</button>
@@ -126,7 +127,7 @@ export default function GoToPage({
 						fullWidth
 						autoFocus
 					/>
-					<Button size="sm" onClick={handleSubmit}>
+					<Button size="sm" onClick={handleSubmit} data-testid="goto-page-submit">
 						{resolvedSubmitLabel}
 					</Button>
 				</div>

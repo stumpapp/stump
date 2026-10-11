@@ -15,6 +15,7 @@ import {
 	Icon,
 	Text,
 } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
 export function BookReadingTimelineMenu() {
@@ -34,6 +35,8 @@ export function BookReadingTimelineMenu() {
 }
 
 function IosTimelineMenu() {
+	const { translate } = useTranslate()
+
 	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
 	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
 
@@ -45,13 +48,13 @@ function IosTimelineMenu() {
 						onPress={() => patchDisplay({ feedType: 'sessions' })}
 						isOn={feedType === 'sessions'}
 					>
-						Sessions
+						{translate('shared.readingTimeline.feedType.sessions')}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						onPress={() => patchDisplay({ feedType: 'events' })}
 						isOn={feedType === 'events'}
 					>
-						Events
+						{translate('shared.readingTimeline.feedType.events')}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 			</Stack.Toolbar.Menu>
@@ -60,8 +63,9 @@ function IosTimelineMenu() {
 }
 
 function AndroidTimelineMenu() {
-	const insets = useSafeAreaInsets()
+	const { translate } = useTranslate()
 
+	const insets = useSafeAreaInsets()
 	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
 	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
 
@@ -103,13 +107,13 @@ function AndroidTimelineMenu() {
 						checked={feedType === 'sessions'}
 						onCheckedChange={() => patchDisplay({ feedType: 'sessions' })}
 					>
-						<Text className="text-lg">Sessions</Text>
+						<Text className="text-lg">{translate('shared.readingTimeline.feedType.sessions')}</Text>
 					</DropdownMenuCheckboxItem>
 					<DropdownMenuCheckboxItem
 						checked={feedType === 'events'}
 						onCheckedChange={() => patchDisplay({ feedType: 'events' })}
 					>
-						<Text className="text-lg">Events</Text>
+						<Text className="text-lg">{translate('shared.readingTimeline.feedType.events')}</Text>
 					</DropdownMenuCheckboxItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>

@@ -2989,6 +2989,7 @@
         "description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
       },
       "enter": "Enter",
+      "groupBy": "Group By",
       "save": "Save",
       "send": "Send",
       "saveChanges": "Save Changes",
@@ -3104,7 +3105,12 @@
       "search": "Search",
       "invalidUrl": "Please enter a valid URL",
       "global": "Global",
-      "preferences": "Preferences"
+      "preferences": "Preferences",
+      "time": {
+	      "day": "Day",
+				"dateAndTime": "Date and Time",
+	      "month": "Month"
+      }
     },
     "libraryType": {
       "BOOK": "Books",
@@ -3298,6 +3304,7 @@
     },
     "sorting": {
       "labelEllipsis": "Sort By...",
+      "sortOrderLabel": "Sort Order",
       "sortField": {
         "CREATED_AT": "Date Added",
         "NUMBER": "Series Position",
@@ -3418,7 +3425,19 @@
     "readingTimeline": {
       "title": "Reading Timeline",
       "startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
-      "readthroughDateRange": "{{startDate}} - {{endDate}}"
+      "readthroughDateRange": "{{startDate}} - {{endDate}}",
+      "feedType": {
+	      "sessions": "Sessions",
+	      "events": "Events"
+      },
+      "goToSession": "Go to Session",
+      "deleteSession": {
+      	"label": "Delete Session",
+       	"finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "dnfedConfirm": "This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "normalConfirm": "This will permanently remove the session from your timeline",
+        "failedToDelete": "Failed to Delete Session"
+      }
     },
     "errors": {
       "unknown": "Unknown Error",

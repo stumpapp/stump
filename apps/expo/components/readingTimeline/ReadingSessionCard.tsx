@@ -265,22 +265,6 @@ export function ReadingSessionCard({
 				</Card>
 			)
 		} else {
-			// return (
-			// 	<Card>
-			// 		<Card.Row>
-			// 			<ThumbnailImage
-			// 				source={{
-			// 					uri: thumbnailUrl,
-			// 				}}
-			// 				size={{ height: 60 / thumbnailRatio, width: 60 }}
-			// 				placeholderData={thumbnailData}
-			// 				borderAndShadowStyle={{ shadowRadius: 5 }}
-			// 			/>
-			// 		</Card.Row>
-			// 		<SessionWithEventsTimeline fragmentRef={data} />
-			// 	</Card>
-			// )
-
 			const description =
 				groupedBy === 'month'
 					? `${intlFormat(startDate, {
@@ -314,58 +298,6 @@ export function ReadingSessionCard({
 					<SessionWithEventsTimeline fragmentRef={data} />
 				</Card>
 			)
-
-			//   	return (
-			// 	<View className="gap-6 flex-row items-start justify-between">
-			// 		<ThumbnailImage
-			// 			source={{
-			// 				uri: thumbnailUrl,
-			// 			}}
-			// 			size={{ height: 60 / thumbnailRatio, width: 60 }}
-			// 			placeholderData={thumbnailData}
-			// 			borderAndShadowStyle={{ shadowRadius: 5 }}
-			// 		/>
-			//
-			// 		<View className="gap-3 flex-1">
-			// 			<Text className="text-lg font-semibold shrink" numberOfLines={2}>
-			// 				{bookName}
-			// 			</Text>
-			//
-			// 			<SessionWithEventsTimeline fragmentRef={data} />
-			// 		</View>
-			// 	</View>
-			// )
-
-			//     <View className="gap-6 items-start justify-between">
-			// 			<View className="gap-6 flex-row items-start">
-			// 				<ThumbnailImage
-			// 					source={{
-			// 						uri: thumbnailUrl,
-			// 					}}
-			// 					size={{ height: 60 / thumbnailRatio, width: 60 }}
-			// 					placeholderData={thumbnailData}
-			// 					borderAndShadowStyle={{ shadowRadius: 5 }}
-			// 				/>
-			//
-			// 				<View className="gap-3 flex-1">
-			// 					<Text className="text-lg font-semibold shrink" numberOfLines={2}>
-			// 						{bookName}
-			// 					</Text>
-			//
-			// 					<View className="gap-6 flex-row items-center">
-			// 						<Text className="text-foreground-muted font-medium">{timeRange}</Text>
-			//
-			// 						<Text className="text-foreground-muted">
-			// 							{session?.elapsedSeconds != null
-			// 								? formatHumanDuration(session.elapsedSeconds)
-			// 								: '??'}
-			// 						</Text>
-			// 					</View>
-			// 				</View>
-			// 			</View>
-			//
-			// 			<SessionWithEventsTimeline fragmentRef={data} />
-			// 		</View>
 		}
 	}
 
@@ -401,7 +333,7 @@ export function ReadingSessionCard({
 								{
 									items: [
 										{
-											label: 'Go to Session',
+											label: translate('shared.readingTimeline.goToSession'),
 											icon: {
 												ios: 'arrow.up.right',
 												android: CalendarClock,
@@ -415,7 +347,7 @@ export function ReadingSessionCard({
 					{
 						items: [
 							{
-								label: 'Date and Time',
+								label: translate('shared.common.time.dateAndTime'),
 								icon: {
 									ios: 'calendar',
 									android: CalendarClock,
@@ -427,7 +359,7 @@ export function ReadingSessionCard({
 					{
 						items: [
 							{
-								label: 'Delete Session',
+								label: translate('shared.readingTimeline.deleteSession.label'),
 								icon: {
 									ios: 'trash',
 									android: Trash,

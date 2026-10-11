@@ -7,6 +7,7 @@ import { View } from 'react-native'
 import SheetWithHeader from '~/components/SheetWithHeader'
 import { Button, Card, Text } from '~/components/ui'
 import { InlineDatePicker } from '~/components/ui/inline-date-picker'
+import { useTranslate } from '~/lib/hooks'
 
 const mutation = graphql(`
 	mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
@@ -32,6 +33,8 @@ type Props = {
 }
 
 export function ReadingSessionEditSheet({ ref, session }: Props) {
+	const { translate } = useTranslate()
+
 	const [start, setStart] = useState(() => new Date(session.createdAt))
 	const [end, setEnd] = useState(() => new Date(session.updatedAt ?? session.createdAt))
 	const [elapsedSeconds, setElapsedSeconds] = useState(String(session.elapsedSeconds ?? 0))
@@ -58,7 +61,7 @@ export function ReadingSessionEditSheet({ ref, session }: Props) {
 		<SheetWithHeader
 			ref={ref}
 			detents={[0.65, 1]}
-			headerLabel="Date and Time"
+			headerLabel={translate('shared.common.time.dateAndTime')}
 			headerLeftButton={{ type: 'dismiss' }}
 			headerRightButton={{ type: 'check', onPress: onSubmit, disabled: isPatchingSession }}
 		>
@@ -83,7 +86,7 @@ export function ReadingSessionEditSheet({ ref, session }: Props) {
 				{/* TODO(reading-timeline): entering secs is terrible, find an actual lib for entering
 			  durations */}
 				<Card
-					label="Reading Time"
+					label={translate('shared.common.readTime')}
 					description="The total active reading time for this session, in seconds"
 				>
 					<Card.InputRow

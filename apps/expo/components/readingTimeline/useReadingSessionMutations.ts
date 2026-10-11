@@ -23,17 +23,16 @@ type Options = {
 	onDeleted?: () => void
 }
 
-// TODO(reading-timeline): obv translate all of this after i sort the translation organization stuff out
 // TODO(reading-timeline): created this intending to put patch here too, but kinda just made more sense
 // to keep it where used in the sheet. if i wind up not adding more, just rename this to useDelete... or sm
 
 export function useReadingSessionMutations({ onDeleted }: Options = {}) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const client = useQueryClient()
 
 	const { mutate: deleteSession } = useGraphQLMutation(mutation, {
 		onError: (error) => {
-			toast.error('Failed to delete session', {
+			toast.error(translate('shared.readingTimeline.deleteSession.failedToDelete'), {
 				description: extractErrorMessage(error, 'An unknown error occurred'),
 			})
 		},
@@ -41,23 +40,19 @@ export function useReadingSessionMutations({ onDeleted }: Options = {}) {
 
 	const getConfirmationMessage = (status: ReadingStatus) =>
 		match(status)
-			.with(
-				ReadingStatus.Finished,
-				() =>
-					'This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone. Are you sure?',
+			.with(ReadingStatus.Finished, () =>
+				translate('shared.readingTimeline.deleteSession.finishedConfirm'),
 			)
-			.with(
-				ReadingStatus.Abandoned,
-				() =>
-					'This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone. Are you sure?',
+			.with(ReadingStatus.Abandoned, () =>
+				translate('shared.readingTimeline.deleteSession.dnfedConfirm'),
 			)
-			.otherwise(() => 'This will permanently remove the session from your timeline. Are you sure?')
+			.otherwise(() => translate('shared.readingTimeline.deleteSession.normalConfirm'))
 
 	const confirmDeleteSession = (session: SessionRef) => {
 		SystemAlert.alert('Delete Session', getConfirmationMessage(session.status), [
-			{ text: t('common.cancel'), style: 'cancel' },
+			{ text: translate('shared.common.cancel'), style: 'cancel' },
 			{
-				text: t('common.delete'),
+				text: translate('shared.common.delete'),
 				style: 'destructive',
 				onPress: () =>
 					deleteSession(

@@ -56,13 +56,13 @@ function IosTimelineMenu() {
 						onPress={() => patchDisplay({ feedType: 'sessions' })}
 						isOn={feedType === 'sessions'}
 					>
-						Sessions
+						{translate('shared.readingTimeline.feedType.sessions')}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						onPress={() => patchDisplay({ feedType: 'events' })}
 						isOn={feedType === 'events'}
 					>
-						Events
+						{translate('shared.readingTimeline.feedType.events')}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 
@@ -75,7 +75,7 @@ function IosTimelineMenu() {
 						}
 						isOn={groupBy === 'day'}
 					>
-						Day
+						{translate('shared.common.time.day')}
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						onPress={() =>
@@ -85,7 +85,7 @@ function IosTimelineMenu() {
 						}
 						isOn={groupBy === 'month'}
 					>
-						Month
+						{translate('shared.common.time.month')}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 
@@ -97,7 +97,7 @@ function IosTimelineMenu() {
 					}
 					subtitle={translate(`shared.sorting.sortDirectionDate.${order}`)}
 				>
-					Sort Order
+					{translate('shared.sorting.sortOrderLabel')}
 				</Stack.Toolbar.MenuAction>
 			</Stack.Toolbar.Menu>
 		</Stack.Toolbar>
@@ -151,31 +151,33 @@ function AndroidTimelineMenu() {
 						checked={feedType === 'sessions'}
 						onCheckedChange={() => patchDisplay({ feedType: 'sessions' })}
 					>
-						<Text className="text-lg">Sessions</Text>
+						<Text className="text-lg">{translate('shared.readingTimeline.feedType.sessions')}</Text>
 					</DropdownMenuCheckboxItem>
 					<DropdownMenuCheckboxItem
 						checked={feedType === 'events'}
 						onCheckedChange={() => patchDisplay({ feedType: 'events' })}
 					>
-						<Text className="text-lg">Events</Text>
+						<Text className="text-lg">{translate('shared.readingTimeline.feedType.events')}</Text>
 					</DropdownMenuCheckboxItem>
 				</DropdownMenuGroup>
 
 				<DropdownMenuSeparator />
 
 				<DropdownMenuGroup>
-					<DropdownMenuLabel className="text-foreground-muted">Group By</DropdownMenuLabel>
+					<DropdownMenuLabel className="text-foreground-muted">
+						{translate('shared.common.groupBy')}
+					</DropdownMenuLabel>
 					<DropdownMenuCheckboxItem
 						checked={groupBy === 'day'}
 						onCheckedChange={() => patchDisplay({ groupBy: 'day' })}
 					>
-						<Text className="text-lg">Day</Text>
+						<Text className="text-lg">{translate('shared.common.time.day')}</Text>
 					</DropdownMenuCheckboxItem>
 					<DropdownMenuCheckboxItem
 						checked={groupBy === 'month'}
 						onCheckedChange={() => patchDisplay({ groupBy: 'month' })}
 					>
-						<Text className="text-lg">Month</Text>
+						<Text className="text-lg">{translate('shared.common.time.month')}</Text>
 					</DropdownMenuCheckboxItem>
 				</DropdownMenuGroup>
 
@@ -189,7 +191,7 @@ function AndroidTimelineMenu() {
 					}
 				>
 					<View className="flex-1 justify-center">
-						<Text className="text-lg">Sort Order</Text>
+						<Text className="text-lg">{translate('shared.sorting.sortOrderLabel')}</Text>
 						<Text className="text-sm text-foreground-muted">
 							{translate(`shared.sorting.sortDirectionDate.${order}`)}
 						</Text>

@@ -10,6 +10,7 @@ use models::{
 		library, library_config, library_scan_record, media, metadata_provider_config,
 		scanned_directory, series,
 	},
+	services::scanned_directory::stored_mtimes_under_path,
 	shared::enums::FileStatus,
 };
 use sea_orm::{
@@ -205,14 +206,8 @@ impl JobLifecycle for LibraryScanJob {
 
 		self.config = Some(config);
 
-		let stored_dir_mtimes = scanned_directory::Entity::find()
-			.filter(scanned_directory::Column::Path.starts_with(self.path.as_str()))
-			.all(ctx.conn())
-			.await
-			.unwrap_or_default()
-			.into_iter()
-			.map(|r| (r.path, r.last_mtime as u64))
-			.collect::<HashMap<String, u64>>();
+		let stored_dir_mtimes =
+			stored_mtimes_under_path(self.path.as_str(), ctx.conn()).await?;
 		tracing::debug!(
 			count = stored_dir_mtimes.len(),
 			"Loaded stored directory mtimes"

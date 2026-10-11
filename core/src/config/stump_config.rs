@@ -186,19 +186,13 @@ impl StumpConfig {
 		let config_dir_snippet = format!("config_dir = {:?}", config_dir);
 
 		let mut loader = ConfigLoader::<StumpConfig>::new();
-		loader
-			.code(config_dir_snippet, "base.toml")
-			.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+		loader.code(config_dir_snippet, "base.toml")?;
 
 		if toml_path.exists() {
-			loader
-				.file(toml_path)
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			loader.file(toml_path)?;
 		}
 
-		let result = loader
-			.load()
-			.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+		let result = loader.load()?;
 
 		let config = result.config;
 
@@ -390,6 +384,44 @@ allowed_origins = ["http://localhost:3000"]
 					assert_eq!(config.port, 4242);
 					assert_eq!(config.verbosity, 3); // toml value
 				});
+			},
+		);
+	}
+
+	#[test]
+	fn test_invalid_toml_reports_field_level_error() {
+		temp_env::with_vars(
+			[
+				("STUMP_PORT", None::<&str>),
+				("STUMP_VERBOSITY", None::<&str>),
+				("STUMP_ENABLE_PLAYGROUND", None::<&str>),
+				("STUMP_ALLOWED_ORIGINS", None::<&str>),
+				("STUMP_PASSWORD_HASH_COST", None::<&str>),
+			],
+			|| {
+				let dir = tempfile::tempdir().expect("should create temp dir");
+				let config_dir = dir.path().to_path_buf();
+
+				std::fs::write(
+					config_dir.join("Stump.toml"),
+					"port = \"not a number\"\n",
+				)
+				.expect("should write toml");
+
+				let error = StumpConfig::load(config_dir)
+					.expect_err("config with invalid port should fail to load");
+
+				let message = error.to_string();
+				// there is a lot of ansi in the message so not asserting full msgs
+				assert!(
+					message.contains("port"),
+					"should have complained about port, got: {message}"
+				);
+				assert!(
+					message
+						.contains("invalid type: string \"not a number\", expected u16"),
+					"should have complained about port being a string, got: {message}"
+				);
 			},
 		);
 	}

@@ -1,20 +1,23 @@
 import { TextInput } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import type { JournalEditorProps } from './types'
 
 export function JournalEditor({
 	value,
 	onChange,
-	placeholder = 'Write some thoughts down...',
+	placeholder,
 	onFocus,
 	onBlur,
 	lineHeight = 22,
 }: JournalEditorProps) {
+	const { translate } = useTranslate()
 	return (
 		<TextInput
 			value={value}
 			onChangeText={onChange}
-			placeholder={placeholder}
+			placeholder={placeholder ?? translate('shared.readingJournal.editorPlaceholder')}
 			placeholderClassName="text-foreground-muted"
 			onFocus={onFocus}
 			onBlur={onBlur}

@@ -2171,6 +2171,7 @@ export type Mutation = {
   deleteUserSessions: Scalars['Int']['output'];
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
+  extendReadingSession: ReadingSession;
   favoriteMedia: Media;
   favoriteSeries: Series;
   /** Start a job which will search external metadata providers */
@@ -2718,6 +2719,11 @@ export type MutationDeleteUserSessionsArgs = {
 export type MutationEditMessageArgs = {
   input: EditMessageInput;
   messageId: Scalars['ID']['input'];
+};
+
+
+export type MutationExtendReadingSessionArgs = {
+  sessionId: Scalars['Int']['input'];
 };
 
 
@@ -3999,6 +4005,7 @@ export type ReadingSession = {
   chaptersRead: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deviceIds: Array<Scalars['String']['output']>;
+  /** The devices which were used during this reading session */
   devices: Array<ReadingDeviceModel>;
   /** accumulated reading time for this session, updated via deltas (not overwritten) */
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
@@ -4007,6 +4014,7 @@ export type ReadingSession = {
   endPercentage?: Maybe<Scalars['Decimal']['output']>;
   events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
+  isLatest: Scalars['Boolean']['output'];
   journalEntry?: Maybe<JournalEntryModel>;
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   /**
@@ -5863,7 +5871,7 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
 export type ReadingSessionCardFragment = (
-  { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> }
+  { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, isLatest: boolean, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> }
   & { ' $fragmentRefs'?: { 'SessionWithEventsTimelineFragment': SessionWithEventsTimelineFragment } }
 ) & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
 
@@ -5947,6 +5955,13 @@ export type DeleteReadingSessionMutationVariables = Exact<{
 
 
 export type DeleteReadingSessionMutation = { __typename?: 'Mutation', deleteReadingSession: boolean };
+
+export type ExtendReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type ExtendReadingSessionMutation = { __typename?: 'Mutation', extendReadingSession: { __typename?: 'ReadingSession', updatedAt?: any | null } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -7976,6 +7991,7 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     journalEntry {
       content
     }
+    isLatest
   }
   events {
     __typename
@@ -8101,6 +8117,7 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     journalEntry {
       content
     }
+    isLatest
   }
   events {
     __typename
@@ -9661,6 +9678,7 @@ export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
     journalEntry {
       content
     }
+    isLatest
   }
   events {
     __typename
@@ -11257,6 +11275,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     journalEntry {
       content
     }
+    isLatest
   }
   events {
     __typename
@@ -11363,6 +11382,13 @@ export const DeleteReadingSessionDocument = new TypedDocumentString(`
   deleteReadingSession(sessionId: $sessionId)
 }
     `) as unknown as TypedDocumentString<DeleteReadingSessionMutation, DeleteReadingSessionMutationVariables>;
+export const ExtendReadingSessionDocument = new TypedDocumentString(`
+    mutation ExtendReadingSession($sessionId: Int!) {
+  extendReadingSession(sessionId: $sessionId) {
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<ExtendReadingSessionMutation, ExtendReadingSessionMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

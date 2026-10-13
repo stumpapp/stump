@@ -37,7 +37,7 @@ export function SessionJournal({ fragmentRef }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 	const client = useQueryClient()
 
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
 			client.invalidateQueries({
@@ -47,7 +47,7 @@ export function SessionJournal({ fragmentRef }: Props) {
 		},
 		onError: (error) => {
 			const errorMessage = extractErrorMessage(error, t('errors.unknown'))
-			toast.error('Failed to save entry', {
+			toast.error(translate('shared.readingJournal.failedToSaveEntry'), {
 				description: errorMessage,
 			})
 		},

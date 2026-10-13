@@ -17,7 +17,10 @@ use tokio::task::spawn_blocking;
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	loader::media::{MediaByIdForUserLoaderKey, MediaLoader},
+	loader::{
+		media::{MediaByIdForUserLoaderKey, MediaLoader},
+		reading_session::{ReadingSessionIsLatestLoaderKey, ReadingSessionLoader},
+	},
 	object::{
 		bookmark::Bookmark, media::Media, media_annotation::MediaAnnotation,
 		reading_timeline::SessionEvent,
@@ -167,6 +170,21 @@ impl ReadingSession {
 			)),
 			_ => Ok(vec![]),
 		}
+	}
+
+	async fn is_latest(&self, ctx: &Context<'_>) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
+
+		let is_latest = loader
+			.load_one(ReadingSessionIsLatestLoaderKey {
+				session_id: self.model.id,
+				user_id: user.id.clone(),
+			})
+			.await?
+			.unwrap_or(false);
+
+		Ok(is_latest)
 	}
 
 	async fn journal_entry(

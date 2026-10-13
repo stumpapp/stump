@@ -47,7 +47,7 @@ type Props = {
 }
 
 export function SessionEventsTimeline({ fragmentRef }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const data = useFragment(fragment, fragmentRef)
 	const endPage = data.endPage ?? data.endLocator?.locations?.position ?? '??'
@@ -115,7 +115,7 @@ export function SessionEventsTimeline({ fragmentRef }: Props) {
 							style={pressed ? { opacity: 0.8 } : undefined}
 						>
 							<Text className="text-foreground-muted">
-								{t(`sorting.sortDirectionDate.${order}`)}
+								{translate(`shared.sorting.sortDirectionDate.${order}`)}
 							</Text>
 
 							<Icon
@@ -136,7 +136,7 @@ export function SessionEventsTimeline({ fragmentRef }: Props) {
 							key={`${event.__typename}-${event.id}-session-${data.id}`}
 							event={event}
 							session={data}
-							feedType="events"
+							feedType="sessions"
 						/>
 					))}
 

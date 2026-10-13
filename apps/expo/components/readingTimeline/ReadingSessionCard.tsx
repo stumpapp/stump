@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'expo-router'
 import {
 	Bookmark as BookmarkIcon,
 	CalendarClock,
+	CalendarPlus,
 	Highlighter,
 	LucideIcon,
 	PencilLine,
@@ -47,6 +48,7 @@ const fragment = graphql(`
 			journalEntry {
 				content
 			}
+			isLatest
 		}
 		events {
 			__typename
@@ -125,7 +127,7 @@ export function ReadingSessionCard({
 	} = useActiveServer()
 	const data = useFragment(fragment, fragmentRef)
 	const { session, events } = data
-	const { confirmDeleteSession } = useReadingSessionMutations()
+	const { confirmDeleteSession, confirmExtendSession } = useReadingSessionMutations()
 
 	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
 
@@ -354,6 +356,22 @@ export function ReadingSessionCard({
 								},
 								onPress: () => editSheetRef.current?.present(),
 							},
+							// Note: it would prob be better to do a combo check of isLatest +
+							// isNotActive or sm but that is way more work to do. i think this
+							// is an appropriate balance, but also it isn't invalid to extend
+							// an active session in this manner
+							...(data.session.isLatest
+								? [
+										{
+											label: translate('shared.readingTimeline.extendSession.label'),
+											icon: {
+												ios: 'calendar.badge.plus',
+												android: CalendarPlus,
+											},
+											onPress: () => confirmExtendSession(data.session),
+										} as const,
+									]
+								: []),
 						],
 					},
 					{

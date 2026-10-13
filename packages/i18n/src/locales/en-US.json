@@ -2984,6 +2984,7 @@
         "confirm": "Delete {{type}}",
         "typeToConfirm": "Type {{name}} to confirm:"
       },
+      "extend": "Extend",
       "experimentalDisclaimer": {
         "title": "This feature is experimental",
         "description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
@@ -3437,7 +3438,16 @@
         "dnfedConfirm": "This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone",
         "normalConfirm": "This will permanently remove the session from your timeline",
         "failedToDelete": "Failed to Delete Session"
+      },
+      "extendSession": {
+      	"label": "Extend Session",
+       	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
+        "failedToExtend": "Failed to Extend Session"
       }
+    },
+    "readingJournal": {
+    	"editorPlaceholder": "Write some thoughts down...",
+    	"failedToSaveEntry": "Failed to Save Journal Entry"
     },
     "errors": {
       "unknown": "Unknown Error",

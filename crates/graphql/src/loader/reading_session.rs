@@ -1,8 +1,12 @@
 use async_graphql::dataloader::Loader;
 use itertools::Itertools;
 use models::{entity::reading_session, shared::enums::ReadingStatus};
-use sea_orm::{prelude::*, DatabaseConnection, QueryOrder};
-use std::{cmp::Reverse, collections::HashMap, sync::Arc};
+use sea_orm::{prelude::*, DatabaseConnection, QueryOrder, QuerySelect};
+use std::{
+	cmp::Reverse,
+	collections::{HashMap, HashSet},
+	sync::Arc,
+};
 
 use crate::object::{
 	readthrough_record::ReadthroughRecord, resume_reading_cursor::ResumeReadingCursor,
@@ -186,6 +190,58 @@ impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionLoader {
 				result.insert(key.clone(), records);
 			}
 		}
+
+		Ok(result)
+	}
+}
+
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ReadingSessionIsLatestLoaderKey {
+	pub session_id: i32,
+	pub user_id: String,
+}
+
+impl Loader<ReadingSessionIsLatestLoaderKey> for ReadingSessionLoader {
+	type Value = bool;
+	type Error = Arc<sea_orm::error::DbErr>;
+
+	async fn load(
+		&self,
+		keys: &[ReadingSessionIsLatestLoaderKey],
+	) -> Result<HashMap<ReadingSessionIsLatestLoaderKey, Self::Value>, Self::Error> {
+		let session_ids = keys
+			.iter()
+			.map(|k| k.session_id.clone())
+			.collect::<Vec<_>>();
+		let user_ids = keys.iter().map(|k| k.user_id.clone()).collect::<Vec<_>>();
+
+		let latest_session_ids_for_users = reading_session::Entity::find()
+			.select_only()
+			.column(reading_session::Column::Id)
+			.filter(
+				reading_session::Column::UserId
+					.is_in(user_ids)
+					.and(reading_session::Column::Id.is_in(session_ids)),
+			)
+			.filter(
+				Expr::expr(Expr::exists(
+					reading_session::Entity::newer_session_exists_subquery(),
+				))
+				.not(),
+			)
+			.into_tuple::<i32>()
+			.all(self.conn.as_ref())
+			.await?
+			.into_iter()
+			.collect::<HashSet<_>>();
+
+		let result = keys.iter().fold(HashMap::new(), |mut acc, key| {
+			acc.insert(
+				key.clone(),
+				latest_session_ids_for_users.contains(&key.session_id),
+			);
+			acc
+		});
 
 		Ok(result)
 	}

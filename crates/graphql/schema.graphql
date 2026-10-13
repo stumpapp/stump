@@ -2234,6 +2234,7 @@ type Mutation {
 	may delete it
 	"""
 	deleteReadingSession(sessionId: Int!): Boolean!
+	extendReadingSession(sessionId: Int!): ReadingSession!
 	"""
 	Updates a reading session for the authenticated user, exposing a small
 	set of fields which are editable
@@ -2781,6 +2782,7 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	"The devices which were used during this reading session"
 	devices: [ReadingDeviceModel!]!
 	"""
 	The media which this session belongs to. Please note that if somehow the user loses access to the
@@ -2798,6 +2800,7 @@ type ReadingSession {
 	of sessions but more a detail view into a single session, etc.
 	"""
 	chaptersRead: [String!]!
+	isLatest: Boolean!
 	journalEntry: JournalEntryModel
 }
 

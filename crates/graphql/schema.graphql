@@ -2776,7 +2776,6 @@ type ReadingSession {
 	state of the session when it was last updated
 	"""
 	status: ReadingStatus!
-	notes: String
 	mediaId: String!
 	userId: String!
 	createdAt: DateTime!

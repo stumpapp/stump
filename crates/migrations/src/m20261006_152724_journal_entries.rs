@@ -7,6 +7,15 @@ pub struct Migration;
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		manager
+			.alter_table(
+				Table::alter()
+					.table(ReadingSessions::Table)
+					.drop_column(ReadingSessions::Notes)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
 			.create_table(
 				Table::create()
 					.table(JournalEntry::Table)
@@ -73,13 +82,28 @@ impl MigrationTrait for Migration {
 					.col(JournalEntry::SessionId)
 					.to_owned(),
 			)
-			.await
+			.await?;
+
+		Ok(())
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		manager
 			.drop_table(Table::drop().table(JournalEntry::Table).to_owned())
-			.await
+			.await?;
+
+		manager
+			.alter_table(
+				Table::alter()
+					.table(ReadingSessions::Table)
+					.add_column_if_not_exists(
+						ColumnDef::new(ReadingSessions::Notes).text(),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		Ok(())
 	}
 }
 
@@ -112,4 +136,5 @@ enum Media {
 enum ReadingSessions {
 	Table,
 	Id,
+	Notes,
 }

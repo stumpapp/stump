@@ -4025,7 +4025,6 @@ export type ReadingSession = {
    */
   media?: Maybe<Media>;
   mediaId: Scalars['String']['output'];
-  notes?: Maybe<Scalars['String']['output']>;
   /** which read-through of this book this session belongs to (1-indexed) */
   readthroughNumber: Scalars['Int']['output'];
   /** the "logical" date of this session, based on user prefs and start time */

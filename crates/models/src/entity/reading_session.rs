@@ -57,10 +57,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub status: ReadingStatus,
 
-	// TODO(reading-journal): remove in migration
-	#[sea_orm(column_type = "Text", nullable)]
-	pub notes: Option<String>,
-
 	/// all device ids that contributed updates to this session
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]

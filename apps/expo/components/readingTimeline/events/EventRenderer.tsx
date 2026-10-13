@@ -71,9 +71,6 @@ export function EventRenderer({ event, session, feedType }: Props) {
 			{renderEvent()}
 
 			<UpdateAnnotationSheet
-				// TODO: consider knobs to style the sheet, the blast of white
-				// was not welcome when i opened for the first time compared
-				// to the nice background
 				ref={updateAnnotationSheetRef}
 				onAnnotationChange={(id, annotationText) =>
 					updateAnnotation({

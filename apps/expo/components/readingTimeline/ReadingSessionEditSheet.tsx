@@ -8,6 +8,7 @@ import SheetWithHeader from '~/components/SheetWithHeader'
 import { Button, Card, Text } from '~/components/ui'
 import { InlineDatePicker } from '~/components/ui/inline-date-picker'
 import { useTranslate } from '~/lib/hooks'
+import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 
 const mutation = graphql(`
 	mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
@@ -34,6 +35,7 @@ type Props = {
 
 export function ReadingSessionEditSheet({ ref, session }: Props) {
 	const { translate } = useTranslate()
+	const { imageMetadata } = useDerivedColorPalette()
 
 	const [start, setStart] = useState(() => new Date(session.createdAt))
 	const [end, setEnd] = useState(() => new Date(session.updatedAt ?? session.createdAt))
@@ -64,6 +66,7 @@ export function ReadingSessionEditSheet({ ref, session }: Props) {
 			headerLabel={translate('shared.common.time.dateAndTime')}
 			headerLeftButton={{ type: 'dismiss' }}
 			headerRightButton={{ type: 'check', onPress: onSubmit, disabled: isPatchingSession }}
+			backgroundColorData={imageMetadata}
 		>
 			<View className="gap-4">
 				<Card label="Session Times">

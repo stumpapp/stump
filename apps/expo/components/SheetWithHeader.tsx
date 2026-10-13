@@ -7,7 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { PortalHostProvider } from '~/providers/PortalHostProvider'
+import { usePreferencesStore } from '~/stores'
 
+import { ScreenBackgroundGradient } from './BackgroundGradient'
+import { ThumbnailPlaceholderData } from './image'
 import { SheetBackDetection } from './SheetBackDetection'
 import { Heading } from './ui'
 import { HeaderButton } from './ui/header-button/header-button'
@@ -22,7 +25,9 @@ type HeaderProps = {
 	headerRightButton?: HeaderButtonPreset
 }
 
-type Props = TrueSheetProps & { ref?: RefObject<TrueSheet | null> } & HeaderProps
+type Props = TrueSheetProps & { ref?: RefObject<TrueSheet | null> } & HeaderProps & {
+		backgroundColorData?: ThumbnailPlaceholderData | null
+	}
 
 export default function SheetWithHeader({
 	children,
@@ -33,10 +38,12 @@ export default function SheetWithHeader({
 	headerRightButton,
 	onDidPresent,
 	onDidDismiss,
+	backgroundColorData,
 	...props
 }: Props) {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
+	const listColors = usePreferencesStore((store) => store.tintListBackground)
 
 	const [isOpen, setIsOpen] = useState(false)
 	const internalRef = useRef<TrueSheet>(null)
@@ -79,10 +86,14 @@ export default function SheetWithHeader({
 			}}
 			{...props}
 		>
+			{backgroundColorData && listColors && (
+				<ScreenBackgroundGradient imageMetadata={backgroundColorData} />
+			)}
+
 			<PortalHostProvider name={Platform.OS === 'android' ? props.name : undefined}>
 				<ScrollView
 					className={cn(
-						'p-6',
+						'p-6 h-full',
 						// the header is position: 'absolute' so we must manually offset
 						blurGradientHeader && 'pt-[5.25rem]',
 					)}

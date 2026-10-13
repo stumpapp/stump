@@ -33,6 +33,7 @@ import {
 } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useDeviceId } from '~/providers/DeviceIdProvider'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -281,6 +282,7 @@ export default function Screen() {
 		id: bookId,
 	})
 	const queryClient = useQueryClient()
+	const deviceId = useDeviceId()
 
 	const preferNativePdfReader = usePreferencesStore((store) => Boolean(store.preferNativePdf))
 
@@ -365,11 +367,12 @@ export default function Screen() {
 					paged: {
 						page,
 						elapsedSecondsDelta: delta > 0 ? delta : undefined,
+						deviceId,
 					},
 				},
 			})
 		},
-		[book.id, timer, updateProgress],
+		[book.id, timer, updateProgress, deviceId],
 	)
 
 	const onLocationChanged = useCallback(
@@ -391,11 +394,12 @@ export default function Screen() {
 						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						percentage,
 						isComplete: false,
+						deviceId,
 					},
 				},
 			})
 		},
-		[book.id, timer, updateProgress],
+		[book.id, timer, updateProgress, deviceId],
 	)
 
 	const onReachedEnd = useCallback(
@@ -416,11 +420,12 @@ export default function Screen() {
 						},
 						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						isComplete: true,
+						deviceId,
 					},
 				},
 			})
 		},
-		[book.id, timer, updateProgress],
+		[book.id, timer, updateProgress, deviceId],
 	)
 
 	const { mutate: resetElapsedSeconds } = useGraphQLMutation(resetElapsedSecondsMutation, {

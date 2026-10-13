@@ -47,6 +47,9 @@ const fragment = graphql(`
 				}
 			}
 		}
+		devices {
+			name
+		}
 	}
 `)
 
@@ -110,11 +113,13 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 	}, [startPage, endPage])
 
 	const chaptersRead = Math.max(0, data.chaptersRead.length - 1)
+	const devices = data.devices.map(({ name }) => name).join(', ')
 
 	if (!data.media) return null
 
+	// TODO: don't show devices as desription text, render badges or sm
 	return (
-		<Card>
+		<Card description={devices.length ? `Read on ${devices}` : undefined}>
 			<Card.Row className="gap-4 flex-col">
 				<View className="gap-2.5 flex-row items-start">
 					<View className="flex-1">

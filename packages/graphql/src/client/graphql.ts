@@ -5935,7 +5935,7 @@ export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTime
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
       ) }> } };
 
-export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
+export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null, devices: Array<{ __typename?: 'ReadingDeviceModel', name: string }> } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
 
 export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
 
@@ -8286,6 +8286,9 @@ export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
       }
     }
   }
+  devices {
+    name
+  }
 }
     `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
 export const ReadingSessionMenuFragmentDoc = new TypedDocumentString(`
@@ -9634,6 +9637,9 @@ fragment ReadingSessionDetailHeader on ReadingSession {
         thumbhash
       }
     }
+  }
+  devices {
+    name
   }
 }
 fragment ReadingSessionMenu on ReadingSession {

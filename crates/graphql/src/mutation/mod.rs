@@ -109,14 +109,19 @@ struct ListMutations(
 );
 
 #[derive(async_graphql::MergedObject, Default)]
+struct ReadingRelatedMutation(
+	ReadProgressMutation,
+	ReadingSessionMutation,
+	ReadingJournalMutation,
+	ReadingDeviceMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
 	BookClubMutations,
 	ContentMutations,
 	UserAndNotifsMutations,
 	SystemMutations,
 	ListMutations,
-	ReadProgressMutation,
-	ReadingSessionMutation,
-	ReadingJournalMutation,
-	ReadingDeviceMutation,
+	ReadingRelatedMutation,
 );

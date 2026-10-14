@@ -209,10 +209,7 @@ impl Loader<ReadingSessionIsLatestLoaderKey> for ReadingSessionLoader {
 		&self,
 		keys: &[ReadingSessionIsLatestLoaderKey],
 	) -> Result<HashMap<ReadingSessionIsLatestLoaderKey, Self::Value>, Self::Error> {
-		let session_ids = keys
-			.iter()
-			.map(|k| k.session_id.clone())
-			.collect::<Vec<_>>();
+		let session_ids = keys.iter().map(|k| k.session_id).collect::<Vec<_>>();
 		let user_ids = keys.iter().map(|k| k.user_id.clone()).collect::<Vec<_>>();
 
 		let latest_session_ids_for_users = reading_session::Entity::find()

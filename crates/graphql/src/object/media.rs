@@ -1,14 +1,22 @@
+use std::time::{Duration, Instant};
+
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
 
+use models::entity::{
+	library, media, media_analysis, media_metadata, reading_session, series, tag,
+};
 use models::{
-	entity::{library, media, media_analysis, reading_session, series, tag},
 	services::reading_timeline::sessions_with_events,
 	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*,
+	sea_query::{NullOrdering, Query},
+	FromQueryResult, Order, QueryOrder, QuerySelect,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -346,7 +354,8 @@ impl Media {
 		Ok(position)
 	}
 
-	/// The next media in the series, ordered by name
+	/// The next media in the series, ordered by metadata series position
+	/// when available and falling back to name if not
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
@@ -364,34 +373,50 @@ impl Media {
 			},
 		};
 
-		let mut cursor = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.series_id.clone()))
-			.cursor_by(media::Column::Name);
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
-		let after = match pagination.after.clone() {
-			Some(after) if after != self.model.id => {
-				let media =
-					media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(media::Column::Id.eq(after).and(
-							media::Column::SeriesId.eq(self.model.series_id.clone()),
-						))
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
-				media.name
-			},
-			_ => self.model.name.clone(),
-		};
-
-		cursor.after(after).first(pagination.limit);
-
-		let next = cursor
+		let start = Instant::now();
+		// TODO: im doing a little experiment here after being a bit annoyed with
+		// the inaccurate next up sections. there is a complicated bug in the version
+		// of sea-orm i use for cursor-ing with complex ordering, and while i def want
+		// to upgrade to the next major i def do not want to do that now, so im just
+		// working around it by paginating in-memory here. i honestly can't see this
+		// being a problem unless someone has an absurd amount of large series, talking
+		// >1000 books. i know my library is not the best repr of folks using stump but
+		// fwiw the largest series in mine is only a few hundred books, and my use case is
+		// really just to get the direct next book. obviously this is not the ideal
+		// fix bc there is an entire modality of stump centered around series books
+		// that goes unfixed with this lol and ideally that page should be able
+		// to also default to this ordering but then set a diff one. ahhhhhh
+		// its fine for now
+		let series_media = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::SeriesId.eq(series_id))
+			.filter(media::Column::DeletedAt.is_null())
+			.order_by_with_nulls(
+				media_metadata::Column::Number,
+				Order::Asc,
+				NullOrdering::Last,
+			)
+			.order_by(media::Column::Name, Order::Asc)
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;
+		let series_books_count = series_media.len();
+
+		let cursor_id = match pagination.after.clone() {
+			Some(after) if after != self.model.id => after,
+			_ => self.model.id.clone(),
+		};
+		let cursor_idx = series_media
+			.iter()
+			.position(|m| m.media.id == cursor_id)
+			.ok_or("Cursor not found")?;
+
+		let next = series_media
+			.into_iter()
+			.skip(cursor_idx + 1)
+			.take(pagination.limit as usize)
+			.collect::<Vec<_>>();
 		let current_cursor = pagination
 			.after
 			.or_else(|| next.first().map(|m| m.media.id.clone()));
@@ -399,6 +424,15 @@ impl Media {
 			Some(id) if next.len() == pagination.limit as usize => Some(id),
 			_ => None,
 		};
+
+		let elapsed = start.elapsed();
+		if elapsed > Duration::from_secs(1) {
+			tracing::warn!(
+				?elapsed,
+				series_books_count,
+				"If you see this warning, please create an issue on GitHub!"
+			);
+		}
 
 		Ok(PaginatedResponse {
 			nodes: next.into_iter().map(Media::from).collect(),

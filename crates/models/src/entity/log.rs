@@ -1,10 +1,10 @@
 use async_graphql::SimpleObject;
 use filter_gen::Ordering;
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::prelude::*;
 
 use crate::shared::{
 	enums::LogLevel,
-	ordering::{OrderBy, OrderDirection},
+	ordering::{OrderDirection, OrderingField},
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]

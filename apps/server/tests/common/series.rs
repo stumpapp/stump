@@ -15,11 +15,10 @@ pub async fn setup_single_series_with_n_books(
 	let mut books = Vec::new();
 
 	for i in 1..=n {
+		let name = format!("{} {:0>3}", series.name.clone(), i);
 		let book = fake_data::Media {
 			id: Some(format!("{}_{}", series.id.clone(), i)),
-			// FIXME: realizing i violate a critical rule here to use padded nums,
-			// too much effort to fix now but should refactor tests accordingly
-			name: Some(format!("{} #{}", series.name.clone(), i)),
+			name: Some(name),
 			series_id: series.id.clone(),
 			created_at: Some("2026-01-01T00:00:00Z".parse().unwrap()),
 			pages: Some(100),

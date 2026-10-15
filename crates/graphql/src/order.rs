@@ -307,7 +307,7 @@ mod tests {
 			("Platform Decay", Some(8.0)),
 			("Fugitive Telemetry", Some(5.0)),
 			(
-				"Rapport_ Friendship, Solidarity, Communion, Empathy",
+				"Rapport: Friendship, Solidarity, Communion, Empathy",
 				Some(6.5),
 			),
 			("System Collapse", Some(7.0)),
@@ -360,7 +360,7 @@ mod tests {
 				"Exit Strategy",
 				"Fugitive Telemetry",
 				"Network Effect",
-				"Rapport_ Friendship, Solidarity, Communion, Empathy",
+				"Rapport: Friendship, Solidarity, Communion, Empathy",
 				"System Collapse",
 				"Platform Decay",
 				"Home: Habitat, Range, Niche, Territory",

@@ -5,7 +5,7 @@ import { FragmentType, graphql, MetadataField, useFragment, UserPermission } fro
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import getProperty from 'lodash/get'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { match, P } from 'ts-pattern'
@@ -117,6 +117,10 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	)
 
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
+
+	useEffect(() => {
+		setData(data)
+	}, [mediaId, data])
 
 	const { checkPermission } = useAppContext()
 	const { translate } = useTranslate()

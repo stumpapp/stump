@@ -1457,7 +1457,10 @@ export type Media = {
   modifiedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The name of the media, derived from the filename and excluding the extension */
   name: Scalars['String']['output'];
-  /** The next media in the series, ordered by name */
+  /**
+   * The next media in the series, ordered by metadata series position
+   * when available and falling back to name if not
+   */
   nextInSeries: PaginatedMediaResponse;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
@@ -2043,6 +2046,11 @@ export type Mutation = {
    * This operation will also remove any associated thumbnails of the deleted media and series.
    */
   cleanLibrary: CleanLibraryResponse;
+  /**
+   * Clear the stored directory mtimes for a library, forcing the next scan to do a
+   * full walk
+   */
+  clearLibraryScannedDirectories: Scalars['Int']['output'];
   /** trashes current readthrough, if there is one */
   clearMediaProgress: Scalars['Boolean']['output'];
   /** Clear the scan history for a specific library */
@@ -2426,6 +2434,11 @@ export type MutationCancelJobArgs = {
 
 
 export type MutationCleanLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationClearLibraryScannedDirectoriesArgs = {
   id: Scalars['ID']['input'];
 };
 

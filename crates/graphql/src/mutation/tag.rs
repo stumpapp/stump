@@ -10,7 +10,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, ActiveValue::Set, DatabaseConnection,
-	DatabaseTransaction, IntoActiveModel, QuerySelect, TransactionTrait,
+	DatabaseTransaction, ExprTrait, IntoActiveModel, QuerySelect, TransactionTrait,
 };
 use std::collections::HashSet;
 
@@ -248,7 +248,7 @@ async fn insert_tags(
 		.collect::<Vec<tag::ActiveModel>>();
 
 	tag::Entity::insert_many(new_tag_models)
-		.exec_with_returning_many(txn)
+		.exec_with_returning(txn)
 		.await
 }
 
@@ -300,7 +300,7 @@ pub(crate) async fn sync_tags(
 
 	let created_tags = if !tags_to_create.is_empty() {
 		tag::Entity::insert_many(tags_to_create)
-			.exec_with_returning_many(txn)
+			.exec_with_returning(txn)
 			.await?
 	} else {
 		vec![]

@@ -18,7 +18,7 @@ use models::{
 	shared::image::ImageRef,
 };
 use reqwest::header;
-use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
+use sea_orm::{prelude::*, ExprTrait, IntoActiveModel, TransactionTrait};
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;

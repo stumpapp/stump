@@ -402,9 +402,7 @@ impl UserMutation {
 			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
 				.await?
-				.first()
 				.ok_or("Failed to delete user".to_string())?
-				.clone()
 		} else {
 			let mut active_model = existing_user.into_active_model();
 			active_model.deleted_at = Set(Some(chrono::Utc::now().into()));

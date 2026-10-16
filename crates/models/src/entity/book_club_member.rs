@@ -3,7 +3,7 @@ use async_graphql::SimpleObject;
 use sea_orm::{
 	prelude::*,
 	sea_query::{Query, SimpleExpr},
-	ColumnTrait, Condition,
+	ColumnTrait, Condition, ExprTrait,
 };
 
 use crate::shared::book_club::BookClubMemberRole;

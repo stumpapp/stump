@@ -4,8 +4,8 @@ use sea_orm::{
 	entity::prelude::*,
 	prelude::async_trait::async_trait,
 	sea_query::{Alias, ConditionType, Query, SelectStatement},
-	ActiveValue, Condition, DeriveEntityModel, FromJsonQueryResult, FromQueryResult,
-	JoinType, QueryOrder, QuerySelect,
+	ActiveValue, Condition, DeriveEntityModel, ExprTrait, FromJsonQueryResult,
+	FromQueryResult, JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 

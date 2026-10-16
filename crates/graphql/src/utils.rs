@@ -1,5 +1,5 @@
 use models::entity::user::AuthUser;
-use sea_orm::{ConnectionTrait, DatabaseConnection, Statement, Value};
+use sea_orm::{DatabaseConnection, Statement, Value};
 use tower_sessions::Session;
 
 pub async fn save_user_session(session: &Session, user: AuthUser) {

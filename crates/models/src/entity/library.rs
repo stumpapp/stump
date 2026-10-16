@@ -3,7 +3,7 @@ use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
-	DerivePartialModel, FromQueryResult,
+	DerivePartialModel,
 };
 
 use crate::shared::{
@@ -51,7 +51,7 @@ impl Entity {
 	}
 }
 
-#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[derive(Clone, Debug, DerivePartialModel)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryIdentSelect {
 	pub id: String,
@@ -65,7 +65,7 @@ impl LibraryIdentSelect {
 	}
 }
 
-#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[derive(Clone, Debug, DerivePartialModel)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryThumbSelect {
 	pub id: String,

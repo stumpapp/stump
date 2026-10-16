@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object, Result};
 use chrono::Utc;
 use models::entity::reading_session;
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{prelude::*, ActiveValue::Set, ExprTrait, IntoActiveModel};
 
 use crate::{
 	data::{AuthContext, CoreContext},

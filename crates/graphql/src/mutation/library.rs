@@ -17,7 +17,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, OnConflict, Query},
-	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
+	Condition, ExprTrait, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::{
 	image::{
@@ -1503,7 +1503,7 @@ async fn enforce_valid_library_path(
 	};
 
 	let parent_libraries_count: i64 = conn
-		.query_one(db_statement(conn, parent_sql, parent_values))
+		.query_one_raw(db_statement(conn, parent_sql, parent_values))
 		.await?
 		.ok_or("Failed to count parent libraries")?
 		.try_get("", "count")?;

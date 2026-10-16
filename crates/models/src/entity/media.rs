@@ -125,11 +125,8 @@ pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Cond
 			.add(
 				Condition::all()
 					.add(media_metadata::Column::Id.is_not_null())
-					.add(
-						media_metadata::Column::AgeRating
-							.is_not_null()
-							.add(media_metadata::Column::AgeRating.lte(min_age)),
-					),
+					.add(media_metadata::Column::AgeRating.is_not_null())
+					.add(media_metadata::Column::AgeRating.lte(min_age)),
 			)
 	}
 }
@@ -476,7 +473,7 @@ mod tests {
 				+ r#"(("media_metadata"."id" IS NULL OR "media_metadata"."age_rating" IS NULL) AND "#
 				+ r#"("series_metadata"."series_id" IS NULL OR ("series_metadata"."series_id" IS NOT NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR "#
 				+ r#"("series_metadata"."series_id" IS NOT NULL AND "series_metadata"."age_rating" IS NULL))) OR "#
-				+ r#"("media_metadata"."id" IS NOT NULL AND ("media_metadata"."age_rating" IS NOT NULL) + ("media_metadata"."age_rating" <= 18))"#
+				+ r#"("media_metadata"."id" IS NOT NULL AND "media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18)"#
 		);
 	}
 

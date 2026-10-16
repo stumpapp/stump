@@ -65,6 +65,7 @@ function extractSortConfig<O extends Record<string, unknown>>(
 }
 
 const DATE_FIELDS = ['DATE_ADDED', 'YEAR', 'CREATED_AT']
+const NUMBER_FIELDS = ['NUMBER']
 
 export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 	sort,
@@ -99,6 +100,9 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 		if (field !== sortConfig.field) return undefined
 		if (DATE_FIELDS.includes(field)) {
 			return translate(`shared.sorting.sortDirectionDate.${sortConfig.direction}`)
+		}
+		if (NUMBER_FIELDS.includes(field)) {
+			return translate(`shared.sorting.sortDirectionNumber.${sortConfig.direction}`)
 		}
 		return translate(`shared.sorting.sortDirectionString.${sortConfig.direction}`)
 	}

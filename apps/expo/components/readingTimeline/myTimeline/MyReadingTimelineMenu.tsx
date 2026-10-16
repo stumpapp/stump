@@ -22,8 +22,6 @@ import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
-// TODO(reading-timeline): support event vs session view modalities
-
 export function MyReadingTimelineMenu() {
 	const navigation = useNavigation()
 

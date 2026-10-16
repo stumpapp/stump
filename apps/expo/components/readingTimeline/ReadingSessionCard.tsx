@@ -16,7 +16,7 @@ import {
 import { useRef } from 'react'
 import { View } from 'react-native'
 
-import { useTranslate } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
@@ -112,8 +112,6 @@ type Props = {
 	groupedBy?: 'day' | 'month'
 }
 
-// i personally need for my own reading (sometimes i move to kobo, mostly on phone tho)
-
 export function ReadingSessionCard({
 	fragmentRef,
 	mediaFragmentRef,
@@ -125,12 +123,13 @@ export function ReadingSessionCard({
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
+	const { isTablet } = useDisplay()
 	const data = useFragment(fragment, fragmentRef)
 	const { session, events } = data
 	const { confirmDeleteSession, confirmExtendSession } = useReadingSessionMutations()
 
 	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
-
+	const truncateAfter = isTablet ? 300 : 200
 	const pathname = usePathname()
 	const pushReferrer = pathname.includes('/books/') ? undefined : 'my-timeline'
 	// ^ informs the detail screen whether to show a link to book in menu
@@ -166,18 +165,19 @@ export function ReadingSessionCard({
 		(e) => e.__typename === 'MediaAnnotation' && e.annotationText != null,
 	).length
 
-	// TODO: ellipsis with truncation?
-	const truncatedJournalEntry = session.journalEntry?.content?.slice(0, 200) || null
-	// TODO: not quite right, entry will not be plain text
+	// TODO(reading-journal): support some flavor of rich text / markdown eventually
+	const annotationTexts = events
+		.filter((e): e is Annotation => e.__typename === 'MediaAnnotation' && e.annotationText != null)
+		.map((e) => e.annotationText)
+		.join('\n')
+	const textSource = session.journalEntry?.content ?? annotationTexts
 	const previewText =
-		truncatedJournalEntry ||
-		events
-			.filter(
-				(e): e is Annotation => e.__typename === 'MediaAnnotation' && e.annotationText != null,
-			)
-			.slice(0, 3)
-			.map((e) => e.annotationText)
-			.join('\n')
+		textSource.length > truncateAfter
+			? translate('shared.common.truncatedText', {
+					text: textSource.slice(0, truncateAfter).trimEnd(),
+					// ^ trim otherwise there could be a space before the ellipsis
+				})
+			: textSource
 
 	const renderContent = () => {
 		if (feedType === 'sessions') {

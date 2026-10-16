@@ -1989,6 +1989,11 @@ type Mutation {
 	"Clear the scan history for a specific library"
 	clearScanHistory(id: ID!): Int!
 	"""
+	Clear the stored directory mtimes for a library, forcing the next scan to do a
+	full walk
+	"""
+	clearLibraryScannedDirectories(id: ID!): Int!
+	"""
 	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after creation.
 	"""

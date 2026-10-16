@@ -367,10 +367,9 @@ fn get_cover_internal(
 		}
 	}
 
-	tracing::error!("Failed to find cover for epub file");
-	Err(MediaProcessorError::EpubRead(
-		"Failed to find cover for epub file".to_string(),
-	))
+	// A cover is optional in EPUB, so a book without one is valid input rather than an error
+	tracing::debug!("Epub file does not contain a cover image");
+	Err(MediaProcessorError::CoverNotFound)
 }
 
 /// Returns the cover image for the epub file. If a cover image cannot be extracted via the
@@ -1366,6 +1365,101 @@ mod tests {
 
 		let chapter = get_chapter(path, 1);
 		assert!(chapter.is_ok());
+	}
+
+	/// Build a minimal EPUB 3 with a single chapter and no image resources or cover
+	/// metadata, keeping the backing temp directory alive alongside its path.
+	fn build_test_epub_without_cover() -> (tempfile::TempDir, PathBuf) {
+		use std::io::Write;
+
+		let temp = tempfile::tempdir().expect("tempdir");
+		let path = temp.path().join("book.epub");
+		let file = File::create(&path).expect("create epub");
+		let mut zip = zip::ZipWriter::new(file);
+		let zip_options = zip::write::FileOptions::<()>::default();
+		// The EPUB OCF spec requires the mimetype entry to be stored uncompressed
+		let mimetype_options = zip::write::FileOptions::<()>::default()
+			.compression_method(zip::CompressionMethod::Stored);
+
+		zip.start_file("mimetype", mimetype_options)
+			.expect("mimetype");
+		zip.write_all(b"application/epub+zip")
+			.expect("mimetype bytes");
+		zip.start_file("META-INF/container.xml", zip_options)
+			.expect("container");
+		zip.write_all(
+			br#"<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+	<rootfiles>
+		<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+	</rootfiles>
+</container>"#,
+		)
+		.expect("container bytes");
+		zip.start_file("OEBPS/content.opf", zip_options)
+			.expect("opf");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+		<dc:identifier id="uid">urn:uuid:stump-no-cover-test</dc:identifier>
+		<dc:title>No Cover Test</dc:title>
+		<dc:language>en</dc:language>
+		<meta property="dcterms:modified">2026-01-01T00:00:00Z</meta>
+	</metadata>
+	<manifest>
+		<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+		<item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>
+	</manifest>
+	<spine><itemref idref="ch1"/></spine>
+</package>"#,
+		)
+		.expect("opf bytes");
+		zip.start_file("OEBPS/nav.xhtml", zip_options).expect("nav");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head><body><nav epub:type="toc"><ol><li><a href="ch1.xhtml">Chapter 1</a></li></ol></nav></body></html>"#,
+		)
+		.expect("nav bytes");
+		zip.start_file("OEBPS/ch1.xhtml", zip_options)
+			.expect("chapter");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Chapter 1</title></head><body><p>Hello</p></body></html>"#,
+		)
+		.expect("chapter bytes");
+		zip.finish().expect("finish zip");
+
+		(temp, path)
+	}
+
+	#[test]
+	fn test_get_cover_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+
+		let cover = get_cover(&path);
+		assert!(matches!(cover, Err(MediaProcessorError::CoverNotFound)));
+	}
+
+	#[test]
+	fn test_get_first_page_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+		let processor = EpubProcessor;
+
+		let page = processor.get_page(&path, 1);
+		assert!(matches!(page, Err(MediaProcessorError::CoverNotFound)));
+	}
+
+	#[test]
+	fn test_get_page_content_types_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+		let processor = EpubProcessor;
+
+		let content_types = processor.get_page_content_types(&path, vec![1]);
+		assert!(matches!(
+			content_types,
+			Err(MediaProcessorError::CoverNotFound)
+		));
 	}
 
 	#[test]

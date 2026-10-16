@@ -14,10 +14,6 @@ use super::user::AuthUser;
 #[sea_orm(table_name = "journal_entries")]
 #[graphql(name = "JournalEntryModel")]
 pub struct Model {
-	// TODO(reading-journal): consider uuid before merge, but for now this is fine
-	// my general philosophy has been if "publically" exposed in some
-	// management/editing/viewing context, uuid, but it's just so easy to
-	// work with int and so ive gone a bit lax on that front
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
 	pub content: String,
@@ -90,9 +86,6 @@ impl ActiveModelBehavior for ActiveModel {
 	{
 		if insert {
 			self.created_at = ActiveValue::Set(Utc::now());
-			// if self.id.is_not_set() {
-			// 	self.id = ActiveValue::Set(Uuid::new_v4().to_string());
-			// }
 		}
 		self.updated_at = ActiveValue::Set(Utc::now());
 

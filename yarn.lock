@@ -12644,6 +12644,13 @@ expo-dev-menu@~56.0.17:
   dependencies:
     expo-dev-menu-interface "~56.0.0"
 
+expo-device@~56.0.4:
+  version "56.0.4"
+  resolved "https://registry.yarnpkg.com/expo-device/-/expo-device-56.0.4.tgz#11b9d9f2dd65ec95d60a2232e137b5ce104ef87f"
+  integrity sha512-ucVcGPkvBrl2QHuy7XcYex2Y6BETvJ6TREutZrwLGUDnlvbpKS8KfQoNZOpvkyo5Nmm9RrasYQ0CrXmBHho2mg==
+  dependencies:
+    ua-parser-js "^0.7.33"
+
 expo-file-system@~56.0.8:
   version "56.0.8"
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-56.0.8.tgz#025542c887433957f2fdddf8557e59f2b03abe17"
@@ -20520,10 +20527,10 @@ react-native-edge-to-edge@^1.8.1:
   resolved "https://registry.yarnpkg.com/react-native-edge-to-edge/-/react-native-edge-to-edge-1.8.1.tgz#a1044ddbf4007a029980239e16c6a066e60756d2"
   integrity sha512-bhvsKqeX9PGkY9wBUk9vni/tJNJdKtLPbs/j3e/3CdV4JmUWfTXYYoL+4Hc8Wmej+5eJxkc8KOFa454ruFWBCA==
 
-react-native-enriched-markdown@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-enriched-markdown/-/react-native-enriched-markdown-0.4.1.tgz#cdc53cb90d62bde3457f0112176f22c8c87f2951"
-  integrity sha512-KjtQEJPigVoPCQpk6uDf0bnb1th7VSIYFjyPJgjbzMtTDbXRKiOSNx6l/A3GOfxPqENgywhwpH5sLxtMqB4r4A==
+react-native-enriched-markdown@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-enriched-markdown/-/react-native-enriched-markdown-1.1.1.tgz#1ff36aedb6af1e5d096f2fc1a6311979ec4ca082"
+  integrity sha512-JvbRIVy75MAoGCv8V6sSscu11/Ian588wfIgH+j64XFpf6gy5sNNkMyG087MH88jNCf3p7fTjgEAGxZMhEqL4A==
 
 react-native-gesture-handler@~2.31.1:
   version "2.31.2"
@@ -23633,6 +23640,11 @@ typescript@^6.0.3:
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-6.0.3.tgz#90251dc007916e972786cb94d74d15b185577d21"
   integrity sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==
+
+ua-parser-js@^0.7.33:
+  version "0.7.41"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.41.tgz#9f6dee58c389e8afababa62a4a2dc22edb69a452"
+  integrity sha512-O3oYyCMPYgNNHuO7Jjk3uacJWZF8loBgwrfd/5LE/HyZ3lUIOdniQ7DNXJcIgZbwioZxk0fLfI4EVnetdiX5jg==
 
 ua-parser-js@^1.0.33, ua-parser-js@^1.0.35:
   version "1.0.41"

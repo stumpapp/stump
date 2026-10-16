@@ -2984,11 +2984,14 @@
         "confirm": "Delete {{type}}",
         "typeToConfirm": "Type {{name}} to confirm:"
       },
+      "extend": "Extend",
       "experimentalDisclaimer": {
         "title": "This feature is experimental",
         "description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
       },
       "enter": "Enter",
+      "friendlyName": "Friendly Name",
+      "groupBy": "Group By",
       "save": "Save",
       "send": "Send",
       "saveChanges": "Save Changes",
@@ -3012,6 +3015,10 @@
       "unknown": "Unknown",
       "lastUpdated": "Last Updated",
       "limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+      "notFullyImplemented": {
+      	"label": "Not Fully Implemented",
+       	"description": "This feature is still under active development, not fully functional, and not ready for use"
+      },
       "logIn": "Log In",
       "login": "Login",
       "seeError": "See error",
@@ -3089,6 +3096,7 @@
       "test": "Test",
       "thisBook": "this book",
       "thisServer": "this server",
+      "truncatedText": "{{text}}...",
       "unknownTitle": "Untitled",
       "url": "URL",
       "username": "Username",
@@ -3104,7 +3112,12 @@
       "search": "Search",
       "invalidUrl": "Please enter a valid URL",
       "global": "Global",
-      "preferences": "Preferences"
+      "preferences": "Preferences",
+      "time": {
+	      "day": "Day",
+				"dateAndTime": "Date and Time",
+	      "month": "Month"
+      }
     },
     "libraryType": {
       "BOOK": "Books",
@@ -3298,6 +3311,7 @@
     },
     "sorting": {
       "labelEllipsis": "Sort By...",
+      "sortOrderLabel": "Sort Order",
       "sortField": {
         "CREATED_AT": "Date Added",
         "NUMBER": "Series Position",
@@ -3415,10 +3429,40 @@
       },
       "unknownSeriesName": "series"
     },
+    "readingDevice": {
+    	"device": "Device",
+    	"description": "Some reading features correlate activity to specific devices. You can set these if you want to opt-in to that behavior",
+     	"placeholder": {
+      	"ios": "My iOS Device",
+       	"android": "My Android Device",
+        "macos": "My macOS Device"
+      }
+    },
     "readingTimeline": {
       "title": "Reading Timeline",
       "startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
-      "readthroughDateRange": "{{startDate}} - {{endDate}}"
+      "readthroughDateRange": "{{startDate}} - {{endDate}}",
+      "feedType": {
+	      "sessions": "Sessions",
+	      "events": "Events"
+      },
+      "goToSession": "Go to Session",
+      "deleteSession": {
+      	"label": "Delete Session",
+       	"finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "dnfedConfirm": "This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "normalConfirm": "This will permanently remove the session from your timeline",
+        "failedToDelete": "Failed to Delete Session"
+      },
+      "extendSession": {
+      	"label": "Extend Session",
+       	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
+        "failedToExtend": "Failed to Extend Session"
+      }
+    },
+    "readingJournal": {
+    	"editorPlaceholder": "Write some thoughts down...",
+    	"failedToSaveEntry": "Failed to Save Journal Entry"
     },
     "errors": {
       "unknown": "Unknown Error",

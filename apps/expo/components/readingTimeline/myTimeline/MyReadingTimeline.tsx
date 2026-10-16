@@ -1,18 +1,16 @@
-import MoreHorizontal from '@expo/material-symbols/more_horiz.xml'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteCursorGraphQL, useRefetch } from '@stump/client'
-import { graphql, MyReadingTimelineScreenQuery, OrderDirection } from '@stump/graphql'
+import { graphql, MyReadingTimelineScreenQuery } from '@stump/graphql'
 import { intlFormat, parse } from 'date-fns'
-import { Stack } from 'expo-router'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 
-import { useTranslate } from '~/lib/hooks'
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
-import { OwlEmptyState } from '../OwlEmptyState'
-import RefreshControl from '../RefreshControl'
-import { Text } from '../ui'
-import { ReadingSessionCard } from './ReadingSessionCard'
+import { OwlEmptyState } from '../../OwlEmptyState'
+import RefreshControl from '../../RefreshControl'
+import { Text } from '../../ui'
+import { ReadingSessionCard } from '../ReadingSessionCard'
+import { MyReadingTimelineMenu } from './MyReadingTimelineMenu'
 
 const query = graphql(`
 	query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
@@ -46,7 +44,6 @@ type ListItem =
 
 export function MyReadingTimeline() {
 	const order = useReadingTimelineDisplayStore((state) => state.order)
-	// TODO: properly hook this up once i land on finalized pagination strat
 	const { data, refetch, hasNextPage, fetchNextPage } = useInfiniteCursorGraphQL(
 		query,
 		['myReadingTimeline', order],
@@ -111,84 +108,15 @@ export function MyReadingTimeline() {
 		<FlashList
 			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 			data={listItems}
-			// TODO: rn the card links to books/[bookId]/reading-timeline/[sessionId]
-			// this might be acceptable and honestly reduce the amount of work, but atm
-			// the background gradient is a bit awkward when it changes and the back nav
-			// doesn't work when jumping stacks
 			renderItem={renderItem}
 			contentContainerStyle={{ paddingHorizontal: 16 }}
 			contentInsetAdjustmentBehavior="automatic"
-			ListHeaderComponent={<StackHeader />}
+			ListHeaderComponent={<MyReadingTimelineMenu />}
 			onEndReached={() => {
 				if (hasNextPage) fetchNextPage()
 			}}
 			// since we are manually grouping things i want to be a little more agressive here
 			onEndReachedThreshold={0.5}
 		/>
-	)
-}
-
-function StackHeader() {
-	const { translate } = useTranslate()
-
-	const order = useReadingTimelineDisplayStore((state) => state.order)
-	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
-	const groupBy = useReadingTimelineDisplayStore((state) => state.groupBy)
-
-	// TODO(reading-timeline): while i really would prefer to conform onto the Stack api
-	// it just has a few issues on Android that atp don't make it worth it. in this instance,
-	// the groups are just awkward but worse is that the background color of the header
-	// really messes with the background of the menu. it is quite bad. i won't have time
-	// to fix it for now, so will swap this out for a custom one later like it do elsewhere
-	return (
-		<Stack.Toolbar placement="right">
-			<Stack.Toolbar.Menu
-				icon={Platform.OS === 'ios' ? 'ellipsis' : MoreHorizontal}
-				cornerRadius={16}
-			>
-				<Stack.Toolbar.Menu title="Timeline" cornerRadius={16}>
-					<Stack.Toolbar.MenuAction onPress={() => {}} isOn disabled>
-						Sessions
-					</Stack.Toolbar.MenuAction>
-					<Stack.Toolbar.MenuAction onPress={() => {}} disabled>
-						Events
-					</Stack.Toolbar.MenuAction>
-				</Stack.Toolbar.Menu>
-
-				<Stack.Toolbar.Menu title="Group By" cornerRadius={16}>
-					<Stack.Toolbar.MenuAction
-						onPress={() =>
-							patchDisplay({
-								groupBy: 'day',
-							})
-						}
-						isOn={groupBy === 'day'}
-					>
-						Day
-					</Stack.Toolbar.MenuAction>
-					<Stack.Toolbar.MenuAction
-						onPress={() =>
-							patchDisplay({
-								groupBy: 'month',
-							})
-						}
-						isOn={groupBy === 'month'}
-					>
-						Month
-					</Stack.Toolbar.MenuAction>
-				</Stack.Toolbar.Menu>
-
-				<Stack.Toolbar.MenuAction
-					onPress={() =>
-						patchDisplay({
-							order: order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc,
-						})
-					}
-					subtitle={translate(`shared.sorting.sortDirectionDate.${order}`)}
-				>
-					Sort Order
-				</Stack.Toolbar.MenuAction>
-			</Stack.Toolbar.Menu>
-		</Stack.Toolbar>
 	)
 }

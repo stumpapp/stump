@@ -26,6 +26,7 @@ export const useSessionDetailOrderStore = create(
 type ReadingTimelineDisplayStore = {
 	order: OrderDirection
 	groupBy: 'day' | 'month'
+	feedType: 'sessions' | 'events'
 	patchStore: (data: Partial<ReadingTimelineDisplayStore>) => void
 }
 
@@ -34,6 +35,7 @@ export const useReadingTimelineDisplayStore = create(
 		(set) => ({
 			order: OrderDirection.Desc,
 			groupBy: 'day',
+			feedType: 'sessions',
 			patchStore: (data) => set((state) => ({ ...state, ...data })),
 		}),
 		{

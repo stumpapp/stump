@@ -43,6 +43,7 @@ type RowProps = Omit<ViewProps, 'children'> & {
 	iconBackgroundColor?: string
 	disabled?: boolean
 	renderDivider?: boolean
+	onPress?: () => void
 } & ({ value?: string | number; children?: never } | { children?: ReactNode; value?: never })
 
 type StatGroupProps = ViewProps
@@ -344,9 +345,7 @@ function BaseRowComponent({
 	onPress,
 	disabled,
 	...props
-}: RowProps & {
-	onPress?: () => void
-}) {
+}: RowProps) {
 	const Container = onPress ? Pressable : View
 	return (
 		// We shift up by 1px to hide the first divider in a list

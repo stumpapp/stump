@@ -132,7 +132,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 			? decodeURIComponent(cacheDir.replace('file://', ''))
 			: cacheDir
 
-		await ensureDirectoryExists(cacheDir)
+		ensureDirectoryExists(cacheDir)
 
 		try {
 			const { success } = await StumpStreamer.initializeBook(book.id, filePath, cacheDirPath)

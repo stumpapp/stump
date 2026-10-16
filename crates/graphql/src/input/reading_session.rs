@@ -7,7 +7,7 @@ use sea_orm::{
 
 #[derive(Debug, Default, InputObject)]
 pub struct PatchReadingSession {
-	pub elapsed_seconds: MaybeUndefined<String>,
+	pub elapsed_seconds: MaybeUndefined<i64>,
 	pub status: Option<ReadingStatus>,
 	// TODO: this would be a big antipattern and should eventually be corrected, created_at/updated_at
 	// should really be internal-only and now that we are exposing them as less system and more "you
@@ -31,7 +31,7 @@ impl PatchReadingSession {
 			elapsed_seconds: match elapsed_seconds {
 				MaybeUndefined::Undefined => Unchanged(model.elapsed_seconds),
 				MaybeUndefined::Null => Set(None),
-				MaybeUndefined::Value(v) => Set(Some(v.parse::<i64>().unwrap_or(0))),
+				MaybeUndefined::Value(v) => Set(Some(v)),
 			},
 			status: match status {
 				Some(s) => Set(s),

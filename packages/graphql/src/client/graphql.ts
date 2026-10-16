@@ -1139,6 +1139,17 @@ export type JobUpdate = {
   totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
 
+export type JournalEntryModel = {
+  __typename?: 'JournalEntryModel';
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  mediaId: Scalars['String']['output'];
+  sessionId?: Maybe<Scalars['Int']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type Library = {
   __typename?: 'Library';
   authors: Array<Author>;
@@ -2116,6 +2127,8 @@ export type Mutation = {
   deleteJob: Scalars['Boolean']['output'];
   deleteJobHistory: DeleteJobHistory;
   deleteJobLogs: DeleteJobAssociatedLogs;
+  /** Deletes a reading journal entry for the authenticated user */
+  deleteJournalEntry: Scalars['Boolean']['output'];
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -2133,6 +2146,8 @@ export type Mutation = {
   deleteMessage: BookClubDiscussionMessage;
   deleteMetadataProvider: MetadataProviderConfigModel;
   deleteNotifier: Notifier;
+  /** Deletes a reading device owned by the authenticated user */
+  deleteReadingDevice: Scalars['Boolean']['output'];
   /**
    * Deletes a reading list by ID.
    *
@@ -2164,6 +2179,7 @@ export type Mutation = {
   deleteUserSessions: Scalars['Int']['output'];
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
+  extendReadingSession: ReadingSession;
   favoriteMedia: Media;
   favoriteSeries: Series;
   /** Start a job which will search external metadata providers */
@@ -2357,6 +2373,10 @@ export type Mutation = {
    * called by a server owner
    */
   uploadUserAvatar: User;
+  /** Upserts a reading device for the authenticated user */
+  upsertReadingDevice: ReadingDeviceModel;
+  /** Upserts a reading journal entry for the authenticated user and the given reading session */
+  upsertReadingSessionJournalEntry: JournalEntryModel;
   /** Validate the provided API token by making a test request using a client instance */
   validateProviderConfig: ProviderCredentialVerification;
   /**
@@ -2607,6 +2627,11 @@ export type MutationDeleteJobLogsArgs = {
 };
 
 
+export type MutationDeleteJournalEntryArgs = {
+  entryId: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteLibraryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2649,6 +2674,11 @@ export type MutationDeleteMetadataProviderArgs = {
 
 export type MutationDeleteNotifierArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteReadingDeviceArgs = {
+  deviceId: Scalars['Int']['input'];
 };
 
 
@@ -2702,6 +2732,11 @@ export type MutationDeleteUserSessionsArgs = {
 export type MutationEditMessageArgs = {
   input: EditMessageInput;
   messageId: Scalars['ID']['input'];
+};
+
+
+export type MutationExtendReadingSessionArgs = {
+  sessionId: Scalars['Int']['input'];
 };
 
 
@@ -3163,6 +3198,18 @@ export type MutationUploadUserAvatarArgs = {
 };
 
 
+export type MutationUpsertReadingDeviceArgs = {
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationUpsertReadingSessionJournalEntryArgs = {
+  content: Scalars['String']['input'];
+  sessionId: Scalars['Int']['input'];
+};
+
+
 export type MutationValidateProviderConfigArgs = {
   config: ValidateMetadataProviderConfigInput;
 };
@@ -3456,7 +3503,7 @@ export type PatchMetadataProviderConfigInput = {
 };
 
 export type PatchReadingSession = {
-  elapsedSeconds?: InputMaybe<Scalars['String']['input']>;
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<ReadingStatus>;
 };
 
@@ -3911,6 +3958,15 @@ export type QueryUsersArgs = {
   pagination?: Pagination;
 };
 
+export type ReadingDeviceModel = {
+  __typename?: 'ReadingDeviceModel';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
 /** The different reading directions supported by any Stump reader */
 export enum ReadingDirection {
   Ltr = 'LTR',
@@ -3962,6 +4018,8 @@ export type ReadingSession = {
   chaptersRead: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deviceIds: Array<Scalars['String']['output']>;
+  /** The devices which were used during this reading session */
+  devices: Array<ReadingDeviceModel>;
   /** accumulated reading time for this session, updated via deltas (not overwritten) */
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
   endLocator?: Maybe<ReadiumLocator>;
@@ -3969,6 +4027,8 @@ export type ReadingSession = {
   endPercentage?: Maybe<Scalars['Decimal']['output']>;
   events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
+  isLatest: Scalars['Boolean']['output'];
+  journalEntry?: Maybe<JournalEntryModel>;
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   /**
    * The media which this session belongs to. Please note that if somehow the user loses access to the
@@ -3978,7 +4038,6 @@ export type ReadingSession = {
    */
   media?: Maybe<Media>;
   mediaId: Scalars['String']['output'];
-  notes?: Maybe<Scalars['String']['output']>;
   /** which read-through of this book this session belongs to (1-indexed) */
   readthroughNumber: Scalars['Int']['output'];
   /** the "logical" date of this session, based on user prefs and start time */
@@ -5279,7 +5338,7 @@ export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
 
 export type BookReadingTimelineSessionIdScreenQuery = { __typename?: 'Query', readingSessionById?: (
     { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null }
-    & { ' $fragmentRefs'?: { 'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment } }
+    & { ' $fragmentRefs'?: { 'ReadingSessionMenuFragment': ReadingSessionMenuFragment;'SessionEventsTimelineFragment': SessionEventsTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment;'SessionJournalFragment': SessionJournalFragment } }
   ) | null };
 
 export type BookReadingTimelineScreenQueryVariables = Exact<{
@@ -5823,39 +5882,45 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
+export type ReadingSessionCardFragment = (
+  { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, isLatest: boolean, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> }
+  & { ' $fragmentRefs'?: { 'SessionWithEventsTimelineFragment': SessionWithEventsTimelineFragment } }
+) & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
+
+export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
+
+export type PatchReadingSessionEditSheetMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  input: PatchReadingSession;
+}>;
+
+
+export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', patchReadingSession: { __typename?: 'ReadingSession', id: number, elapsedSeconds?: number | null } };
+
 export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, readingTimeline?: { __typename?: 'BookReadingTimeline', totalElapsedSeconds: number, readthroughs: Array<{ __typename?: 'ReadthroughTimeline', readthroughNumber: number, startedAt: any, finishedAt?: any | null, sessions: Array<(
         { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, sessionDate: any } }
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment } }
       )> }> } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
 
-export type MyReadingTimelineScreenQueryVariables = Exact<{
-  pagination?: InputMaybe<CursorPagination>;
-  order?: InputMaybe<OrderDirection>;
-}>;
-
-
-export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTimeline: { __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse', nodes: Array<{ __typename?: 'GlobalReadingTimelineNode', mediaId: string, session: (
-        { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
-        & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
-      ) }> } };
-
-export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
-
-export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
-
-export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
-
 export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', href: string, type: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', position?: number | null, progression?: any | null, totalProgression?: any | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null, after?: string | null, before?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
 export type BookmarkEventFragment = { __typename?: 'Bookmark', id: string, page?: number | null, createdAt: any, bookmarkLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'BookmarkEventFragment' };
 
-export type EventTimelineFragment = { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
-    { __typename: 'Bookmark' }
+export type SessionEventsTimelineFragment = { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
+    { __typename: 'Bookmark', id: string }
     & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
   ) | (
-    { __typename: 'MediaAnnotation' }
+    { __typename: 'MediaAnnotation', id: string }
     & { ' $fragmentRefs'?: { 'AnnotationEventFragment': AnnotationEventFragment } }
-  )>, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'EventTimelineFragment' };
+  )>, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'SessionEventsTimelineFragment' };
+
+export type SessionWithEventsTimelineFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<(
+    { __typename: 'Bookmark', id: string }
+    & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
+  ) | (
+    { __typename: 'MediaAnnotation', id: string }
+    & { ' $fragmentRefs'?: { 'AnnotationEventFragment': AnnotationEventFragment } }
+  )> } & { ' $fragmentName'?: 'SessionWithEventsTimelineFragment' };
 
 export type UpdateAnnotationMobileEventTimelineMutationVariables = Exact<{
   input: UpdateAnnotationInput;
@@ -5870,6 +5935,45 @@ export type DeleteAnnotationMobileEventTimelineMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMobileEventTimelineMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
+
+export type MyReadingTimelineScreenQueryVariables = Exact<{
+  pagination?: InputMaybe<CursorPagination>;
+  order?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTimeline: { __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse', nodes: Array<{ __typename?: 'GlobalReadingTimelineNode', mediaId: string, session: (
+        { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
+        & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
+      ) }> } };
+
+export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null, devices: Array<{ __typename?: 'ReadingDeviceModel', name: string }> } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
+
+export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
+
+export type SessionJournalFragment = { __typename?: 'ReadingSession', id: number, journalEntry?: { __typename?: 'JournalEntryModel', id: number, content: string, updatedAt: any, mediaId: string } | null } & { ' $fragmentName'?: 'SessionJournalFragment' };
+
+export type UpsertReadingSessionJournalEntryMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  content: Scalars['String']['input'];
+}>;
+
+
+export type UpsertReadingSessionJournalEntryMutation = { __typename?: 'Mutation', upsertReadingSessionJournalEntry: { __typename?: 'JournalEntryModel', content: string, updatedAt: any } };
+
+export type DeleteReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteReadingSessionMutation = { __typename?: 'Mutation', deleteReadingSession: boolean };
+
+export type ExtendReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type ExtendReadingSessionMutation = { __typename?: 'Mutation', extendReadingSession: { __typename?: 'ReadingSession', updatedAt?: any | null } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5914,6 +6018,14 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
+
+export type UseSyncDeviceNameMutationVariables = Exact<{
+  deviceId: Scalars['String']['input'];
+  deviceName: Scalars['String']['input'];
+}>;
+
+
+export type UseSyncDeviceNameMutation = { __typename?: 'Mutation', upsertReadingDevice: { __typename?: 'ReadingDeviceModel', id: string, name: string } };
 
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7754,10 +7866,128 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionCardMedia on SessionWithEvents {
+  session {
+    media {
+      resolvedName
+      pages
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}
+    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
+export const BookmarkEventFragmentDoc = new TypedDocumentString(`
+    fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+    `, {"fragmentName":"BookmarkEvent"}) as unknown as TypedDocumentString<BookmarkEventFragment, unknown>;
+export const AnnotationEventFragmentDoc = new TypedDocumentString(`
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+    `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
+export const SessionWithEventsTimelineFragmentDoc = new TypedDocumentString(`
+    fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}`, {"fragmentName":"SessionWithEventsTimeline"}) as unknown as TypedDocumentString<SessionWithEventsTimelineFragment, unknown>;
 export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7770,6 +8000,10 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -7781,8 +8015,69 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
       annotationText
     }
   }
+  ...SessionWithEventsTimeline
 }
-    `, {"fragmentName":"ReadingSessionCard"}) as unknown as TypedDocumentString<ReadingSessionCardFragment, unknown>;
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`, {"fragmentName":"ReadingSessionCard"}) as unknown as TypedDocumentString<ReadingSessionCardFragment, unknown>;
 export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment BookReadingTimeline on Media {
   id
@@ -7818,6 +8113,7 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7830,6 +8126,10 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -7841,78 +8141,9 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
       annotationText
     }
   }
-}`, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
-export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
-    fragment ReadingSessionCardMedia on SessionWithEvents {
-  session {
-    media {
-      resolvedName
-      pages
-      thumbnail {
-        url
-        metadata {
-          averageColor
-          colors {
-            color
-            percentage
-          }
-          thumbhash
-        }
-      }
-    }
-  }
+  ...SessionWithEventsTimeline
 }
-    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
-export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
-    fragment ReadingSessionDetailHeader on ReadingSession {
-  id
-  startPage
-  endPage
-  startLocator {
-    locations {
-      position
-    }
-  }
-  endLocator {
-    locations {
-      position
-    }
-  }
-  startPercentage
-  endPercentage
-  createdAt
-  updatedAt
-  elapsedSeconds
-  chaptersRead
-  media {
-    thumbnail {
-      url
-      metadata {
-        averageColor
-        colors {
-          color
-          percentage
-        }
-        thumbhash
-      }
-    }
-  }
-}
-    `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
-export const BookmarkEventFragmentDoc = new TypedDocumentString(`
-    fragment BookmarkEvent on Bookmark {
-  id
-  page
-  bookmarkLocator: locator {
-    locations {
-      position
-    }
-  }
-  createdAt
-}
-    `, {"fragmentName":"BookmarkEvent"}) as unknown as TypedDocumentString<BookmarkEventFragment, unknown>;
-export const AnnotationEventFragmentDoc = new TypedDocumentString(`
-    fragment AnnotationEvent on MediaAnnotation {
+fragment AnnotationEvent on MediaAnnotation {
   id
   annotationText
   locator {
@@ -7932,9 +8163,49 @@ export const AnnotationEventFragmentDoc = new TypedDocumentString(`
   }
   createdAt
 }
-    `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
-export const EventTimelineFragmentDoc = new TypedDocumentString(`
-    fragment EventTimeline on ReadingSession {
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
+export const SessionEventsTimelineFragmentDoc = new TypedDocumentString(`
+    fragment SessionEventsTimeline on ReadingSession {
   id
   mediaId
   createdAt
@@ -7947,9 +8218,11 @@ export const EventTimelineFragmentDoc = new TypedDocumentString(`
   events(order: $eventOrder) {
     __typename
     ... on Bookmark {
+      id
       ...BookmarkEvent
     }
     ... on MediaAnnotation {
+      id
       ...AnnotationEvent
     }
   }
@@ -7990,7 +8263,67 @@ fragment BookmarkEvent on Bookmark {
     }
   }
   createdAt
-}`, {"fragmentName":"EventTimeline"}) as unknown as TypedDocumentString<EventTimelineFragment, unknown>;
+}`, {"fragmentName":"SessionEventsTimeline"}) as unknown as TypedDocumentString<SessionEventsTimelineFragment, unknown>;
+export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionDetailHeader on ReadingSession {
+  id
+  startPage
+  endPage
+  startLocator {
+    locations {
+      position
+    }
+  }
+  endLocator {
+    locations {
+      position
+    }
+  }
+  startPercentage
+  endPercentage
+  createdAt
+  updatedAt
+  elapsedSeconds
+  chaptersRead
+  media {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  devices {
+    name
+  }
+}
+    `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
+export const ReadingSessionMenuFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
+}
+    `, {"fragmentName":"ReadingSessionMenu"}) as unknown as TypedDocumentString<ReadingSessionMenuFragment, unknown>;
+export const SessionJournalFragmentDoc = new TypedDocumentString(`
+    fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+    mediaId
+  }
+}
+    `, {"fragmentName":"SessionJournal"}) as unknown as TypedDocumentString<SessionJournalFragment, unknown>;
 export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
@@ -9194,6 +9527,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
     query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
   readingSessionById(id: $sessionId) {
     id
+    ...ReadingSessionMenu
     createdAt
     updatedAt
     startPage
@@ -9205,7 +9539,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
     }
     endPercentage
     elapsedSeconds
-    ...EventTimeline
+    ...SessionEventsTimeline
     media {
       resolvedName
       pages
@@ -9222,9 +9556,69 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
       }
     }
     ...ReadingSessionDetailHeader
+    ...SessionJournal
   }
 }
-    fragment ReadingSessionDetailHeader on ReadingSession {
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionEventsTimeline on ReadingSession {
+  id
+  mediaId
+  createdAt
+  startPage
+  startLocator {
+    locations {
+      position
+    }
+  }
+  events(order: $eventOrder) {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+  updatedAt
+  endPage
+  endLocator {
+    locations {
+      position
+    }
+  }
+}
+fragment ReadingSessionDetailHeader on ReadingSession {
   id
   startPage
   endPage
@@ -9255,6 +9649,97 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
         }
         thumbhash
       }
+    }
+  }
+  devices {
+    name
+  }
+}
+fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
+}
+fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+    mediaId
+  }
+}`) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
+export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
+    query BookReadingTimelineScreen($bookId: ID!) {
+  mediaById(id: $bookId) {
+    id
+    ...BookReadingTimeline
+  }
+}
+    fragment ReadingSessionCard on SessionWithEvents {
+  session {
+    id
+    status
+    createdAt
+    updatedAt
+    startPage
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+    endPercentage
+    elapsedSeconds
+    mediaId
+    journalEntry {
+      content
+    }
+    isLatest
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+    }
+    ... on MediaAnnotation {
+      id
+      annotationText
+    }
+  }
+  ...SessionWithEventsTimeline
+}
+fragment BookReadingTimeline on Media {
+  id
+  readingTimeline {
+    readthroughs {
+      readthroughNumber
+      startedAt
+      finishedAt
+      sessions {
+        session {
+          id
+          sessionDate
+        }
+        ...ReadingSessionCard
+      }
+    }
+    totalElapsedSeconds
+  }
+  resolvedName
+  pages
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
     }
   }
 }
@@ -9288,95 +9773,34 @@ fragment BookmarkEvent on Bookmark {
   }
   createdAt
 }
-fragment EventTimeline on ReadingSession {
-  id
-  mediaId
-  createdAt
-  startPage
-  startLocator {
-    locations {
-      position
-    }
-  }
-  events(order: $eventOrder) {
-    __typename
-    ... on Bookmark {
-      ...BookmarkEvent
-    }
-    ... on MediaAnnotation {
-      ...AnnotationEvent
-    }
-  }
-  updatedAt
-  endPage
-  endLocator {
-    locations {
-      position
-    }
-  }
-}`) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
-export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
-    query BookReadingTimelineScreen($bookId: ID!) {
-  mediaById(id: $bookId) {
-    id
-    ...BookReadingTimeline
-  }
-}
-    fragment BookReadingTimeline on Media {
-  id
-  readingTimeline {
-    readthroughs {
-      readthroughNumber
-      startedAt
-      finishedAt
-      sessions {
-        session {
-          id
-          sessionDate
-        }
-        ...ReadingSessionCard
-      }
-    }
-    totalElapsedSeconds
-  }
-  resolvedName
-  pages
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-}
-fragment ReadingSessionCard on SessionWithEvents {
+fragment SessionWithEventsTimeline on SessionWithEvents {
   session {
     id
+    mediaId
     createdAt
-    updatedAt
     startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
     endPage
     endLocator {
       locations {
         position
       }
     }
-    endPercentage
-    elapsedSeconds
-    mediaId
   }
   events {
     __typename
     ... on Bookmark {
       id
+      ...BookmarkEvent
     }
     ... on MediaAnnotation {
       id
-      annotationText
+      ...AnnotationEvent
     }
   }
 }`) as unknown as TypedDocumentString<BookReadingTimelineScreenQuery, BookReadingTimelineScreenQueryVariables>;
@@ -10813,6 +11237,30 @@ export const AcceptLocalProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
+export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
+    mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
+  patchReadingSession(sessionId: $sessionId, input: $input) {
+    id
+    elapsedSeconds
+  }
+}
+    `) as unknown as TypedDocumentString<PatchReadingSessionEditSheetMutation, PatchReadingSessionEditSheetMutationVariables>;
+export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
+  updateAnnotation(input: $input) {
+    id
+    annotationText
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateAnnotationMobileEventTimelineMutation, UpdateAnnotationMobileEventTimelineMutationVariables>;
+export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation DeleteAnnotationMobileEventTimeline($id: String!) {
+  deleteAnnotation(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
 export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
   myReadingTimeline(pagination: $pagination, order: $order) {
@@ -10831,6 +11279,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -10843,6 +11292,10 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -10854,6 +11307,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
       annotationText
     }
   }
+  ...SessionWithEventsTimeline
 }
 fragment ReadingSessionCardMedia on SessionWithEvents {
   session {
@@ -10873,23 +11327,88 @@ fragment ReadingSessionCardMedia on SessionWithEvents {
       }
     }
   }
-}`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
-export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
-    mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
-  updateAnnotation(input: $input) {
+}
+fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
     id
-    annotationText
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
+export const UpsertReadingSessionJournalEntryDocument = new TypedDocumentString(`
+    mutation UpsertReadingSessionJournalEntry($sessionId: Int!, $content: String!) {
+  upsertReadingSessionJournalEntry(sessionId: $sessionId, content: $content) {
+    content
     updatedAt
   }
 }
-    `) as unknown as TypedDocumentString<UpdateAnnotationMobileEventTimelineMutation, UpdateAnnotationMobileEventTimelineMutationVariables>;
-export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
-    mutation DeleteAnnotationMobileEventTimeline($id: String!) {
-  deleteAnnotation(id: $id) {
-    id
+    `) as unknown as TypedDocumentString<UpsertReadingSessionJournalEntryMutation, UpsertReadingSessionJournalEntryMutationVariables>;
+export const DeleteReadingSessionDocument = new TypedDocumentString(`
+    mutation DeleteReadingSession($sessionId: Int!) {
+  deleteReadingSession(sessionId: $sessionId)
+}
+    `) as unknown as TypedDocumentString<DeleteReadingSessionMutation, DeleteReadingSessionMutationVariables>;
+export const ExtendReadingSessionDocument = new TypedDocumentString(`
+    mutation ExtendReadingSession($sessionId: Int!) {
+  extendReadingSession(sessionId: $sessionId) {
+    updatedAt
   }
 }
-    `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
+    `) as unknown as TypedDocumentString<ExtendReadingSessionMutation, ExtendReadingSessionMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(
@@ -11069,6 +11588,14 @@ export const UseFavoriteBookDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
+export const UseSyncDeviceNameDocument = new TypedDocumentString(`
+    mutation UseSyncDeviceName($deviceId: String!, $deviceName: String!) {
+  upsertReadingDevice(id: $deviceId, name: $deviceName) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<UseSyncDeviceNameMutation, UseSyncDeviceNameMutationVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {

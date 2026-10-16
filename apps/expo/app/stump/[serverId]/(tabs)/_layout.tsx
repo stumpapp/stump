@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 
 import { ServerErrorBoundary } from '~/components/error'
 import { useColors } from '~/lib/constants'
-import { useAutoSyncActiveServer, useTranslate } from '~/lib/hooks'
+import { useAutoSyncActiveServer, useSyncDeviceName, useTranslate } from '~/lib/hooks'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
@@ -21,6 +21,7 @@ export default function TabLayout() {
 	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncLocalData)
 	const bookClubsEnabled = usePreferencesStore((state) => state.bookClubsEnabled)
 
+	useSyncDeviceName()
 	useAutoSyncActiveServer({
 		enabled: !!sdk.token && autoSyncEnabled,
 	})

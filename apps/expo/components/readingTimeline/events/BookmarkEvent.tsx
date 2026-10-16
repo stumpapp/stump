@@ -25,12 +25,14 @@ type Props = {
 	fragmentRef: FragmentType<typeof fragment>
 	showTopConnector?: boolean
 	showBottomConnector?: boolean
+	feedType?: 'sessions' | 'events'
 }
 
 export function BookmarkEvent({
 	fragmentRef,
 	showTopConnector = true,
 	showBottomConnector = true,
+	feedType = 'sessions',
 }: Props) {
 	const { t } = useTranslate()
 	const data = useFragment(fragment, fragmentRef)
@@ -48,6 +50,7 @@ export function BookmarkEvent({
 			timestamp={parseGraphQLDateTime(data.createdAt) ?? new Date()}
 			showTopConnector={showTopConnector}
 			showBottomConnector={showBottomConnector}
+			feedType={feedType}
 		>
 			<TemplatedTranslationText
 				className="text-foreground-muted"

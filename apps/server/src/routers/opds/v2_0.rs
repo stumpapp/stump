@@ -1519,27 +1519,36 @@ async fn update_book_progression(
 		_ => {},
 	}
 
-	let device_id = if let Some(input_device) = input.device() {
-		let existing_device = reading_device::Entity::find_by_id(&input_device.id)
+	let mut device_id = None;
+
+	if let Some(input_device) = input.device() {
+		let composite_id = (input_device.id.clone(), user.id.clone());
+		let existing_device = reading_device::Entity::find_by_id(composite_id)
 			.one(conn)
 			.await?;
 
 		if existing_device.is_none() {
-			let new_device = reading_device::ActiveModel {
+			let device = reading_device::ActiveModel {
 				id: Set(input_device.id.clone()),
 				name: Set(input_device.name.clone()),
-				kind: Set(None),
-				email: Set(None),
+				user_id: Set(user.id.clone()),
+				..Default::default()
 			};
-			reading_device::Entity::insert(new_device)
-				.exec(conn)
-				.await?;
+			match device.insert(conn).await {
+				Ok(_) => {
+					device_id = Some(input_device.id.clone());
+				},
+				Err(e) => {
+					tracing::error!("Failed to insert reading device: {}", e);
+					return Err(APIError::InternalServerError(
+						"Failed to insert reading device".to_string(),
+					));
+				},
+			}
+		} else {
+			device_id = Some(input_device.id.clone());
 		}
-
-		Some(input_device.id.clone())
-	} else {
-		None
-	};
+	}
 
 	let page = input.page();
 	let percentage = match page {

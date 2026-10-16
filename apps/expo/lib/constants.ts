@@ -99,6 +99,13 @@ export const toRgba = (color: ColorTypes, alpha: number) => {
 	return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+// blends a color over an opaque base, i couldn't quite get it perfect but this improves
+// the transitions for android which of course very annoyingly behaves diff to ios
+export function compositeColorOverBase(overlay: ColorTypes, base: ColorTypes) {
+	const overlayColor = getColor(overlay)
+	return toHex(mix(getColor(base), overlayColor, overlayColor.alpha, { space: 'srgb' }))
+}
+
 export function reduceChroma(color: ColorTypes, chromaScale: number) {
 	const plainColor = getColor(color)
 	setColor(plainColor, { 'oklch.c': (c) => c * chromaScale })

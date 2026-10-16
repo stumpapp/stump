@@ -8,6 +8,7 @@ import { Platform, ScrollView, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
 import { SessionEventsTimeline } from '~/components/readingTimeline/events'
 import {
 	ReadingSessionDetailHeader,
@@ -15,6 +16,8 @@ import {
 	useReadingSessionMenu,
 } from '~/components/readingTimeline/sessionDetail'
 import RefreshControl from '~/components/RefreshControl'
+import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
+import { usePreferencesStore } from '~/stores'
 import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
 
 const ScrollComponent = Platform.OS === 'ios' ? ScrollView : KeyboardAwareScrollView
@@ -83,6 +86,10 @@ export default function Screen() {
 
 	const [isRefetching, onRefresh] = useRefetch(refetch)
 
+	const { imageMetadata } = useDerivedColorPalette()
+
+	const listColors = usePreferencesStore((store) => store.tintListBackground)
+
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
 		if (session?.media?.resolvedName) {
@@ -96,6 +103,9 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+			{listColors && (
+				<ScreenBackgroundGradient imageMetadata={imageMetadata} tintAndroidHeader={false} />
+			)}
 			{sessionMenu}
 			<ScrollComponent
 				className="flex-1"

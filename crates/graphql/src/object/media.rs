@@ -2,13 +2,17 @@ use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
 
+use models::entity::{
+	library, media, media_analysis, media_metadata, reading_session, series, tag,
+};
 use models::{
-	entity::{library, media, media_analysis, reading_session, series, tag},
 	services::reading_timeline::sessions_with_events,
 	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*, sea_query::Query, FromQueryResult, Order, QueryOrder, QuerySelect,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -26,6 +30,7 @@ use crate::{
 		epub::Epub,
 		reading_timeline::{BookReadingTimeline, SessionWithEvents},
 	},
+	order::order_spec,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -346,7 +351,8 @@ impl Media {
 		Ok(position)
 	}
 
-	/// The next media in the series, ordered by name
+	/// The next media in the series, ordered by metadata series position
+	/// when available and falling back to name if not
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
@@ -364,31 +370,42 @@ impl Media {
 			},
 		};
 
-		let mut cursor = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.series_id.clone()))
-			.cursor_by(media::Column::Name);
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
-		let after = match pagination.after.clone() {
-			Some(after) if after != self.model.id => {
-				let media =
-					media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(media::Column::Id.eq(after).and(
-							media::Column::SeriesId.eq(self.model.series_id.clone()),
-						))
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
-				media.name
-			},
-			_ => self.model.name.clone(),
+		let spec = order_spec![
+			(media_metadata::Column::Number, Order::Asc),
+			(media::Column::Name, Order::Asc),
+			(media::Column::Id, Order::Asc),
+		];
+		// ^ this Id addition is really just a tie breaker
+
+		let query = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::SeriesId.eq(series_id))
+			.filter(media::Column::DeletedAt.is_null());
+
+		let cursor_id = match pagination.after.clone() {
+			Some(after) if after != self.model.id => after,
+			_ => self.model.id.clone(),
+		};
+		let cursor_row = query
+			.clone()
+			.filter(media::Column::Id.eq(cursor_id))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Cursor not found")?;
+		let number = match &cursor_row.metadata {
+			Some(metadata) => metadata.get(media_metadata::Column::Number),
+			None => Option::<Decimal>::None.into(),
 		};
 
-		cursor.after(after).first(pagination.limit);
-
-		let next = cursor
+		let next = spec
+			.apply(query.filter(spec.sorts_after(&[
+				number,
+				cursor_row.media.get(media::Column::Name),
+				cursor_row.media.get(media::Column::Id),
+			])))
+			.limit(pagination.limit)
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;

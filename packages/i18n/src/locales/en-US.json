@@ -3310,7 +3310,13 @@
       "goToLibrary": "Go to Library"
     },
     "sorting": {
+      "label": "Sort By",
       "labelEllipsis": "Sort By...",
+      "placeholder": "Select a Field",
+      "fieldGroups": {
+        "book": "Book",
+        "metadata": "Metadata"
+      },
       "sortOrderLabel": "Sort Order",
       "sortField": {
         "CREATED_AT": "Date Added",
@@ -3318,7 +3324,17 @@
         "YEAR": "Year Published",
         "NAME": "Name",
         "ADDED_AT": "Date Added",
-        "SERIES": "Series"
+        "SERIES": "Series",
+        "SERIES_ID": "Series",
+        "LIBRARY_ID": "Library",
+        "MODIFIED_AT": "Date Modified",
+        "STATUS": "Status",
+        "PATH": "Path",
+        "SIZE": "Size",
+        "EXTENSION": "File Type",
+        "PAGES": "Page Count",
+        "DESCRIPTION": "Description",
+        "VOLUME": "Volume"
       },
       "sortDirection": {
         "ASC": "Ascending",

@@ -3,7 +3,7 @@ use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
-	Condition, FromQueryResult, Linked, QueryOrder, QuerySelect, QueryTrait,
+	Condition, FromQueryResult, Linked, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
 	shared::{
 		enums::FileStatus,
 		image::ImageMetadata,
-		ordering::{OrderBy, OrderDirection},
+		ordering::{OrderDirection, OrderingField},
 	},
 };
 
@@ -124,11 +124,6 @@ impl SeriesThumbSelect {
 			Column::LibraryId,
 		]
 	}
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct SeriesNameCmpSelect {
-	pub name: String,
 }
 
 #[derive(Debug, FromQueryResult)]

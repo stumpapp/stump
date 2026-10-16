@@ -1,5 +1,11 @@
 import { PREFETCH_STALE_TIME, useSDK } from '@stump/client'
-import { graphql, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
+import {
+	graphql,
+	MediaFilterInput,
+	MediaMetadataModelOrdering,
+	MediaOrderBy,
+	OrderDirection,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
@@ -9,6 +15,11 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+
+export const DEFAULT_SERIES_BOOKS_ORDER_BY: MediaOrderBy[] = [
+	{ metadata: { field: MediaMetadataModelOrdering.Number, direction: OrderDirection.Asc } },
+	...DEFAULT_MEDIA_ORDER_BY,
+] as MediaOrderBy[]
 
 export const query = graphql(`
 	query SeriesBooksScene(
@@ -66,7 +77,10 @@ export const usePrefetchSeriesBooks = () => {
 	const prefetch = useCallback(
 		(
 			id: string,
-			params: UsePrefetchSeriesBooksParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY },
+			params: UsePrefetchSeriesBooksParams = {
+				filter: [],
+				orderBy: DEFAULT_SERIES_BOOKS_ORDER_BY,
+			},
 		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({

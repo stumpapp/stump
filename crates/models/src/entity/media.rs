@@ -4,15 +4,14 @@ use async_trait::async_trait;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
-	QuerySelect,
+	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QuerySelect,
 };
 
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
 		enums::FileStatus,
-		ordering::{OrderBy, OrderDirection},
+		ordering::{OrderDirection, OrderingField},
 	},
 };
 
@@ -307,18 +306,8 @@ impl From<Model> for MediaThumbSelect {
 }
 
 #[derive(Debug, FromQueryResult)]
-pub struct MediaNameCmpSelect {
-	pub name: String,
-}
-
-#[derive(Debug, FromQueryResult)]
 pub struct MediaCreatedAtCmpSelect {
 	pub created_at: DateTimeWithTimeZone,
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct ReadingSessionUpdatedAtCmpSelect {
-	pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

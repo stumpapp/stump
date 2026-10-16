@@ -16,6 +16,7 @@ const fragment = graphql(`
 			id
 			content
 			updatedAt
+			mediaId
 		}
 	}
 `)
@@ -40,10 +41,19 @@ export function SessionJournal({ fragmentRef }: Props) {
 	const { t, translate } = useTranslate()
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
-			client.invalidateQueries({
-				queryKey: ['sessionById', data.id.toString()],
-				exact: false, // order also in key
-			})
+			const keys = [
+				['sessionById', data.id.toString()],
+				['myReadingTimeline'],
+				['mediaById', data.journalEntry?.mediaId, 'readingTimeline'],
+			]
+			Promise.all(
+				keys.map((queryKey) =>
+					client.invalidateQueries({
+						queryKey,
+						exact: false,
+					}),
+				),
+			)
 		},
 		onError: (error) => {
 			const errorMessage = extractErrorMessage(error, t('errors.unknown'))

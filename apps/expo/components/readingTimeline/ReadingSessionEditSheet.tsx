@@ -10,6 +10,8 @@ import { InlineDatePicker } from '~/components/ui/inline-date-picker'
 import { useTranslate } from '~/lib/hooks'
 import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 
+import { LimitedFunctionalityWipAlert } from '../LimitedFunctionalityWipAlert'
+
 const mutation = graphql(`
 	mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
 		patchReadingSession(sessionId: $sessionId, input: $input) {
@@ -69,6 +71,8 @@ export function ReadingSessionEditSheet({ ref, session }: Props) {
 			backgroundColorData={imageMetadata}
 		>
 			<View className="gap-4">
+				<LimitedFunctionalityWipAlert />
+
 				<Card label="Session Times">
 					<Card.Row label="Start">
 						<InlineDatePicker

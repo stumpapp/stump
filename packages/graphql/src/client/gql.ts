@@ -121,7 +121,7 @@ type Documents = {
     "\n\tquery MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {\n\t\tmyReadingTimeline(pagination: $pagination, order: $order) {\n\t\t\tnodes {\n\t\t\t\tmediaId\n\t\t\t\tsession {\n\t\t\t\t\tsession {\n\t\t\t\t\t\tsessionDate\n\t\t\t\t\t}\n\t\t\t\t\t...ReadingSessionCard\n\t\t\t\t\t...ReadingSessionCardMedia\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.MyReadingTimelineScreenDocument,
     "\n\tfragment ReadingSessionDetailHeader on ReadingSession {\n\t\tid\n\t\tstartPage\n\t\tendPage\n\t\tstartLocator {\n\t\t\tlocations {\n\t\t\t\tposition\n\t\t\t}\n\t\t}\n\t\tendLocator {\n\t\t\tlocations {\n\t\t\t\tposition\n\t\t\t}\n\t\t}\n\t\tstartPercentage\n\t\tendPercentage\n\t\tcreatedAt\n\t\tupdatedAt\n\t\telapsedSeconds\n\t\tchaptersRead\n\t\tmedia {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tdevices {\n\t\t\tname\n\t\t}\n\t}\n": typeof types.ReadingSessionDetailHeaderFragmentDoc,
     "\n\tfragment ReadingSessionMenu on ReadingSession {\n\t\tid\n\t\tstatus\n\t\tmediaId\n\t\tcreatedAt\n\t\tupdatedAt\n\t\telapsedSeconds\n\t}\n": typeof types.ReadingSessionMenuFragmentDoc,
-    "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.SessionJournalFragmentDoc,
+    "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t\tmediaId\n\t\t}\n\t}\n": typeof types.SessionJournalFragmentDoc,
     "\n\tmutation UpsertReadingSessionJournalEntry($sessionId: Int!, $content: String!) {\n\t\tupsertReadingSessionJournalEntry(sessionId: $sessionId, content: $content) {\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.UpsertReadingSessionJournalEntryDocument,
     "\n\tmutation DeleteReadingSession($sessionId: Int!) {\n\t\tdeleteReadingSession(sessionId: $sessionId)\n\t}\n": typeof types.DeleteReadingSessionDocument,
     "\n\tmutation ExtendReadingSession($sessionId: Int!) {\n\t\textendReadingSession(sessionId: $sessionId) {\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.ExtendReadingSessionDocument,
@@ -458,7 +458,7 @@ const documents: Documents = {
     "\n\tquery MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {\n\t\tmyReadingTimeline(pagination: $pagination, order: $order) {\n\t\t\tnodes {\n\t\t\t\tmediaId\n\t\t\t\tsession {\n\t\t\t\t\tsession {\n\t\t\t\t\t\tsessionDate\n\t\t\t\t\t}\n\t\t\t\t\t...ReadingSessionCard\n\t\t\t\t\t...ReadingSessionCardMedia\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.MyReadingTimelineScreenDocument,
     "\n\tfragment ReadingSessionDetailHeader on ReadingSession {\n\t\tid\n\t\tstartPage\n\t\tendPage\n\t\tstartLocator {\n\t\t\tlocations {\n\t\t\t\tposition\n\t\t\t}\n\t\t}\n\t\tendLocator {\n\t\t\tlocations {\n\t\t\t\tposition\n\t\t\t}\n\t\t}\n\t\tstartPercentage\n\t\tendPercentage\n\t\tcreatedAt\n\t\tupdatedAt\n\t\telapsedSeconds\n\t\tchaptersRead\n\t\tmedia {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tdevices {\n\t\t\tname\n\t\t}\n\t}\n": types.ReadingSessionDetailHeaderFragmentDoc,
     "\n\tfragment ReadingSessionMenu on ReadingSession {\n\t\tid\n\t\tstatus\n\t\tmediaId\n\t\tcreatedAt\n\t\tupdatedAt\n\t\telapsedSeconds\n\t}\n": types.ReadingSessionMenuFragmentDoc,
-    "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.SessionJournalFragmentDoc,
+    "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t\tmediaId\n\t\t}\n\t}\n": types.SessionJournalFragmentDoc,
     "\n\tmutation UpsertReadingSessionJournalEntry($sessionId: Int!, $content: String!) {\n\t\tupsertReadingSessionJournalEntry(sessionId: $sessionId, content: $content) {\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.UpsertReadingSessionJournalEntryDocument,
     "\n\tmutation DeleteReadingSession($sessionId: Int!) {\n\t\tdeleteReadingSession(sessionId: $sessionId)\n\t}\n": types.DeleteReadingSessionDocument,
     "\n\tmutation ExtendReadingSession($sessionId: Int!) {\n\t\textendReadingSession(sessionId: $sessionId) {\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.ExtendReadingSessionDocument,
@@ -1116,7 +1116,7 @@ export function graphql(source: "\n\tfragment ReadingSessionMenu on ReadingSessi
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').SessionJournalFragmentDoc;
+export function graphql(source: "\n\tfragment SessionJournal on ReadingSession {\n\t\tid\n\t\tjournalEntry {\n\t\t\tid\n\t\t\tcontent\n\t\t\tupdatedAt\n\t\t\tmediaId\n\t\t}\n\t}\n"): typeof import('./graphql').SessionJournalFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

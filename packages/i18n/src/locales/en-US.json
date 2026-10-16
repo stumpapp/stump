@@ -3015,6 +3015,10 @@
       "unknown": "Unknown",
       "lastUpdated": "Last Updated",
       "limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+      "notFullyImplemented": {
+      	"label": "Not Fully Implemented",
+       	"description": "This feature is still under active development, not fully functional, and not ready for use"
+      },
       "logIn": "Log In",
       "login": "Login",
       "seeError": "See error",

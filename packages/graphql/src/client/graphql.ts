@@ -2054,6 +2054,11 @@ export type Mutation = {
    * This operation will also remove any associated thumbnails of the deleted media and series.
    */
   cleanLibrary: CleanLibraryResponse;
+  /**
+   * Clear the stored directory mtimes for a library, forcing the next scan to do a
+   * full walk
+   */
+  clearLibraryScannedDirectories: Scalars['Int']['output'];
   /** trashes current readthrough, if there is one */
   clearMediaProgress: Scalars['Boolean']['output'];
   /** Clear the scan history for a specific library */
@@ -2446,6 +2451,11 @@ export type MutationCancelJobArgs = {
 
 
 export type MutationCleanLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationClearLibraryScannedDirectoriesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5938,7 +5948,7 @@ export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession'
 
 export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
 
-export type SessionJournalFragment = { __typename?: 'ReadingSession', id: number, journalEntry?: { __typename?: 'JournalEntryModel', id: number, content: string, updatedAt: any } | null } & { ' $fragmentName'?: 'SessionJournalFragment' };
+export type SessionJournalFragment = { __typename?: 'ReadingSession', id: number, journalEntry?: { __typename?: 'JournalEntryModel', id: number, content: string, updatedAt: any, mediaId: string } | null } & { ' $fragmentName'?: 'SessionJournalFragment' };
 
 export type UpsertReadingSessionJournalEntryMutationVariables = Exact<{
   sessionId: Scalars['Int']['input'];
@@ -8307,6 +8317,7 @@ export const SessionJournalFragmentDoc = new TypedDocumentString(`
     id
     content
     updatedAt
+    mediaId
   }
 }
     `, {"fragmentName":"SessionJournal"}) as unknown as TypedDocumentString<SessionJournalFragment, unknown>;
@@ -9655,6 +9666,7 @@ fragment SessionJournal on ReadingSession {
     id
     content
     updatedAt
+    mediaId
   }
 }`) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
 export const BookReadingTimelineScreenDocument = new TypedDocumentString(`

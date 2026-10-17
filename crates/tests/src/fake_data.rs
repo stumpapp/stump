@@ -185,7 +185,7 @@ impl Series {
 		let model = series::ActiveModel {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
-			path: sea_orm::Set(path),
+			path: sea_orm::Set(Some(path)),
 			library_id: sea_orm::Set(Some(library_id)),
 			..Default::default()
 		};

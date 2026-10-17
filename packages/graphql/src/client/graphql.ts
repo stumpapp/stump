@@ -2001,7 +2001,8 @@ export type MetadataRetryConfigInput = {
 export type MissingEntity = {
   __typename?: 'MissingEntity';
   id: Scalars['String']['output'];
-  path: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  path?: Maybe<Scalars['String']['output']>;
   type: MissingEntityType;
 };
 
@@ -4267,6 +4268,7 @@ export type Series = {
   isComplete: Scalars['Boolean']['output'];
   isFavorite: Scalars['Boolean']['output'];
   isOneshot: Scalars['Boolean']['output'];
+  kind: SeriesKind;
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   /** Get media in this series */
@@ -4276,7 +4278,7 @@ export type Series = {
   metadata?: Maybe<SeriesMetadata>;
   name: Scalars['String']['output'];
   oneshotBook?: Maybe<Media>;
-  path: Scalars['String']['output'];
+  path?: Maybe<Scalars['String']['output']>;
   percentageCompleted: Scalars['Float']['output'];
   readCount: Scalars['Int']['output'];
   resolvedDescription?: Maybe<Scalars['String']['output']>;
@@ -4326,6 +4328,11 @@ export type SeriesFilterInput = {
   path?: InputMaybe<FieldFilterString>;
   readingStatus?: InputMaybe<ComputedFilterReadingStatus>;
 };
+
+export enum SeriesKind {
+  Filesystem = 'FILESYSTEM',
+  Virtual = 'VIRTUAL'
+}
 
 export type SeriesMetadata = {
   __typename?: 'SeriesMetadata';
@@ -4453,6 +4460,7 @@ export enum SeriesModelOrdering {
   Description = 'DESCRIPTION',
   Id = 'ID',
   IsOneshot = 'IS_ONESHOT',
+  Kind = 'KIND',
   LibraryId = 'LIBRARY_ID',
   Name = 'NAME',
   Path = 'PATH',
@@ -5509,7 +5517,7 @@ export type SeriesBooksSceneSeriesNameQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, libraryId?: string | null, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } } | null };
+export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', kind: SeriesKind, resolvedName: string, libraryId?: string | null, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } } | null };
 
 export type SeriesBooksScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -6664,7 +6672,7 @@ export type LibraryMissingEntitiesQueryVariables = Exact<{
 }>;
 
 
-export type LibraryMissingEntitiesQuery = { __typename?: 'Query', libraryMissingEntities: { __typename?: 'PaginatedMissingEntityResponse', nodes: Array<{ __typename?: 'MissingEntity', id: string, path: string, type: MissingEntityType }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean, totalItems: number } } };
+export type LibraryMissingEntitiesQuery = { __typename?: 'Query', libraryMissingEntities: { __typename?: 'PaginatedMissingEntityResponse', nodes: Array<{ __typename?: 'MissingEntity', id: string, name: string, path?: string | null, type: MissingEntityType }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean, totalItems: number } } };
 
 export type AnalyzeLibraryMediaMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6758,7 +6766,7 @@ export type SeriesLayoutQueryVariables = Exact<{
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path?: string | null, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9976,6 +9984,7 @@ export const LibrariesScreenDocument = new TypedDocumentString(`
 export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
     query SeriesBooksSceneSeriesName($id: ID!) {
   seriesById(id: $id) {
+    kind
     resolvedName
     stats {
       bookCount
@@ -13447,6 +13456,7 @@ export const LibraryMissingEntitiesDocument = new TypedDocumentString(`
   libraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {
     nodes {
       id
+      name
       path
       type
     }

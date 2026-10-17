@@ -234,7 +234,7 @@ pub async fn walk_library(
 		} else {
 			let existing_series_map = existing_records
 				.iter()
-				.map(|s| (s.path.clone(), s.clone()))
+				.filter_map(|s| s.path.clone().map(|path| (path, s.clone())))
 				.collect::<HashMap<String, _>>();
 
 			let missing_series = existing_series_map
@@ -716,7 +716,7 @@ pub async fn walk_oneshots(
 		.all(db.as_ref())
 		.await?
 		.into_iter()
-		.map(|s| (s.path, s.id))
+		.filter_map(|s| s.path.map(|path| (path, s.id)))
 		.collect::<HashMap<String, String>>();
 
 	let pending_oneshot_conversions =

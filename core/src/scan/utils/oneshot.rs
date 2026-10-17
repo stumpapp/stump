@@ -64,7 +64,7 @@ async fn build_oneshot<P: AsRef<Path>>(
 	// ^ we set id early to share with book
 	let series = series::ActiveModel {
 		id: Set(id.to_string()),
-		path: Set(path.to_string_lossy().to_string()),
+		path: Set(Some(path.to_string_lossy().to_string())),
 		name: Set(name.clone()),
 		library_id: Set(Some(library_id.to_string())),
 		is_oneshot: Set(true),
@@ -410,9 +410,11 @@ pub(crate) async fn collect_previous_oneshot_entries(
 			.all(conn)
 			.await?
 			.into_iter()
-			.map(|s| PreviousOneshotEntry {
-				book_path: PathBuf::from(&s.path),
-				old_series_id: s.id,
+			.filter_map(|s| {
+				s.path.map(|path| PreviousOneshotEntry {
+					book_path: PathBuf::from(path),
+					old_series_id: s.id,
+				})
 			})
 			.collect::<Vec<_>>();
 		previous_oneshots.extend(oneshots_to_convert);
@@ -471,7 +473,7 @@ pub(crate) async fn convert_to_oneshot_series(
 
 		let new_series = series::ActiveModel {
 			id: Set(new_series_id.clone()),
-			path: Set(media_row.path.clone()),
+			path: Set(Some(media_row.path.clone())),
 			name: Set(name),
 			library_id: Set(Some(library_id.to_string())),
 			is_oneshot: Set(true),

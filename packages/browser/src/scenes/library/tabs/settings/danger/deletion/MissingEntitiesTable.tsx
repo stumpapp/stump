@@ -18,6 +18,7 @@ const query = graphql(`
 		libraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {
 			nodes {
 				id
+				name
 				path
 				type
 			}
@@ -76,7 +77,7 @@ export default function MisisngEntitiesTable() {
 		columnHelper.accessor('path', {
 			cell: ({
 				row: {
-					original: { id, path, type },
+					original: { id, name, path, type },
 				},
 			}) => (
 				<Link
@@ -86,7 +87,7 @@ export default function MisisngEntitiesTable() {
 						.otherwise(() => undefined)}
 					className="text-sm text-opacity-100 hover:text-opacity-90 line-clamp-2 no-underline hover:underline"
 				>
-					{path}
+					{path ?? name}
 				</Link>
 			),
 			header: t(getKey('columns.path')),

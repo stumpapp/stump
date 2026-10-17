@@ -526,9 +526,9 @@ pub async fn safely_generate_batch(
 		for (source_index, source) in chunk.iter().enumerate() {
 			let options = options.clone();
 			let path = match source {
-				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Book(book) => Some(book.path.clone()),
 				GenerateImageSource::Series(series) => series.path.clone(),
-				GenerateImageSource::Library(library) => library.path.clone(),
+				GenerateImageSource::Library(library) => Some(library.path.clone()),
 			};
 
 			let future = async move {
@@ -568,7 +568,7 @@ pub async fn safely_generate_batch(
 							"Failed to generate thumbnail: {:?}",
 							error.to_string()
 						))
-						.with_ctx(format!("Media path: {path}")),
+						.with_ctx(format!("Media path: {path:?}")),
 					);
 				},
 			}
@@ -825,9 +825,9 @@ pub async fn safely_generate_placeholder_batch(
 		for (source_index, source) in chunk.iter().enumerate() {
 			let force_regen = force_regen;
 			let path = match source {
-				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Book(book) => Some(book.path.clone()),
 				GenerateImageSource::Series(series) => series.path.clone(),
-				GenerateImageSource::Library(library) => library.path.clone(),
+				GenerateImageSource::Library(library) => Some(library.path.clone()),
 			};
 
 			let future = async move {
@@ -866,7 +866,7 @@ pub async fn safely_generate_placeholder_batch(
 								"Failed to generate placeholder metadata: {:?}",
 								error.to_string()
 							))
-							.with_ctx(format!("Media path: {path}")),
+							.with_ctx(format!("Media path: {path:?}")),
 						);
 						output.skipped_entities += 1;
 					},

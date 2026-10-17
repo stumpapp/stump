@@ -779,18 +779,19 @@
 			"sections": {
 				"cleanLibrary": {
 					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
+					"description": "Remove missing books and series, and empty series",
 					"disclaimerTitle": "No files will be deleted",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"disclaimer": "This action removes database records for missing books and series, and for empty series. Files on disk will not be deleted.",
 					"confirmation": {
 						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"text": "Are you sure you want to clean this library?",
+						"loading": "Cleaning library..."
 					},
 					"emptyText": "There was nothing to clean",
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",
-							"path": "Path",
+							"path": "Path or name",
 							"type": "Type"
 						},
 						"types": {
@@ -798,8 +799,8 @@
 							"SERIES": "Series",
 							"LIBRARY": "Library"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "Nothing to clean for this library",
+						"emptySubtitle": "All files were located on disk and there are no empty series"
 					}
 				},
 				"deleteLibrary": {

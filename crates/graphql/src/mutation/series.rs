@@ -204,7 +204,10 @@ impl SeriesMutation {
 				.await?
 				.ok_or("Series not found")?;
 
-		core.enqueue(StumpJob::series_scan(model.id, model.path, None))
+		let path = model.path.ok_or(
+			"Virtual series cannot be scanned as a directory; scan its library instead",
+		)?;
+		core.enqueue(StumpJob::series_scan(model.id, path, None))
 			.await?;
 
 		Ok(true)

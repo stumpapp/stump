@@ -745,7 +745,7 @@ mod tests {
 		let series = series::ActiveModel {
 			name: Set("Test Series".to_string()),
 			library_id: Set(Some(library.id.clone())),
-			path: Set("/test/series".to_string()),
+			path: Set(Some("/test/series".to_string())),
 			status: Set(FileStatus::Ready),
 			..Default::default()
 		}

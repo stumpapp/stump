@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use apalis::prelude::{MemoryStorage, MessageQueue};
 use models::entity::server_config;
-use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, SelectColumns};
+use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, QuerySelect};
 use tokio::sync::broadcast::{channel, Receiver, Sender};
 
 use crate::{
@@ -189,7 +189,7 @@ impl Ctx {
 	/// Retrieves the encryption key from the server configuration
 	pub async fn get_encryption_key(&self) -> CoreResult<String> {
 		let record = server_config::Entity::find()
-			.select_column(server_config::Column::EncryptionKey)
+			.column(server_config::Column::EncryptionKey)
 			.one(self.conn.as_ref())
 			.await?;
 

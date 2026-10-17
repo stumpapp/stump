@@ -9,6 +9,9 @@ use crate::shared::{
 	},
 };
 
+use super::user;
+
+#[sea_orm::model]
 #[derive(
 	Clone, Debug, PartialEq, DeriveEntityModel, SimpleObject, Serialize, Deserialize,
 )]
@@ -67,18 +70,10 @@ pub struct Model {
 	pub reading_session_grace_period_secs: i64,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_one = "super::user::Entity")]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	#[serde(skip)]
+	pub user: HasOne<user::Entity>,
 }
 
 impl Model {

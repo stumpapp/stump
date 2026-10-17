@@ -8,6 +8,7 @@ use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
+	ExprTrait,
 };
 use stump_core::{
 	image::{bump_series_thumbnail_fallbacks, generate_thumbnail_from_book},

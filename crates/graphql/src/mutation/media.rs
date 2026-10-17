@@ -7,7 +7,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	IntoActiveModel, QuerySelect, Set,
+	ExprTrait, IntoActiveModel, QuerySelect, Set,
 };
 use stump_core::{
 	image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},

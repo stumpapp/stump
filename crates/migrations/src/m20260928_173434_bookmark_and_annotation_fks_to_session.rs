@@ -15,7 +15,7 @@ impl MigrationTrait for Migration {
 
 		// Sqlite does not support modification of foreign key constraints to existing tables
 		// >:( so we just rebuild the tables with the new fks
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"alter table "bookmarks" rename to "bookmarks_legacy""#.to_owned(),
 		))
@@ -71,7 +71,7 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"insert into "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")
 			select
@@ -87,13 +87,13 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop table "bookmarks_legacy""#.to_owned(),
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"alter table "media_annotations" rename to "media_annotations_legacy""#
 				.to_owned(),
@@ -163,7 +163,7 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"insert into "media_annotations"("id", "locator", "annotation_text", "media_id", "user_id", "created_at", "updated_at")
 			select
@@ -179,13 +179,13 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop table "media_annotations_legacy""#.to_owned(),
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop index if exists "idx_media_annotations_user_media""#.to_owned(),
 		))
@@ -220,7 +220,7 @@ impl MigrationTrait for Migration {
 		let conn = manager.get_connection();
 		let db_backend = manager.get_database_backend();
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"alter table "bookmarks" rename to "bookmarks_legacy""#.to_owned(),
 		))
@@ -267,7 +267,7 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"insert into "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")SELECT "id",
                 "preview_content",
@@ -281,13 +281,13 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop table "bookmarks_legacy""#.to_owned(),
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"alter table "media_annotations" rename to "media_annotations_legacy""#
 				.to_owned(),
@@ -348,7 +348,7 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"insert into "media_annotations"("id", "locator", "annotation_text", "media_id", "user_id", "created_at", "updated_at")
 			select
@@ -364,13 +364,13 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop table "media_annotations_legacy""#.to_owned(),
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			db_backend,
 			r#"drop index if exists "idx_media_annotations_user_media""#.to_owned(),
 		))
@@ -523,7 +523,7 @@ async fn backfill(conn: &impl ConnectionTrait) -> Result<(), DbErr> {
 			determine_approximate_session_id(bookmark.created_at, &candidate_sessions);
 
 		if let Some(session_id) = closest_match {
-			conn.execute(Statement::from_sql_and_values(
+			conn.execute_raw(Statement::from_sql_and_values(
 				backend,
 				"update bookmarks set session_id = ? where id = ?",
 				vec![session_id.into(), bookmark.id.clone().into()],
@@ -567,7 +567,7 @@ async fn backfill(conn: &impl ConnectionTrait) -> Result<(), DbErr> {
 			determine_approximate_session_id(annotation.created_at, &candidate_sessions);
 
 		if let Some(session_id) = closest_match {
-			conn.execute(Statement::from_sql_and_values(
+			conn.execute_raw(Statement::from_sql_and_values(
 				backend,
 				"update media_annotations set session_id = ? where id = ?",
 				vec![session_id.into(), annotation.id.clone().into()],
@@ -661,7 +661,7 @@ mod tests {
 		];
 
 		for stmt in &stmts {
-			db.execute(Statement::from_string(backend, ToString::to_string(stmt)))
+			db.execute_raw(Statement::from_string(backend, ToString::to_string(stmt)))
 				.await
 				.expect("should create table");
 		}
@@ -776,7 +776,7 @@ mod tests {
 		let db = setup_db().await;
 		let backend = db.get_database_backend();
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
 			vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), "2026-10-03 12:00:00".into()],
@@ -784,7 +784,7 @@ mod tests {
 		.await
 		.expect("should insert reading session");
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
 			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 11:30:00".into()],
@@ -802,7 +802,7 @@ mod tests {
 		let db = setup_db().await;
 		let backend = db.get_database_backend();
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
 			vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), "2026-10-03 15:00:00".into()],
@@ -810,7 +810,7 @@ mod tests {
 		.await
 		.expect("should insert reading session");
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into media_annotations (id, user_id, media_id, created_at, updated_at) values (?, ?, ?, ?, ?)",
 			vec!["ann-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 14:00:00".into(), "2026-10-03 14:00:00".into()],
@@ -834,7 +834,7 @@ mod tests {
 			"2026-10-03 10:30:00", // ends at 10:30
 			"2026-10-03 14:00:00", // ends at 2:30
 		] {
-			db.execute(Statement::from_sql_and_values(
+			db.execute_raw(Statement::from_sql_and_values(
 				backend,
 				"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
 				vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), updated_at.into()],
@@ -843,7 +843,7 @@ mod tests {
 			.expect("should insert reading session");
 		}
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
 			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
@@ -862,7 +862,7 @@ mod tests {
 		let db = setup_db().await;
 		let backend = db.get_database_backend();
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
 			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
@@ -882,7 +882,7 @@ mod tests {
 		let db = setup_db().await;
 		let backend = db.get_database_backend();
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into user_preferences (user_id, day_reset_hour_offset) values (?, ?)",
 			vec!["user-1".into(), 4.into()], // offset=4 -> logical day starts at 4am
@@ -890,7 +890,7 @@ mod tests {
 		.await
 		.expect("should insert user preferences");
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
 			vec!["user-1".into(), "media-1".into(), "2026-10-02".into(), "2026-10-03 03:00:00".into()],
@@ -899,7 +899,7 @@ mod tests {
 		.expect("should insert reading session");
 		// ^ session is on 2nd and ends at 3am, thus is still part of 2nd logical day
 
-		db.execute(Statement::from_sql_and_values(
+		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
 			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 01:00:00".into()],

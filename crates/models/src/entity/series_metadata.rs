@@ -6,6 +6,9 @@ use async_graphql::SimpleObject;
 use filter_gen::Ordering;
 use sea_orm::entity::prelude::*;
 
+use super::series;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesMetadataModel")]
 #[sea_orm(table_name = "series_metadata")]
@@ -79,24 +82,15 @@ pub struct Model {
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub locked_fields: Option<serde_json::Value>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::series::Entity",
-		from = "Column::SeriesId",
-		to = "super::series::Column::Id",
+		belongs_to,
+		from = "series_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Series,
-}
-
-impl Related<super::series::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Series.def()
-	}
+	#[graphql(skip)]
+	pub series: BelongsTo<series::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -11,7 +11,9 @@ use models::{
 		ordering::{OrderDirection, OrderingField},
 	},
 };
-use sea_orm::{prelude::*, FromQueryResult, Order, QueryOrder, QuerySelect, QueryTrait};
+use sea_orm::{
+	prelude::*, ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect, QueryTrait,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -147,7 +149,7 @@ impl LibraryQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -229,7 +231,7 @@ impl LibraryQuery {
 		};
 
 		let total_count_result = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r"
                 SELECT COUNT(*) as count FROM (
@@ -258,7 +260,7 @@ impl LibraryQuery {
 		let limit = offset_pagination.limit();
 
 		let result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r#"
 				SELECT

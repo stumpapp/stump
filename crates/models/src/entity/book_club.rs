@@ -13,8 +13,9 @@ use sea_orm::{
 };
 use slugify::slugify;
 
-use super::user::AuthUser;
+use super::{book_club_book, book_club_invitation, user::AuthUser};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubModel")]
 #[sea_orm(table_name = "book_clubs")]
@@ -35,6 +36,15 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_books: HasMany<book_club_book::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_invitations: HasMany<book_club_invitation::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_members: HasMany<book_club_member::Entity>,
 }
 
 impl Entity {
@@ -129,34 +139,6 @@ impl Entity {
 		id: &str,
 	) -> Select<Entity> {
 		Self::find_for_member_enforce_role(user, role).filter(Column::Id.eq(id))
-	}
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::book_club_book::Entity")]
-	BookClubBook,
-	#[sea_orm(has_many = "super::book_club_invitation::Entity")]
-	BookClubInvitation,
-	#[sea_orm(has_many = "super::book_club_member::Entity")]
-	BookClubMember,
-}
-
-impl Related<super::book_club_book::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBook.def()
-	}
-}
-
-impl Related<super::book_club_invitation::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubInvitation.def()
-	}
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMember.def()
 	}
 }
 

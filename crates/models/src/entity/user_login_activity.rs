@@ -1,10 +1,13 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
+use super::user;
+
 // TODO(security): Add the following fields:
 // - failure_reason
 // - ip_source_method (e.g., the header pulled if applicable)
 // - authentication_method (oidc, api_key, pass, etc)
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "user_login_activity")]
 #[graphql(name = "UserLoginActivityModel")]
@@ -20,24 +23,15 @@ pub struct Model {
 	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

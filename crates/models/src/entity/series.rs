@@ -15,10 +15,14 @@ use crate::{
 	},
 };
 
-use super::{library_exclusion, series_metadata, user::AuthUser};
+use super::{
+	library, library_exclusion, media, metadata_fetch_record, series_metadata,
+	series_tag, user::AuthUser,
+};
 
 // TODO: Properly support soft deletion
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesModel")]
 #[sea_orm(table_name = "series")]
@@ -46,6 +50,27 @@ pub struct Model {
 	pub updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(
+		belongs_to,
+		from = "library_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub library: BelongsTo<Option<library::Entity>>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub media: HasMany<media::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub metadata: HasOne<series_metadata::Entity>,
+	#[sea_orm(has_many, relation_enum = "Tags")]
+	#[graphql(skip)]
+	pub tags: HasMany<series_tag::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub metadata_fetch_record: HasOne<metadata_fetch_record::Entity>,
 }
 
 pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
@@ -205,50 +230,6 @@ fn apply_age_restriction_filter(
 	select
 		.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 		.to_owned()
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::library::Entity",
-		from = "Column::LibraryId",
-		to = "super::library::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	Library,
-	#[sea_orm(has_many = "super::media::Entity")]
-	Media,
-	#[sea_orm(has_one = "super::series_metadata::Entity")]
-	SeriesMetadata,
-	#[sea_orm(has_many = "super::series_tag::Entity")]
-	Tags,
-	#[sea_orm(has_one = "super::metadata_fetch_record::Entity")]
-	MetadataFetchRecord,
-}
-
-impl Related<super::library::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Library.def()
-	}
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
-}
-
-impl Related<super::series_metadata::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SeriesMetadata.def()
-	}
-}
-
-impl Related<super::metadata_fetch_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MetadataFetchRecord.def()
-	}
 }
 
 impl Linked for Entity {

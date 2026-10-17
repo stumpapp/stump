@@ -13,12 +13,13 @@ use models::{
 	entity::{
 		session,
 		user::{self, AuthUser, LoginUser},
-		user_login_activity, user_preferences,
+		user_login_activity,
 	},
+	services::user::create_user_with_preferences,
 	shared::image::ImageRef,
 };
 use reqwest::header;
-use sea_orm::{prelude::*, ExprTrait, IntoActiveModel, TransactionTrait};
+use sea_orm::{prelude::*, ExprTrait};
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
@@ -422,37 +423,22 @@ pub async fn register(
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
-	let tx = conn.begin().await?;
-
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),
 		hashed_password: Set(hashed_password),
 		is_server_owner: Set(is_server_owner),
 		..Default::default()
 	};
-	let created_user = active_model.insert(&tx).await?;
-
-	let active_model = user_preferences::ActiveModel {
-		user_id: Set(Some(created_user.id.clone())),
-		..Default::default()
-	};
-	let created_user_preferences = active_model.insert(&tx).await?;
-
-	// Write back the preferences ID to the user
-	let mut updated_user = created_user.into_active_model();
-	updated_user.user_preferences_id = Set(Some(created_user_preferences.id));
-	let updated_user = updated_user.update(&tx).await?;
+	let updated_user = create_user_with_preferences(conn, active_model, None).await?;
 
 	let auth_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(updated_user.id.clone()))
 		.into_model::<user::LoginUser>()
-		.one(&tx)
+		.one(conn)
 		.await?
 		.ok_or(APIError::InternalServerError(
 			"Failed to fetch user after registration.".to_string(),
 		))?;
-
-	tx.commit().await?;
 
 	let auth_user = inject_avatar_url(AuthUser::from(auth_user), service);
 

@@ -7,10 +7,11 @@ use axum::{
 	Extension, Json, Router,
 };
 use chrono::Utc;
-use models::entity::{server_config, user, user_preferences};
+use models::entity::{server_config, user};
+use models::services::user::create_user_with_preferences;
 use sea_orm::{
-	entity::prelude::DateTimeWithTimeZone, ActiveModelTrait, ColumnTrait, EntityTrait,
-	IntoActiveModel, PaginatorTrait, QueryFilter, Set, TransactionTrait,
+	entity::prelude::DateTimeWithTimeZone, ColumnTrait, EntityTrait, PaginatorTrait,
+	QueryFilter, Set,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::image::thumbnail::generate_image_metadata_from_bytes;
@@ -269,8 +270,6 @@ async fn callback(
 
 		let username = ensure_unique_username(ctx.conn.as_ref(), &claims.email).await?;
 
-		let tx = ctx.conn.begin().await?;
-
 		let active_model = user::ActiveModel {
 			username: Set(username),
 			hashed_password: Set(String::new()), // OIDC users don't have a password
@@ -279,20 +278,8 @@ async fn callback(
 			is_server_owner: Set(is_server_owner),
 			..Default::default()
 		};
-		let created_user = active_model.insert(&tx).await?;
-		let created_user_preferences = user_preferences::ActiveModel {
-			user_id: Set(Some(created_user.id.clone())),
-			..Default::default()
-		}
-		.insert(&tx)
-		.await?;
-
-		let mut updated_user = created_user.into_active_model();
-		updated_user.user_preferences_id = Set(Some(created_user_preferences.id));
-
-		let user = updated_user.update(&tx).await?;
-
-		tx.commit().await?;
+		let user =
+			create_user_with_preferences(ctx.conn.as_ref(), active_model, None).await?;
 
 		if let Some(picture_url) = &claims.picture {
 			match download_image(picture_url).await {

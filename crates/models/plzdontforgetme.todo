@@ -3,5 +3,5 @@
 - [x] https://www.sea-ql.org/blog/2026-01-12-sea-orm-2.0/
   - [ ] follow-ups:
     - [x] https://www.sea-ql.org/blog/2025-10-20-sea-orm-2.0/ —> new entity format
-      - [ ] smart loader, other goodies etc etc
     - [ ] https://www.sea-ql.org/blog/2025-11-25-sea-orm-2.0/ —> nested active model :eyes:!!
+      - [ ] i don't think there are _too_ many areas this actually helps but there are def a few winners! i think one thing i need to do before tackling more is remove the circular fks between user/user_preferences. not doing that here, though, in a major orm version change lol

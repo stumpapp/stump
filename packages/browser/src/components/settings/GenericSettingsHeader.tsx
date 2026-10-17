@@ -1,11 +1,11 @@
 import { cn, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { RouteGroup } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import GenericSettingsSelectNavigation from './GenericSettingsSelectNavigation'
 
@@ -19,7 +19,7 @@ export default function GenericSettingsHeader({ localeBase, routeGroups }: Props
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'

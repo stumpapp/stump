@@ -9,7 +9,6 @@ import {
 	ReadingDirection,
 	type ReadiumLocator,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import type { EpubSearchResponse } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
@@ -17,6 +16,7 @@ import { toast } from 'sonner'
 
 import Spinner from '@/components/Spinner'
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookTimer } from '@/stores/reader'
 
@@ -168,7 +168,7 @@ type LoadState =
  * Production Readium Web EPUB reader — streams via Stump RWPM.
  */
 export default function ReadiumWebReader({ id, isIncognito }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -294,7 +294,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				console.error('[ReadiumWebReader] open failed', error)
 				setOpenState({
 					status: 'error',
-					message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
+					message:
+						error instanceof Error
+							? error.message
+							: translate('shared.epubReader.errors.openFailed'),
 				})
 			}
 		}
@@ -647,10 +650,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				console.error(err)
 			}
 
-			toast.error(t('epubReader.errors.navigateFailed'))
+			toast.error(translate('shared.epubReader.errors.navigateFailed'))
 			return false
 		},
-		[api, opened, t],
+		[api, opened, translate],
 	)
 
 	const onLinkClick = useCallback(

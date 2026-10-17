@@ -1,10 +1,10 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { BadgeAlert, BadgeCheck, BadgeX } from 'lucide-react'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { PROVIDER_LABELS } from './constants'
 import { EditProviderDialog } from './EditProviderDialog'
@@ -29,7 +29,7 @@ type Props = {
 export function ExistingProviderCard({ data }: Props) {
 	const provider = useFragment(fragment, data)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canEdit = checkPermission(UserPermission.MetadataProviderManage)

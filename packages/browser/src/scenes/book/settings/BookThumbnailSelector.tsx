@@ -1,13 +1,13 @@
 import { useGraphQLMutation, useGraphQLUploadMutation, useSDK } from '@stump/client'
 import { Button, Dialog } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from './BookPageGrid'
@@ -55,7 +55,7 @@ type Props = {
 
 export default function BookThumbnailSelector({ fragment }: Props) {
 	const book = useFragment(BookThumbnailSelectorFragment, fragment)
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()
@@ -151,7 +151,7 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}

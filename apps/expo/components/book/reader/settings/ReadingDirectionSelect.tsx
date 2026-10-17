@@ -9,13 +9,13 @@ type Props = {
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<Picker
 			options={[
-				{ label: t(getKey(ReadingDirection.Ltr)), value: ReadingDirection.Ltr },
-				{ label: t(getKey(ReadingDirection.Rtl)), value: ReadingDirection.Rtl },
+				{ label: translate(getKey(ReadingDirection.Ltr)), value: ReadingDirection.Ltr },
+				{ label: translate(getKey(ReadingDirection.Rtl)), value: ReadingDirection.Rtl },
 			]}
 			value={direction}
 			onValueChange={onChange}
@@ -23,5 +23,5 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.readingDirection'
+const LOCALE_BASE = 'shared.readerSettings.readingDirection'
 const getKey = (key: ReadingDirection) => `${LOCALE_BASE}.options.${key}`

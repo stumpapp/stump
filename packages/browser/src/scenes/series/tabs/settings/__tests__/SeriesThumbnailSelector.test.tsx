@@ -26,7 +26,7 @@ vi.mock('@stump/graphql', async () => {
 })
 
 vi.mock('@stump/i18n', () => ({
-	useLocaleContext: () => ({ t: (key: string) => `translated:${key}` }),
+	useCreateTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
 }))
 
 vi.mock('@/components/entity', () => ({
@@ -61,12 +61,10 @@ describe('SeriesThumbnailSelector', () => {
 
 		fireEvent.click(screen.getByRole('button', { name: 'Choose thumbnail' }))
 
-		expect(screen.getByText('translated:thumbnailSelector.title')).toBeInTheDocument()
+		expect(screen.getByText('thumbnailSelector.title')).toBeInTheDocument()
+		expect(screen.getByText('thumbnailSelector.descriptions.chooseSeriesBook')).toBeInTheDocument()
 		expect(
-			screen.getByText('translated:thumbnailSelector.descriptions.chooseSeriesBook'),
-		).toBeInTheDocument()
-		expect(
-			screen.getByRole('button', { name: 'translated:thumbnailSelector.actions.confirmSelection' }),
+			screen.getByRole('button', { name: 'thumbnailSelector.actions.confirmSelection' }),
 		).toBeInTheDocument()
 	})
 })

@@ -3,10 +3,7 @@ use std::collections::HashMap;
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::series,
-	shared::{
-		alphabet::{AvailableAlphabet, EntityLetter},
-		ordering::OrderBy,
-	},
+	shared::alphabet::{AvailableAlphabet, EntityLetter},
 };
 use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
 
@@ -41,28 +38,28 @@ impl SeriesQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let conditions = filter.into_filter_with_user(&user.id);
-		let query = SeriesOrderBy::add_order_by(
-			&order_by,
-			series::ModelWithMetadata::find_for_user(user).filter(conditions),
-		)?;
+		let spec = SeriesOrderBy::spec(&order_by);
+		let query =
+			spec.apply(series::ModelWithMetadata::find_for_user(user).filter(conditions));
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
-				let mut cursor = query.cursor_by(series::Column::Name);
+				let mut query = query;
 				if let Some(ref id) = info.after {
-					let series = series::ModelWithMetadata::find_for_user(user)
-						.select_only()
-						.column(series::Column::Name)
-						.filter(series::Column::Id.eq(id.clone()))
-						.into_model::<series::SeriesNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
-					cursor.after(series.name);
+					let cursor =
+						series::ModelWithMetadata::find_by_id_for_user(id.clone(), user)
+							.into_model::<series::ModelWithMetadata>()
+							.one(conn)
+							.await?
+							.ok_or("Cursor not found")?;
+					query =
+						query.filter(spec.sorts_after(&SeriesOrderBy::cursor_values(
+							&order_by, &cursor,
+						)));
 				}
-				cursor.first(info.limit);
 
-				let models = cursor
+				let models = query
+					.limit(info.limit)
 					.into_model::<series::ModelWithMetadata>()
 					.all(conn)
 					.await?;

@@ -16,8 +16,11 @@ mod media;
 mod media_metadata;
 mod metadata_provider;
 mod notifier;
+mod reading_device;
+mod reading_journal;
 mod reading_list;
 pub mod reading_progress;
+mod reading_session;
 mod scheduled_job_config;
 mod series;
 mod series_metadata;
@@ -46,8 +49,11 @@ use media::MediaMutation;
 use media_metadata::MediaMetadataMutation;
 use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
+use reading_device::ReadingDeviceMutation;
+use reading_journal::ReadingJournalMutation;
 use reading_list::ReadingListMutation;
 use reading_progress::ReadProgressMutation;
+use reading_session::ReadingSessionMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
 use series_metadata::SeriesMetadataMutation;
@@ -103,11 +109,19 @@ struct ListMutations(
 );
 
 #[derive(async_graphql::MergedObject, Default)]
+struct ReadingRelatedMutation(
+	ReadProgressMutation,
+	ReadingSessionMutation,
+	ReadingJournalMutation,
+	ReadingDeviceMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
 	BookClubMutations,
 	ContentMutations,
 	UserAndNotifsMutations,
 	SystemMutations,
 	ListMutations,
-	ReadProgressMutation,
+	ReadingRelatedMutation,
 );

@@ -1,8 +1,7 @@
 use async_graphql::{Enum, SimpleObject, ID};
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, Condition, DeriveActiveEnum, EnumIter, QueryOrder, QuerySelect,
-	QueryTrait,
+	prelude::*, Condition, DeriveActiveEnum, EnumIter, QuerySelect, QueryTrait,
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -12,7 +11,7 @@ use crate::{
 	entity::{smart_list_access_rule::SmartListAccessRole, user::AuthUser},
 	shared::{
 		enums::EntityVisibility,
-		ordering::{OrderBy, OrderDirection},
+		ordering::{OrderDirection, OrderingField},
 	},
 };
 

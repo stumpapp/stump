@@ -124,7 +124,7 @@ function SheetContent({ library }: SheetContentProps) {
 		{
 			label: 'Completed',
 			value: stats.completedBooks,
-			suffix: `/ ${stats.bookCount}`,
+			suffix: ` / ${stats.bookCount}`,
 			icon: BookCheck,
 			colors: STAT_COLORS.completed,
 		},
@@ -142,8 +142,8 @@ function SheetContent({ library }: SheetContentProps) {
 		},
 		{
 			label: 'Reading Time',
-			value: formattedTime ? formattedTime.value : '??',
-			suffix: formattedTime ? formattedTime.unit : undefined,
+			value: formattedTime[0]?.value ?? '??',
+			suffix: formattedTime[0]?.unit ?? undefined,
 			icon: Clock,
 			colors: STAT_COLORS.readingTime,
 		},

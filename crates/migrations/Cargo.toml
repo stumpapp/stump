@@ -12,9 +12,11 @@ path = "bin/migrate.rs"
 postgres-tests = []
 
 [dependencies]
+chrono = { workspace = true }
 sea-orm = { workspace = true }
 sea-orm-migration = { workspace = true }
 tokio = { workspace = true }
+tracing = { workspace = true }
 
 models = { path = "../models" }
 

@@ -9,7 +9,6 @@ import {
 	RadioGroup,
 } from '@stump/components'
 import { Apikey } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { allPermissions, isUserPermission } from '@stump/sdk'
 import { addDays, endOfDay } from 'date-fns'
 import { useCallback } from 'react'
@@ -17,6 +16,7 @@ import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { userPermissionSchema } from '../../server/users/create-or-update/schema'
 
@@ -56,7 +56,7 @@ export default function CreateOrUpdateAPIKeyForm({
 	editingKey,
 	onFormFocusStateChanged,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const form = useForm<CreateOrUpdateAPIKeyFormValues>({

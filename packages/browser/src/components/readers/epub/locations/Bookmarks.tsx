@@ -1,8 +1,8 @@
 import { Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEpubReaderContext } from '../context'
 
@@ -11,7 +11,7 @@ type Props = {
 }
 
 export default function Bookmarks({ onLocationChanged }: Props) {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const {
 		readerMeta: { bookMeta },
 		controls: { onGoToLocator },
@@ -39,7 +39,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	)
 
 	if (!bookmarks.length) {
-		return <GenericEmptyState title={t('epubReader.noBookmarks')} />
+		return <GenericEmptyState title={translate('shared.epubReader.noBookmarks')} />
 	}
 
 	return (
@@ -49,7 +49,9 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 				const hasLocator = !!bookmark.locator?.href
 				const isNavigable = hasLocator
 				const subtitle =
-					bookmark.locator?.chapterTitle || bookmark.locator?.href || t('epubReader.bookmark')
+					bookmark.locator?.chapterTitle ||
+					bookmark.locator?.href ||
+					translate('shared.epubReader.bookmark')
 
 				return (
 					<button

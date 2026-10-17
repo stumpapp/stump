@@ -23,13 +23,13 @@ import {
 	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
 
@@ -73,7 +73,7 @@ const lockMutation = graphql(`
 `)
 
 export default function NavigationArrangementRow() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	return (
 		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
 			<NavigationArrangementSheet />
@@ -82,7 +82,7 @@ export default function NavigationArrangementRow() {
 }
 
 export function NavigationArrangementSheet() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 	const {
@@ -247,7 +247,7 @@ export function NavigationArrangementSheet() {
 			description={t(getKey('description'))}
 			trigger={
 				<Button size="sm" variant="outline">
-					{t('common.edit')}
+					{translate('shared.common.edit')}
 				</Button>
 			}
 		>

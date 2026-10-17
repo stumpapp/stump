@@ -1,12 +1,12 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { OwlEmptyState } from '@/components/Owl'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import {
@@ -62,7 +62,7 @@ export const usePrefetchHomeScene = () => {
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const paths = usePaths()
 	const { data: arrangement } = useHomeArrangement()
 	const { sdk } = useSDK()
@@ -111,11 +111,11 @@ export default function HomeScene() {
 
 			{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
 				<OwlEmptyState
-					title={t('homeScene.allSectionsHidden.label')}
-					description={t('homeScene.allSectionsHidden.description')}
+					title={translate('shared.homeSections.allSectionsHidden.label')}
+					description={translate('shared.homeSections.allSectionsHidden.description')}
 					actions={
 						<ButtonOrLink href={paths.settings('preferences')} data-testid="customize-home-button">
-							{t('homeScene.allSectionsHidden.customizeHome')}
+							{translate('shared.homeSections.allSectionsHidden.customizeHome')}
 						</ButtonOrLink>
 					}
 				/>

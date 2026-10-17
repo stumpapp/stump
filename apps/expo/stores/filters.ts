@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import {
 	MediaFilterInput,
+	MediaMetadataModelOrdering,
 	MediaModelOrdering,
 	MediaOrderBy,
 	OrderDirection,
@@ -39,10 +40,21 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	}))
 }
 
-export const createBookFilterStore = (initialFilter: Partial<MediaFilterInput> = {}) =>
-	createFilterStore<MediaFilterInput, MediaOrderBy>(initialFilter, {
-		media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
-	})
+export const DEFAULT_BOOK_SORT: MediaOrderBy = {
+	media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
+}
+
+export const SERIES_POSITION_SORT: MediaOrderBy = {
+	metadata: { field: MediaMetadataModelOrdering.Number, direction: OrderDirection.Asc },
+}
+
+export const createBookFilterStore = (
+	initialFilter: Partial<MediaFilterInput> = {},
+	defaultSort: MediaOrderBy = DEFAULT_BOOK_SORT,
+) => createFilterStore<MediaFilterInput, MediaOrderBy>(initialFilter, defaultSort)
+
+export const resolveBookOrderBy = (sort: MediaOrderBy): MediaOrderBy[] =>
+	sort.metadata?.field === MediaMetadataModelOrdering.Number ? [sort, DEFAULT_BOOK_SORT] : [sort]
 
 export const useInitialBookFilters = () => {
 	const initialFilters = useLocalSearchParams<{ initialFilters?: string }>()

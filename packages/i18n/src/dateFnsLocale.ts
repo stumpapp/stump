@@ -189,16 +189,41 @@ export function formatHumanDuration(
 	)
 }
 
+type DurationPart = {
+	value: number
+	unit: string
+}
+
 /**
  * Format a duration in human-readable form, separating the unit and value.
  *
- * Only returns one significant unit (hours, minutes or seconds).
+ * `'1 hour 2 minutes'` -> `[{value: 1, unit: ' hour '}, {value: 2, ' minutes'}]`
  */
-export function formatHumanDurationSeparate(seconds: number) {
-	const formattedDuration = formatHumanDuration(seconds, { significantUnits: 1 })
-	const [, value, unit] = formattedDuration.match(/^(\d+)\s*(.+)$/) || []
-	if (!value || !unit) return
-	return { value, unit }
+export function formatHumanDurationSeparate(
+	seconds: number,
+	options: { significantUnits: 1 | 2 | 3 } = { significantUnits: 1 },
+): DurationPart[] {
+	const formattedDuration = formatHumanDuration(seconds, {
+		significantUnits: options.significantUnits,
+		delimiter: ',',
+	})
+
+	const parts = formattedDuration.split(',')
+
+	return parts
+		.map((part, index) => {
+			const match = part.match(/^(\d+)(.+)$/)
+			if (!match) return null
+
+			const [, value, unit] = match
+
+			return {
+				value: Number(value),
+				// hopefully a space as a separator between units is okay for all locales
+				unit: index < parts.length - 1 ? `${unit} ` : unit,
+			}
+		})
+		.filter((x): x is DurationPart => x !== null)
 }
 
 /**

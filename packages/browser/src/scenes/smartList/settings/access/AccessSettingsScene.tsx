@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
 import { EntityVisibility } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -11,6 +10,7 @@ import {
 	intoForm,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSmartListSettings } from '../context'
 import ChangeVisibilityConfirmation from './ChangeVisibilityConfirmation'
@@ -19,7 +19,7 @@ import UserAccessManager from './UserAccessManager'
 type SubSchema = Pick<SmartListFormSchema, 'visibility'>
 
 export default function AccessSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 
 	const form = useForm<SubSchema>({

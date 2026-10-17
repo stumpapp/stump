@@ -10,29 +10,36 @@ import { useAppState } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 
 type BrightnessProps = {
+	isSheetOpen: boolean
 	setTouchingSlider: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 // TODO: Fancy and scale on focus/drag
-export default function Brightness({ setTouchingSlider }: BrightnessProps) {
+export default function Brightness({ isSheetOpen, setTouchingSlider }: BrightnessProps) {
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
 
 	const [brightness, setBrightness] = useState<number>()
 
 	const syncBrightness = useCallback(async () => {
+		const { status } = await ExpoBrightness.getPermissionsAsync()
+		if (status === ExpoBrightness.PermissionStatus.DENIED) return
+		// i think getSystemBrightnessAsync will auto-request if they haven't been granted, at least that
+		// is what it seems to do based on testing. if i deny the permission, i do not want it
+		// prompting me each time i open the sheet
 		const currentBrightness = await ExpoBrightness.getSystemBrightnessAsync()
 		setBrightness(currentBrightness)
 	}, [])
 
-	useEffect(() => {
-		;(async () => {
-			const { status } = await ExpoBrightness.requestPermissionsAsync()
-			if (status === 'granted') {
-				syncBrightness()
-			}
-		})()
-	}, [syncBrightness])
+	useEffect(
+		() => {
+			syncBrightness()
+		},
+		// so there exists https://docs.expo.dev/versions/latest/sdk/brightness/#event-subscriptions but OF COURSE it is
+		// iOS only >:( so i've added a workaround to re-sync whenever the sheet state changes. it's far from ideal, but
+		// it works well enough i guess
+		[syncBrightness, isSheetOpen],
+	)
 
 	const onFocusedChanged = useCallback(
 		(focused: boolean) => {

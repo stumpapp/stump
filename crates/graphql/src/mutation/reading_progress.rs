@@ -150,7 +150,7 @@ impl ReadProgressMutation {
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
 				NormalizedProgression {
-					page: None,
+					page: input.locator.page(),
 					locator: Some(input.locator),
 					percentage: input.percentage,
 					elapsed_seconds_delta: input.elapsed_seconds_delta,

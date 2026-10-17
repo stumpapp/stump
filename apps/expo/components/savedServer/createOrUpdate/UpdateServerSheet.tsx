@@ -25,7 +25,7 @@ type Props = {
 export function UpdateServerSheet({ editingServer, onClose }: Props) {
 	const sheetRef = useRef<TrueSheet>(null)
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, updateServer } = useSavedServers()
 
 	const hasBeenPresentedRef = useRef(false)
@@ -56,7 +56,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
-				t,
+				translate,
 			),
 		),
 	})
@@ -81,7 +81,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 					ref={sheetRef}
 					detents={[1]}
 					scrollable
-					headerLabel={t('addOrEditServer.updateServer')}
+					headerLabel={translate('shared.addOrEditServer.updateServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
 						type: 'check',

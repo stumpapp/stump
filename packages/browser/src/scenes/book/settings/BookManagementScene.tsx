@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Construction } from 'lucide-react'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
@@ -9,6 +8,7 @@ import { useNavigate, useParams } from 'react-router'
 import { SceneContainer } from '@/components/container'
 import { MatchReviewDialog } from '@/components/metadata/metadataMatching'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import BookMetadataSearch from './BookMetadataSearch'
@@ -46,7 +46,7 @@ const analyzeMutation = graphql(`
 export default function BookManagementScene() {
 	const paths = usePaths()
 	const navigate = useNavigate()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { checkPermission } = useAppContext()
 

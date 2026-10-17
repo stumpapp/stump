@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useSuspenseGraphQL } from '@stump/client'
 import { Button, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -12,6 +11,7 @@ import {
 	intoForm,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 import { compareByKeys } from '@/utils/compare'
 
 import { useSmartListSettings } from '../context'
@@ -26,7 +26,7 @@ const query = graphql(`
 	}
 `)
 export default function BasicSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 	const {
 		data: { smartLists: lists },

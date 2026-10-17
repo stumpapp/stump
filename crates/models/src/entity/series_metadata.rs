@@ -1,10 +1,10 @@
 use crate::shared::{
-	ordering::{OrderBy, OrderDirection},
+	ordering::{OrderDirection, OrderingField},
 	series_metadata::CollectedItems,
 };
 use async_graphql::SimpleObject;
 use filter_gen::Ordering;
-use sea_orm::{entity::prelude::*, QueryOrder};
+use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesMetadataModel")]

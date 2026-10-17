@@ -67,7 +67,13 @@ export { Preformatted, type PreformattedProps } from './preformatted'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'
 export { ScrollArea, ScrollBar } from './scroll-area'
-export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
+export {
+	ComboBox,
+	type ComboBoxProps,
+	NativeSelect,
+	type NativeSelectProps,
+	Select,
+} from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Slider } from './slider'
 export {

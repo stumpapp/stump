@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Dialog, Form, Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSmartListContext } from '../../context'
 import { useSaveSelectedStoredView, useSaveWorkingView } from '../../hooks'
@@ -19,7 +20,7 @@ type Props = {
 	onClose: () => void
 }
 export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const {
 		list: { views },
 	} = useSmartListContext()
@@ -119,7 +120,9 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 						Cancel
 					</Button>
 					<Button type="submit" form="create-or-update-view">
-						{isCreating ? t('common.create') : t('common.saveChanges')}
+						{isCreating
+							? translate('shared.common.create')
+							: translate('shared.common.saveChanges')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

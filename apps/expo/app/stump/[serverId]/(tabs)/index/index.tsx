@@ -12,7 +12,7 @@ import { ServerSettingsSheet } from '~/components/savedServer/serverSettings/Ser
 import { useTranslate } from '~/lib/hooks'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const [refreshing, setRefreshing] = useState(false)
 
@@ -77,12 +77,12 @@ export default function Screen() {
 						icon="gearshape"
 						onPress={() => TrueSheet.present('serverSettingsSheet')}
 					>
-						{t('common.settings')}
+						{translate('shared.common.settings')}
 					</Stack.Toolbar.MenuAction>
 
 					<Stack.Toolbar.Menu inline>
 						<Stack.Toolbar.MenuAction icon="arrow.left.to.line" onPress={() => router.back()}>
-							{t('common.exit')}
+							{translate('shared.common.exit')}
 						</Stack.Toolbar.MenuAction>
 					</Stack.Toolbar.Menu>
 				</Stack.Toolbar.Menu>

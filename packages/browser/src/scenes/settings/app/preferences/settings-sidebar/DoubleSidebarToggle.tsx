@@ -1,11 +1,11 @@
 import { NewCard, RawSwitch } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function DoubleSidebarToggle() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableDoubleSidebar },
 		update,

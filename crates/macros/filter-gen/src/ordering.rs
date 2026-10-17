@@ -45,16 +45,16 @@ pub fn ordering_impl(input: TokenStream) -> Result<TokenStream, syn::Error> {
 	let order_by_structs_def =
 		generate_order_by_structs_def(&order_by_ident, &enum_ident)?;
 
-	// generates the impl that converts from graphql to sea_orm order bys
-	let order_by_impl = generate_order_by_impl(&order_by_ident, &enum_ident, &col_map)?;
+	// generates the typed mapping from ordering variants to sea_orm columns
+	let column_impl = generate_column_impl(&enum_ident, &col_map);
 
 	// build the final output
 	let output = quote! {
 		#enum_def
 
-		#order_by_structs_def
+		#column_impl
 
-		#order_by_impl
+		#order_by_structs_def
 	};
 
 	Ok(output)
@@ -143,11 +143,10 @@ fn build_field_to_sea_orm_col_map(
 	Ok(field_to_sea_orm_col_map)
 }
 
-fn generate_order_by_impl(
-	order_by_ident: &syn::Ident,
+fn generate_column_impl(
 	enum_ident: &syn::Ident,
 	col_map: &HashMap<syn::Ident, syn::Ident>,
-) -> Result<TokenStream, syn::Error> {
+) -> TokenStream {
 	let mut enum_map: syn::punctuated::Punctuated<_, syn::token::Comma> =
 		syn::punctuated::Punctuated::new();
 
@@ -161,30 +160,17 @@ fn generate_order_by_impl(
 		});
 	}
 
-	let order_by_impl = quote! {
-		impl OrderBy<Entity, #order_by_ident> for #order_by_ident {
-			fn add_order_by(
-				order_by: &[#order_by_ident],
-				query: sea_orm::Select<Entity>,
-			) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-				if order_by.is_empty() {
-					return Ok(query);
-				}
+	quote! {
+		impl OrderingField for #enum_ident {
+			type Column = Column;
 
-				order_by
-					.iter()
-					.try_fold(query, |query, order_by|  {
-						let order = sea_orm::Order::from(order_by.direction);
-						let field = match order_by.field {
-							#enum_map
-						};
-						Ok(query.order_by(field, order))
-					})
+			fn column(&self) -> Column {
+				match self {
+					#enum_map
+				}
 			}
 		}
-	};
-
-	Ok(order_by_impl)
+	}
 }
 
 fn generate_order_by_structs_def(
@@ -633,28 +619,20 @@ mod tests {
 				A,
 				B
 			}
+			impl OrderingField for FooOrdering {
+				type Column = Column;
+
+				fn column(&self) -> Column {
+					match self {
+						FooOrdering::A => Column::A,
+						FooOrdering::B => Column::B
+					}
+				}
+			}
 			#[derive(async_graphql::InputObject, Clone)]
 			pub struct FooOrderBy {
 				pub field: FooOrdering,
 				pub direction: OrderDirection,
-			}
-			impl OrderBy<Entity, FooOrderBy> for FooOrderBy {
-				fn add_order_by(
-					order_by: &[FooOrderBy],
-					query: sea_orm::Select<Entity>,
-				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if order_by.is_empty() {
-						return Ok(query);
-					}
-					order_by.iter().try_fold(query, |query, order_by| {
-						let order = sea_orm::Order::from(order_by.direction);
-						let field = match order_by.field {
-							FooOrdering::A => Column::A,
-							FooOrdering::B => Column::B
-						};
-						Ok(query.order_by(field, order))
-					})
-				}
 			}
 		};
 
@@ -681,28 +659,20 @@ mod tests {
 				A,
 				B
 			}
+			impl OrderingField for FooGraphQLOrdering {
+				type Column = Column;
+
+				fn column(&self) -> Column {
+					match self {
+						FooGraphQLOrdering::A => Column::A,
+						FooGraphQLOrdering::B => Column::B
+					}
+				}
+			}
 			#[derive(async_graphql::InputObject, Clone)]
 			pub struct FooGraphQLOrderBy {
 				pub field: FooGraphQLOrdering,
 				pub direction: OrderDirection,
-			}
-			impl OrderBy<Entity, FooGraphQLOrderBy> for FooGraphQLOrderBy {
-				fn add_order_by(
-					order_by: &[FooGraphQLOrderBy],
-					query: sea_orm::Select<Entity>,
-				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if order_by.is_empty() {
-						return Ok(query);
-					}
-					order_by.iter().try_fold(query, |query, order_by| {
-						let order = sea_orm::Order::from(order_by.direction);
-						let field = match order_by.field {
-							FooGraphQLOrdering::A => Column::A,
-							FooGraphQLOrdering::B => Column::B
-						};
-						Ok(query.order_by(field, order))
-					})
-				}
 			}
 		};
 

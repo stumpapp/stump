@@ -9,13 +9,13 @@ import {
 	usePrevious,
 } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../../../context'
 
@@ -56,7 +56,7 @@ const mutation = graphql(`
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [
 		{

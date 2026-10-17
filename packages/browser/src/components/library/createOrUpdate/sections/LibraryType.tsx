@@ -1,14 +1,15 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { LibraryType } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function LibraryTypeSelect() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	return (
 		<div className="gap-2 flex flex-col">
@@ -16,7 +17,7 @@ export default function LibraryTypeSelect() {
 			<NativeSelect
 				options={OPTIONS.map((option) => ({
 					value: option,
-					label: t(getKey(`options.${option}`)),
+					label: translate(`shared.libraryType.${option}`),
 				}))}
 				{...form.register('libraryType')}
 			/>

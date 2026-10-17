@@ -6,7 +6,6 @@ import {
 	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
@@ -16,6 +15,7 @@ import { match } from 'ts-pattern'
 
 import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
@@ -58,7 +58,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const paths = usePaths()
 
 	const { basePath } = useRouterContext()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {
@@ -100,7 +100,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 						onMouseEnter={() => prefetchHome()}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
-						{t('sidebar.buttons.home')}
+						{translate('shared.common.home')}
 					</SideBarButtonLink>
 				))
 				.with(SystemArrangement.Explore, () => (
@@ -129,7 +129,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, prefetchHome, isMobile, paths, basePath],
+		[t, location.pathname, prefetchHome, isMobile, paths, basePath, translate],
 	)
 
 	const sections = useMemo(

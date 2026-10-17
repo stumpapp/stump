@@ -1,7 +1,7 @@
 import { Database } from 'lucide-react-native'
-import { Alert } from 'react-native'
 
 import { Button, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { deleteDatabase } from '~/db'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -9,10 +9,14 @@ import { useTranslate } from '~/lib/hooks'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function DeleteDatabase() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const onDeletedDatabase = (success: boolean) => {
 		const baseKey = success ? 'success' : 'error'
-		Alert.alert(t(getKey(`${baseKey}.title`)), t(getKey(`${baseKey}.description`)))
+		SystemAlert.alert(t(getKey(`${baseKey}.title`)), t(getKey(`${baseKey}.description`)), [
+			{
+				text: translate('shared.common.ok'),
+			},
+		])
 	}
 
 	return (
@@ -35,7 +39,7 @@ export default function DeleteDatabase() {
 					}
 				}}
 			>
-				<Text>{t('common.delete')}</Text>
+				<Text>{translate('shared.common.delete')}</Text>
 			</Button>
 		</AppSettingsRow>
 	)

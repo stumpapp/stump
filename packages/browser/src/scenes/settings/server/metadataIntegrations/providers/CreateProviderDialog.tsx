@@ -2,11 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { Button, Dialog, Form } from '@stump/components'
 import { extractErrorMessage, graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { PROVIDER_LABELS, PROVIDERS } from './constants'
 import ProviderForm from './ProviderForm'
@@ -28,7 +29,7 @@ export function CreateProviderDialog() {
 	const [step, setStep] = useState(0)
 	const client = useQueryClient()
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const form = useForm<CreateProviderConfigSchema>({
 		defaultValues: {
@@ -122,7 +123,7 @@ export function CreateProviderDialog() {
 
 					<Dialog.Footer>
 						<Button onClick={onSecondaryButtonClick} disabled={isPending} variant="outline">
-							{step === 1 ? t('common.back') : t('common.cancel')}
+							{step === 1 ? translate('shared.common.back') : translate('shared.common.cancel')}
 						</Button>
 
 						{step === 0 && !!selectedProvider && (
@@ -132,7 +133,7 @@ export function CreateProviderDialog() {
 								isLoading={isPending}
 								onClick={() => setStep(1)}
 							>
-								{t('common.continue')}
+								{translate('shared.common.continue')}
 							</Button>
 						)}
 
@@ -143,7 +144,7 @@ export function CreateProviderDialog() {
 								disabled={isPending}
 								isLoading={isPending}
 							>
-								{t('common.create')}
+								{translate('shared.common.create')}
 							</Button>
 						)}
 					</Dialog.Footer>

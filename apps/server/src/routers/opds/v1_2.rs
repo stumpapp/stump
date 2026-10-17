@@ -562,14 +562,16 @@ async fn get_series_by_id(
 			.await?
 			.ok_or(APIError::NotFound(format!("Series {id} not found")))?;
 
-	let books = OPDSPublicationEntity::find_for_user(&user)
-		.filter(media::Column::SeriesId.eq(id.clone()))
-		.order_by_asc(media::Column::Name)
-		.offset(pagination.offset())
-		.limit(pagination.limit())
-		.into_model::<OPDSPublicationEntity>()
-		.all(ctx.conn.as_ref())
-		.await?;
+	let books = media::Entity::order_in_series(
+		OPDSPublicationEntity::find_for_user(&user)
+			.filter(media::Column::SeriesId.eq(id.clone())),
+		series.kind,
+	)
+	.offset(pagination.offset())
+	.limit(pagination.limit())
+	.into_model::<OPDSPublicationEntity>()
+	.all(ctx.conn.as_ref())
+	.await?;
 	let count = OPDSPublicationEntity::find_for_user(&user)
 		.filter(media::Column::SeriesId.eq(id.clone()))
 		.count(ctx.conn.as_ref())

@@ -1,3 +1,4 @@
+use models::shared::enums::OrganizationMode;
 use std::{
 	collections::HashMap,
 	io::Cursor,
@@ -76,6 +77,7 @@ impl MediaProcessor for PdfProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		_organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		process_metadata_internal(path, &self.config.pdfium_path)
 	}

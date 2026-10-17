@@ -6,7 +6,7 @@ use models::{
 	entity::{media, media_metadata, series, series_metadata},
 	shared::ordering::{OrderBy, OrderDirection},
 };
-use sea_orm::QueryOrder;
+use sea_orm::{sea_query::NullOrdering, QueryOrder};
 
 #[derive(InputObject, Clone)]
 #[graphql(concrete(name = "MediaOrderByField", params(media::MediaModelOrdering)))]
@@ -75,12 +75,17 @@ impl OrderBy<media::Entity, MediaOrderBy> for MediaOrderBy {
 					let field = media_metadata::Column::from_str(
 						&order_by.field.to_string().to_snake_case(),
 					)?;
-					// TODO(order-by): Better null handling (e.g. NULLS LAST or option to exclude unpopulated metadata fields when sorting)
-					query = query.order_by(field, order);
+					query = if matches!(field, media_metadata::Column::Number) {
+						query.order_by_with_nulls(field, order, NullOrdering::Last)
+					} else {
+						query.order_by(field, order)
+					};
 				},
 			}
 		}
-		Ok(query)
+		Ok(query
+			.order_by_asc(media::Column::Name)
+			.order_by_asc(media::Column::Id))
 	}
 }
 

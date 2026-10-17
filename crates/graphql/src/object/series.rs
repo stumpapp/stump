@@ -8,14 +8,14 @@ use models::{
 	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		enums::ReadingStatus,
+		enums::{ReadingStatus, SeriesKind},
 		image::ImageRef,
 	},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
+	Condition, FromQueryResult, JoinType, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -119,15 +119,16 @@ impl Series {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			// TODO: Consider allowing custom ordering?
-			.order_by_asc(media::Column::Name)
-			.apply_if(take, |query, take| query.limit(take))
-			.apply_if(skip, |query, skip| query.offset(skip))
-			.into_model::<media::ModelWithMetadata>()
-			.all(conn)
-			.await?;
+		let models = media::Entity::order_in_series(
+			media::ModelWithMetadata::find_for_user(user)
+				.filter(media::Column::SeriesId.eq(self.model.id.clone())),
+			self.model.kind,
+		)
+		.apply_if(take, |query, take| query.limit(take))
+		.apply_if(skip, |query, skip| query.offset(skip))
+		.into_model::<media::ModelWithMetadata>()
+		.all(conn)
+		.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
 	}
@@ -187,21 +188,7 @@ impl Series {
 		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
-		let name_cmp = if let Some(id) = cursor {
-			let media = media::Entity::find_for_user(user)
-				.select_only()
-				.column(media::Column::Name)
-				.filter(media::Column::Id.eq(id.clone()))
-				.into_model::<media::MediaNameCmpSelect>()
-				.one(conn)
-				.await?
-				.ok_or("Cursor not found")?;
-			Some(media.name)
-		} else {
-			None
-		};
-
-		let query = media::ModelWithMetadata::find_for_user(user)
+		let mut query = media::ModelWithMetadata::find_for_user(user)
 			.join_rev(
 				JoinType::LeftJoin,
 				reading_session::Entity::belongs_to(media::Entity)
@@ -232,21 +219,31 @@ impl Series {
 			.group_by(media::Column::Id)
 			.group_by(media_metadata::Column::Id); // pgsql requires addtl grouping
 
-		let books = if let Some(name) = name_cmp {
-			let mut cursor = query.cursor_by(media::Column::Name);
-			cursor.after(name).first(take);
-			cursor
+		if let Some(id) = cursor {
+			let book = media::ModelWithMetadata::find_by_id_for_user(id, user)
+				.filter(media::Column::SeriesId.eq(self.model.id.clone()))
 				.into_model::<media::ModelWithMetadata>()
-				.all(conn)
+				.one(conn)
 				.await?
-		} else {
-			query
-				.order_by_asc(media::Column::Name)
-				.limit(take)
-				.into_model::<media::ModelWithMetadata>()
-				.all(conn)
-				.await?
-		};
+				.ok_or("Cursor not found")?;
+			let after = if self.model.kind == SeriesKind::Virtual {
+				media::Entity::after_number(
+					&book.media.name,
+					&book.media.id,
+					book.metadata.and_then(|metadata| metadata.number),
+					models::shared::ordering::OrderDirection::Asc,
+				)
+			} else {
+				Condition::all().add(media::Column::Name.gt(book.media.name))
+			};
+			query = query.filter(after);
+		}
+
+		let books = media::Entity::order_in_series(query, self.model.kind)
+			.limit(take)
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
 
 		Ok(books.into_iter().map(Media::from).collect())
 	}

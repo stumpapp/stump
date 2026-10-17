@@ -1457,7 +1457,6 @@ export type Media = {
   modifiedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The name of the media, derived from the filename and excluding the extension */
   name: Scalars['String']['output'];
-  /** The next media in the series, ordered by name */
   nextInSeries: PaginatedMediaResponse;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];

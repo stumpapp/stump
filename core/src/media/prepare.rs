@@ -3,7 +3,7 @@ use std::path::Path;
 use chrono::{DateTime, FixedOffset, Utc};
 use models::{
 	entity::{library_config, media, media_metadata},
-	shared::enums::FileStatus,
+	shared::enums::{FileStatus, OrganizationMode},
 };
 use sea_orm::Set;
 use uuid::Uuid;
@@ -40,7 +40,7 @@ impl MediaDraft {
 /// Creates a draft of a media entry to be upserted into the database
 pub async fn prepare_draft(
 	path: &Path,
-	series_id: &str,
+	series_id: Option<&str>,
 	library_config: library_config::Model,
 	config: &StumpConfig,
 	existing: Option<&media::ModelWithMetadata>,
@@ -80,6 +80,10 @@ pub async fn prepare_draft(
 	// TODO(metadata): we should consider locked metadata fields and only overwrite unlocked fields
 	let (resolved_metadata, resolved_tags) = processed
 		.metadata
+		.or_else(|| {
+			(library_config.organization_mode == OrganizationMode::Metadata)
+				.then(Default::default)
+		})
 		.map(|mut metadata| {
 			let conflicting_page_counts =
 				metadata.page_count.is_some_and(|count| count != pages);
@@ -110,7 +114,7 @@ pub async fn prepare_draft(
 		hash: Set(processed.hash),
 		koreader_hash: Set(processed.koreader_hash),
 		path: Set(path_str),
-		series_id: Set(Some(series_id.to_string())),
+		series_id: Set(series_id.map(str::to_string)),
 		library_id: Set(library_id),
 		modified_at: Set(last_modified_at),
 		status: Set(FileStatus::Ready),

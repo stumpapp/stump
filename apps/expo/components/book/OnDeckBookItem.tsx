@@ -80,7 +80,11 @@ function OnDeckBookItem({ book }: Props) {
 	} = data.thumbnail
 
 	const seriesPosition = formatSeriesPosition(
-		data.series ? Number(data.metadata?.number) || data.seriesPosition : null,
+		data.series
+			? data.metadata?.number == null
+				? data.seriesPosition
+				: Number(data.metadata.number)
+			: null,
 		data.series?.metadata?.totalIssues ?? null,
 		{
 			t,

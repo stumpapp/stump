@@ -1,3 +1,4 @@
+use models::shared::enums::OrganizationMode;
 use std::{
 	collections::HashMap,
 	fs::File,
@@ -19,7 +20,7 @@ use crate::{
 		},
 		utils::sort_file_names,
 	},
-	metadata::{utils::metadata_from_buf, ProcessedMediaMetadata},
+	metadata::{utils::comic_info_metadata, ProcessedMediaMetadata},
 };
 
 pub struct ZipProcessor;
@@ -71,6 +72,7 @@ impl MediaProcessor for ZipProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		let zip_file = File::open(path)?;
 		let mut archive = ZipArchive::new(zip_file)?;
@@ -108,7 +110,7 @@ impl MediaProcessor for ZipProcessor {
 					String::from_utf8_lossy(&contents).to_string()
 				};
 				tracing::trace!(contents_len = contents.len(), "Read ComicInfo.xml");
-				return Ok(metadata_from_buf(&contents));
+				return comic_info_metadata(&contents, organization_mode);
 			}
 		}
 
@@ -120,6 +122,8 @@ impl MediaProcessor for ZipProcessor {
 		path: &Path,
 		options: MediaProcessorOptions,
 	) -> Result<ProcessedMediaFile, MediaProcessorError> {
+		let process_metadata = options.process_metadata;
+		let organization_mode = options.organization_mode;
 		let hashes = self.generate_hashes(path, options)?;
 		let mut metadata = None;
 		let mut pages = 0;
@@ -149,7 +153,7 @@ impl MediaProcessor for ZipProcessor {
 			let content_type = path.naive_content_type();
 			let FileParts { file_name, .. } = path.file_parts();
 
-			if file_name.to_lowercase() == "comicinfo.xml" {
+			if file_name.to_lowercase() == "comicinfo.xml" && process_metadata {
 				tracing::trace!("Found ComicInfo.xml");
 				let contents = {
 					let mut contents = Vec::new();
@@ -157,7 +161,7 @@ impl MediaProcessor for ZipProcessor {
 					String::from_utf8_lossy(&contents).to_string()
 				};
 				tracing::trace!(contents_len = contents.len(), "Read ComicInfo.xml");
-				metadata = metadata_from_buf(&contents);
+				metadata = comic_info_metadata(&contents, organization_mode)?;
 			} else if content_type.is_image() {
 				pages += 1;
 			}

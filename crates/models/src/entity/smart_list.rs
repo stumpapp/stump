@@ -6,7 +6,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
-use super::smart_list_access_rule;
+use super::{smart_list_access_rule, smart_list_view, user};
 use crate::{
 	entity::{smart_list_access_rule::SmartListAccessRole, user::AuthUser},
 	shared::{
@@ -76,6 +76,7 @@ pub enum SmartListGrouping {
 	ByLibrary,
 }
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SmartListModel")]
 #[sea_orm(table_name = "smart_lists")]
@@ -97,40 +98,21 @@ pub struct Model {
 	pub visibility: EntityVisibility,
 	#[sea_orm(column_type = "Text")]
 	pub creator_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::smart_list_access_rule::Entity")]
-	SmartListAccessRule,
-	#[sea_orm(has_many = "super::smart_list_view::Entity")]
-	SmartListView,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub access_rules: HasMany<smart_list_access_rule::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub views: HasMany<smart_list_view::Entity>,
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::CreatorId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "creator_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::smart_list_access_rule::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SmartListAccessRule.def()
-	}
-}
-
-impl Related<super::smart_list_view::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SmartListView.def()
-	}
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub creator: BelongsTo<user::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

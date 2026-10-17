@@ -14,6 +14,9 @@ use crate::shared::{
 	image_processor_options::ImageProcessorOptions,
 };
 
+use super::library;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "LibraryConfigModel")]
 #[sea_orm(table_name = "library_configs")]
@@ -55,6 +58,9 @@ pub struct Model {
 	/// relative to the library path. this is **not** a fully qualified path
 	#[sea_orm(column_type = "Text", nullable)]
 	pub oneshots_directory: Option<String>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub library: HasOne<library::Entity>,
 }
 
 impl Model {
@@ -70,18 +76,6 @@ impl Model {
 #[derive(Clone, Debug, FromQueryResult)]
 pub struct LibraryConfigThumbnailConfig {
 	pub thumbnail_config: Option<ImageProcessorOptions>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_one = "super::library::Entity")]
-	Library,
-}
-
-impl Related<super::library::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Library.def()
-	}
 }
 
 #[async_trait]

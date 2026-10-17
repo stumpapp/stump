@@ -2,5 +2,6 @@
 - [ ] add a timezone field to relevant models (e.g., reading_session) so that it can be more accurately displayed per the tz which the user was in at the time of event. honestly for self-hosted software i imagine this is largely a non-issue, but eventually would be good to get done
 - [x] https://www.sea-ql.org/blog/2026-01-12-sea-orm-2.0/
   - [ ] follow-ups:
-    - [ ] https://www.sea-ql.org/blog/2025-10-20-sea-orm-2.0/ —> new entity format, smart loader, other goodies etc etc
+    - [x] https://www.sea-ql.org/blog/2025-10-20-sea-orm-2.0/ —> new entity format
+      - [ ] smart loader, other goodies etc etc
     - [ ] https://www.sea-ql.org/blog/2025-11-25-sea-orm-2.0/ —> nested active model :eyes:!!

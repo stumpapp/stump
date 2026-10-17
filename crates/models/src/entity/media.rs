@@ -15,8 +15,14 @@ use crate::{
 	},
 };
 
-use super::{library_exclusion, media_metadata, series, series_metadata, user::AuthUser};
+use super::{
+	book_club_book, book_club_book_suggestion, book_club_member_favorite_book, bookmark,
+	library_exclusion, media_analysis, media_annotation, media_metadata, media_tag,
+	metadata_fetch_record, reading_list_item, reading_session, review, series,
+	series_metadata, user::AuthUser,
+};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
@@ -73,6 +79,51 @@ pub struct Model {
 	/// The timestamp of when the media was **soft** deleted. This will act like a trash bin.
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_book_suggestions: HasMany<book_club_book_suggestion::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_books: HasMany<book_club_book::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_member_favorite_books: HasMany<book_club_member_favorite_book::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub bookmarks: HasMany<bookmark::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub media_annotations: HasMany<media_annotation::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub metadata: HasOne<media_metadata::Entity>,
+	#[sea_orm(has_many, relation_enum = "Tags")]
+	#[graphql(skip)]
+	pub tags: HasMany<media_tag::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reading_list_items: HasMany<reading_list_item::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reading_sessions: HasMany<reading_session::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reviews: HasMany<review::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "series_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub series: BelongsTo<Option<series::Entity>>,
+	#[sea_orm(has_many, relation_enum = "Analysis")]
+	#[graphql(skip)]
+	pub analyses: HasMany<media_analysis::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub metadata_fetch_record: HasOne<metadata_fetch_record::Entity>,
 }
 
 pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
@@ -305,120 +356,6 @@ impl From<Model> for MediaThumbSelect {
 #[derive(Debug, FromQueryResult)]
 pub struct MediaCreatedAtCmpSelect {
 	pub created_at: DateTimeWithTimeZone,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
-	BookClubBookSuggestion,
-	#[sea_orm(has_many = "super::book_club_book::Entity")]
-	BookClubBook,
-	#[sea_orm(has_many = "super::book_club_member_favorite_book::Entity")]
-	BookClubMemberFavoriteBook,
-	#[sea_orm(has_many = "super::bookmark::Entity")]
-	Bookmark,
-	#[sea_orm(has_many = "super::media_annotation::Entity")]
-	MediaAnnotation,
-	#[sea_orm(has_one = "super::media_metadata::Entity")]
-	MediaMetadata,
-	#[sea_orm(has_many = "super::media_tag::Entity")]
-	Tags,
-	#[sea_orm(has_many = "super::reading_list_item::Entity")]
-	ReadingListItem,
-	#[sea_orm(has_many = "super::reading_session::Entity")]
-	ReadingSession,
-	#[sea_orm(has_many = "super::review::Entity")]
-	Review,
-	#[sea_orm(
-		belongs_to = "super::series::Entity",
-		from = "Column::SeriesId",
-		to = "super::series::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	Series,
-	#[sea_orm(has_many = "super::media_analysis::Entity")]
-	Analysis,
-	#[sea_orm(has_one = "super::metadata_fetch_record::Entity")]
-	MetadataFetchRecord,
-}
-
-impl Related<super::book_club_book_suggestion::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBookSuggestion.def()
-	}
-}
-
-impl Related<super::book_club_book::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBook.def()
-	}
-}
-
-impl Related<super::book_club_member_favorite_book::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMemberFavoriteBook.def()
-	}
-}
-
-impl Related<super::bookmark::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Bookmark.def()
-	}
-}
-
-impl Related<super::media_annotation::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MediaAnnotation.def()
-	}
-}
-
-impl Related<super::media_metadata::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MediaMetadata.def()
-	}
-}
-
-impl Related<super::media_tag::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Tags.def()
-	}
-}
-
-impl Related<super::reading_list_item::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingListItem.def()
-	}
-}
-
-impl Related<super::reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingSession.def()
-	}
-}
-
-impl Related<super::review::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Review.def()
-	}
-}
-
-impl Related<super::series::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Series.def()
-	}
-}
-
-impl Related<super::media_analysis::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Analysis.def()
-	}
-}
-
-impl Related<super::metadata_fetch_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MetadataFetchRecord.def()
-	}
 }
 
 #[async_trait]

@@ -378,7 +378,7 @@ mod tests {
 
 		let tags = vec!["hello".to_string(), "world".to_string()];
 		let mut inserted_tags = create_tags(&conn, tags).await.unwrap();
-		inserted_tags.sort();
+		inserted_tags.sort_by_key(|t| t.model.id);
 		assert_eq!(
 			inserted_tags,
 			vec![

@@ -1,6 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, FromQueryResult};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "server_config")]
 #[graphql(name = "ServerConfigModel")]
@@ -31,8 +32,5 @@ pub struct JwtSecretsSelect {
 	pub jwt_access_secret: Option<String>,
 	pub jwt_refresh_secret: Option<String>,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

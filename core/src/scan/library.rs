@@ -140,24 +140,24 @@ impl LibraryScanJob {
 #[serde(rename_all = "camelCase")]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
-	total_files: u64,
+	pub total_files: u64,
 	/// The number of directories visited during the scan
-	total_directories: u64,
+	pub total_directories: u64,
 	/// The number of files that were ignored during the scan
-	ignored_files: u64,
+	pub ignored_files: u64,
 	/// The number of files that were deemed to be skipped during the scan, e.g. it
 	/// exists in the database but has not been modified since the last scan
-	skipped_files: u64,
+	pub skipped_files: u64,
 	/// The number of ignored directories during the scan
-	ignored_directories: u64,
+	pub ignored_directories: u64,
 	/// The number of media entities created
-	created_media: u64,
+	pub created_media: u64,
 	/// The number of media entities updated
-	updated_media: u64,
+	pub updated_media: u64,
 	/// The number of series entities created
-	created_series: u64,
+	pub created_series: u64,
 	/// The number of series entities updated
-	updated_series: u64,
+	pub updated_series: u64,
 }
 
 impl JobOutputExt for LibraryScanOutput {

@@ -774,7 +774,7 @@ impl MediaQuery {
 					Query::select()
 						.column(media::Column::Hash)
 						.from(media::Entity)
-						.add_group_by([Expr::col(media::Column::Hash).into()])
+						.add_group_by([Expr::col(media::Column::Hash)])
 						.and_having(Expr::col(media::Column::Id).count().gt(1))
 						.to_owned(),
 				),

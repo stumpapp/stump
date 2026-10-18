@@ -226,7 +226,7 @@ struct OrderSpecColumn {
 
 impl OrderSpecColumn {
 	fn expr(&self) -> SimpleExpr {
-		Expr::col((self.table.clone(), self.column.clone())).into()
+		Expr::col((self.table.clone(), self.column.clone()))
 	}
 
 	/// `col = value`, or `col IS NULL` when the cursor value is null

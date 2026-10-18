@@ -479,7 +479,7 @@ async fn dedupe_media_by_path<C: ConnectionTrait>(
 			media_ids_with_sessions
 				.contains(&b.id)
 				.cmp(&media_ids_with_sessions.contains(&a.id)) // prefer those with history
-				.then(a.created_at.cmp(&b.created_at)) // fallback to newer
+				.then(a.created_at.cmp(&b.created_at)) // fallback to oldest, prob the original
 		});
 		let mut rows = rows.into_iter();
 		if let Some(keeper) = rows.next() {
@@ -507,7 +507,7 @@ async fn dedupe_media_by_path<C: ConnectionTrait>(
 
 fn duplicates_log(deleted: u64) -> JobExecuteLog {
 	JobExecuteLog::warn(&format!(
-		"Removed {deleted} duplicate book record(s) left over from a previous oneshots configuration!"
+		"Removed {deleted} duplicate book record(s) detected during oneshots conversion!"
 	))
 }
 
@@ -570,7 +570,7 @@ pub(crate) async fn convert_to_oneshot_series(
 		}
 	}
 
-	let total = books.len();
+	let total_books = books.len();
 	for (idx, (path, book)) in books.into_iter().enumerate() {
 		let mut existing = existing_oneshots.remove(&path).unwrap_or_default();
 		// prefer the oneshot series the kept book already belongs to, if any
@@ -606,7 +606,7 @@ pub(crate) async fn convert_to_oneshot_series(
 
 		worker_ctx.report_progress(JobProgress::subtask_position(
 			(idx + 1) as i32,
-			total as i32,
+			total_books as i32,
 		));
 	}
 

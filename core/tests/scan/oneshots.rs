@@ -189,7 +189,7 @@ async fn create_duplicated_oneshots_scenario(library: &TestLibrary) {
 /// if duplicates exist, they should be removed and favor whichever one
 /// has reading history (for oneshots, only)
 #[tokio::test]
-async fn duplicated_oneshots_are_repaired_when_enabled() {
+async fn duplicated_oneshots_are_deleted_when_enabled() {
 	let library = oneshots_library(Some(ONESHOTS_DIR)).await;
 	create_duplicated_oneshots_scenario(&library).await;
 
@@ -204,9 +204,10 @@ async fn duplicated_oneshots_are_repaired_when_enabled() {
 // which does help, and there is a query for it, but user friendly hooks not really
 // yet
 
-/// if duplicates exist, they are otherwise ignored
+/// if duplicates exist while oneshots are disabled, they should be removed when the
+/// leftover oneshot series are converted back into a normal series
 #[tokio::test]
-async fn duplicated_oneshots_are_repaired_when_disabled() {
+async fn duplicated_oneshots_are_deleted_when_disabled() {
 	let library = oneshots_library(None).await;
 	create_duplicated_oneshots_scenario(&library).await;
 

@@ -23,6 +23,9 @@ pub struct Media {
 	pub modified_at: Option<DateTimeWithTimeZone>,
 	pub deleted_at: Option<DateTimeWithTimeZone>,
 	pub pages: Option<i32>,
+	/// defaults to `<name>.<extension>`
+	pub path: Option<String>,
+	pub is_oneshot: bool,
 
 	pub metadata: Option<MediaMetadata>,
 }
@@ -60,7 +63,12 @@ impl Media {
 			deleted_at: self
 				.deleted_at
 				.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
-			path: sea_orm::Set(format!("{name}.{extension}").to_string()),
+			path: sea_orm::Set(
+				self.path
+					.clone()
+					.unwrap_or_else(|| format!("{name}.{extension}")),
+			),
+			is_oneshot: sea_orm::Set(self.is_oneshot),
 			status: sea_orm::Set(FileStatus::Ready),
 			..Default::default()
 		};
@@ -181,6 +189,7 @@ pub struct Series {
 	pub name: Option<String>,
 	pub path: Option<String>,
 	pub library_id: Option<String>,
+	pub is_oneshot: bool,
 }
 
 impl Series {
@@ -200,6 +209,7 @@ impl Series {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
+			is_oneshot: sea_orm::Set(self.is_oneshot),
 			library_id: match &self.library_id {
 				Some(lib_id) => sea_orm::Set(Some(lib_id.clone())),
 				None => sea_orm::NotSet,

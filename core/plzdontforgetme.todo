@@ -1,0 +1,2 @@
+- [ ] integration-tests is dead, long live tests (the new home for integration tests)
+  - the existing integration-tests is extremely stale, 2-4 years last edit for a lot of the files. thanks to contributors there are really good foundations to build better suites, like the entirety of the fake_data mod. so i won't delete it now, since that would cascade and pollute the diff, but i def want to come back and have a dedicated chore hour to move what can be moved here instead

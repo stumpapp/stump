@@ -380,3 +380,102 @@ fn median(sorted: &[f64]) -> f64 {
 }
 
 // TODO(chore): write tests before release
+
+#[cfg(test)]
+mod tests {
+	use chrono::{Days, Utc};
+
+	use super::*;
+
+	fn row(
+		date: Date,
+		media_id: &str,
+		readthrough: i32,
+		elapsed_seconds: i64,
+		status: ReadingStatus,
+	) -> SessionRow {
+		SessionRow {
+			media_id: media_id.to_string(),
+			readthrough_number: readthrough,
+			session_date: date,
+			elapsed_seconds: Some(elapsed_seconds),
+			status,
+		}
+	}
+
+	fn stats(rows: Vec<SessionRow>) -> SessionStats {
+		let start = rows
+			.iter()
+			.min_by_key(|row| row.session_date)
+			.map(|row| row.session_date.clone());
+		let end = rows
+			.iter()
+			.max_by_key(|row| row.session_date)
+			.clone()
+			.map(|row| row.session_date)
+			.unwrap_or_else(|| Utc::now().date_naive());
+		SessionStats { rows, start, end }
+	}
+
+	fn days_before_today(days: u64) -> Date {
+		let date = Utc::now().date_naive();
+		let adjusted = date
+			.checked_sub_days(Days::new(days))
+			.expect("should have subtracted fine");
+		adjusted
+	}
+
+	fn today() -> Date {
+		Utc::now().date_naive()
+	}
+
+	#[test]
+	fn test_session_stats_totals() {
+		let rows = vec![
+			// rt 1
+			row(days_before_today(3), "m1", 1, 600, ReadingStatus::Reading),
+			row(days_before_today(3), "m1", 1, 400, ReadingStatus::Finished),
+			// rt 2
+			row(days_before_today(2), "m1", 2, 400, ReadingStatus::Reading),
+			row(days_before_today(2), "m1", 2, 600, ReadingStatus::Reading),
+			row(days_before_today(1), "m1", 2, 1000, ReadingStatus::Finished),
+			// rt 3 dnf
+			row(today(), "m1", 2, 400, ReadingStatus::Reading),
+			row(today(), "m1", 2, 600, ReadingStatus::Abandoned),
+		];
+
+		let totals = stats(rows).totals();
+
+		assert_eq!(totals.total_seconds, 4000);
+		assert_eq!(totals.session_count, 7);
+		assert_eq!(totals.finished_count, 2);
+		assert_eq!(totals.dnf_count, 1);
+		assert_eq!(totals.active_day_count, 4);
+	}
+
+	#[test]
+	fn test_daily_activity_groups_and_sums_by_date() {
+		let rows = vec![
+			row(days_before_today(3), "m1", 1, 300, ReadingStatus::Reading),
+			row(days_before_today(2), "m2", 1, 100, ReadingStatus::Reading),
+			row(days_before_today(3), "m3", 1, 200, ReadingStatus::Reading),
+		];
+
+		let activity = stats(rows).daily_activity();
+		assert_eq!(activity.len(), 2);
+
+		let three_days_ago = activity
+			.iter()
+			.find(|d| d.date == days_before_today(3))
+			.expect("should have 3 days ago in here");
+		assert_eq!(three_days_ago.total_seconds, 500);
+		assert_eq!(three_days_ago.session_count, 2);
+
+		let two_days_ago = activity
+			.iter()
+			.find(|d| d.date == days_before_today(2))
+			.expect("should have 2 days ago in here");
+		assert_eq!(two_days_ago.total_seconds, 100);
+		assert_eq!(two_days_ago.session_count, 1);
+	}
+}

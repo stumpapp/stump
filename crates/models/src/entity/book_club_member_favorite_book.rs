@@ -1,5 +1,8 @@
 use sea_orm::entity::prelude::*;
 
+use super::{book_club_member, media};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_member_favorite_books")]
 pub struct Model {
@@ -19,38 +22,22 @@ pub struct Model {
 	pub book_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub image_url: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::book_club_member::Entity",
-		from = "Column::MemberId",
-		to = "super::book_club_member::Column::Id",
+		belongs_to,
+		from = "member_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClubMember,
+	pub member: BelongsTo<book_club_member::Entity>,
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::BookId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "book_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMember.def()
-	}
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
+	pub book: BelongsTo<Option<media::Entity>>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -4,6 +4,9 @@ use sea_orm::{
 	ActiveValue,
 };
 
+use super::{book_club, book_club_book, book_club_discussion_message};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubDiscussionModel")]
 #[sea_orm(table_name = "book_club_discussions")]
@@ -22,46 +25,27 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub book_club_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClub,
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club_book::Entity",
-		from = "Column::BookClubBookId",
-		to = "super::book_club_book::Column::Id",
+		belongs_to,
+		from = "book_club_book_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "SetNull"
 	)]
-	BookClubBook,
-	#[sea_orm(has_many = "super::book_club_discussion_message::Entity")]
-	BookClubDiscussionMessage,
-}
-
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::book_club_book::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBook.def()
-	}
-}
-
-impl Related<super::book_club_discussion_message::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessage.def()
-	}
+	#[graphql(skip)]
+	pub book_club_book: BelongsTo<Option<book_club_book::Entity>>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub messages: HasMany<book_club_discussion_message::Entity>,
 }
 
 #[async_trait]

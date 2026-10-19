@@ -1,8 +1,12 @@
 use async_graphql::SimpleObject;
 use sea_orm::{prelude::*, Condition, FromQueryResult, QueryOrder};
 
-use super::{reading_list_rule, user::AuthUser};
+use super::{
+	reading_list_item, reading_list_rule,
+	user::{self, AuthUser},
+};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingListModel")]
 #[sea_orm(table_name = "reading_lists")]
@@ -21,40 +25,21 @@ pub struct Model {
 	pub ordering: String,
 	#[sea_orm(column_type = "Text")]
 	pub creating_user_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::reading_list_item::Entity")]
-	ReadingListItems,
-	#[sea_orm(has_many = "super::reading_list_rule::Entity")]
-	ReadingListRules,
+	#[sea_orm(has_many, relation_enum = "ReadingListItems")]
+	#[graphql(skip)]
+	pub reading_list_items: HasMany<reading_list_item::Entity>,
+	#[sea_orm(has_many, relation_enum = "ReadingListRules")]
+	#[graphql(skip)]
+	pub reading_list_rules: HasMany<reading_list_rule::Entity>,
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::CreatingUserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "creating_user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::reading_list_item::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingListItems.def()
-	}
-}
-
-impl Related<super::reading_list_rule::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingListRules.def()
-	}
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

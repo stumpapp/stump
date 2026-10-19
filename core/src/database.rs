@@ -4,8 +4,7 @@ use migrations::{Migrator, MigratorTrait};
 use schematic::{Config, ConfigLoader};
 use sea_orm::sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sea_orm::{
-	self, ConnectionTrait, DatabaseBackend, DatabaseConnection, FromQueryResult,
-	SqlxSqliteConnector,
+	self, DatabaseBackend, DatabaseConnection, FromQueryResult, SqlxSqliteConnector,
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;

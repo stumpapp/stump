@@ -7,6 +7,9 @@ use crate::shared::{
 	ordering::{OrderDirection, OrderingField},
 };
 
+use super::job;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LogModel")]
 #[sea_orm(table_name = "logs")]
@@ -23,24 +26,15 @@ pub struct Model {
 	pub job_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub context: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::job::Entity",
-		from = "Column::JobId",
-		to = "super::job::Column::Id",
+		belongs_to,
+		from = "job_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Job,
-}
-
-impl Related<super::job::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Job.def()
-	}
+	#[graphql(skip)]
+	pub job: BelongsTo<Option<job::Entity>>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

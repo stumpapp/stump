@@ -201,10 +201,13 @@ pub async fn streaks_for_user(
 	user: &AuthUser,
 ) -> Result<ReadingStreaks, DbErr> {
 	let today = logical_today(user);
-
 	let session_stats = SessionStats::load(conn, &user.id, None, today).await?;
 
-	let days = session_stats
+	Ok(streaks_from_stats(session_stats, today))
+}
+
+fn streaks_from_stats(stats: SessionStats, today: Date) -> ReadingStreaks {
+	let days = stats
 		.daily_activity()
 		.into_iter()
 		.filter(|day| day.total_seconds >= STREAK_DAY_MIN_SECS)
@@ -243,10 +246,10 @@ pub async fn streaks_for_user(
 	}
 	// ^ we keep going backwards until the list doesn't contain the date
 
-	Ok(ReadingStreaks {
+	ReadingStreaks {
 		current_days: current,
 		longest_days: longest,
-	})
+	}
 }
 
 #[derive(Debug, FromQueryResult)]
@@ -379,11 +382,11 @@ fn median(sorted: &[f64]) -> f64 {
 	}
 }
 
-// TODO(chore): write tests before release
-
 #[cfg(test)]
 mod tests {
 	use chrono::{Days, Utc};
+
+	use crate::domain::reading_progress::calculate_logical_date;
 
 	use super::*;
 
@@ -429,6 +432,7 @@ mod tests {
 		Utc::now().date_naive()
 	}
 
+	/// totals should be properly computed for a mixed readthrough history (2 finished + dnf)
 	#[test]
 	fn test_session_stats_totals() {
 		let rows = vec![
@@ -453,6 +457,7 @@ mod tests {
 		assert_eq!(totals.active_day_count, 4);
 	}
 
+	/// daily activity should be grouped and summed by the logical date
 	#[test]
 	fn test_daily_activity_groups_and_sums_by_date() {
 		let rows = vec![
@@ -492,6 +497,7 @@ mod tests {
 		adjusted
 	}
 
+	/// the aggregation should average data grouped by each iso weekday
 	#[test]
 	fn test_day_of_week_averages_over_weekdays() {
 		let rows = vec![
@@ -525,11 +531,95 @@ mod tests {
 		assert_eq!(friday.average_seconds, 200 / 1);
 	}
 
-	// #[tokio::test]
-	// async fn test_streaks_properly_counts_runs() {
-	// 	// TODO: no time now, but either use fake_data OR move the logical parts to a separate
-	// 	// fn and just test that
-	// }
+	/// a past streak should be counted properly, along with a gap between it and the now
+	/// current streak
+	#[test]
+	fn test_streaks_long_with_gap_and_then_current() {
+		let long_streak_dates = (30..250)
+			.into_iter()
+			.map(|days_ago| days_before_today(days_ago))
+			.collect::<Vec<_>>();
+		// ^ 30 days ago we broke our 220-day streak
+
+		let current_streak_dates = (0..10)
+			.into_iter()
+			.map(|days_ago| days_before_today(days_ago))
+			.collect::<Vec<_>>();
+		// ^ 10 days ago we started again and haven't missed a day
+
+		let rows = long_streak_dates
+			.iter()
+			.chain(current_streak_dates.iter())
+			.map(|date| row(date.clone(), "m1", 1, 600, ReadingStatus::Reading))
+			// ^ doesn't really matter to mix status or books etc, just about whether you met
+			// min threshold to count towards streak per date
+			.collect::<Vec<_>>();
+
+		let streaks =
+			streaks_from_stats(stats(rows), calculate_logical_date(Utc::now(), 0));
+
+		assert_eq!(streaks.longest_days, 250 - 30);
+		assert_eq!(streaks.current_days, 10);
+	}
+
+	/// a past streak should be counted properly, even with no current streak
+	#[test]
+	fn test_streaks_long_with_gap_no_current() {
+		let long_streak_dates = (30..250)
+			.into_iter()
+			.map(|days_ago| days_before_today(days_ago))
+			.collect::<Vec<_>>();
+		// ^ 30 days ago we broke our 220-day streak
+
+		let rows = long_streak_dates
+			.iter()
+			.map(|date| row(date.clone(), "m1", 1, 600, ReadingStatus::Reading))
+			// ^ doesn't really matter to mix status or books etc, just about whether you met
+			// min threshold to count towards streak per date
+			.collect::<Vec<_>>();
+
+		let streaks =
+			streaks_from_stats(stats(rows), calculate_logical_date(Utc::now(), 0));
+
+		assert_eq!(streaks.longest_days, 250 - 30);
+		assert_eq!(streaks.current_days, 0);
+	}
+
+	/// if a session doesn't meet the minimum amount of elapsed seconds then it won't be counted and
+	/// break the streak (if no other sessions exist that day which otherwise met requirements)
+	#[test]
+	fn test_streaks_min_secs_must_be_reached_to_count() {
+		let last_twelve_days = (0..12)
+			.into_iter()
+			.map(|days_ago| days_before_today(days_ago))
+			.collect::<Vec<_>>();
+
+		let rows = last_twelve_days
+			.into_iter()
+			.map(|date| {
+				row(
+					date.clone(),
+					"m1",
+					1,
+					// 2 days ago we didn't read enough and broke our streak :'(
+					if date == days_before_today(2) {
+						10
+					} else {
+						600
+					},
+					ReadingStatus::Reading,
+				)
+			})
+			.collect::<Vec<_>>();
+
+		let streaks =
+			streaks_from_stats(stats(rows), calculate_logical_date(Utc::now(), 0));
+
+		// 12 days total but the 10 secs day (2 days ago) doesn't count, which leaves runs
+		// of 2 (today + yesterday) and 9 (3-11 days ago)
+		assert_eq!(streaks.longest_days, 9);
+		assert_eq!(streaks.current_days, 2);
+	}
 
 	// TODO: TimeToFinishStat tests
 }

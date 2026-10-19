@@ -168,7 +168,7 @@ async fn load_sessions(
 		.await
 }
 
-#[derive(Debug, SimpleObject)]
+#[derive(Debug, Clone, SimpleObject)]
 pub struct WeekdayActivity {
 	/// 1 (Monday) -> 7 (Sunday)
 	pub iso_weekday: u32,
@@ -478,4 +478,58 @@ mod tests {
 		assert_eq!(two_days_ago.total_seconds, 100);
 		assert_eq!(two_days_ago.session_count, 1);
 	}
+
+	/// oct 19 2026 is monday
+	fn anchor_date() -> Date {
+		Date::parse_from_str("2026-10-19", "%Y-%m-%d").unwrap()
+	}
+
+	fn days_before_anchor(days: u64) -> Date {
+		let date = anchor_date();
+		let adjusted = date
+			.checked_sub_days(Days::new(days))
+			.expect("should have subtracted fine");
+		adjusted
+	}
+
+	#[test]
+	fn test_day_of_week_averages_over_weekdays() {
+		let rows = vec![
+			// mondays
+			row(days_before_anchor(7), "m1", 1, 600, ReadingStatus::Reading),
+			row(days_before_anchor(7), "m2", 1, 200, ReadingStatus::Reading),
+			row(anchor_date(), "m1", 1, 200, ReadingStatus::Reading),
+			// tuesday
+			row(days_before_anchor(6), "m1", 1, 400, ReadingStatus::Reading),
+			// friday
+			row(days_before_anchor(3), "m2", 1, 200, ReadingStatus::Reading),
+		];
+
+		let weekdays = stats(rows).day_of_week();
+
+		assert_eq!(weekdays.len(), 7); // always 7, sanity check
+
+		let monday = weekdays[0].clone();
+		assert_eq!(monday.iso_weekday, 1);
+		assert_eq!(monday.total_seconds, 1000);
+		assert_eq!(monday.average_seconds, 1000 / 2);
+
+		let tuesday = weekdays[1].clone();
+		assert_eq!(tuesday.iso_weekday, 2);
+		assert_eq!(tuesday.total_seconds, 400);
+		assert_eq!(tuesday.average_seconds, 400 / 1);
+
+		let friday = weekdays[4].clone();
+		assert_eq!(friday.iso_weekday, 5);
+		assert_eq!(friday.total_seconds, 200);
+		assert_eq!(friday.average_seconds, 200 / 1);
+	}
+
+	// #[tokio::test]
+	// async fn test_streaks_properly_counts_runs() {
+	// 	// TODO: no time now, but either use fake_data OR move the logical parts to a separate
+	// 	// fn and just test that
+	// }
+
+	// TODO: TimeToFinishStat tests
 }

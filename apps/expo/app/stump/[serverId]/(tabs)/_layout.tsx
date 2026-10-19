@@ -56,6 +56,8 @@ export default function TabLayout() {
 		return null
 	}
 
+	// TODO(macos): https://docs.expo.dev/versions/latest/sdk/router/native-tabs/#sidebaradaptable
+	// ^ would be cool to explore? i tried it out and some issues but worth a real look
 	return (
 		<NativeTabs
 			minimizeBehavior="onScrollDown"

@@ -58,6 +58,7 @@ export default function TabLayout() {
 
 	// TODO(macos): https://docs.expo.dev/versions/latest/sdk/router/native-tabs/#sidebaradaptable
 	// ^ would be cool to explore? i tried it out and some issues but worth a real look
+	// TODO: instead of showClubs fold that into a more generalized "choose the tabs you want" kinda thing
 	return (
 		<NativeTabs
 			minimizeBehavior="onScrollDown"
@@ -93,6 +94,10 @@ export default function TabLayout() {
 					// - timeline (meh)
 					md="view_timeline"
 				/>
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="stats">
+				<NativeTabs.Trigger.Label>{t('tabs.stats')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="chart.bar.fill" md="bar_chart" />
 			</NativeTabs.Trigger>
 			{showClubs && (
 				<NativeTabs.Trigger name="clubs">

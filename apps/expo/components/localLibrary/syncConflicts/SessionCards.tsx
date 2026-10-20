@@ -26,7 +26,7 @@ export function LastCommonSessionCard({
 	thumbnailPath,
 	thumbnailData,
 }: LastCommonSessionCardProps) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { isTablet } = useDisplay()
 
 	const updatedAt = parseGraphQLDateTime(session?.updatedAt)
@@ -63,7 +63,7 @@ export function LastCommonSessionCard({
 
 							{session && (
 								<Text size="sm" className="text-foreground-muted">
-									{formatNormalizedProgression(t, {
+									{formatNormalizedProgression(translate, {
 										page: session.endPage,
 										chapter: session.endLocator?.chapterTitle,
 										percentage: parseGraphQLPercentageDecimal(session.endPercentage),
@@ -94,7 +94,7 @@ type SourceSessionCardProps = {
 }
 
 export function SourceSessionCard({ session }: SourceSessionCardProps) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const normalizedProgression = match(session)
 		.with({ __typename: 'ReadingSession' }, (remoteSession) => ({
@@ -121,7 +121,7 @@ export function SourceSessionCard({ session }: SourceSessionCardProps) {
 					</Text>
 
 					<Text size="sm" className="text-foreground-muted">
-						{formatNormalizedProgression(t, normalizedProgression)}
+						{formatNormalizedProgression(translate, normalizedProgression)}
 					</Text>
 
 					{normalizedProgression.updatedAt && (
@@ -189,13 +189,13 @@ type NormalizedProgression = {
 }
 
 function formatNormalizedProgression(
-	t: (key: string, options?: Record<string, unknown>) => string,
+	translate: (fullKey: string, options?: Record<string, unknown>) => string,
 	{ page, chapter, percentage }: Partial<NormalizedProgression>,
 ) {
 	if (!page && !chapter && percentage == null) return null
 	const progressParts = []
 	if (chapter) progressParts.push(chapter)
-	if (page) progressParts.push(t('common.pageX', { current: page }))
+	if (page) progressParts.push(translate('shared.common.pageX', { current: page }))
 
 	const percentageSuffix = percentage != null ? ` (${Math.round(percentage)}%)` : ''
 

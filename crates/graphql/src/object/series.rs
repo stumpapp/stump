@@ -15,7 +15,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
+	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -26,6 +26,7 @@ use crate::{
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
 	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
+	order::order_spec,
 	utils::db_statement,
 };
 
@@ -187,21 +188,14 @@ impl Series {
 		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
-		let name_cmp = if let Some(id) = cursor {
-			let media = media::Entity::find_for_user(user)
-				.select_only()
-				.column(media::Column::Name)
-				.filter(media::Column::Id.eq(id.clone()))
-				.into_model::<media::MediaNameCmpSelect>()
-				.one(conn)
-				.await?
-				.ok_or("Cursor not found")?;
-			Some(media.name)
-		} else {
-			None
-		};
+		let spec = order_spec![
+			(media_metadata::Column::Number, Order::Asc),
+			(media::Column::Name, Order::Asc),
+			(media::Column::Id, Order::Asc),
+		];
+		// ^ this Id addition is really just a tie breaker
 
-		let query = media::ModelWithMetadata::find_for_user(user)
+		let mut query = media::ModelWithMetadata::find_for_user(user)
 			.join_rev(
 				JoinType::LeftJoin,
 				reading_session::Entity::belongs_to(media::Entity)
@@ -232,21 +226,29 @@ impl Series {
 			.group_by(media::Column::Id)
 			.group_by(media_metadata::Column::Id); // pgsql requires addtl grouping
 
-		let books = if let Some(name) = name_cmp {
-			let mut cursor = query.cursor_by(media::Column::Name);
-			cursor.after(name).first(take);
-			cursor
+		if let Some(id) = cursor {
+			let cursor_row = media::ModelWithMetadata::find_by_id_for_user(id, user)
 				.into_model::<media::ModelWithMetadata>()
-				.all(conn)
+				.one(conn)
 				.await?
-		} else {
-			query
-				.order_by_asc(media::Column::Name)
-				.limit(take)
-				.into_model::<media::ModelWithMetadata>()
-				.all(conn)
-				.await?
-		};
+				.ok_or("Cursor not found")?;
+			let number = match &cursor_row.metadata {
+				Some(metadata) => metadata.get(media_metadata::Column::Number),
+				None => Option::<Decimal>::None.into(),
+			};
+			query = query.filter(spec.sorts_after(&[
+				number,
+				cursor_row.media.get(media::Column::Name),
+				cursor_row.media.get(media::Column::Id),
+			]));
+		}
+
+		let books = spec
+			.apply(query)
+			.limit(take)
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
 
 		Ok(books.into_iter().map(Media::from).collect())
 	}

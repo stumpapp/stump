@@ -20,6 +20,7 @@ use super::user::AuthUser;
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct DeviceIds(pub Vec<String>);
 
+// TODO: add optional timezone
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingSessionModel")]
 #[sea_orm(table_name = "reading_sessions")]
@@ -55,9 +56,6 @@ pub struct Model {
 	/// state of the session when it was last updated
 	#[sea_orm(column_type = "Text")]
 	pub status: ReadingStatus,
-
-	#[sea_orm(column_type = "Text", nullable)]
-	pub notes: Option<String>,
 
 	/// all device ids that contributed updates to this session
 	#[graphql(skip)]

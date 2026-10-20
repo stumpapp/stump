@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
 import { ExternalLink } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-native'
+import { Linking, ScrollView, useWindowDimensions, View } from 'react-native'
 
 import EmptyState from '~/components/EmptyState'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
@@ -10,12 +10,13 @@ import { useOwlHeaderOffset } from '~/components/Owl'
 import { UpdateServerSheet } from '~/components/savedServer/createOrUpdate/UpdateServerSheet'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
 import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, deleteServer, getServerConfig } = useSavedServers()
 	const router = useRouter()
 	const { width } = useWindowDimensions()
@@ -65,22 +66,22 @@ export default function Screen() {
 
 	const handleDeleteServer = useCallback(
 		(server: SavedServer) => {
-			Alert.alert(
-				t('savedServerActions.deleteServer.title'),
-				t('savedServerActions.deleteServer.confirmation', {
+			SystemAlert.alert(
+				translate('shared.savedServerActions.deleteServer.title'),
+				translate('shared.savedServerActions.deleteServer.confirmation', {
 					serverName: `'${server.name}'`,
 				}),
 				[
-					{ text: t('common.cancel'), style: 'cancel' },
+					{ text: translate('shared.common.cancel'), style: 'cancel' },
 					{
-						text: t('common.delete'),
+						text: translate('shared.common.delete'),
 						style: 'destructive',
 						onPress: () => deleteServer(server.id),
 					},
 				],
 			)
 		},
-		[deleteServer, t],
+		[deleteServer, translate],
 	)
 
 	const onSelectForEdit = useCallback(
@@ -104,8 +105,8 @@ export default function Screen() {
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<EmptyState
-					title={t('emptyState.noServers')}
-					message={t('emptyState.cta')}
+					title={translate('shared.emptyState.noServers')}
+					message={translate('shared.emptyState.cta')}
 					actions={
 						<>
 							<Button
@@ -115,7 +116,7 @@ export default function Screen() {
 								className="relative"
 								onPress={() => Linking.openURL('https://www.stumpapp.dev/docs/apps/mobile')}
 							>
-								<Text>{t('emptyState.seeDocumentation')}</Text>
+								<Text>{translate('shared.emptyState.seeDocumentation')}</Text>
 
 								<Icon
 									as={ExternalLink}

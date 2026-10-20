@@ -1,7 +1,8 @@
 import { Label, NativeSelect, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../schema'
 
@@ -23,7 +24,7 @@ export default function GroupBy({ disabled }: Props) {
 		[form],
 	)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<div className="space-y-1.5 pb-4 flex flex-col">

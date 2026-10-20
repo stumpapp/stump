@@ -5,7 +5,10 @@ use async_graphql::{
 };
 use stump_core::fs_utils::PathUtils;
 
-use crate::{loader::media::MediaLoader, object::media::Media};
+use crate::{
+	loader::media::{MediaByPathLoaderKey, MediaLoader},
+	object::media::Media,
+};
 
 #[derive(Debug, Clone, SimpleObject)]
 pub struct DirectoryListing {
@@ -57,7 +60,12 @@ impl DirectoryListingFile {
 		}
 
 		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
-		let media = loader.load_one(self.path.clone()).await?;
+		let media = loader
+			.load_one(MediaByPathLoaderKey {
+				path: self.path.clone(),
+			})
+			.await?;
+
 		Ok(media)
 	}
 }

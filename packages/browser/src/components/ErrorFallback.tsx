@@ -1,15 +1,16 @@
 import { Button, ButtonOrLink, useBodyLock } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 import { FallbackProps } from 'react-error-boundary'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { copyTextToClipboard } from '../utils/misc'
 
 // TODO: take in platform?
 export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	useBodyLock()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	function copyErrorStack() {
 		if (error.stack) {

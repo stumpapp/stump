@@ -1,13 +1,13 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Drawer, Text, ToolTip } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useCallback, useMemo, useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { useCheckPermission } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import EmailerSendHistoryTable from './EmailerSendHistoryTable'
 
@@ -63,7 +63,7 @@ type Props = {
 }
 
 export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const fetchUser = useCheckPermission(UserPermission.ReadUsers)
 	const {

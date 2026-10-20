@@ -8,8 +8,9 @@ import {
 } from '@readium/navigator'
 import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator, Publication } from '@readium/shared'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { clearFramesSelection } from '../annotations/clearSelection'
 import { locatorToHref, resolvePublicationLinkLocator } from './locator'
@@ -85,7 +86,7 @@ export function useReadiumNavigator({
 	onTextCleared,
 	onDecorationActivated,
 }: UseReadiumNavigatorArgs): UseReadiumNavigatorResult {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const [loadState, setLoadState] = useState<LoadState>({ status: 'idle' })
 	const [navButtons, setNavButtons] = useState({ canGoBackward: false, canGoForward: false })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)
@@ -340,7 +341,10 @@ export function useReadiumNavigator({
 				if (!cancelled) {
 					setLoadState({
 						status: 'error',
-						message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
+						message:
+							error instanceof Error
+								? error.message
+								: translate('shared.epubReader.errors.openFailed'),
 					})
 				}
 			}
@@ -386,7 +390,7 @@ export function useReadiumNavigator({
 		containerRef,
 		enqueueNavigation,
 		syncNavButtons,
-		t,
+		translate,
 	])
 
 	useEffect(() => {

@@ -1,6 +1,5 @@
 import { cn } from '@stump/components'
 import { AccessRole } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense, useMemo, useRef } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -9,6 +8,7 @@ import { SceneContainer } from '@/components/container'
 import { GenericSettingsHeader } from '@/components/settings'
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListContext } from './context'
 import { useSmartListById, useSmartListMeta, useUpdateSmartList } from './graphql'
@@ -24,7 +24,7 @@ export default function UserSmartListLayout() {
 	const location = useLocation()
 
 	const { id } = useParams<{ id: string }>()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const {
 		preferences: {

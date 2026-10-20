@@ -3,13 +3,13 @@ use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
-	DerivePartialModel, FromQueryResult, QueryOrder,
+	DerivePartialModel, FromQueryResult,
 };
 
 use crate::shared::{
 	enums::FileStatus,
 	image::ImageMetadata,
-	ordering::{OrderBy, OrderDirection},
+	ordering::{OrderDirection, OrderingField},
 };
 
 use super::{library_exclusion, user::AuthUser};
@@ -85,11 +85,6 @@ impl LibraryThumbSelect {
 			Column::ThumbnailMeta,
 		]
 	}
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct LibraryNameCmpSelect {
-	pub name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

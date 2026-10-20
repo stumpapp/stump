@@ -3,12 +3,13 @@ import { Stack } from 'expo-router'
 import { CheckCircle2, Share, Trash } from 'lucide-react-native'
 import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
-import { Alert, Platform, Pressable, View } from 'react-native'
+import { Platform, Pressable, View } from 'react-native'
 
 import { useSelectionStore } from '~/stores/selection'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
 import { Icon } from '../ui/icon'
+import { SystemAlert } from '../ui/system-alert'
 
 // TODO: Redesign after https://github.com/software-mansion/react-native-screens/issues/2990#issuecomment-3448692775
 
@@ -27,7 +28,7 @@ export default function SelectionRightScreenHeader() {
 	}, [currentSelection, deleteAction, onStopSelection])
 
 	const confirmDeleteSelection = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			`Delete ${currentSelection.size} ${pluralize('download', currentSelection.size)}`,
 			'This action cannot be undone.',
 			[

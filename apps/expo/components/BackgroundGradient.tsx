@@ -4,8 +4,8 @@ import { AnimatedProp, Canvas, Color, LinearGradient, Rect, vec } from '@shopify
 import { getThumbnailTintColor } from '@stump/client'
 import { InterfaceLayout } from '@stump/graphql'
 import { useNavigation } from 'expo-router'
-import { RefObject, useCallback, useEffect } from 'react'
-import { Appearance, Platform } from 'react-native'
+import { RefObject, useCallback, useEffect, useLayoutEffect } from 'react'
+import { Appearance, Platform, View } from 'react-native'
 import Animated, {
 	SharedValue,
 	useAnimatedStyle,
@@ -14,9 +14,10 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
-import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { compositeColorOverBase, IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { ImageMetadata } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 import { useResolvedHeaderHeight } from './header/useAnimatedHeader'
@@ -170,4 +171,80 @@ function getTintColor(item?: MinimalItem): string {
 function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 	const animatedStyle = useAnimatedStyle(() => ({ backgroundColor: color.value }))
 	return <Animated.View style={[{ flex: 1 }, animatedStyle]} />
+}
+
+type ScreenBackgroundGradientProps = {
+	imageMetadata?: ImageMetadata | null
+	// screens which declare their own headerBackground should disable this
+	tintAndroidHeader?: boolean
+	// the color which the steps are composited over so transitions aren't so awful
+	baseColor?: string
+}
+
+export function ScreenBackgroundGradient({
+	imageMetadata,
+	tintAndroidHeader = true,
+	baseColor,
+}: ScreenBackgroundGradientProps) {
+	const { height, width } = useDisplay()
+	const colors = useColors()
+
+	const naviation = useNavigation()
+	const averageColor = getTintColor({ thumbnail: { metadata: imageMetadata } })
+
+	const resolvedBase = baseColor ?? colors.background.DEFAULT
+
+	// not quite right just looking at apple journal and throwing something
+	// vaguely similar-ish. the steps are composited over the base so the content
+	// renders opaque regardless what is behind it
+	const colorSteps =
+		averageColor === 'transparent'
+			? [resolvedBase, resolvedBase, resolvedBase]
+			: [
+					compositeColorOverBase(averageColor + '99', resolvedBase), // 60%
+					compositeColorOverBase(averageColor + 'cc', resolvedBase), // 80%
+					averageColor,
+				]
+
+	const endPoint = vec(0, height)
+
+	const androidColor = useSharedValue(averageColor)
+
+	const applyAndroidHeader = tintAndroidHeader && !!imageMetadata
+	useLayoutEffect(() => {
+		if (Platform.OS === 'android' && applyAndroidHeader) {
+			naviation.setOptions({
+				headerBackground: () => <AnimatedHeaderBackground color={androidColor} />,
+			})
+		}
+	}, [androidColor, naviation, applyAndroidHeader])
+
+	return (
+		<Canvas style={{ position: 'absolute', inset: 0 }}>
+			<Rect x={0} y={0} width={width} height={height}>
+				<LinearGradient start={vec(0, 0)} end={endPoint} colors={colorSteps} />
+			</Rect>
+		</Canvas>
+	)
+}
+
+type ScreenHeaderBackgroundProps = {
+	color?: string
+	baseColor: string
+}
+
+export function ScreenHeaderBackground({ color, baseColor }: ScreenHeaderBackgroundProps) {
+	return (
+		<View
+			style={{
+				flex: 1,
+				backgroundColor: color ? compositeColorOverBase(`${color}99`, baseColor) : baseColor,
+			}}
+		/>
+	)
+}
+
+export function getScreenTintColor(imageMetadata?: ImageMetadata | null): string | undefined {
+	const color = getTintColor({ thumbnail: { metadata: imageMetadata } })
+	return color === 'transparent' ? undefined : color
 }

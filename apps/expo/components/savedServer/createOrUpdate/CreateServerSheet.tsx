@@ -23,7 +23,7 @@ import {
 export function CreateServerSheet() {
 	const sheetRef = useRef<TrueSheet>(null)
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, createServer } = useSavedServers()
 
 	const didSuccessfullyCreate = useRef(false)
@@ -41,7 +41,7 @@ export function CreateServerSheet() {
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name),
-				t,
+				translate,
 			),
 		),
 		// doesn't work >:(
@@ -89,7 +89,7 @@ export function CreateServerSheet() {
 					ref={sheetRef}
 					detents={[1]}
 					scrollable
-					headerLabel={t('addOrEditServer.createServer')}
+					headerLabel={translate('shared.addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
 						type: 'check',

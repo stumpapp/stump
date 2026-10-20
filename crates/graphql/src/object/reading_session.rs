@@ -1,5 +1,31 @@
-use async_graphql::{ComplexObject, SimpleObject};
-use models::entity::{reading_session, reading_session::DeviceIds};
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+};
+use models::{
+	domain::readium::chapters_between_locators,
+	entity::{
+		bookmark, journal_entry,
+		media::{self, MediaIdentSelect},
+		media_annotation, reading_device,
+		reading_session::{self, DeviceIds},
+	},
+	shared::ordering::OrderDirection,
+};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use stump_core::readium::ReadiumManifestGenerator;
+use tokio::task::spawn_blocking;
+
+use crate::{
+	data::{AuthContext, CoreContext},
+	loader::{
+		media::{MediaByIdForUserLoaderKey, MediaLoader},
+		reading_session::{ReadingSessionIsLatestLoaderKey, ReadingSessionLoader},
+	},
+	object::{
+		bookmark::Bookmark, media::Media, media_annotation::MediaAnnotation,
+		reading_timeline::SessionEvent,
+	},
+};
 
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex, name = "ReadingSession")]
@@ -8,6 +34,9 @@ pub struct ReadingSession {
 	pub model: reading_session::Model,
 }
 
+/// A single, contiguous reading session for a given user and book. Access to this node
+/// MUST be restricted by the resolvers which would return it, and resolvers within
+/// this node assume as such
 #[ComplexObject]
 impl ReadingSession {
 	async fn device_ids(&self) -> Vec<String> {
@@ -18,7 +47,160 @@ impl ReadingSession {
 			.unwrap_or_default()
 	}
 
-	// TODO: async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<RegisteredReadingDevice>>
+	// TODO: one day a device can have its own obj with resolvers for various stats
+	// but i don't personally have much need for that so will see if it is ever asked
+
+	/// The devices which were used during this reading session
+	async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<reading_device::Model>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		if self.model.device_ids.is_none() {
+			return Ok(vec![]);
+		}
+
+		let devices = reading_device::Entity::find_for_user(user)
+			.filter(
+				reading_device::Column::Id.is_in(
+					self.model
+						.device_ids
+						.as_ref()
+						.map(|DeviceIds(ids)| ids.clone())
+						.unwrap_or_default(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(devices)
+	}
+
+	/// The media which this session belongs to. Please note that if somehow the user loses access to the
+	/// media record, e.g. via access control, then this will resolve to `None` to avoid leaking
+	/// information which the user no longer has access to. It is a bit awkward, since the session itself
+	/// means they have at least at some point read some portion
+	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
+
+		let media = loader
+			.load_one(MediaByIdForUserLoaderKey {
+				id: self.model.media_id.clone(),
+				user_id: user.id.clone(),
+			})
+			.await?;
+
+		Ok(media)
+	}
+
+	async fn events(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default_with = "OrderDirection::Asc")] order: OrderDirection,
+	) -> Result<Vec<SessionEvent>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let bookmarks = bookmark::Entity::find()
+			.filter(bookmark::Column::SessionId.eq(self.model.id))
+			.order_by(bookmark::Column::CreatedAt, order.into())
+			.all(conn)
+			.await?;
+		let annotations = media_annotation::Entity::find()
+			.filter(media_annotation::Column::SessionId.eq(self.model.id))
+			.order_by(media_annotation::Column::CreatedAt, order.into())
+			.all(conn)
+			.await?;
+
+		let events = {
+			let mut events = Vec::with_capacity(bookmarks.len() + annotations.len());
+			events.extend(
+				bookmarks
+					.into_iter()
+					.map(|b| SessionEvent::Bookmark(Bookmark::from(b))),
+			);
+			events.extend(
+				annotations
+					.into_iter()
+					.map(|a| SessionEvent::Annotation(MediaAnnotation::from(a))),
+			);
+			events.sort_by(|a, b| match order {
+				OrderDirection::Asc => a.created_at().cmp(&b.created_at()),
+				OrderDirection::Desc => b.created_at().cmp(&a.created_at()),
+			});
+			events
+		};
+
+		Ok(events)
+	}
+
+	/// Returns the list of chapter titles read during this session, including the start
+	/// and end chapters.
+	///
+	/// ## Important: This has some io cost and so should not necessarily be used in a list
+	/// of sessions but more a detail view into a single session, etc.
+	// ^ TODO: at least not until potentially storing the positions in the db
+	async fn chapters_read(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let selection = media::Entity::find_by_id(self.model.media_id.clone())
+			.select_only()
+			.columns(MediaIdentSelect::columns())
+			.filter(media::Column::Extension.like("epub"))
+			.into_model::<MediaIdentSelect>()
+			.one(conn)
+			.await?;
+		let Some(book) = selection else {
+			tracing::debug!(
+				?self.model.media_id,
+				"book is not an epub so skipping chapters_read computation"
+			);
+			return Ok(vec![]);
+		};
+
+		let generator =
+			ReadiumManifestGenerator::new(book.path, "internal://".to_string());
+		// TODO(optimize): should generate positions once at ingestion and store in db
+		let positions = spawn_blocking(move || generator.generate_positions()).await??;
+
+		match (&self.model.start_locator, &self.model.end_locator) {
+			(Some(start), Some(end)) => Ok(chapters_between_locators(
+				start,
+				end,
+				positions.positions.as_slice(),
+			)),
+			_ => Ok(vec![]),
+		}
+	}
+
+	async fn is_latest(&self, ctx: &Context<'_>) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
+
+		let is_latest = loader
+			.load_one(ReadingSessionIsLatestLoaderKey {
+				session_id: self.model.id,
+				user_id: user.id.clone(),
+			})
+			.await?
+			.unwrap_or(false);
+
+		Ok(is_latest)
+	}
+
+	async fn journal_entry(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<journal_entry::Model>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let entry = journal_entry::Entity::find_for_user(user)
+			.filter(journal_entry::Column::SessionId.eq(self.model.id))
+			.one(conn)
+			.await?;
+
+		Ok(entry)
+	}
 }
 
 impl From<reading_session::Model> for ReadingSession {

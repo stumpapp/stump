@@ -1,11 +1,14 @@
 import '@/__mocks__/resizeObserver'
 
-import { LocaleProvider } from '@stump/i18n'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 
 import ReadStatusSelect from '../ReadStatusSelect'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
+}))
 
 type FormValues = {
 	read_status: string[]
@@ -16,12 +19,10 @@ function TestSubject() {
 	const value = useWatch({ control: form.control, name: 'read_status' })
 
 	return (
-		<LocaleProvider locale="en-US">
-			<FormProvider {...form}>
-				<ReadStatusSelect />
-				<output data-testid="read-status-value">{value.join(',')}</output>
-			</FormProvider>
-		</LocaleProvider>
+		<FormProvider {...form}>
+			<ReadStatusSelect />
+			<output data-testid="read-status-value">{value.join(',')}</output>
+		</FormProvider>
 	)
 }
 
@@ -30,12 +31,12 @@ describe('ReadStatusSelect', () => {
 		const user = userEvent.setup()
 		render(<TestSubject />)
 
-		expect(screen.getByText('Read Status')).toBeInTheDocument()
+		expect(screen.getByText('mediaFilterForm.readStatusSelect.label')).toBeInTheDocument()
 		const trigger = screen.getByRole('combobox')
 		await user.click(trigger)
-		await user.click(await screen.findByText('Completed'))
+		await user.click(await screen.findByText('mediaFilterForm.readStatusSelect.options.completed'))
 
 		expect(screen.getByTestId('read-status-value')).toHaveTextContent('finished')
-		expect(trigger).toHaveTextContent('Completed')
+		expect(trigger).toHaveTextContent('mediaFilterForm.readStatusSelect.options.completed')
 	})
 })

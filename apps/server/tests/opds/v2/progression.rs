@@ -72,6 +72,12 @@ async fn test_progression_returns_default_when_missing() {
 			.and_then(Value::as_str),
 		Some("")
 	);
+	// default progression is 0.0 with no references
+	assert_eq!(
+		progression.get("progression").and_then(Value::as_f64),
+		Some(0.0)
+	);
+	assert!(progression.get("references").is_none());
 }
 
 /// progression should round-trip with latest page and total progression
@@ -85,16 +91,8 @@ async fn test_progression_put_then_get_round_trip() {
 			"id": "opds-device-1",
 			"name": "OPDS Device"
 		},
-		"locator": {
-			"href": format!("/opds/v2.0/books/{}/pages/10", book_id),
-			"type": "image/jpeg",
-			"title": "Page 10",
-			"locations": {
-				"position": 10,
-				"progression": 0.1,
-				"totalProgression": 0.1
-			}
-		}
+		"progression": 0.1,
+		"references": ["#page=10"]
 	});
 
 	let response = app
@@ -122,21 +120,19 @@ async fn test_progression_put_then_get_round_trip() {
 		Some("OPDS Device")
 	);
 
-	assert_eq!(
-		progression
-			.get("locator")
-			.and_then(|locator| locator.get("locations"))
-			.and_then(|locations| locations.get("position"))
-			.and_then(Value::as_i64),
-		Some(10)
-	);
-
 	let total_progression = progression
-		.get("locator")
-		.and_then(|locator| locator.get("locations"))
-		.and_then(|locations| locations.get("totalProgression"))
+		.get("progression")
 		.and_then(Value::as_f64)
-		.expect("expected total progression");
-
+		.expect("expected progression");
 	assert!((total_progression - 0.1).abs() < 0.000001);
+
+	let refs = progression
+		.get("references")
+		.and_then(Value::as_array)
+		.expect("expected references");
+	assert!(
+		refs.iter()
+			.any(|r| r.as_str().is_some_and(|s| s.starts_with("#page="))),
+		"expected a #page=N reference"
+	);
 }

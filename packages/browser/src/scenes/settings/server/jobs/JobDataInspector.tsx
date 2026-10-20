@@ -1,11 +1,11 @@
 import { useGraphQL } from '@stump/client'
 import { Card, Preformatted, Sheet, Text, usePrevious } from '@stump/components'
 import { FragmentType, graphql, JobTableQuery, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { columns } from '../logs/persisted-logs/PersistedLogsTable'
 
@@ -71,7 +71,7 @@ type Props = {
 // TODO: pull in logs from this job, bumps complexity a bit but worth i think (even tho there is a see logs btn)
 
 export default function JobDataInspector({ job, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const inlineData = useFragment(fragment, job?.outputData)
 	const fallback = usePrevious(inlineData)

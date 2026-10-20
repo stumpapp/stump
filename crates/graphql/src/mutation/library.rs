@@ -11,6 +11,7 @@ use models::{
 		library_config, library_exclusion, library_scan_record, library_tag, media,
 		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
 	},
+	services::scanned_directory,
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
@@ -210,6 +211,39 @@ impl LibraryMutation {
 		Ok(affected_records)
 	}
 
+	/// Clear the stored directory mtimes for a library, forcing the next scan to do a
+	/// full walk
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn clear_library_scanned_directories(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<library::LibraryIdentSelect>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let cleared = scanned_directory::delete_mtimes_under_path(
+			&library.path,
+			core.conn.as_ref(),
+		)
+		.await?;
+
+		tracing::debug!(
+			count = cleared,
+			path = ?library.path,
+			"Cleared stored directory mtimes paths within library"
+		);
+
+		Ok(cleared)
+	}
+
 	/// Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	/// the library will be scanned immediately after creation.
 	#[tracing::instrument(skip(self, ctx))]
@@ -250,6 +284,16 @@ impl LibraryMutation {
 		}
 		.insert(&txn)
 		.await?;
+
+		// any stored mtimes beneath the path are leftovers from a previous library
+		let cleared_mtimes =
+			scanned_directory::delete_mtimes_under_path(&created_library.path, &txn)
+				.await?;
+		tracing::debug!(
+			count = cleared_mtimes,
+			path = ?created_library.path,
+			"Cleared stored directory mtimes paths within library"
+		);
 
 		if let Some(tags) = tags {
 			let (to_connect, _) = super::tag::sync_tags(&txn, &tags, &[]).await?;
@@ -430,6 +474,7 @@ impl LibraryMutation {
 				_ => (false, false),
 			};
 
+		let path_changed = input.path != existing_library.path;
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -480,6 +525,18 @@ impl LibraryMutation {
 				.exec(&txn)
 				.await?;
 			}
+		}
+
+		if path_changed {
+			let cleared_mtimes =
+				scanned_directory::delete_mtimes_under_path(&updated_library.path, &txn)
+					.await?;
+			tracing::debug!(
+				count = cleared_mtimes,
+				path = ?updated_library.path,
+				"Cleared stored directory mtimes paths within library"
+
+			);
 		}
 
 		txn.commit().await?;
@@ -587,12 +644,28 @@ impl LibraryMutation {
 			MaybeUndefined::Undefined => None, // no update
 		};
 
+		let path_changed = input
+			.path
+			.as_ref()
+			.is_some_and(|path| path != &existing_library.path);
+
 		let txn = core.conn.as_ref().begin().await?;
 
 		let (library, config) = input.apply(existing_library, existing_config)?;
 
 		let updated_library = library.update(&txn).await?;
 		let _updated_config = config.update(&txn).await?;
+
+		if path_changed {
+			let cleared_mtimes =
+				scanned_directory::delete_mtimes_under_path(&updated_library.path, &txn)
+					.await?;
+			tracing::debug!(
+				count = cleared_mtimes,
+				path = ?updated_library.path,
+				"Cleared stored directory mtimes paths within library"
+			);
+		}
 
 		if let Some(tags) = updated_tags {
 			let (to_connect, to_disconnect) =
@@ -939,6 +1012,17 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 		library.clone().delete(core.conn.as_ref()).await?;
+
+		if let Err(error) =
+			scanned_directory::delete_mtimes_under_path(&library.path, core.conn.as_ref())
+				.await
+		{
+			tracing::error!(
+				?error,
+				path = ?library.path,
+				"Failed to clear stored directory mtimes for deleted library"
+			);
+		}
 
 		// TODO: delete thumbnails!
 

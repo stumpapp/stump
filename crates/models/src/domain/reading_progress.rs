@@ -127,7 +127,6 @@ mod tests {
 			} else {
 				ReadingStatus::Reading
 			},
-			notes: None,
 			device_ids: None,
 			media_id: "m1".to_string(),
 			user_id: "u1".to_string(),

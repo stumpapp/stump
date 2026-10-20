@@ -6,14 +6,14 @@ import { useEffect } from 'react'
 
 import { ServerErrorBoundary } from '~/components/error'
 import { useColors } from '~/lib/constants'
-import { useAutoSyncActiveServer, useTranslate } from '~/lib/hooks'
+import { useAutoSyncActiveServer, useSyncDeviceName, useTranslate } from '~/lib/hooks'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse } = useClientContext()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { checkPermission } = useStumpServer()
 
 	const colors = useColors()
@@ -21,6 +21,7 @@ export default function TabLayout() {
 	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncLocalData)
 	const bookClubsEnabled = usePreferencesStore((state) => state.bookClubsEnabled)
 
+	useSyncDeviceName()
 	useAutoSyncActiveServer({
 		enabled: !!sdk.token && autoSyncEnabled,
 	})
@@ -65,12 +66,31 @@ export default function TabLayout() {
 			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="index">
-				<NativeTabs.Trigger.Label>{t('tabs.home')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{translate('shared.common.home')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="browse">
 				<NativeTabs.Trigger.Label>{t('tabs.browse')}</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="explore" />
+				<NativeTabs.Trigger.Icon
+					sf={{
+						default: 'books.vertical',
+						selected: 'books.vertical.fill',
+					}}
+					md="explore"
+				/>
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="reading-timeline">
+				<NativeTabs.Trigger.Label>{t('tabs.activity')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon
+					sf={{
+						default: 'book.pages',
+						selected: 'book.pages.fill',
+					}}
+					// TODO(android): don't love this one, a few other options:
+					// - history
+					// - timeline (meh)
+					md="view_timeline"
+				/>
 			</NativeTabs.Trigger>
 			{showClubs && (
 				<NativeTabs.Trigger name="clubs">
@@ -79,7 +99,7 @@ export default function TabLayout() {
 				</NativeTabs.Trigger>
 			)}
 			<NativeTabs.Trigger name="search" role="search">
-				<NativeTabs.Trigger.Label>{t('tabs.search')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{translate('shared.common.search')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
 			</NativeTabs.Trigger>
 		</NativeTabs>

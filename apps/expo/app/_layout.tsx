@@ -24,6 +24,7 @@ import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
 import { FloatingQueueButton } from '~/components/downloadQueue'
 import { PerformanceMonitor } from '~/components/PerformanceMonitor'
+import { SystemAlertHost } from '~/components/ui/system-alert'
 import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
@@ -34,6 +35,7 @@ import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { refreshWidgetFromCache } from '~/lib/widgets/readingNow/readingNowWidgetSync'
 import { useEnsureWidgetAssetsWritten } from '~/lib/widgets/utils'
+import { DeviceIdProvider } from '~/providers/DeviceIdProvider'
 import { WifiSsidProvider } from '~/providers/WifiSsidProvider'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -63,7 +65,7 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export default function RootLayout() {
 	const navigationRef = useNavigationContainerRef()
 
-	const { colorScheme, isDarkColorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme()
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
 
@@ -75,6 +77,7 @@ export default function RootLayout() {
 	const animation = React.useRef<LottieView>(null)
 	const { hideStatusBar, hideNavigationBar } = useHideSystemBars()
 	const hasMounted = React.useRef(false)
+	const hasRestoredTheme = React.useRef(false)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -102,6 +105,20 @@ export default function RootLayout() {
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
 	const { isDarkEpubTheme } = useEpubTheme()
+	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
+
+	useIsomorphicLayoutEffect(() => {
+		if (hasRestoredTheme.current) {
+			return
+		}
+		setColorScheme(usePreferencesStore.getState().themePreference)
+		hasRestoredTheme.current = true
+		setIsColorSchemeLoaded(true)
+	}, [setColorScheme])
+
+	React.useEffect(() => {
+		setAndroidNavigationBar(isDarkBackground ? 'dark' : 'light')
+	}, [isDarkBackground])
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -111,8 +128,6 @@ export default function RootLayout() {
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setLocaleDetector(() => preferredLocale ?? deviceLocale)
-		setAndroidNavigationBar(colorScheme)
-		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
 
 		SplashScreen.hideAsync().then(() => {
@@ -166,8 +181,6 @@ export default function RootLayout() {
 
 	useEnsureWidgetAssetsWritten()
 
-	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
-
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />
 	}
@@ -204,93 +217,96 @@ export default function RootLayout() {
 	return (
 		<SafeAreaProvider>
 			<WifiSsidProvider>
-				<LocaleProvider locale={locale}>
-					<GestureHandlerRootView style={{ flex: 1 }}>
-						<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-							<View className="flex-1" style={accentVars}>
-								{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
-								<KeyboardProvider>
-									<SystemBars
-										style={isDarkBackground ? 'light' : 'dark'}
-										hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
-									/>
+				<DeviceIdProvider>
+					<LocaleProvider locale={locale}>
+						<GestureHandlerRootView style={{ flex: 1 }}>
+							<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+								<View className="flex-1" style={accentVars}>
+									{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
+									<KeyboardProvider>
+										<SystemBars
+											style={isDarkBackground ? 'light' : 'dark'}
+											hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+										/>
 
-									<Stack
-										screenOptions={{
-											animation: animationEnabled ? 'default' : 'none',
-											contentStyle: {
-												backgroundColor: colors.background.DEFAULT,
+										<Stack
+											screenOptions={{
+												animation: animationEnabled ? 'default' : 'none',
+												contentStyle: {
+													backgroundColor: colors.background.DEFAULT,
+												},
+											}}
+										>
+											<Stack.Screen
+												name="(tabs)"
+												options={{
+													headerShown: false,
+													title: '',
+													animation: animationEnabled ? 'default' : 'none',
+												}}
+											/>
+
+											<Stack.Screen
+												name="stump/[serverId]"
+												options={{
+													headerShown: false,
+													title: '',
+													animation: animationEnabled ? 'default' : 'none',
+													autoHideHomeIndicator: hideNavigationBar,
+													contentStyle: {
+														backgroundColor: colors.background.DEFAULT,
+													},
+												}}
+											/>
+											<Stack.Screen
+												name="opds/[serverId]"
+												options={{
+													headerShown: false,
+													animation: animationEnabled ? 'default' : 'none',
+												}}
+											/>
+											<Stack.Screen
+												name="opds-legacy/[serverId]"
+												options={{
+													headerShown: false,
+													animation: animationEnabled ? 'default' : 'none',
+												}}
+											/>
+
+											<Stack.Screen
+												name="offline"
+												options={{
+													headerShown: false,
+													title: '',
+													animation: animationEnabled ? 'default' : 'none',
+													autoHideHomeIndicator: hideNavigationBar,
+													contentStyle: {
+														backgroundColor: colors.background.DEFAULT,
+													},
+												}}
+											/>
+										</Stack>
+										<FloatingQueueButton />
+										<PortalHost />
+										<SystemAlertHost />
+									</KeyboardProvider>
+
+									<Toaster
+										position="bottom-center"
+										styles={{
+											title: {
+												fontSize: 18,
+											},
+											description: {
+												fontSize: 16,
 											},
 										}}
-									>
-										<Stack.Screen
-											name="(tabs)"
-											options={{
-												headerShown: false,
-												title: '',
-												animation: animationEnabled ? 'default' : 'none',
-											}}
-										/>
-
-										<Stack.Screen
-											name="stump/[serverId]"
-											options={{
-												headerShown: false,
-												title: '',
-												animation: animationEnabled ? 'default' : 'none',
-												autoHideHomeIndicator: hideNavigationBar,
-												contentStyle: {
-													backgroundColor: colors.background.DEFAULT,
-												},
-											}}
-										/>
-										<Stack.Screen
-											name="opds/[serverId]"
-											options={{
-												headerShown: false,
-												animation: animationEnabled ? 'default' : 'none',
-											}}
-										/>
-										<Stack.Screen
-											name="opds-legacy/[serverId]"
-											options={{
-												headerShown: false,
-												animation: animationEnabled ? 'default' : 'none',
-											}}
-										/>
-
-										<Stack.Screen
-											name="offline"
-											options={{
-												headerShown: false,
-												title: '',
-												animation: animationEnabled ? 'default' : 'none',
-												autoHideHomeIndicator: hideNavigationBar,
-												contentStyle: {
-													backgroundColor: colors.background.DEFAULT,
-												},
-											}}
-										/>
-									</Stack>
-									<FloatingQueueButton />
-									<PortalHost />
-								</KeyboardProvider>
-
-								<Toaster
-									position="bottom-center"
-									styles={{
-										title: {
-											fontSize: 18,
-										},
-										description: {
-											fontSize: 16,
-										},
-									}}
-								/>
-							</View>
-						</ThemeProvider>
-					</GestureHandlerRootView>
-				</LocaleProvider>
+									/>
+								</View>
+							</ThemeProvider>
+						</GestureHandlerRootView>
+					</LocaleProvider>
+				</DeviceIdProvider>
 			</WifiSsidProvider>
 		</SafeAreaProvider>
 	)

@@ -9,6 +9,7 @@
 	"scripts": {
 		"check-types": "tsc -b tsconfig.json",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
+		"test": "vitest run",
 		"clean": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
@@ -27,7 +28,8 @@
 		"@types/react": "^19.0.0",
 		"prettier": "^3.2.5",
 		"tsconfig": "^7.0.0",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"vitest": "^4.1.11"
 	},
 	"peerDependencies": {
 		"react": "^19.0.0"

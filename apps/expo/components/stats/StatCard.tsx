@@ -90,7 +90,6 @@ export function MiniStatCard({
 					</Text>
 					{suffix && (
 						<Text size="xs" className="font-bold mb-1 opacity-60" style={{ color: textColor }}>
-							{' '}
 							{suffix}
 						</Text>
 					)}

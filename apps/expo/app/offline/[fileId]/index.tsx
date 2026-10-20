@@ -45,7 +45,7 @@ import { usePreferencesStore } from '~/stores'
 export default function Screen() {
 	const { fileId } = useLocalSearchParams<{ fileId: string }>()
 	const router = useRouter()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const { fetchCounter, increment } = useDownloadsState(
@@ -110,7 +110,7 @@ export default function Screen() {
 		0,
 		{
 			seriesName: seriesName ?? null,
-			t,
+			translate,
 		},
 	)
 
@@ -120,9 +120,9 @@ export default function Screen() {
 
 	const renderRead = () => {
 		if (progressPercentage && progressPercentage > 0) {
-			return <Text>{t('common.continue')}</Text>
+			return <Text>{translate('shared.common.continue')}</Text>
 		} else {
-			return <Text>{t('common.read')}</Text>
+			return <Text>{translate('shared.common.read')}</Text>
 		}
 	}
 
@@ -204,7 +204,7 @@ export default function Screen() {
 					/>
 
 					<MetadataBadgeSection
-						label={t('bookMetadata.genres')}
+						label={translate('shared.bookMetadata.genres')}
 						items={genres.map((genre) => ({ label: genre }))}
 					/>
 

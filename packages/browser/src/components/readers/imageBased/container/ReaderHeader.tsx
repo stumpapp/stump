@@ -1,9 +1,9 @@
 import { cn, Link, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useFullscreen } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useAppStore } from '@/stores'
@@ -14,7 +14,7 @@ import SettingsDialog from './SettingsDialog'
 import TimerMenu from './TimerMenu'
 
 export default function ReaderHeader() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const { book } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar },
@@ -44,7 +44,7 @@ export default function ReaderHeader() {
 				<div className="space-x-4 flex items-center">
 					<Link
 						className="flex items-center text-foreground hover:text-foreground/80"
-						title={t('imageReader.header.goToMediaOverview')}
+						title={translate('shared.imageReader.header.goToMediaOverview')}
 						to={paths.bookOverview(id)}
 					>
 						<ArrowLeft size={'1.25rem'} />

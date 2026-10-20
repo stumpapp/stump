@@ -6,9 +6,10 @@ import {
 	NavigationArrangementQuery,
 	SystemArrangement,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Bolt, Eye, EyeOff } from 'lucide-react'
 import { useCallback, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { getSectionId } from './NavigationArrangement'
 
@@ -48,7 +49,7 @@ export default function NavigationArrangementItem({
 	disabled,
 	hidden,
 }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
 		disabled,
 		id: getSectionId(section),

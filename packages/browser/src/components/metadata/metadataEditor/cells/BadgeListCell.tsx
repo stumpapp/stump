@@ -1,9 +1,10 @@
 import { Badge, cn, ToolTip } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { Link } from 'react-router'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import AddFieldsDialog from '../AddFieldsDialog'
 import { useMetadataEditorContext } from '../context'
@@ -22,7 +23,7 @@ export default function BadgeListCell<Field extends string>({
 	itemUrl,
 }: Props<Field>) {
 	const form = useFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 

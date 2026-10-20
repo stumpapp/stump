@@ -1,19 +1,19 @@
 import { Heading, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteJobHistoryConfirmation from './DeleteJobHistoryConfirmation.tsx'
 import JobScheduler from './JobScheduler.tsx'
 import JobTable from './JobTable.tsx'
 
 export default function JobSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
 	const canManageJobs = checkPermission(UserPermission.ManageJobs)
@@ -24,8 +24,8 @@ export default function JobSettingsScene() {
 				<title>Stump | {t('settingsScene.server/jobs.helmet')}</title>
 			</Helmet>
 
-			{/* 
-					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all 
+			{/*
+					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all
 					through the table on mobile would prolly suck
 				*/}
 

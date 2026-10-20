@@ -77,11 +77,11 @@ describe('TimerMenu', () => {
 		)
 
 		await user.click(screen.getByRole('button'))
-		await user.click(await screen.findByText('Start Timer'))
+		await user.click(await screen.findByText('Start timer'))
 		expect(setBookPreferences).toHaveBeenCalledWith({ trackElapsedTime: true })
 
 		await user.click(screen.getByRole('button'))
-		await user.click(await screen.findByText('Reset Timer'))
+		await user.click(await screen.findByText('Reset timer'))
 		expect(resetTimer).toHaveBeenCalledOnce()
 	})
 
@@ -95,6 +95,6 @@ describe('TimerMenu', () => {
 		)
 
 		await user.click(screen.getByRole('button'))
-		expect(await screen.findByText('Stop Timer')).toBeInTheDocument()
+		expect(await screen.findByText('Stop timer')).toBeInTheDocument()
 	})
 })

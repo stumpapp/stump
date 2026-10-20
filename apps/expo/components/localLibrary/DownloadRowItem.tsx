@@ -4,7 +4,7 @@ import { SymbolView } from 'expo-symbols'
 import medium from 'expo-symbols/androidWeights/medium'
 import { CheckCircle2, Trash } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
-import { Alert, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -16,6 +16,7 @@ import { useSelectionStore } from '~/stores/selection'
 import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { SystemAlert } from '../ui/system-alert'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { useDownloadRowItemSize } from './useDownloadRowItemSize'
@@ -28,7 +29,7 @@ type Props = {
 export default function DownloadRowItem({ downloadedFile }: Props) {
 	const router = useRouter()
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const { deleteBook } = useDownload({
 		serverId: downloadedFile.serverId,
@@ -130,21 +131,24 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	}, [selectionStore, downloadedFile.id, onSelectItem])
 
 	const handleDelete = useCallback(() => {
-		Alert.alert(
-			t('bookActions.deleteBook.label'),
-			t('bookActions.deleteBook.confirmation', {
-				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+		SystemAlert.alert(
+			translate('shared.bookActions.deleteBook.label'),
+			translate('shared.bookActions.deleteBook.confirmation', {
+				// TODO(translations): i don't think this always works, should be confirmationWithName vs confirmationWithoutName or sm
+				bookTitle: downloadedFile.bookName
+					? `'${downloadedFile.bookName}'`
+					: translate('shared.common.thisBook'),
 			}),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
 				{
-					text: t('common.delete'),
+					text: translate('shared.common.delete'),
 					style: 'destructive',
 					onPress: () => deleteBook(downloadedFile.id),
 				},
 			],
 		)
-	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, t])
+	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, translate])
 
 	const getProgress = () => {
 		if (!readProgress) {
@@ -177,7 +181,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					{
 						items: [
 							{
-								label: t('common.select'),
+								label: translate('shared.common.select'),
 								icon: {
 									ios: 'checkmark.circle',
 									android: CheckCircle2,
@@ -189,7 +193,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					{
 						items: [
 							{
-								label: t('bookActions.deleteBook.label'),
+								label: translate('shared.bookActions.deleteBook.label'),
 								icon: {
 									ios: 'trash',
 									android: Trash,
@@ -221,7 +225,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					<View className="gap-2 py-1.5 flex-1 justify-center">
 						<View className="gap-2 flex-row justify-between">
 							<Heading numberOfLines={2} className="shrink">
-								{downloadedFile.bookName || t('common.unknownTitle')}
+								{downloadedFile.bookName || translate('shared.common.unknownTitle')}
 							</Heading>
 
 							{status && (
@@ -234,7 +238,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						<View className="gap-2 flex-row items-center">
 							{currentPage && (
 								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-									<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
+									<Text size="sm">{`${translate('shared.common.page')} ${currentPage}`}</Text>
 									<Text
 										size="xs"
 										className="pb-0.5 text-foreground-muted"

@@ -1,11 +1,11 @@
 import { Button, ButtonOrLink, cn, Label } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey } from '@/hooks/useRouteGroups'
+import { useTranslate } from '@/hooks/useTranslate'
 import paths, { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
@@ -18,7 +18,7 @@ export default function SmartListSettingsSideBar() {
 	const routerPaths = usePaths()
 
 	const { list, viewerRole } = useSmartListContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()

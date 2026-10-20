@@ -4,7 +4,7 @@ use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::shared::ordering::{OrderBy, OrderDirection};
+use crate::shared::ordering::{OrderDirection, OrderingField};
 
 #[skip_serializing_none]
 #[derive(

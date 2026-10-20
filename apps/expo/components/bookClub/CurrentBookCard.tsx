@@ -11,7 +11,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Archive, Edit, Plus } from 'lucide-react-native'
 import { useCallback, useMemo, useRef } from 'react'
-import { Alert, Easing, Platform, Pressable, View } from 'react-native'
+import { Easing, Platform, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 import { toast } from 'sonner-native'
@@ -21,6 +21,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../image'
 import { Icon, Text } from '../ui'
+import { SystemAlert } from '../ui/system-alert'
 import { AddBookOptionsSheet, type AddBookOptionsSheetRef } from './AddBookOptionsSheet'
 import { useBookClubContext } from './context'
 import { CurrentBookSheet, CurrentBookSheetRef } from './CurrentBookSheet'
@@ -173,7 +174,7 @@ export function CurrentBookCard({ data }: Props) {
 	})
 
 	const confirmArchiveBook = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			'Archive book',
 			`Are you sure you are ready to archive ${book?.title ? `'${book?.title}'` : 'the current book'}?`,
 			[

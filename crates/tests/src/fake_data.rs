@@ -1,6 +1,8 @@
 use chrono::Utc;
 use models::entity::user::{AuthUser, LoginUser};
-use models::entity::{library, library_config, media, reading_session, series, user};
+use models::entity::{
+	library, library_config, media, media_metadata, reading_session, series, user,
+};
 use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
@@ -21,6 +23,17 @@ pub struct Media {
 	pub modified_at: Option<DateTimeWithTimeZone>,
 	pub deleted_at: Option<DateTimeWithTimeZone>,
 	pub pages: Option<i32>,
+	/// defaults to `<name>.<extension>`
+	pub path: Option<String>,
+	pub is_oneshot: bool,
+
+	pub metadata: Option<MediaMetadata>,
+}
+
+#[derive(Default, Clone)]
+pub struct MediaMetadata {
+	pub number: Option<f64>,
+	pub media_id: Option<String>,
 }
 
 impl Media {
@@ -35,6 +48,7 @@ impl Media {
 			.clone()
 			.unwrap_or_else(|| format!("Test Book {id}"));
 		let extension = self.extension.clone().unwrap_or("epub".to_string());
+		let metadata = self.metadata.clone();
 
 		let model = media::ActiveModel {
 			series_id: ActiveValue::Set(Some(self.series_id.clone())),
@@ -49,7 +63,12 @@ impl Media {
 			deleted_at: self
 				.deleted_at
 				.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
-			path: sea_orm::Set(format!("{name}.{extension}").to_string()),
+			path: sea_orm::Set(
+				self.path
+					.clone()
+					.unwrap_or_else(|| format!("{name}.{extension}")),
+			),
+			is_oneshot: sea_orm::Set(self.is_oneshot),
 			status: sea_orm::Set(FileStatus::Ready),
 			..Default::default()
 		};
@@ -57,14 +76,29 @@ impl Media {
 		let insert_result = model.insert(db).await.expect("could not insert media");
 
 		// "created_at" is overridden by the ActiveModelBehavior, so we need to update it explicitly.
-		match self.created_at {
+		let book = match self.created_at {
 			Some(t) => {
 				let mut model: media::ActiveModel = insert_result.into();
 				model.created_at = ActiveValue::Set(t);
 				model.update(db).await.expect("could not update media")
 			},
 			None => insert_result,
+		};
+
+		if let Some(metadata) = metadata {
+			let _meta_model = media_metadata::ActiveModel {
+				media_id: sea_orm::Set(Some(book.id.clone())),
+				number: metadata.number.map_or(ActiveValue::NotSet, |num| {
+					sea_orm::Set(Some(Decimal::try_from(num).expect("invalid number")))
+				}),
+				..Default::default()
+			}
+			.insert(db)
+			.await
+			.expect("could not insert media metadata");
 		}
+
+		book
 	}
 }
 
@@ -155,6 +189,7 @@ pub struct Series {
 	pub name: Option<String>,
 	pub path: Option<String>,
 	pub library_id: Option<String>,
+	pub is_oneshot: bool,
 }
 
 impl Series {
@@ -174,6 +209,7 @@ impl Series {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
+			is_oneshot: sea_orm::Set(self.is_oneshot),
 			library_id: match &self.library_id {
 				Some(lib_id) => sea_orm::Set(Some(lib_id.clone())),
 				None => sea_orm::NotSet,

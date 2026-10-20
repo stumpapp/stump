@@ -1,11 +1,11 @@
 import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
 import { Input, NewCard, RawSwitch } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 import DoubleSpreadBehavior from './DoubleSpreadBehavior'
@@ -14,8 +14,6 @@ import ReadingDirectionSelect from './ReadingDirectionSelect'
 import ReadingModeSelect from './ReadingModeSelect'
 
 // locale org is a bit fucked after years of changes but it's fine lol
-const getSettingsKey = (key: string) => `imageReader.settings.${key}`
-const getSectionKey = (key: string) => `imageReader.settings.readerSettings.sections.${key}`
 const getSettingsSceneKey = (key: string) =>
 	`settingsScene.app/reader.sections.imageBasedBooks.sections.${key}`
 
@@ -25,7 +23,7 @@ type Props = {
 }
 
 export default function ReaderSettings({ forBook, currentPage }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const [search, setSearch] = useSearchParams()
 
 	const store = useReaderStore((state) => state)
@@ -126,9 +124,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 
 	return (
 		<div className="gap-8 flex flex-col" key={forBook}>
-			<NewCard label={t(getSectionKey('mode'))}>
+			<NewCard label={translate('shared.readerSettings.sections.mode')}>
 				<NewCard.Row
-					label={t(getSettingsKey('readingMode.label'))}
+					label={translate('shared.readerSettings.readingMode.label')}
 					className="flex-row items-center"
 				>
 					<ReadingModeSelect
@@ -138,7 +136,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				</NewCard.Row>
 
 				<NewCard.Row
-					label={t(getSettingsKey('readingDirection.label'))}
+					label={translate('shared.readerSettings.readingDirection.label')}
 					className="flex-row items-center"
 				>
 					<ReadingDirectionSelect
@@ -148,9 +146,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				</NewCard.Row>
 			</NewCard>
 
-			<NewCard label={t(getSectionKey('imageOptions'))}>
+			<NewCard label={translate('shared.readerSettings.sections.imageOptions')}>
 				<NewCard.Row
-					label={t(getSettingsKey('doublePageBehavior.label'))}
+					label={translate('shared.readerSettings.doublePageBehavior.label')}
 					className="flex-row items-center"
 				>
 					<DoubleSpreadBehavior
@@ -161,14 +159,14 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					/>
 				</NewCard.Row>
 
-				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.separateSecondPage'))}>
+				<NewCard.Row label={translate('shared.readerSettings.separateSecondPage')}>
 					<RawSwitch
 						checked={activeSettings.secondPageSeparate}
 						onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
 					/>
 				</NewCard.Row>
 
-				<NewCard.Row label={t(getSettingsKey('imageScaling.label'))}>
+				<NewCard.Row label={translate('shared.readerSettings.imageScaling.label')}>
 					<ImageScalingSelect
 						value={activeSettings.imageScaling?.scaleToFit}
 						onChange={(value) =>
@@ -182,15 +180,15 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				</NewCard.Row>
 			</NewCard>
 
-			<NewCard label={t(getSectionKey('controls'))}>
-				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.panZoomWithoutCtrl'))}>
+			<NewCard label={translate('shared.readerSettings.sections.controls')}>
+				<NewCard.Row label={translate('shared.readerSettings.panZoomWithoutCtrl')}>
 					<RawSwitch
 						checked={activeSettings.panzoomWithoutCtrl}
 						onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
 					/>
 				</NewCard.Row>
 
-				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.tapSidesToNavigate'))}>
+				<NewCard.Row label={translate('shared.readerSettings.tapSidesToNavigate')}>
 					<RawSwitch
 						checked={activeSettings.tapSidesToNavigate}
 						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
@@ -198,8 +196,8 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				</NewCard.Row>
 			</NewCard>
 
-			<NewCard label={t(getSectionKey('preferences'))}>
-				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.readingTimer'))}>
+			<NewCard label={translate('shared.common.preferences')}>
+				<NewCard.Row label={translate('shared.readerSettings.readingTimer.label')}>
 					<RawSwitch
 						checked={activeSettings.trackElapsedTime}
 						onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}

@@ -12,7 +12,6 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql, UploadBooksInput } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { AxiosProgressEvent } from 'axios'
 import { Book, FolderArchive } from 'lucide-react'
@@ -21,6 +20,7 @@ import { FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useSeriesContextSafe } from '@/scenes/series'
 
 import { useFileExplorerContext } from '../context'
@@ -54,7 +54,7 @@ export default function UploadModal() {
 	const [files, setFiles] = useState<UploadFileEntry[]>([])
 	const nextFileIdRef = useRef(0)
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
 
@@ -240,7 +240,7 @@ export default function UploadModal() {
 
 					<div className="text-center">
 						<Heading size="xs" className="space-x-1 flex items-center justify-center">
-							{t('common.uploading')}{' '}
+							{translate('shared.common.uploading')}{' '}
 							{uploadProgress > 0 && (
 								<span className="text-muted-foreground">({uploadProgress}%)</span>
 							)}
@@ -381,7 +381,7 @@ export default function UploadModal() {
 																	setFiles((prev) => prev.filter(({ id }) => id !== fileEntry.id))
 																}}
 															>
-																{t('common.remove')}
+																{translate('shared.common.remove')}
 															</Button>
 														</div>
 													</div>
@@ -396,10 +396,10 @@ export default function UploadModal() {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={() => setUploadType(undefined)}>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button disabled={!files.length} onClick={onUploadClicked}>
-							{t('common.upload')}
+							{translate('shared.common.upload')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

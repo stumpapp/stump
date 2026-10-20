@@ -1,10 +1,11 @@
 import { Plus } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Icon } from '~/components/ui/icon'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -78,11 +79,11 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 
 	const handleDelete = useCallback(() => {
 		if (themeNames.length <= 1) {
-			Alert.alert('Error', 'You must have at least one theme')
+			SystemAlert.alert('Error', 'You must have at least one theme')
 			return
 		}
 
-		Alert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
+		SystemAlert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
 			{ text: 'Cancel', style: 'cancel' },
 			{
 				text: 'Delete',

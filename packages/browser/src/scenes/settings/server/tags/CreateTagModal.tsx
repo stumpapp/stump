@@ -1,10 +1,11 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Input } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation CreateTagModal($tags: [String!]!) {
@@ -20,7 +21,7 @@ export default function CreateTagModal() {
 	const [name, setName] = useState('')
 
 	const client = useQueryClient()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 
 	const { mutate: createTags, isPending } = useGraphQLMutation(mutation, {
@@ -70,7 +71,7 @@ export default function CreateTagModal() {
 					}}
 				>
 					<Input
-						label={t(getKey('modal.name.label'))}
+						label={translate('shared.common.name')}
 						placeholder={t(getKey('modal.name.placeholder'))}
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -80,11 +81,11 @@ export default function CreateTagModal() {
 
 				<Dialog.Footer>
 					<Button variant="outline" disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 
 					<Button disabled={isPending || !name.trim()} size="sm" onClick={handleCreate}>
-						{t(getKey('modal.submit'))}
+						{translate('shared.common.create')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

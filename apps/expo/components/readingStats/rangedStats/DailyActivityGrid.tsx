@@ -1,8 +1,9 @@
 import { Canvas, Circle } from '@shopify/react-native-skia'
 import { DailyActivityGridFragment, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { addDays, format, isAfter, parse } from 'date-fns'
-import { useMemo, useState } from 'react'
+import { ComponentPropsWithoutRef, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
+import { Easing, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { Card, Text } from '~/components/ui'
 import { useColors, usePalette } from '~/lib/constants'
@@ -25,8 +26,6 @@ const fragment = graphql(`
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
 }
-
-// TODO: animate dots on mount?
 
 export function DailyActivityGrid({ fragmentRef }: Props) {
 	const { translate } = useTranslate()
@@ -118,7 +117,7 @@ function DotGrid({ days, range }: DotGridProps) {
 			<View onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
 				<Canvas style={{ width, height: rows * cell }}>
 					{days.map((day, index) => (
-						<Circle
+						<Dot
 							key={day.date}
 							cx={(index % columns) * cell + cell / 2}
 							// ^ modulo for which col i am in + maths for center of circle
@@ -126,7 +125,7 @@ function DotGrid({ days, range }: DotGridProps) {
 							// ^ floor division for which row i am in + same center of circle maths
 							r={radius}
 							color={day.seconds > 0 ? accentColor : colors.foreground.muted}
-							opacity={LEVEL_OPACITY[toLevel(day.seconds, max)]}
+							opacity={LEVEL_OPACITY[toLevel(day.seconds, max)] ?? 0.25}
 						/>
 					))}
 				</Canvas>
@@ -168,4 +167,19 @@ function DotGrid({ days, range }: DotGridProps) {
 function toLevel(seconds: number, max: number) {
 	if (seconds <= 0) return 0
 	return Math.min(4, Math.ceil((seconds / max) * 4))
+}
+
+type DotProps = ComponentPropsWithoutRef<typeof Circle>
+
+function Dot({ opacity, ...props }: DotProps) {
+	const animatedOpacity = useSharedValue(0.25)
+
+	// TODO: i kinda don't love, it's fine. i think room for improvement
+	// but okay for now
+	useEffect(() => {
+		// @ts-expect-error: its fine
+		animatedOpacity.value = withTiming(opacity, { easing: Easing.linear })
+	}, [opacity, animatedOpacity])
+
+	return <Circle {...props} opacity={animatedOpacity} />
 }

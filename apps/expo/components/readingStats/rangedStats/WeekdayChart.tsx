@@ -1,7 +1,9 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatNarrowDuration } from '@stump/i18n'
 import { format, setDay } from 'date-fns'
+import { useEffect } from 'react'
 import { View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 import { Text } from '~/components/ui'
 import { usePalette } from '~/lib/constants'
@@ -24,12 +26,9 @@ function weekdayLabel(isoWeekday: number): string {
 	return format(setDay(new Date(), isoWeekday % 7), 'EEE')
 }
 
-// TODO: animate bars on mount?
-
 export function WeekdayChart({ fragmentRef }: Props) {
 	const { locale } = useTranslate()
 
-	const accentColor = usePalette('accent')
 	const data = useFragment(fragment, fragmentRef)
 
 	const weekdays = data.dayOfWeek.map((day) => ({
@@ -48,23 +47,59 @@ export function WeekdayChart({ fragmentRef }: Props) {
 					<Text size="xs" className="text-foreground-muted" numberOfLines={1}>
 						{day.seconds > 0 ? day.value : ''}
 					</Text>
-					<View className="h-28 w-full items-center justify-end">
-						<View
-							className="squircle w-3/5 rounded-lg"
-							style={{
-								backgroundColor: accentColor,
-								height: `${Math.max(4, (day.seconds / max) * 100)}%`,
-								// ^ basically normalizing them all as percentages of max
-								// with a clamp so all are visible
-								opacity: day.seconds > 0 ? 1 : 0.2,
-							}}
-						/>
-					</View>
+
+					<WeekdayBar max={max} seconds={day.seconds} />
+
 					<Text size="sm" className="font-medium">
 						{day.label}
 					</Text>
 				</View>
 			))}
+		</View>
+	)
+}
+
+type WeekdayBarProps = {
+	max: number
+	seconds: number
+}
+
+const BAR_HEIGHT = 95
+
+function WeekdayBar({ max, seconds }: WeekdayBarProps) {
+	const accentColor = usePalette('accent')
+
+	const height = useSharedValue(0)
+
+	useEffect(() => {
+		const percentage = Math.max(4 / BAR_HEIGHT, seconds / max)
+		height.value = withSpring(BAR_HEIGHT * percentage, { overshootClamping: true })
+	}, [max, seconds, height])
+
+	const style = useAnimatedStyle(() => ({
+		height: height.value,
+	}))
+
+	return (
+		<View
+			className="w-full items-center justify-end"
+			style={{
+				height: BAR_HEIGHT + 12,
+			}}
+		>
+			<Animated.View
+				className="squircle w-3/5 rounded-lg"
+				style={[
+					style,
+					{
+						backgroundColor: accentColor,
+						// height: `${Math.max(4, (seconds / max) * 100)}%`,
+						// ^ basically normalizing them all as percentages of max
+						// with a clamp so all are visible
+						opacity: seconds > 0 ? 1 : 0.2,
+					},
+				]}
+			/>
 		</View>
 	)
 }

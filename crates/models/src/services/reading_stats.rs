@@ -1,4 +1,6 @@
-// TODO(reading-stats): top genres
+// TODO(reading-stats): add the following:
+// - top genres
+// - top libraries?
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 

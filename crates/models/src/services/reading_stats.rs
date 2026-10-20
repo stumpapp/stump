@@ -113,8 +113,8 @@ impl SessionStats {
 	}
 
 	pub fn day_of_week(&self) -> Vec<WeekdayActivity> {
-		let start = self.start.clone();
-		let end = self.end.clone();
+		let start = self.start;
+		let end = self.end;
 		let mut totals = [0; 7];
 
 		for row in &self.rows {
@@ -353,9 +353,8 @@ impl TimeToFinishStat {
 
 				let mut seconds_per_page = readthroughs
 					.iter()
-					.filter_map(|s| {
-						(s.pages > 0).then(|| s.active_seconds as f64 / s.pages as f64)
-					})
+					.filter(|&s| s.pages > 0)
+					.map(|s| s.active_seconds as f64 / s.pages as f64)
 					.collect::<Vec<_>>();
 				seconds_per_page.sort_by(|a, b| a.total_cmp(b));
 

@@ -536,16 +536,9 @@ async fn update_user_preferences_by_id(
 		app_theme: Set(user_preferences.app_theme),
 		enable_gradients: Set(user_preferences.enable_gradients),
 		app_font: Set(user_preferences.app_font),
-		primary_navigation_mode: Set(user_preferences.primary_navigation_mode),
-		layout_max_width_px: Set(user_preferences.layout_max_width_px),
 		show_query_indicator: Set(user_preferences.show_query_indicator),
 		enable_live_refetch: Set(user_preferences.enable_live_refetch),
 		enable_discord_presence: Set(user_preferences.enable_discord_presence),
-		enable_compact_display: Set(user_preferences.enable_compact_display),
-		enable_double_sidebar: Set(user_preferences.enable_double_sidebar),
-		enable_replace_primary_sidebar: Set(
-			user_preferences.enable_replace_primary_sidebar
-		),
 		enable_hide_scrollbar: Set(user_preferences.enable_hide_scrollbar),
 		enable_job_overlay: Set(user_preferences.enable_job_overlay),
 		enable_fancy_animations: Set(user_preferences.enable_fancy_animations),

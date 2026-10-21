@@ -273,13 +273,10 @@
             "label": "有効",
             "description": "このライブラリのサムネイル画像を生成"
           },
-          "format": {
-            "label": "画像の形式",
-            "description": "生成されたサムネイル画像の形式"
-          },
-          "quality": {
-            "label": "品質",
-            "description": "生成されたサムネイル画像の品質（0～1.0）"
+          "output": {
+            "description": "生成されたサムネイル画像の形式",
+            "format": "画像の形式",
+            "quality": "品質"
           }
         },
         "ignoreRules": {

@@ -336,10 +336,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken",
-            "factor": {
-              "label": "Skalfaktor"
-            }
+            "label": "Skalfaktor",
+            "description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken"
           },
           "exact": {
             "description": "Ändra storlek på miniatyrbilden till en exakt storlek i pixlar",
@@ -359,18 +357,12 @@
                 "width": "Bredd",
                 "height": "Höjd"
               }
-            },
-            "size": {
-              "label": "Storlek"
             }
           },
-          "format": {
-            "label": "Bildformat",
-            "description": "Formatet av de genererade miniatyrbilderna"
-          },
-          "quality": {
-            "label": "Kvalitet",
-            "description": "Kvaliteten på de genererade miniatyrbilderna, mellan 1 och 100"
+          "output": {
+            "description": "Formatet av de genererade miniatyrbilderna",
+            "format": "Bildformat",
+            "quality": "Kvalitet"
           }
         },
         "ignoreRules": {

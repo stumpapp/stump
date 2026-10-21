@@ -673,10 +673,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Skalirajte minijaturu faktorom izvorne veličine. Na primjer, 0,65 daje minijaturu veličine 65% izvornika",
-            "factor": {
-              "label": "Faktor skaliranja"
-            }
+            "label": "Faktor skaliranja",
+            "description": "Skalirajte minijaturu faktorom izvorne veličine. Na primjer, 0,65 daje minijaturu veličine 65% izvornika"
           },
           "exact": {
             "description": "Promijenite veličinu minijature na tačne dimenzije u pikselima",
@@ -696,18 +694,12 @@
                 "width": "Širina",
                 "height": "Visina"
               }
-            },
-            "size": {
-              "label": "Veličina"
             }
           },
-          "format": {
-            "label": "Format slike",
-            "description": "Format generiranih minijatura"
-          },
-          "quality": {
-            "label": "Kvalitet",
-            "description": "Kvalitet generiranih minijatura, od 1 do 100"
+          "output": {
+            "description": "Format generiranih minijatura",
+            "format": "Format slike",
+            "quality": "Kvalitet"
           }
         },
         "ignoreRules": {

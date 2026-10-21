@@ -274,13 +274,10 @@
             "label": "Zapnuto",
             "description": "Generovat náhledové obrázky pro tuto knihovnu"
           },
-          "format": {
-            "label": "Formát obrázku",
-            "description": "Formát vygenerovaných obrázků náhledů"
-          },
-          "quality": {
-            "label": "Kvalita",
-            "description": "Kvalita vygenerovaných obrázků náhledů mezi 0 a 1.0"
+          "output": {
+            "description": "Formát vygenerovaných obrázků náhledů",
+            "format": "Formát obrázku",
+            "quality": "Kvalita"
           }
         },
         "ignoreRules": {

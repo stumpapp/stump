@@ -1,7 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
 import { CreateBookClubInput, graphql } from '@stump/graphql'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
-import { Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback } from 'react'
 import { Helmet } from 'react-helmet'
 import { useNavigate } from 'react-router'
 
@@ -10,8 +10,7 @@ import {
 	defaultMemberSpec,
 } from '@/components/bookClub/createOrUpdateForm/schema'
 import { SceneContainer } from '@/components/container'
-import { SteppedFormContext } from '@/components/steppedForm'
-import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
+import { SteppedFormSceneHeader } from '@/components/steppedForm'
 import { usePaths } from '@/paths'
 
 import CreateBookClubForm from './CreateBookClubForm'
@@ -27,8 +26,6 @@ const mutation = graphql(`
 
 export default function CreateBookClubScene() {
 	const paths = usePaths()
-	const [formStep, setFormStep] = useState(1)
-
 	const navigate = useNavigate()
 
 	const { mutate: createClub } = useGraphQLMutation(mutation, {
@@ -71,26 +68,15 @@ export default function CreateBookClubScene() {
 				<title>Stump | Create a book club</title>
 			</Helmet>
 
-			<SteppedFormContext.Provider
-				value={{
-					currentStep: formStep,
-					localeBase: 'createBookClubScene',
-					setStep: setFormStep,
-					stepsBeforeReview: 3,
-				}}
-			>
-				<SteppedFormSceneHeader />
+			<SteppedFormSceneHeader localeBase="createBookClubScene" />
 
-				<SceneContainer>
-					<div className="gap-12 flex flex-col">
-						<Suspense>
-							<CreateBookClubForm onSubmit={handleSubmit} />
-						</Suspense>
-					</div>
-				</SceneContainer>
-			</SteppedFormContext.Provider>
+			<SceneContainer>
+				<div className="gap-12 flex flex-col">
+					<Suspense>
+						<CreateBookClubForm onSubmit={handleSubmit} />
+					</Suspense>
+				</div>
+			</SceneContainer>
 		</div>
 	)
-
-	return null
 }

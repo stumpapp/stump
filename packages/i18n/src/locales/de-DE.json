@@ -673,10 +673,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welches 65% der Originalgröße beträgt",
-            "factor": {
-              "label": "Skalierungsfaktor"
-            }
+            "label": "Skalierungsfaktor",
+            "description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welches 65% der Originalgröße beträgt"
           },
           "exact": {
             "description": "Größenveränderung des Vorschaubildes auf eine exakte Größe in Pixeln",
@@ -696,18 +694,12 @@
                 "width": "Breite",
                 "height": "Höhe"
               }
-            },
-            "size": {
-              "label": "Größe"
             }
           },
-          "format": {
-            "label": "Bildformat",
-            "description": "Das Format der erzeugten Vorschaubilder"
-          },
-          "quality": {
-            "label": "Qualität",
-            "description": "Die Qualität der erzeugten Vorschaubilder zwischen 1 und 100"
+          "output": {
+            "description": "Das Format der erzeugten Vorschaubilder",
+            "format": "Bildformat",
+            "quality": "Qualität"
           }
         },
         "ignoreRules": {

@@ -92,6 +92,7 @@ export {
 	type StatisticItemProps,
 	type StatisticProps,
 	type StatisticSize,
+	TemplatedTranslationText,
 	Text,
 	TEXT_VARIANTS,
 	type TextProps,

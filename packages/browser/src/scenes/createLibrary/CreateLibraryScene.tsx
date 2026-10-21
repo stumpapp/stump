@@ -1,20 +1,19 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Alert, AlertDescription, AlertTitle } from '@stump/components'
 import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
-import { AlertCircle } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import { SceneContainer } from '@/components/container'
 import {
 	CreateOrUpdateLibrarySchema,
 	intoThumbnailConfig,
 } from '@/components/library/createOrUpdate'
-import { SteppedFormContext } from '@/components/steppedForm'
-import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
+import { SteppedFormSceneHeader } from '@/components/steppedForm'
 import { useConfetti } from '@/hooks/useConfetti'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
@@ -50,7 +49,7 @@ export default function CreateLibraryScene() {
 			libraries: { nodes: libraries },
 		},
 	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
-
+	const { t } = useTranslate()
 	const {
 		mutate: createLibrary,
 		isPending,
@@ -65,7 +64,6 @@ export default function CreateLibraryScene() {
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
 
-	const [formStep, setFormStep] = useState(1)
 	/**
 	 * A function which will handle the submission of the form, creating a new library
 	 * provided the form values. Note the transformation of certain values.
@@ -101,48 +99,32 @@ export default function CreateLibraryScene() {
 		[createLibrary],
 	)
 
-	/**
-	 * An effect to scroll to the top of the page if there is an error,
-	 * since the form is rather long and the error will render at the top
-	 */
 	useEffect(() => {
 		if (createError) {
-			window.scrollTo({ behavior: 'smooth', top: 0 })
+			toast.error(t('createLibraryScene.failedToCreateLibrary'), {
+				description: createError,
+			})
 		}
-	}, [createError])
+	}, [createError, t])
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<SteppedFormContext.Provider
-				value={{
-					currentStep: formStep,
-					localeBase: 'createLibraryScene',
-					setStep: setFormStep,
-					stepsBeforeReview: 3,
-				}}
-			>
-				<SteppedFormSceneHeader subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns" />
+			<SteppedFormSceneHeader
+				localeBase="createLibraryScene"
+				subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
+			/>
 
-				<SceneContainer>
-					<div className="gap-12 flex flex-col">
-						{createError && (
-							<Alert variant="destructive">
-								<AlertCircle />
-								<AlertTitle>Failed to create library</AlertTitle>
-								<AlertDescription>{createError}</AlertDescription>
-							</Alert>
-						)}
-
-						{libraries && (
-							<CreateLibraryForm
-								existingLibraries={libraries}
-								onSubmit={handleSubmit}
-								isLoading={isPending}
-							/>
-						)}
-					</div>
-				</SceneContainer>
-			</SteppedFormContext.Provider>
+			<SceneContainer>
+				<div className="gap-12 flex flex-col">
+					{libraries && (
+						<CreateLibraryForm
+							existingLibraries={libraries}
+							onSubmit={handleSubmit}
+							isLoading={isPending}
+						/>
+					)}
+				</div>
+			</SceneContainer>
 		</div>
 	)
 }

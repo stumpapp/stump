@@ -598,10 +598,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
-            "factor": {
-              "label": "Scale Factor"
-            }
+            "label": "Scale Factor",
+            "description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size"
           },
           "exact": {
             "description": "Resize the thumbnail to an exact size in pixels",
@@ -621,18 +619,12 @@
                 "width": "Width",
                 "height": "Height"
               }
-            },
-            "size": {
-              "label": "Size"
             }
           },
-          "format": {
-            "label": "Image Format",
-            "description": "The format of the generated thumbnail images"
-          },
-          "quality": {
-            "label": "Quality",
-            "description": "The quality of the generated thumbnail images, between 1 and 100"
+          "output": {
+            "description": "The format of the generated thumbnail images",
+            "format": "Image Format",
+            "quality": "Quality"
           }
         },
         "ignoreRules": {
@@ -779,8 +771,7 @@
         }
       },
       "heading": "Create Library",
-      "subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-      "subtitleLink": "relevant documentation"
+      "subtitle": "Libraries are used to group your books together"
     },
     "librarySettingsScene": {
       "options/scanning": {

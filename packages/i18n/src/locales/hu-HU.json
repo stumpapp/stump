@@ -274,13 +274,10 @@
             "label": "Engedélyezve",
             "description": "Bélyegképek generálása ehhez a könyvtárhoz"
           },
-          "format": {
-            "label": "Képformátum",
-            "description": "A generált bélyegképek formátuma"
-          },
-          "quality": {
-            "label": "Minőség",
-            "description": "A generált bélyegképek minősége, 0 és 1,0 között"
+          "output": {
+            "description": "A generált bélyegképek formátuma",
+            "format": "Képformátum",
+            "quality": "Minőség"
           }
         },
         "ignoreRules": {

@@ -2134,10 +2134,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "원본 크기에 지정한 배율을 적용합니다. 예를 들어 0.65를 입력하면 원본 크기의 65%인 썸네일을 생성합니다",
-            "factor": {
-              "label": "배율"
-            }
+            "label": "배율",
+            "description": "원본 크기에 지정한 배율을 적용합니다. 예를 들어 0.65를 입력하면 원본 크기의 65%인 썸네일을 생성합니다"
           },
           "exact": {
             "description": "썸네일을 픽셀 단위로 지정한 크기로 조절합니다",
@@ -2157,18 +2155,12 @@
                 "width": "너비",
                 "height": "높이"
               }
-            },
-            "size": {
-              "label": "크기"
             }
           },
-          "format": {
-            "label": "이미지 형식",
-            "description": "생성할 썸네일 이미지의 형식입니다"
-          },
-          "quality": {
-            "label": "품질",
-            "description": "생성할 썸네일 이미지의 품질입니다. 1에서 100 사이의 값을 사용합니다"
+          "output": {
+            "description": "생성할 썸네일 이미지의 형식입니다",
+            "format": "이미지 형식",
+            "quality": "품질"
           }
         },
         "ignoreRules": {

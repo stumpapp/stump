@@ -558,10 +558,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Escala de la vista en miniatura por un factor del tamaño original. Por ejemplo, 0.65 resultará en una vista en miniatura que es 65% del tamaño original",
-            "factor": {
-              "label": "Factor de escala"
-            }
+            "label": "Factor de escala",
+            "description": "Escala de la vista en miniatura por un factor del tamaño original. Por ejemplo, 0.65 resultará en una vista en miniatura que es 65% del tamaño original"
           },
           "exact": {
             "description": "Redimensionar la vista en miniatura a un tamaño exacto en píxeles",
@@ -581,18 +579,12 @@
                 "height": "Alto"
               }
             },
-            "size": {
-              "label": "Tamaño"
-            },
             "label": "Autoescalado"
           },
-          "format": {
-            "label": "Formato de imagen",
-            "description": "El formato de las imágenes de vista en miniatura generadas"
-          },
-          "quality": {
-            "label": "Calidad",
-            "description": "La calidad de las imágenes de vista en miniatura generadas, entre 1 y 100"
+          "output": {
+            "description": "El formato de las imágenes de vista en miniatura generadas",
+            "format": "Formato de imagen",
+            "quality": "Calidad"
           }
         },
         "ignoreRules": {

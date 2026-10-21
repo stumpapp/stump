@@ -2,7 +2,15 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { forwardRef } from 'react'
 
 import { Label } from '../form'
-import { RawCheckBox, RawCheckBoxProps, RawCheckBoxRef } from '../input/raw'
+import {
+	RawCheckBox,
+	RawCheckBoxProps,
+	RawCheckBoxRef,
+	RawInput,
+	RawInputProps,
+	RawTextArea,
+	RawTextAreaProps,
+} from '../input/raw'
 import { Text } from '../text'
 import { cn } from '../utils'
 
@@ -150,6 +158,102 @@ function Stat({ label, value, suffix }: StatProps) {
 	)
 }
 
+type InputRowProps = Omit<RawInputProps, 'size'> & {
+	label?: string
+	description?: string
+	actions?: ReactNode
+	errorMessage?: string
+	// i kept the isInvalid prop in case we want to show invalid without an error
+	isInvalid?: boolean
+}
+
+type RowControlProps = {
+	actions?: ReactNode
+	errorMessage?: string
+	children: ReactNode
+}
+
+function RowControl({ actions, errorMessage, children }: RowControlProps) {
+	return (
+		<div className="gap-1.5 lg:flex-1 flex w-full flex-col">
+			<div className="gap-2 flex items-center">
+				{children}
+				{actions && <div className="shrink-0">{actions}</div>}
+			</div>
+			{errorMessage && (
+				<Text size="xs" variant="danger">
+					{errorMessage}
+				</Text>
+			)}
+		</div>
+	)
+}
+
+function InputRow({
+	label,
+	description,
+	actions,
+	errorMessage,
+	isInvalid,
+	disabled,
+	className,
+	id,
+	...props
+}: InputRowProps) {
+	const resolvedInvalid = isInvalid ?? !!errorMessage
+
+	return (
+		<BaseRowComponent label={label} description={description} htmlFor={id} disabled={disabled}>
+			<RowControl actions={actions} errorMessage={errorMessage}>
+				<RawInput
+					id={id}
+					disabled={disabled}
+					aria-invalid={resolvedInvalid}
+					className={className}
+					{...props}
+				/>
+			</RowControl>
+		</BaseRowComponent>
+	)
+}
+
+type TextAreaRowProps = Omit<RawTextAreaProps, 'size'> & {
+	label?: string
+	description?: string
+	actions?: ReactNode
+	errorMessage?: string
+	// i kept the isInvalid prop in case we want to show invalid without an error
+	isInvalid?: boolean
+}
+
+function TextAreaRow({
+	label,
+	description,
+	actions,
+	errorMessage,
+	isInvalid,
+	disabled,
+	className,
+	id,
+	...props
+}: TextAreaRowProps) {
+	const resolvedInvalid = isInvalid ?? !!errorMessage
+
+	return (
+		<BaseRowComponent label={label} description={description} htmlFor={id} disabled={disabled}>
+			<RowControl actions={actions} errorMessage={errorMessage}>
+				<RawTextArea
+					id={id}
+					disabled={disabled}
+					aria-invalid={resolvedInvalid}
+					className={className}
+					{...props}
+				/>
+			</RowControl>
+		</BaseRowComponent>
+	)
+}
+
 const CheckboxRow = forwardRef<
 	RawCheckBoxRef,
 	RawCheckBoxProps & { label: string; description?: string }
@@ -170,6 +274,14 @@ const CheckboxRow = forwardRef<
 	)
 })
 CheckboxRow.displayName = 'CheckboxRow'
+
+function FooterRow({ children, className, ...props }: Omit<NewCardRowProps, 'value'>) {
+	return (
+		<BaseRowComponent className={cn('bg-black/5 dark:bg-black/10', className)} {...props}>
+			{children}
+		</BaseRowComponent>
+	)
+}
 
 const NewCardRoot = forwardRef<HTMLDivElement, NewCardProps>(
 	({ label, actions, description, tone = 'default', children, className, ...props }, ref) => {
@@ -215,19 +327,25 @@ NewCardRoot.displayName = 'NewCard'
 
 type NewCardComponent = typeof NewCardRoot & {
 	Row: typeof Row
+	Footer: typeof FooterRow
 	StatGroup: typeof StatGroup
 	Stat: typeof Stat
 	ListLabel: typeof ListLabel
 	Background: typeof CardBackground
 	CheckboxRow: typeof CheckboxRow
+	InputRow: typeof InputRow
+	TextAreaRow: typeof TextAreaRow
 }
 
 // TODO: maybe just rename to CardList or sm
 export const NewCard = Object.assign(NewCardRoot, {
 	Row,
+	Footer: FooterRow,
 	StatGroup,
 	Stat,
 	ListLabel,
 	Background: CardBackground,
 	CheckboxRow,
+	InputRow,
+	TextAreaRow,
 }) as NewCardComponent

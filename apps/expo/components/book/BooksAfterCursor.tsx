@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { View } from 'react-native'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { ListLabel } from '../ui'
@@ -39,6 +39,7 @@ export function BooksAfterCursor({ cursor }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { translate } = useTranslate()
 	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['booksAfterCursor', cursor, serverID],
@@ -64,7 +65,7 @@ export function BooksAfterCursor({ cursor }: Props) {
 
 	return (
 		<View className="-mx-4 gap-3">
-			<ListLabel className="ios:px-8 px-6">Up Next</ListLabel>
+			<ListLabel className="ios:px-8 px-6">{translate('shared.common.upNext')}</ListLabel>
 			<FlashList
 				data={nodes}
 				renderItem={({ item }) => <HorizontalBookListItem book={item} />}

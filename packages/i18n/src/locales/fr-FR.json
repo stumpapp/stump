@@ -303,17 +303,12 @@
                 "width": "Largeur",
                 "height": "Hauteur"
               }
-            },
-            "size": {
-              "label": "Taille"
             }
           },
-          "format": {
-            "label": "Format d'image",
-            "description": "Format des vignettes générées"
-          },
-          "quality": {
-            "label": "Qualité"
+          "output": {
+            "description": "Format des vignettes générées",
+            "format": "Format d'image",
+            "quality": "Qualité"
           }
         },
         "ignoreRules": {

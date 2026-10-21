@@ -620,10 +620,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "缩放缩略图以原始大小的一个系数。例如，0.65 将产生一个缩略图，为原始大小的65%",
-            "factor": {
-              "label": "缩放比例"
-            }
+            "label": "缩放比例",
+            "description": "缩放缩略图以原始大小的一个系数。例如，0.65 将产生一个缩略图，为原始大小的65%"
           },
           "exact": {
             "description": "将缩略图缩放到精确的像素大小",
@@ -643,18 +641,12 @@
                 "width": "宽度",
                 "height": "高度"
               }
-            },
-            "size": {
-              "label": "大小"
             }
           },
-          "format": {
-            "label": "图像格式",
-            "description": "生成的缩略图图像的格式"
-          },
-          "quality": {
-            "label": "质量",
-            "description": "生成的缩略图图像的质量，范围 1 到 100"
+          "output": {
+            "description": "生成的缩略图图像的格式",
+            "format": "图像格式",
+            "quality": "质量"
           }
         },
         "ignoreRules": {

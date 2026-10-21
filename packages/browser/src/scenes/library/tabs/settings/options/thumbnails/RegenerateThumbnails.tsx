@@ -1,10 +1,13 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Button, DropdownMenu, Label, Text } from '@stump/components'
+import { Button, DropdownMenu, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
+
+// TODO: leaving lints to remember to localize
 
 const mutation = graphql(`
 	mutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {
@@ -14,7 +17,7 @@ const mutation = graphql(`
 
 export default function RegenerateThumbnails() {
 	const { library } = useLibraryContext()
-
+	const { t } = useTranslate()
 	const { mutate } = useGraphQLMutation(mutation)
 
 	const regenerate = useCallback(
@@ -25,19 +28,15 @@ export default function RegenerateThumbnails() {
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Label>Regenerate thumbnails</Label>
-				<Text size="sm" variant="muted">
-					Either generate missing thumbnails or force the recreation of all thumbnails
-				</Text>
-			</div>
-
+		<NewCard.Row
+			label={t('thumbnailManagement.regenerateThumbnails.label')}
+			description={t('thumbnailManagement.regenerateThumbnails.description')}
+		>
 			<div>
 				<DropdownMenu
 					trigger={
 						<Button variant="outline">
-							Generate thumbnails
+							{t('thumbnailManagement.generate')}
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}
@@ -45,12 +44,12 @@ export default function RegenerateThumbnails() {
 						{
 							items: [
 								{
-									label: 'Create missing only',
+									label: t('thumbnailManagement.missingOnly'),
 									leftIcon: <ImagePlus className={iconStyle} />,
 									onClick: () => regenerate(false),
 								},
 								{
-									label: 'Force recreate all',
+									label: t('thumbnailManagement.everything'),
 									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),
@@ -61,6 +60,6 @@ export default function RegenerateThumbnails() {
 					align="start"
 				/>
 			</div>
-		</div>
+		</NewCard.Row>
 	)
 }

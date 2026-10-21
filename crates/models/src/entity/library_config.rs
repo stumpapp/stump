@@ -16,6 +16,10 @@ use crate::shared::{
 
 use super::library;
 
+// TODO: instead of default view + hide series shenanigans:
+// - active_tabs - ordered list of e.g. Books, Series, Oneshots, Authors, etc etc etc
+// - default_tab - one of the above
+
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "LibraryConfigModel")]

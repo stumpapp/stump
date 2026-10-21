@@ -2212,10 +2212,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "依原始尺寸的比例縮放縮圖。例如，0.65 會將縮圖縮放至原始尺寸的 65%",
-            "factor": {
-              "label": "縮放比例"
-            }
+            "label": "縮放比例",
+            "description": "依原始尺寸的比例縮放縮圖。例如，0.65 會將縮圖縮放至原始尺寸的 65%"
           },
           "exact": {
             "description": "將縮圖調整為指定的像素大小",
@@ -2235,18 +2233,12 @@
                 "width": "寬度",
                 "height": "高度"
               }
-            },
-            "size": {
-              "label": "大小"
             }
           },
-          "format": {
-            "label": "影像格式",
-            "description": "產生的縮圖影像的格式"
-          },
-          "quality": {
-            "label": "品質",
-            "description": "縮圖影像的品質，範圍為 1 到 100"
+          "output": {
+            "description": "產生的縮圖影像的格式",
+            "format": "影像格式",
+            "quality": "品質"
           }
         },
         "ignoreRules": {

@@ -529,9 +529,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "name": "Name",
             "description": "Description"
@@ -632,28 +629,6 @@
           "label": "Library Content",
           "description": "The type of content present in this library"
         },
-        "defaultLibraryView": {
-          "label": "Default Library View",
-          "description": "Configure which tab is shown by default when opening this library",
-          "hideSeriesView": {
-            "label": "Hide Series Tab",
-            "description": "Hide the series tab from the library navigation"
-          },
-          "skipBookOverview": {
-            "label": "Skip Book Overview",
-            "description": "Open the reader directly when selecting books in this library"
-          },
-          "options": {
-            "series": {
-              "label": "Series",
-              "description": "Show the series tab by default"
-            },
-            "books": {
-              "label": "Books",
-              "description": "Show the books tab by default"
-            }
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "Reading Settings",
@@ -694,10 +669,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
-            "factor": {
-              "label": "Scale Factor"
-            }
+          	"label": "Scale Factor",
+            "description": "Scale the thumbnail by a factor of the original size"
           },
           "exact": {
             "description": "Resize the thumbnail to an exact size in pixels",
@@ -710,25 +683,24 @@
           },
           "scaleDimension": {
             "label": "Auto Scaled",
-            "description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+            "description": "Set the exact size of one dimension and auto-scale the other",
             "dimension": {
               "label": "Dimension",
               "options": {
                 "width": "Width",
                 "height": "Height"
               }
-            },
-            "size": {
-              "label": "Size"
             }
           },
-          "format": {
-            "label": "Image Format",
-            "description": "The format of the generated thumbnail images"
+          "output": {
+           	"description": "The format and quality to use for the image (1-100)",
+          	"format": "Format",
+           	"quality": "Quality"
           },
-          "quality": {
-            "label": "Quality",
-            "description": "The quality of the generated thumbnail images, between 1 and 100"
+          "thumbnailColors": {
+	          "label": "Thumbnail Colors",
+	          "description": "Extract dominant colors from thumbnails for aesthetic-use throughout the app",
+						"requiredWhenGenerationOn": "This is required when generation is enabled"
           }
         },
         "ignoreRules": {
@@ -799,29 +771,38 @@
             "description": "If using KoReader, generate additional hashes in the format it expects"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organization",
-            "description": "Identify which pattern most closely matches the organization of your library",
-            "docs": [
-              "Not sure which to choose? Click",
-              "here",
-              "for more information.",
-              "You cannot change this setting later"
-            ],
-            "disabled": "You cannot change this setting"
-          },
-          "options": {
-            "label": "Library Pattern",
-            "description": "The setting which determines how Stump will organize your library",
-            "collectionPriority": {
-              "label": "Collection Priority",
-              "description": "Each folder at the top-most level of the library root is a single series"
-            },
-            "seriesPriority": {
-              "label": "Series Priority",
+        "organization": {
+        	"label": "Organization",
+         	"description": "This will inform Stump how to interpret your library during scans. These settings cannot be changed later",
+	        "filesystemPattern": {
+						"label": "Filesystem Pattern",
+		        "COLLECTION_BASED": {
+			        "label": "Top-Level Collections",
+			        "description": "Each folder at the top-most level of the library root is a single series"
+		        },
+						"SERIES_BASED": {
+						 	"label": "Recursive Series",
               "description": "Each folder at any level recursively is a single series"
+						}
+	        }
+        },
+        "viewOptions": {
+        	"label": "View Options",
+         	"defaultTab": {
+          	"label": "Default Tab",
+           	"description": "The tab which will open when you enter the library",
+   	        "options": {
+			      	"BOOKS": "Books",
+			      	"SERIES": "Series"
             }
+          },
+          "hideSeries": {
+            "label": "Hide Series Tab",
+            "description": "Hide the series tab from the library navigation"
+          },
+          "skipBookOverview": {
+            "label": "Skip Book Overview",
+            "description": "Open the reader directly when selecting books in this library"
           }
         }
       },
@@ -839,8 +820,7 @@
     },
     "createLibraryScene": {
       "heading": "Create Library",
-      "subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-      "subtitleLink": "relevant documentation",
+      "subtitle": "Libraries are used to group your books together",
       "form": {
         "stepLabel": "Step",
         "steps": [
@@ -866,9 +846,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "generateThumbnails": "Generate Thumbnails",
             "processThumbnailColors": "Process Thumbnail Colors",
@@ -896,7 +873,8 @@
         "buttons": {
           "confirm": "Create Library"
         }
-      }
+      },
+      "failedToCreateLibrary": "Failed to Create Library"
     },
     "fileExplorer": {
       "uploadModal": {
@@ -1034,13 +1012,7 @@
       },
       "options/thumbnails": {
         "title": "Thumbnails",
-        "description": "Settings and management options for thumbnails in this library",
-        "sections": {
-          "management": {
-            "heading": "Manage Thumbnails",
-            "description": "Manage the existing thumbnails for this library"
-          }
-        }
+        "description": "Settings and management options for thumbnails in this library"
       },
       "integrations/analysis": {
         "title": "Analysis",
@@ -1272,6 +1244,27 @@
         "failedToUpdateCompletion": "Failed to update book completion status"
       }
     },
+    "thumbnailManagement": {
+    	"changeThumbnail": {
+     		"label": "Change Thumbnail",
+       	"descriptionLibrary": "Choose a different thumbnail for this library"
+     	},
+      "deleteThumbnails": {
+      	"label": "Delete Thumbnails",
+       	"descriptionLibrary": "Permanently delete all generated thumbnails for this library"
+      },
+	    "regenerateThumbnails": {
+	    	"label": "Regenerate Thumbnails",
+				"description": "Either generate missing thumbnails or force the recreation of all thumbnails"
+	    },
+			"processColors": {
+				"label": "Extract Thumbnail Colors",
+				"description": "The dominant colors from thumbnails for aesthetic-use throughout the app"
+			},
+			"generate": "Generate",
+			"everything": "Everything",
+			"missingOnly": "Missing Only"
+    },
     "createOrUpdateSmartListForm": {
       "validation": {
         "nameTooShort": "Name must be at least 2 characters",
@@ -1450,9 +1443,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "name": "Name",
             "description": "Description",
@@ -1463,7 +1453,11 @@
         "buttons": {
           "confirm": "Create List"
         }
-      }
+      },
+      "failedToCreateSmartList": "Failed to Create Smart List"
+    },
+    "steppedForm": {
+      "sheetTitle": "Steps"
     },
     "createOrUpdateApiKey": {
       "validation": {
@@ -2984,6 +2978,8 @@
         "confirm": "Delete {{type}}",
         "typeToConfirm": "Type {{name}} to confirm:"
       },
+      "documentation": "Documentation",
+      "extract": "Extract",
       "extend": "Extend",
       "experimentalDisclaimer": {
         "title": "This feature is experimental",
@@ -3030,6 +3026,7 @@
       "returnHome": "Return Home",
       "run": "Run",
       "tryAgain": "Try Again",
+      "management": "Management",
       "notConfigured": "Not Configured",
       "notReady": "This feature is not ready",
       "notUsedYet": "Not Used Yet",
@@ -3073,9 +3070,12 @@
       "list": "List",
       "lastCompleted": "Last Completed",
       "name": "Name",
+      "next": "Next",
+      "no": "No",
       "notAvailable": "Not Available",
       "ok": "Okay",
       "options": "Options",
+      "output": "Output",
       "page": "Page",
       "pages": "Pages",
       "pageXOfY": "Page {{current}} of {{total}}",
@@ -3093,7 +3093,9 @@
       "select": "Select",
       "settings": "Settings",
       "servers": "Servers",
+      "size": "Size",
       "test": "Test",
+      "thisActionCannotBeUndone": "Are you sure? This action cannot be undone",
       "thisBook": "this book",
       "thisServer": "this server",
       "truncatedText": "{{text}}...",
@@ -3117,7 +3119,8 @@
 	      "day": "Day",
 				"dateAndTime": "Date and Time",
 	      "month": "Month"
-      }
+      },
+      "yes": "Yes"
     },
     "libraryType": {
       "BOOK": "Books",
@@ -3654,6 +3657,7 @@
       }
     },
     "serverSettings": {
+    	"title": "Server Settings",
       "updateAvailable": {
         "message": "Your server is not up to date. Please update to the latest version!"
       },
@@ -3665,10 +3669,7 @@
         "build": "Build",
         "nonStableChannel": {
           "title": "You are running a non-stable build of Stump",
-          "description": [
-            "It looks like you are running the",
-            "build channel"
-          ]
+          "description": "It looks like you are running the {{channelName}} build channel"
         },
         "debugInfo": {
           "label": "Debug Information",

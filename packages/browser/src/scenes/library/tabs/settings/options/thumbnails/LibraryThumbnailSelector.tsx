@@ -1,19 +1,18 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Button, Dialog, Label, Text } from '@stump/components'
+import { Button, Dialog, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { useTranslate } from '@/hooks/useTranslate'
 import BookPageGrid from '@/scenes/book/settings/BookPageGrid'
 import { useLibraryContext } from '@/scenes/library/context'
 import SeriesBookGrid, { SelectedBook } from '@/scenes/series/tabs/settings/SeriesBookGrid'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'
-
-// TODO: Redesign this ugly shit
 
 const updateMutation = graphql(`
 	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
@@ -46,6 +45,7 @@ export default function LibraryThumbnailSelector() {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const { library } = useLibraryContext()
+	const { t, translate } = useTranslate()
 
 	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
@@ -79,6 +79,7 @@ export default function LibraryThumbnailSelector() {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
+				// TODO(i8n): localize
 				toast.error('Failed to upload image')
 			}
 		},
@@ -93,6 +94,7 @@ export default function LibraryThumbnailSelector() {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
+			// TODO(i8n): localize
 			toast.error('Failed to update thumbnail')
 		}
 	}, [patchThumbnail, selectedBook, page, library.id])
@@ -122,6 +124,7 @@ export default function LibraryThumbnailSelector() {
 		}
 	}
 
+	// TODO(i8n): localize
 	const renderDescription = () => {
 		if (selectedBook) {
 			return 'Choose a page from this book to use as the new thumbnail'
@@ -153,14 +156,11 @@ export default function LibraryThumbnailSelector() {
 	}
 
 	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Label>Select thumbnail</Label>
-				<Text size="sm" variant="muted">
-					Choose a different thumbnail for this library, either from a book or upload a custom one
-				</Text>
-			</div>
-
+		<NewCard.Row
+			className="gap-4 flex flex-col"
+			label={t('thumbnailManagement.changeThumbnail.label')}
+			description={t('thumbnailManagement.changeThumbnail.descriptionLibrary')}
+		>
 			<div>
 				<EditThumbnailDropdown
 					onChooseSelector={() => setIsOpen(true)}
@@ -182,18 +182,18 @@ export default function LibraryThumbnailSelector() {
 					<Suspense>{renderContent()}</Suspense>
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedSeries || !selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{translate('shared.common.confirm')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
 			</Dialog>
-		</div>
+		</NewCard.Row>
 	)
 }

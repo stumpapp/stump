@@ -310,10 +310,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Küçük resmi orijinal boyutunun belirli bir katı oranında küçültün. Örneğin, 0.65 değeri, orijinal boyutun %65'i kadar bir küçük resim oluşturur",
-            "factor": {
-              "label": "Ölçek Faktörü"
-            }
+            "label": "Ölçek Faktörü",
+            "description": "Küçük resmi orijinal boyutunun belirli bir katı oranında küçültün. Örneğin, 0.65 değeri, orijinal boyutun %65'i kadar bir küçük resim oluşturur"
           },
           "exact": {
             "description": "Küçük resmi tam olarak piksel cinsinden belirtilen boyuta getirin",
@@ -333,18 +331,12 @@
                 "width": "Genişlik",
                 "height": "Yükseklik"
               }
-            },
-            "size": {
-              "label": "Boyut"
             }
           },
-          "format": {
-            "label": "Görüntü formatı",
-            "description": "Oluşturulan küçük resim formatı"
-          },
-          "quality": {
-            "label": "Kalite",
-            "description": "Oluşturulan küçük resim kalitesi, 1 ile 100 arası"
+          "output": {
+            "description": "Oluşturulan küçük resim formatı",
+            "format": "Görüntü formatı",
+            "quality": "Kalite"
           }
         },
         "ignoreRules": {

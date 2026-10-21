@@ -16,11 +16,8 @@ import HideScrollbarToggle from './HideScrollbarToggle'
 import HomeArrangementPreference from './HomeArrangementPreference'
 import InterfaceRoundnessPreference from './InterfaceRoundnessPreference'
 import LiveRefetchToggle from './LiveRefetchToggle'
-import MaxWidthPreference from './MaxWidthPreference'
 import { NavigationArrangement } from './navigation-arrangement'
-import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
-import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
 import ThemeSelect from './ThemeSelect'
 import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 
@@ -80,9 +77,7 @@ export default function AppearanceSettingsScene() {
 						label={t(getKey('navigation.title'))}
 						description={t(getKey('navigation.description'))}
 					>
-						<PrimaryNavigationPreference />
-						<DoubleSidebarToggle />
-						<ReplacePrimarySidebarToggle />
+						{/*TODO: support sidebar variant preferences*/}
 						<Suspense>
 							<NavigationArrangement />
 						</Suspense>
@@ -97,7 +92,6 @@ export default function AppearanceSettingsScene() {
 						description={t(getKey('displayAndSpacing.description'))}
 					>
 						<DisplaySpacingPreference />
-						<MaxWidthPreference />
 					</NewCard>
 				</div>
 

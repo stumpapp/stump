@@ -1,5 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { NavigationMenu } from '@stump/components'
+import { cn } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,
 	graphql,
@@ -9,26 +9,22 @@ import {
 import { Book, Home } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
-import { useDimensionsRef } from 'rooks'
 import { match } from 'ts-pattern'
 
-import { useAppContext } from '@/context'
-import { usePreferences } from '@/hooks'
+import { useAppContext, useRouterContext } from '@/context'
+import { useTheme } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
-import {
-	BookClubNavigationItem,
-	LibraryNavigationItem,
-	SettingsNavigationItem,
-	SmartListNavigationItem,
-} from './sections'
-import UserMenu from './sections/UserMenu'
-import TopBarNavLink from './TopBarNavLink'
+import UserMenu from '../../UserMenu'
+import { Sidebar, SidebarProps, useSidebar } from './base'
+import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
+import SideBarButtonLink from './SideBarButtonLink'
+import SideBarFooter from './SideBarFooter'
 
 const query = graphql(`
-	query TopNavigation {
+	query SideBarQuery {
 		me {
 			id
 			preferences {
@@ -50,11 +46,13 @@ const query = graphql(`
 	}
 `)
 
-export default function TopNavigation() {
-	const paths = usePaths()
-	const location = useLocation()
+type Props = Pick<SidebarProps, 'variant' | 'collapsible'>
 
-	const [ref, size] = useDimensionsRef()
+export default function AppSidebar({ variant = 'sidebar', collapsible = 'offcanvas' }: Props) {
+	const location = useLocation()
+	const paths = usePaths()
+
+	const { basePath } = useRouterContext()
 	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
@@ -66,9 +64,8 @@ export default function TopNavigation() {
 	} = useSuspenseGraphQL(query, sdk.cacheKey('sidebar'))
 
 	const { checkPermission } = useAppContext()
-	const {
-		preferences: { layoutMaxWidthPx },
-	} = usePreferences()
+	const { shouldUseGradient } = useTheme()
+	const { isMobile } = useSidebar()
 
 	const checkSectionPermission = useCallback(
 		(variant: SystemArrangement) => {
@@ -83,54 +80,49 @@ export default function TopNavigation() {
 		[checkPermission],
 	)
 
-	// TODO: Might need to pass a position prop to some of the menus in order to adjust
-	// their sizing accordingly
-
 	const prefetchHome = usePrefetchHomeScene()
 
 	const renderSystemSection = useCallback(
 		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
 				.with(SystemArrangement.Home, () => (
-					<TopBarNavLink
-						key="home-topbar-navlink"
+					<SideBarButtonLink
+						key="home-sidebar-navlink"
 						to={paths.home()}
-						isActive={location.pathname === '/'}
+						isActive={location.pathname === basePath + '/'}
 						onMouseEnter={() => prefetchHome()}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
 						{translate('shared.common.home')}
-					</TopBarNavLink>
+					</SideBarButtonLink>
 				))
 				.with(SystemArrangement.Explore, () => (
-					<TopBarNavLink
-						key="explore-topbar-navlink"
+					<SideBarButtonLink
+						key="explore-sidebar-navlink"
 						to={paths.bookSearch()}
 						isActive={location.pathname === paths.bookSearch()}
 					>
 						<Book className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.books')}
-					</TopBarNavLink>
+					</SideBarButtonLink>
 				))
 				.with(SystemArrangement.Libraries, () => (
-					<LibraryNavigationItem
-						key="libraries-topbar-navlink"
-						links={config.links}
-						width={size?.width}
-					/>
+					<Suspense key="libraries-sidebar-navlink">
+						<LibrarySideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
 				))
 				.with(SystemArrangement.SmartLists, () => (
-					<Suspense key="smartlists-topbar-navlink">
-						<SmartListNavigationItem links={config.links} width={size?.width} />
+					<Suspense key="smartlists-sidebar-navlink">
+						<SmartListSideBarSection links={config.links} />
 					</Suspense>
 				))
 				.with(SystemArrangement.BookClubs, () => (
-					<Suspense key="book-clubs-topbar-navlink">
-						<BookClubNavigationItem links={config.links} width={size?.width} />
+					<Suspense key="book-clubs-sidebar-navlink">
+						<BookClubSideBarSection isMobile={isMobile} links={config.links} />
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, size, prefetchHome, paths, translate],
+		[t, location.pathname, prefetchHome, isMobile, paths, basePath, translate],
 	)
 
 	const sections = useMemo(
@@ -139,42 +131,35 @@ export default function TopNavigation() {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
-							const child = renderSystemSection(config)
-							if (!checkSectionPermission(config.variant)) {
-								return null
-							}
-							return child
-						})
+						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
+							checkSectionPermission(config.variant) ? renderSystemSection(config) : null,
+						)
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
 		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
 
+	// TODO: rail looks terrible, if i ever expose it it needs work
 	return (
-		<div className="h-12 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
-			<div
-				className="h-12 mx-auto flex items-center justify-between"
-				style={{
-					maxWidth: layoutMaxWidthPx ? `${layoutMaxWidthPx}px` : undefined,
-				}}
-			>
-				<NavigationMenu className="z-100 h-full">
-					<div ref={ref}>
-						<NavigationMenu.List className="pl-4 w-full">{sections}</NavigationMenu.List>
-					</div>
-				</NavigationMenu>
-
-				<div className="gap-x-2 flex h-full shrink-0 items-center">
-					<NavigationMenu className="pr-4 z-100 h-full" viewPortProps={{ align: 'right' }}>
-						<NavigationMenu.List className="w-full">
-							<SettingsNavigationItem />
-							<UserMenu />
-						</NavigationMenu.List>
-					</NavigationMenu>
+		<Sidebar
+			variant={variant}
+			collapsible={collapsible}
+			className={cn('gap-2 px-2 py-2', {
+				'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to': shouldUseGradient,
+			})}
+		>
+			<Sidebar.Content className="gap-1">
+				<div>
+					<UserMenu />
+					<div className="h-1" />
 				</div>
-			</div>
-		</div>
+				{sections}
+			</Sidebar.Content>
+
+			<SideBarFooter />
+
+			{variant === 'sidebar' && <Sidebar.Rail />}
+		</Sidebar>
 	)
 }

@@ -1,5 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { parseGraphQLPercentageDecimal } from '@stump/client'
+import { parseGraphQLPercentageDecimal, useSDK } from '@stump/client'
 import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
@@ -27,6 +27,7 @@ import { ContextMenu } from '../ui/context-menu/context-menu'
 import { SessionWithEventsTimeline } from './events'
 import { ReadingSessionEditSheet } from './ReadingSessionEditSheet'
 import { useReadingSessionMutations } from './useReadingSessionMutations'
+import { formatTimeRange } from './utils'
 
 const fragment = graphql(`
 	fragment ReadingSessionCard on SessionWithEvents {
@@ -124,6 +125,7 @@ export function ReadingSessionCard({
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { isTablet } = useDisplay()
+	const { sdk } = useSDK()
 	const data = useFragment(fragment, fragmentRef)
 	const { session, events } = data
 	const { confirmDeleteSession, confirmExtendSession } = useReadingSessionMutations()
@@ -149,13 +151,20 @@ export function ReadingSessionCard({
 	const endDate = new Date(session.updatedAt)
 	const endPage = session.endPage ?? session.endLocator?.locations?.position ?? '??'
 
-	const timeRange = `${intlFormat(startDate, {
-		hour: 'numeric',
-		minute: 'numeric',
-	})} - ${intlFormat(endDate, {
-		hour: 'numeric',
-		minute: 'numeric',
-	})}`
+	const elapsedSeconds = session.elapsedSeconds ?? 0
+	const timeRange = formatTimeRange(
+		{
+			date: startDate,
+			...(feedType === 'events' && groupedBy === 'month'
+				? { opts: { month: 'short', day: 'numeric' } }
+				: {}),
+		},
+		{
+			date: endDate,
+		},
+		elapsedSeconds,
+		translate,
+	)
 
 	const bookmarksCount = events.filter((e) => e.__typename === 'Bookmark').length
 	const highlightsCount = events.filter(
@@ -189,6 +198,10 @@ export function ReadingSessionCard({
 								<ThumbnailImage
 									source={{
 										uri: thumbnailUrl,
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
 									}}
 									size={{ height: 80 / thumbnailRatio, width: 80 }}
 									placeholderData={thumbnailData}
@@ -267,30 +280,21 @@ export function ReadingSessionCard({
 				</Card>
 			)
 		} else {
-			const description =
-				groupedBy === 'month'
-					? `${intlFormat(startDate, {
-							hour: 'numeric',
-							minute: 'numeric',
-							month: 'short',
-							day: 'numeric',
-						})} - ${intlFormat(endDate, {
-							hour: 'numeric',
-							minute: 'numeric',
-						})}`
-					: timeRange
-
 			return (
 				<Card
 					label={bookName}
 					className="relative !overflow-visible"
 					backgroundClassName="!overflow-visible"
-					description={description}
+					description={timeRange}
 				>
 					<View className="-top-8 -right-2 absolute z-10">
 						<ThumbnailImage
 							source={{
 								uri: thumbnailUrl,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
 							}}
 							size={{ height: 75 / thumbnailRatio, width: 75 }}
 							placeholderData={thumbnailData}
@@ -320,10 +324,9 @@ export function ReadingSessionCard({
 			{feedType === 'sessions' && (
 				<View className="px-3 flex-row items-center justify-between">
 					<Text className="text-foreground-muted font-medium">{timeRange}</Text>
-
-					<Text className="text-foreground-muted">
-						{session?.elapsedSeconds != null ? formatHumanDuration(session.elapsedSeconds) : '??'}
-					</Text>
+					{elapsedSeconds > 0 && (
+						<Text className="text-foreground-muted">{formatHumanDuration(elapsedSeconds)}</Text>
+					)}
 				</View>
 			)}
 

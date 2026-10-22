@@ -3122,7 +3122,7 @@
 				"daysCount_other": "{{count}} Days",
 				"dateAndTime": "Date and Time",
 	      "month": "Month",
-				"dateRange":  "{{startDate}} - {{endDate}}"
+				"dateRange": "{{startDate}} - {{endDate}}"
       }
     },
     "libraryType": {
@@ -3480,6 +3480,10 @@
       	"label": "Extend Session",
        	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
         "failedToExtend": "Failed to Extend Session"
+      },
+      "emptyState": {
+      	"label": "No Activity",
+       "description": "Once you start reading, come back here to see your timeline"
       }
     },
     "readingJournal": {

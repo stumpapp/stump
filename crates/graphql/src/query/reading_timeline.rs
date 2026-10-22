@@ -3,11 +3,12 @@ use models::{
 	entity::reading_session, services::reading_timeline::sessions_with_events,
 	shared::ordering::OrderDirection,
 };
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	object::reading_timeline::{GlobalReadingTimelineNode, SessionWithEvents},
+	order::order_spec,
 	pagination::{CursorPaginatedResponse, CursorPagination, CursorPaginationInfo},
 };
 
@@ -33,18 +34,48 @@ impl ReadingTimelineQuery {
 			.and_then(|s| s.parse::<i32>().ok());
 		let limit = pagination.limit;
 
-		let mut query = reading_session::Entity::find()
-			.filter(reading_session::Column::UserId.eq(&user.id))
-			.order_by(reading_session::Column::Id, order.into());
-		// ^ ids serial so should be fine to sort by it instead of date
+		let spec = order_spec![
+			(reading_session::Column::CreatedAt, order.into()),
+			(reading_session::Column::Id, order.into()),
+		];
+		// ^ note for posterity: originally i only sorted by ids because i was really only
+		// considering the happy path of sessions are created sequentially as you read
+		// in stump readers. this ofc is not true when considering any kind of external
+		// sync, even for stump offline-to-online sync, because session creation is
+		// not strictly ordered during those mutations. id sort is now just a fallback
+		// if the stamps are eq
+		//
 		// note though if you are a long-time stumper like me and have gone through the
-		// pre-0.1.0 migration then it might be a little funky. but largely the above is
-		// true otherwise for folks coming after 0.1.0
+		// pre-0.1.0 migration then it might be a little funky. some dates might be
+		// the "default" start time of january 1970 lol from a previous migration which
+		// redid the repr of sessions
+
+		let mut query = spec.apply(
+			reading_session::Entity::find()
+				.filter(reading_session::Column::UserId.eq(&user.id)),
+		);
+
 		if let Some(after) = cursor {
-			if order == OrderDirection::Asc {
-				query = query.filter(reading_session::Column::Id.gt(after));
-			} else {
-				query = query.filter(reading_session::Column::Id.lt(after));
+			let anchor = reading_session::Entity::find_by_id(after)
+				.filter(reading_session::Column::UserId.eq(&user.id))
+				.one(conn)
+				.await?;
+
+			match anchor {
+				Some(anchor) => {
+					query = query.filter(spec.sorts_after(&[
+						anchor.get(reading_session::Column::CreatedAt),
+						anchor.get(reading_session::Column::Id),
+					]));
+				},
+				// this realistically shouldn't happen, a deleted session shouldn't be the cursor but
+				// in the event it does just fall back to id filtering
+				None => {
+					query = query.filter(match order {
+						OrderDirection::Asc => reading_session::Column::Id.gt(after),
+						OrderDirection::Desc => reading_session::Column::Id.lt(after),
+					});
+				},
 			}
 		}
 

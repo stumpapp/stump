@@ -1,5 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { parseGraphQLPercentageDecimal } from '@stump/client'
+import { parseGraphQLPercentageDecimal, useSDK } from '@stump/client'
 import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
@@ -119,6 +119,7 @@ export function ReadingSessionCard({
 	groupedBy = 'day',
 }: Props) {
 	const router = useRouter()
+	const { sdk } = useSDK()
 	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
@@ -189,6 +190,10 @@ export function ReadingSessionCard({
 								<ThumbnailImage
 									source={{
 										uri: thumbnailUrl,
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
 									}}
 									size={{ height: 80 / thumbnailRatio, width: 80 }}
 									placeholderData={thumbnailData}
@@ -291,6 +296,10 @@ export function ReadingSessionCard({
 						<ThumbnailImage
 							source={{
 								uri: thumbnailUrl,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
 							}}
 							size={{ height: 75 / thumbnailRatio, width: 75 }}
 							placeholderData={thumbnailData}

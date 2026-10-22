@@ -3116,7 +3116,8 @@
       "time": {
 	      "day": "Day",
 				"dateAndTime": "Date and Time",
-	      "month": "Month"
+	      "month": "Month",
+				"dateRange": "{{startDate}} - {{endDate}}"
       }
     },
     "libraryType": {

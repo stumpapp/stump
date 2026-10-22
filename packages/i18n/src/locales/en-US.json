@@ -56,7 +56,8 @@
       "settings": "Settings",
       "browse": "Browse",
       "clubs": "Clubs",
-      "activity": "Activity"
+      "activity": "Activity",
+      "stats": "Stats"
     },
     "localLibrary": {
       "title": "Local Library",
@@ -3072,6 +3073,8 @@
       "grid": "Grid",
       "list": "List",
       "lastCompleted": "Last Completed",
+      "less": "Less",
+      "more": "More",
       "name": "Name",
       "notAvailable": "Not Available",
       "ok": "Okay",
@@ -3115,6 +3118,8 @@
       "preferences": "Preferences",
       "time": {
 	      "day": "Day",
+		    "daysCount_one": "{{count}} Day",
+				"daysCount_other": "{{count}} Days",
 				"dateAndTime": "Date and Time",
 	      "month": "Month",
 				"dateRange": "{{startDate}} - {{endDate}}"
@@ -3484,6 +3489,34 @@
     "readingJournal": {
     	"editorPlaceholder": "Write some thoughts down...",
     	"failedToSaveEntry": "Failed to Save Journal Entry"
+    },
+    "readingStats": {
+      "title": "Stats",
+      "range": {
+        "week": "This Week",
+        "month": "This Month",
+        "year": "This Year",
+        "lifetime": "Lifetime"
+      },
+      "activeDays_one": "You read on {{count}} day",
+      "activeDays_other": "You read on {{count}} days",
+      "dailyActivity": "Your Days",
+      "streaks": {
+        "current": "Current Streak",
+        "longest": "Longest Streak"
+      },
+      "dayOfWeek": {
+        "title": "By Weekday",
+        "description": "Average time read on each day of the week"
+      },
+      "booksFinished": "Books Finished",
+      "avgPerActiveDay": "Avg. per Day",
+      "avgPerSession": "Avg. Session Time",
+      "timeToFinish": {
+        "title": "Time to Finish",
+        "books_one": "Based on {{count}} book",
+        "books_other": "Based on {{count}} books"
+      }
     },
     "errors": {
       "unknown": "Unknown Error",

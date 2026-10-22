@@ -1,37 +1,26 @@
-import { Button, ButtonOrLink, cn, Label } from '@stump/components'
-import { ArrowLeft, Home } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { ButtonOrLink, cn, Label } from '@stump/components'
+import { ArrowLeft } from 'lucide-react'
+import { useLocation } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
-import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTranslate } from '@/hooks/useTranslate'
-import paths, { usePaths } from '@/paths'
+import { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
 import { createRouteGroups } from './routes'
 
 export default function BookClubSettingsSideBar() {
 	const location = useLocation()
-	const navigate = useNavigate()
 	const routerPaths = usePaths()
 
 	const { bookClub } = useBookClubContext()
 	const { t } = useTranslate()
-	const {
-		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
-	} = usePreferences()
+
 	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(bookClub.slug) })
 
 	return (
-		<div
-			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
-				primaryNavigationMode === 'TOPBAR'
-					? 'top-12 fixed z-50 h-screen border-r'
-					: 'top-0 fixed z-50 h-screen border-r',
-			)}
-		>
+		<div className="top-0 w-48 px-2 py-4 sticky z-40 flex h-(--main-height) shrink-0 flex-col self-start border-r border-border bg-background text-foreground">
 			<div className="gap-4 flex h-full grow flex-col">
 				<div className="space-x-2 flex items-center">
 					<ButtonOrLink
@@ -84,21 +73,6 @@ export default function BookClubSettingsSideBar() {
 						)
 					})
 					.filter(Boolean)}
-				<div className="flex-1" />
-
-				{enableReplacePrimarySidebar && (
-					<div className="shrink-0">
-						<Button
-							title="Go home"
-							variant="ghost"
-							size="icon"
-							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
-							onClick={() => navigate(paths.home())}
-						>
-							<Home className="h-4 w-4 -scale-x-[1] transform" />
-						</Button>
-					</div>
-				)}
 			</div>
 		</div>
 	)

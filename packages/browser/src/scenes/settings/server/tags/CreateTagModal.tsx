@@ -16,6 +16,8 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO: this should probably be a create many that allows pasting a csv basically
+
 export default function CreateTagModal() {
 	const [isOpen, setIsOpen] = useState(false)
 	const [name, setName] = useState('')

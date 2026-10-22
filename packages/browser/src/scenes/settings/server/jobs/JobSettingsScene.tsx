@@ -4,7 +4,6 @@ import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-import ContentContainer from '@/components/container/ContentContainer.tsx'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -19,7 +18,7 @@ export default function JobSettingsScene() {
 	const canManageJobs = checkPermission(UserPermission.ManageJobs)
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/jobs.helmet')}</title>
 			</Helmet>
@@ -29,37 +28,35 @@ export default function JobSettingsScene() {
 					through the table on mobile would prolly suck
 				*/}
 
-			<ContentContainer>
-				<div className="gap-4 flex flex-col">
+			<div className="gap-4 flex flex-col">
+				<div>
+					<Heading size="sm">{t('settingsScene.server/jobs.sections.scheduling.title')}</Heading>
+					<Text size="sm" variant="muted" className="mt-1">
+						{t('settingsScene.server/jobs.sections.scheduling.description')}
+					</Text>
+				</div>
+
+				<Suspense>
+					<JobScheduler />
+				</Suspense>
+			</div>
+
+			<div className="gap-4 flex flex-col">
+				<div className="flex items-end justify-between">
 					<div>
-						<Heading size="sm">{t('settingsScene.server/jobs.sections.scheduling.title')}</Heading>
+						<Heading size="sm">{t('settingsScene.server/jobs.sections.history.title')}</Heading>
 						<Text size="sm" variant="muted" className="mt-1">
-							{t('settingsScene.server/jobs.sections.scheduling.description')}
+							{t('settingsScene.server/jobs.sections.history.description')}
 						</Text>
 					</div>
 
-					<Suspense>
-						<JobScheduler />
-					</Suspense>
+					{canManageJobs && <DeleteJobHistoryConfirmation />}
 				</div>
 
-				<div className="gap-4 flex flex-col">
-					<div className="flex items-end justify-between">
-						<div>
-							<Heading size="sm">{t('settingsScene.server/jobs.sections.history.title')}</Heading>
-							<Text size="sm" variant="muted" className="mt-1">
-								{t('settingsScene.server/jobs.sections.history.description')}
-							</Text>
-						</div>
-
-						{canManageJobs && <DeleteJobHistoryConfirmation />}
-					</div>
-
-					<Suspense>
-						<JobTable />
-					</Suspense>
-				</div>
-			</ContentContainer>
+				<Suspense>
+					<JobTable />
+				</Suspense>
+			</div>
 		</SceneContainer>
 	)
 }

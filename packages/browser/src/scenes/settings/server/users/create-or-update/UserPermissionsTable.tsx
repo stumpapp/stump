@@ -110,7 +110,8 @@ export default function UserPermissionsTable() {
 					{renderDescription()}
 				</Text>
 			</div>
-			<div className="h-96 overflow-auto rounded-lg border border-border">
+			{/*relative position fixes a really old bug which drives the screen to be super duper long*/}
+			<div className="h-96 relative overflow-auto rounded-lg border border-border">
 				<table className="w-full">
 					<tbody>
 						{table.getRowModel().rows.map((row) => {

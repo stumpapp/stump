@@ -7,7 +7,7 @@ import {
 	UserPermission,
 } from '@stump/graphql'
 import { Book, Home } from 'lucide-react'
-import { Suspense, useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { match } from 'ts-pattern'
 
@@ -65,7 +65,13 @@ export default function AppSidebar({ variant = 'sidebar', collapsible = 'offcanv
 
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
-	const { isMobile } = useSidebar()
+	const { isMobile, setOpenMobile } = useSidebar()
+
+	// anytime we navigate on mobile we close the sidebar (which is more like a
+	// burger+sheet for mobile)
+	useEffect(() => {
+		setOpenMobile(false)
+	}, [location.pathname, setOpenMobile])
 
 	const checkSectionPermission = useCallback(
 		(variant: SystemArrangement) => {

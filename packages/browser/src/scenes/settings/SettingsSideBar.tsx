@@ -1,28 +1,20 @@
-import { cn, IconButton, Label } from '@stump/components'
-import { Home } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { cn, Label } from '@stump/components'
 
 import { useRouterContext } from '@/context'
-import { usePreferences, useTheme } from '@/hooks'
+import { useTheme } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'
-import { usePathActive, usePaths } from '@/paths'
+import { usePathActive } from '@/paths'
 import { useAppStore } from '@/stores'
 
 import SettingsSideBarLink from './SettingsSideBarLink'
 import { useSettingsRoutes } from './useSettingsRoutes'
 
 export default function SettingsSideBar() {
-	const navigate = useNavigate()
-	const paths = usePaths()
-
 	const isActive = usePathActive()
 
 	const { basePath } = useRouterContext()
 	const { t } = useTranslate()
 	const platform = useAppStore((store) => store.platform)
-	const {
-		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
-	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
 
 	const { groups } = useSettingsRoutes()
@@ -30,16 +22,10 @@ export default function SettingsSideBar() {
 	return (
 		<div
 			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
-				primaryNavigationMode === 'TOPBAR'
-					? 'top-12 fixed z-50 h-screen border-r'
-					: 'top-0 fixed z-50 h-screen border-r',
+				'top-0 w-48 px-2 py-4 sticky z-40 flex h-(--main-height) shrink-0 flex-col self-start border-r border-border bg-background text-foreground',
 				{
 					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
-				},
-				{
-					'top-8.5': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
 				},
 			)}
 		>
@@ -81,20 +67,6 @@ export default function SettingsSideBar() {
 						)
 					})
 					.filter(Boolean)}
-				<div className="flex-1" />
-
-				{enableReplacePrimarySidebar && (
-					<div className="shrink-0">
-						<IconButton
-							title="Go home"
-							variant="ghost"
-							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
-							onClick={() => navigate(paths.home())}
-						>
-							<Home className="h-4 w-4 -scale-x-[1] transform" />
-						</IconButton>
-					</div>
-				)}
 			</div>
 		</div>
 	)

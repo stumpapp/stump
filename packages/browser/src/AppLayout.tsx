@@ -1,5 +1,5 @@
 import { useAuthQuery, useSDK } from '@stump/client'
-import { cn, cx } from '@stump/components'
+import { cn } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
@@ -8,12 +8,12 @@ import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
 import { useErrorBoundary } from 'react-error-boundary'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { useMediaMatch, useWindowSize } from 'rooks'
+import { useWindowSize } from 'rooks'
 import { toast } from 'sonner'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
-import { MobileTopBar, SideBar, TopBar } from '@/components/navigation'
+import { AppSidebar, Sidebar } from '@/components/navigation/sidebar'
 import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
@@ -26,7 +26,6 @@ export function AppLayout() {
 	const navigate = useNavigate()
 
 	const mainRef = useRef<HTMLDivElement>(null)
-	const isMobile = useMediaMatch('(max-width: 768px)')
 	const windowSize = useWindowSize()
 
 	const { showBoundary } = useErrorBoundary()
@@ -85,6 +84,25 @@ export function AppLayout() {
 		viewport.dataset.artificialScroll = 'true'
 	}, [instance, isRefSet])
 	/**
+	 * some ui components require knowing the height of the main content to position
+	 * itself correctly, like settings sidebars, and so this observer will
+	 * set a css var accordingly
+	 */
+	const mainHeightObserver = useRef<ResizeObserver | null>(null)
+	const setMainRef = useCallback((node: HTMLDivElement | null) => {
+		mainRef.current = node
+
+		mainHeightObserver.current?.disconnect()
+		mainHeightObserver.current = null
+		if (!node) return
+
+		const observer = new ResizeObserver(() => {
+			node.style.setProperty('--main-height', `${node.clientHeight}px`)
+		})
+		observer.observe(node)
+		mainHeightObserver.current = observer
+	}, [])
+	/**
 	 * An effect to destroy the overlay scrollbars instance when it exists but hideScrollBar is true
 	 */
 	useEffect(() => {
@@ -93,31 +111,6 @@ export function AppLayout() {
 			instantiatedInstance.destroy()
 		}
 	}, [instance, isRefSet, hideScrollBar])
-
-	/**
-	 * If the user prefers the top bar, we hide the sidebar
-	 */
-	const preferTopBar = useMemo(() => {
-		const userPreferences = storeUser?.preferences ?? ({} as UserPreferences)
-		return userPreferences?.primaryNavigationMode === 'TOPBAR'
-	}, [storeUser])
-
-	/**
-	 * Soft hiding the sidebar allows a nice animation when toggling the sidebar
-	 * stacking preference
-	 */
-	const softHideSidebar = useMemo(() => {
-		const userPreferences = storeUser?.preferences ?? ({} as UserPreferences)
-		const { enableDoubleSidebar, enableReplacePrimarySidebar } = userPreferences
-
-		// hide sidebar when double sidebar is enabled and replace primary sidebar is enabled and on a route where
-		// a secondary sidebar is displayed (right now, just settings/*)
-		if (enableDoubleSidebar && enableReplacePrimarySidebar) {
-			return (location.pathname.match(/\/settings\/.+/) ?? []).length > 0
-		} else {
-			return false
-		}
-	}, [location, storeUser])
 
 	/**
 	 * If enabled, the client will refetch certain queries to hydrate the UI with
@@ -137,9 +130,6 @@ export function AppLayout() {
 		() => (location.pathname.match(/\/book(s?)\/.+\/(.*-?reader)/) ?? []).length > 0,
 		[location],
 	)
-
-	const hideSidebar = hideAllNavigation || preferTopBar
-	const hideTopBar = isMobile || hideAllNavigation || !preferTopBar
 
 	useCoreEvent({ liveRefetch, onConnectionWithServerChanged })
 
@@ -229,16 +219,14 @@ export function AppLayout() {
 						}}
 					/>
 				)}
-				{!hideAllNavigation && <MobileTopBar />}
-				{!hideTopBar && <TopBar />}
-				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>
+				<Sidebar.Provider>
 					<Suspense fallback={null}>
-						{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+						{!hideAllNavigation && <AppSidebar variant="inset" />}
 					</Suspense>
-					<main
+					<Sidebar.Inset
 						id="main"
 						className={cn(
-							'flex w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background',
+							'min-h-0 overflow-x-hidden overflow-y-auto',
 							{
 								'scrollbar-hide': storeUser.preferences?.enableHideScrollbar,
 							},
@@ -247,7 +235,7 @@ export function AppLayout() {
 									shouldUseGradient,
 							},
 						)}
-						ref={mainRef}
+						ref={setMainRef}
 					>
 						<div className="relative flex flex-1 flex-col">
 							{!!storeUser.preferences?.showQueryIndicator && <BackgroundFetchIndicator />}
@@ -255,8 +243,8 @@ export function AppLayout() {
 								<Outlet />
 							</Suspense>
 						</div>
-					</main>
-				</div>
+					</Sidebar.Inset>
+				</Sidebar.Provider>
 
 				{showJobOverlay && <JobOverlay />}
 			</Suspense>

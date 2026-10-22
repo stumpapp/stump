@@ -1,47 +1,34 @@
-import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
-import { ArrowLeft, Home } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { ButtonOrLink, cn, Label } from '@stump/components'
+import { ArrowLeft } from 'lucide-react'
+import { useLocation } from 'react-router'
 
 import { useRouterContext } from '@/context/RouterContext'
-import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
-import { useAppStore } from '@/stores'
 
 import { useLibraryContext } from '../../context'
 import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
-	const navigate = useNavigate()
 	const paths = usePaths()
 
 	const { library } = useLibraryContext()
 	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
-	const {
-		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
-	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
 	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id, basePath) })
-	const platform = useAppStore((store) => store.platform)
 
 	return (
 		<div
 			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
-				primaryNavigationMode === 'TOPBAR'
-					? 'top-12 fixed z-50 h-screen border-x'
-					: 'top-0 fixed z-50 h-screen border-r',
+				'top-0 w-48 px-2 py-4 sticky z-40 flex h-(--main-height) shrink-0 flex-col self-start border-r border-border bg-background text-foreground',
 				{
 					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
-				},
-				{
-					'top-10': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
 				},
 			)}
 		>
@@ -57,13 +44,11 @@ export default function LibrarySettingsSidebar() {
 						<ArrowLeft className="h-4 w-4 transform" />
 					</ButtonOrLink>
 
-					{/* TODO: handle wrapping... */}
 					<Label className="py-1 line-clamp-1">{library.name}</Label>
 				</div>
 
 				{groups
 					.map(({ label, items }) => {
-						// TODO: refactor the group shit
 						const groupLabel = label
 							? t(`librarySettingsScene.sidebar.${formatRouteKey(label)}.label`)
 							: ''
@@ -75,7 +60,7 @@ export default function LibrarySettingsSidebar() {
 
 						return (
 							<div key={groupLabel}>
-								{groupLabel && <Label>{groupLabel}</Label>}
+								{groupLabel && <Label className="text-muted-foreground">{groupLabel}</Label>}
 								<ul
 									className={cn('gap-y-0.5 text-sm flex flex-col', {
 										'pt-2': groupLabel,
@@ -99,20 +84,6 @@ export default function LibrarySettingsSidebar() {
 						)
 					})
 					.filter(Boolean)}
-				<div className="flex-1" />
-
-				{enableReplacePrimarySidebar && (
-					<div className="shrink-0">
-						<IconButton
-							title="Go home"
-							variant="ghost"
-							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
-							onClick={() => navigate(paths.home())}
-						>
-							<Home className="h-4 w-4 -scale-x-[1] transform" />
-						</IconButton>
-					</div>
-				)}
 			</div>
 		</div>
 	)

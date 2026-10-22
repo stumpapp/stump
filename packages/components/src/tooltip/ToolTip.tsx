@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 
 import { ToolTipContentProps, ToolTipPrimitive, ToolTipProvider } from './primitives'
 
-const toolTipVariants = cva(undefined, {
+const toolTipVariants = cva('bg-popover text-popover-foreground dark:border dark:border-white/5', {
 	defaultVariants: {
 		size: 'sm',
 	},

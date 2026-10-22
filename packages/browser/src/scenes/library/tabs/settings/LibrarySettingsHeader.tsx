@@ -1,39 +1,35 @@
-import { cn, Heading, Text } from '@stump/components'
+import { Breadcrumb } from '@stump/components'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
-import { useMediaMatch } from 'rooks'
 
+import { BreadcrumbPageSwitcher } from '@/components/navigation/BreadcrumbPageSwitcher'
+import { usePageSwitcherGroups } from '@/components/navigation/usePageSwitcherGroups'
+import { PageHeader } from '@/components/sharedLayout'
 import { useRouterContext } from '@/context/RouterContext'
-import { usePreferences } from '@/hooks/usePreferences'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../context'
-import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
 import { LibraryPatternDisplay } from './options/scanner'
 import { createRouteGroups } from './routes'
+
+const isActiveRoute = (to: string, pathname: string) => pathname.endsWith(to)
 
 export default function LibrarySettingsHeader() {
 	const location = useLocation()
 	const { library } = useLibraryContext()
-	const {
-		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
-	} = usePreferences()
 	const { t } = useTranslate()
 	const { basePath } = useRouterContext()
-
-	const isMobile = useMediaMatch('(max-width: 768px)')
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
-	const displayingSideBar = !!enableDoubleSidebar && !isMobile
 
 	/**
 	 * The active route based on the current location
 	 */
+	const routeGroups = useMemo(() => createRouteGroups(library.id, basePath), [library.id, basePath])
 	const activeRouteGroup = useMemo(
 		() =>
-			createRouteGroups(library.id, basePath)
+			routeGroups
 				.flatMap((group) => group.items)
 				.find((page) => location.pathname.endsWith(page.to)),
-		[location.pathname, library.id, basePath],
+		[location.pathname, routeGroups],
 	)
 
 	/**
@@ -54,38 +50,32 @@ export default function LibrarySettingsHeader() {
 	}, [activeRouteGroup, location.pathname])
 
 	const translatedHeader = t(`librarySettingsScene.${activeRouteKey}.title`)
-	const translatedDescription = t(`librarySettingsScene.${activeRouteKey}.description`)
 
 	const isScannerSettings = activeRouteKey === 'options/scanning'
 
+	const switcherGroups = usePageSwitcherGroups({
+		localeBase: 'librarySettingsScene',
+		routeGroups,
+		isActive: isActiveRoute,
+	})
+
 	return (
-		<header
-			className={cn(
-				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between',
-				{
-					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
-					'pl-52': displayingSideBar,
-				},
-			)}
-			style={{
-				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-			}}
-		>
-			<div className="space-y-4 flex flex-col">
-				<div>
-					<Heading size="lg" className="font-bold">
-						{translatedHeader}
-					</Heading>
+		<>
+			<PageHeader>
+				<Breadcrumb>
+					<Breadcrumb.List>
+						<Breadcrumb.Item>{library.name}</Breadcrumb.Item>
+						{/*<Breadcrumb.Separator />
+  						<Breadcrumb.Item>Settings</Breadcrumb.Item>*/}
+						<Breadcrumb.Separator />
+						<Breadcrumb.Item>
+							<BreadcrumbPageSwitcher title={translatedHeader} groups={switcherGroups} />
+						</Breadcrumb.Item>
+					</Breadcrumb.List>
+				</Breadcrumb>
 
-					<Text variant="muted" className="mt-1.5" size="sm">
-						{translatedDescription}
-					</Text>
-				</div>
-			</div>
-
-			{isScannerSettings && <LibraryPatternDisplay />}
-
-			{isMobile && <LibrarySettingsSelectNavigation />}
-		</header>
+				{isScannerSettings && <LibraryPatternDisplay />}
+			</PageHeader>
+		</>
 	)
 }

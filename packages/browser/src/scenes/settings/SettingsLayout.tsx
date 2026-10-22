@@ -1,24 +1,14 @@
-import { cn, cx } from '@stump/components'
+import { cn } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { useShallow } from 'zustand/react/shallow'
 
-import { Container } from '@/components/container'
 import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
 
 import SettingsHeader from './SettingsHeader'
 import SettingsSideBar from './SettingsSideBar'
-
-// TODO(cleanup): i think these settings pages are in a desperate need for a little bit of ui love
-// the disconnected and floating inputs and knobs are not a great look, especially after being
-// so accustomed to how we've been building out the mobile app. i think a few things would
-// go a long way (esp for pages like /settings/preferences):
-// - grouping things in cards for better visual hierarchy
-// - better typography and spacing
-// - fewer inputs/selects, for things like the cover ratio we could render boxes that preview
-//   the diff ratios, same for placeholder colors etc.
 
 export default function SettingsLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -29,54 +19,29 @@ export default function SettingsLayout() {
 		})),
 	)
 	const {
-		preferences: {
-			enableDoubleSidebar,
-			primaryNavigationMode,
-			layoutMaxWidthPx,
-			enableHideScrollbar,
-		},
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	if (!user) {
 		return <Navigate to={`/auth?redirect=${encodeURIComponent(window.location.pathname)}`} />
 	}
 
-	const displaySideBar = !!enableDoubleSidebar && !isMobile
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
-
-	// 1. if we are on mobile, we always render it
-	// 2. if not displaySideBar, we always render it
-	// 3. if topbar, never render it TODO: this is a bit weird UX, let's make this a setting
-	const renderNavigation = isMobile || (!displaySideBar && !preferTopBar)
+	const displaySideBar = !isMobile
+	const renderNavigation = isMobile || !displaySideBar
 
 	return (
 		<div
-			// The overflow on the parent is intentional, as it allows the native scrollbar to be fully
-			// to the right, instead of on the potentially restricted width of the child container
-			className={cn('md:flex-row flex h-full w-full flex-col overflow-y-auto', {
+			className={cn('md:flex-row flex w-full flex-1 flex-col', {
 				'scrollbar-hide': enableHideScrollbar,
 			})}
 		>
-			<div
-				className={cn('md:flex-row flex w-full flex-col', {
-					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
-				})}
-				style={{
-					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-				}}
-			>
+			<div className="md:flex-row flex w-full flex-col">
 				{displaySideBar && <SettingsSideBar />}
-				<div
-					className={cx('w-full flex-1 flex-col', {
-						'pl-48': displaySideBar,
-					})}
-				>
+				<div className="min-w-0 w-full flex-1 flex-col">
 					<SettingsHeader renderNavigation={renderNavigation} />
-					<Container disableHorizontalPadding>
-						<Suspense fallback={null}>
-							<Outlet />
-						</Suspense>
-					</Container>
+					<Suspense fallback={null}>
+						<Outlet />
+					</Suspense>
 				</div>
 			</div>
 		</div>

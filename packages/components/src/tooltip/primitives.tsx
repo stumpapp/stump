@@ -12,6 +12,7 @@ const ToolTipProvider = ({
 )
 const Tooltip = TooltipPrimitive.Root as typeof TooltipPrimitive.Root & ToolTipSubComponents
 const TooltipTrigger = TooltipPrimitive.Trigger
+const TooltipPortal = TooltipPrimitive.Portal
 
 export type ToolTipContentProps = ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 const TooltipContent = React.forwardRef<
@@ -40,4 +41,10 @@ type ToolTipSubComponents = {
 Tooltip.Content = TooltipContent
 Tooltip.Trigger = TooltipTrigger
 
-export { TooltipContent, Tooltip as ToolTipPrimitive, ToolTipProvider, TooltipTrigger }
+export {
+	TooltipContent,
+	TooltipPortal,
+	Tooltip as ToolTipPrimitive,
+	ToolTipProvider,
+	TooltipTrigger,
+}

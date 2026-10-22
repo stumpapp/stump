@@ -9,6 +9,7 @@ import { useBookOverview } from '@/components/book'
 import { BookCardFragment } from '@/components/book/BookCard'
 import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
+import { EntityHeader } from '@/components/sharedLayout'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { useAppContext } from '@/context'
 
@@ -44,13 +45,36 @@ export default function BookOverviewScene() {
 		el?.scrollTo({ top: 0, behavior: 'smooth' })
 	}, [id])
 
+	// TODO(ui): see thoughts in BookRouter, entity header doesn't quite cut it i think
 	return (
-		<SceneContainer className="gap-4">
-			<Suspense>
-				<Helmet>
-					<title>Stump | {media.resolvedName}</title>
-				</Helmet>
+		<>
+			<Helmet>
+				<title>Stump | {media.resolvedName}</title>
+			</Helmet>
 
+			{/*<PageHeader></PageHeader>*/}
+			<EntityHeader
+				name={media.resolvedName}
+				tabs={[
+					{
+						label: 'Details',
+						isActive: true,
+						to: '#',
+					},
+					{
+						label: 'Metadata',
+						isActive: false,
+						to: '###',
+					},
+					{
+						label: 'Reading Timeline',
+						isActive: false,
+						to: '###',
+					},
+				]}
+			/>
+
+			<SceneContainer className="gap-4">
 				<div className="gap-4 flex h-full w-full flex-col">
 					<div className="gap-3 tablet:mb-2 flex flex-col items-center tablet:flex-row tablet:items-start">
 						<div className="max-w-sm gap-3 sm:max-w-50 flex w-full shrink-0 flex-col items-center">
@@ -75,10 +99,10 @@ export default function BookOverviewScene() {
 						<MediaMetadataEditor mediaId={media.id} data={media.metadata} />
 					</div>
 				</div>
-			</Suspense>
 
-			{/*Note: There is no permission specific to file info but I am just taking a loose assumption here*/}
-			{checkPermission(UserPermission.ManageLibrary) && <BookFileInformation fragment={media} />}
-		</SceneContainer>
+				{/*Note: There is no permission specific to file info but I am just taking a loose assumption here*/}
+				{checkPermission(UserPermission.ManageLibrary) && <BookFileInformation fragment={media} />}
+			</SceneContainer>
+		</>
 	)
 }

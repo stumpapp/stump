@@ -220,9 +220,7 @@ export function AppLayout() {
 					/>
 				)}
 				<Sidebar.Provider>
-					<Suspense fallback={null}>
-						{!hideAllNavigation && <AppSidebar variant="inset" />}
-					</Suspense>
+					<Suspense fallback={null}>{!hideAllNavigation && <AppSidebar />}</Suspense>
 					<Sidebar.Inset
 						id="main"
 						className={cn(

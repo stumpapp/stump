@@ -4,6 +4,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { SceneContainer } from '../container'
+import { Owl } from '../Owl'
 
 type Props = {
 	issue?: number
@@ -13,12 +14,8 @@ export default function UnderConstruction({ issue }: Props) {
 	const { t } = useTranslate()
 
 	return (
-		<SceneContainer className="h-full w-full flex-1">
-			<img
-				src="/assets/svg/construction-site.svg"
-				alt="Construction illustration"
-				className="h-72 sm:h-96 mx-auto w-1/2 shrink-0 object-scale-down"
-			/>
+		<SceneContainer className="gap-2 h-full w-full flex-1 items-center justify-center">
+			<Owl owl="construction" className="mx-auto" />
 
 			<div className="max-w-lg space-y-2 mx-auto flex flex-col text-center">
 				<Heading className="text-3xl font-extrabold md:text-4xl">{t(getKey('heading'))}</Heading>

@@ -16,10 +16,13 @@ type Props = {
  * if not e.g. a reader
  */
 export function PageHeader({ children, className }: Props) {
+	// TODO: something like this is possible, interesting but not priority
+	// const sidebarVariant = useLocalPreferencesStore((store) => store.sidebar.variant)
 	return (
 		<header
 			className={cn(
 				'top-0 h-12 sticky z-50 flex w-full shrink-0 items-center border-b border-border bg-background',
+				// { 'top-2 mx-auto w-[98%] rounded-lg border': sidebarVariant === 'floating' },
 				className,
 			)}
 		>

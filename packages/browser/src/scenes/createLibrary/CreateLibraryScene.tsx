@@ -1,9 +1,11 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { Breadcrumb, ButtonOrLink } from '@stump/components'
 import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
+import { ExternalLink } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { SceneContainer } from '@/components/container'
@@ -11,7 +13,7 @@ import {
 	CreateOrUpdateLibrarySchema,
 	intoThumbnailConfig,
 } from '@/components/library/createOrUpdate'
-import { SteppedFormSceneHeader } from '@/components/steppedForm'
+import { PageHeader } from '@/components/sharedLayout'
 import { useConfetti } from '@/hooks/useConfetti'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
@@ -49,7 +51,7 @@ export default function CreateLibraryScene() {
 			libraries: { nodes: libraries },
 		},
 	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		mutate: createLibrary,
 		isPending,
@@ -109,10 +111,29 @@ export default function CreateLibraryScene() {
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<SteppedFormSceneHeader
-				localeBase="createLibraryScene"
-				subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
-			/>
+			<PageHeader>
+				<Breadcrumb>
+					<Breadcrumb.List>
+						<Breadcrumb.Link asChild>
+							<Link to="/libraries">Libraries</Link>
+						</Breadcrumb.Link>
+						<Breadcrumb.Separator />
+						<Breadcrumb.Page>Create Library</Breadcrumb.Page>
+					</Breadcrumb.List>
+				</Breadcrumb>
+
+				<div className="ml-auto">
+					<ButtonOrLink
+						href="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
+						variant="outline"
+						size="sm"
+						target="_blank"
+					>
+						{translate('shared.common.documentation')}{' '}
+						<ExternalLink className="ml-1 h-4 w-4 text-muted-foreground" />
+					</ButtonOrLink>
+				</div>
+			</PageHeader>
 
 			<SceneContainer>
 				<div className="gap-12 flex flex-col">

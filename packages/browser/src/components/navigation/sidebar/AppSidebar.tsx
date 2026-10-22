@@ -16,9 +16,10 @@ import { useTheme } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
+import { useLocalPreferencesStore } from '@/stores/user'
 
 import UserMenu from '../../UserMenu'
-import { Sidebar, SidebarProps, useSidebar } from './base'
+import { Sidebar, useSidebar } from './base'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
@@ -46,9 +47,7 @@ const query = graphql(`
 	}
 `)
 
-type Props = Pick<SidebarProps, 'variant' | 'collapsible'>
-
-export default function AppSidebar({ variant = 'sidebar', collapsible = 'offcanvas' }: Props) {
+export default function AppSidebar() {
 	const location = useLocation()
 	const paths = usePaths()
 
@@ -66,6 +65,8 @@ export default function AppSidebar({ variant = 'sidebar', collapsible = 'offcanv
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
 	const { isMobile, setOpenMobile } = useSidebar()
+
+	const sidebarConfig = useLocalPreferencesStore((store) => store.sidebar)
 
 	// anytime we navigate on mobile we close the sidebar (which is more like a
 	// burger+sheet for mobile)
@@ -146,26 +147,26 @@ export default function AppSidebar({ variant = 'sidebar', collapsible = 'offcanv
 		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
 
-	// TODO: rail looks terrible, if i ever expose it it needs work
+	// TODO: ive wired up collapsible options, but icon is ugly af. just needs to render icon
+	// versions of each enabled section instead of what exists
 	return (
 		<Sidebar
-			variant={variant}
-			collapsible={collapsible}
-			className={cn('gap-2 px-2 py-2', {
+			variant={sidebarConfig.variant}
+			collapsible={sidebarConfig.collapsible}
+			className={cn('gap-2 pt-2', {
 				'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to': shouldUseGradient,
 			})}
 		>
-			<Sidebar.Content className="gap-1">
+			<Sidebar.Content className="gap-1 px-2">
 				<div>
 					<UserMenu />
 					<div className="h-1" />
 				</div>
 				{sections}
+				<SideBarFooter />
 			</Sidebar.Content>
 
-			<SideBarFooter />
-
-			{variant === 'sidebar' && <Sidebar.Rail />}
+			{sidebarConfig.variant === 'sidebar' && <Sidebar.Rail />}
 		</Sidebar>
 	)
 }

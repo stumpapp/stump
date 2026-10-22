@@ -26,8 +26,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		return (
 			<Suspense>
 				<div ref={ref} className={cn('flex flex-1 flex-col', className)} id="urlFilterContainer">
-					<div className="flex flex-1 flex-col overflow-x-auto">{children}</div>
-
+					<div className="flex flex-1 flex-col overflow-x-clip">{children}</div>
 					<div
 						className="bottom-0 h-12 px-4 md:h-10 sticky z-50 flex w-full shrink-0 items-center justify-between border-t border-border bg-background"
 						data-testid="urlFilterFooter"

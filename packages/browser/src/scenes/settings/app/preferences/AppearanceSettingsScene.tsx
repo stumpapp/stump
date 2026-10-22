@@ -1,4 +1,4 @@
-import { NewCard } from '@stump/components'
+import { NewCard, RawSwitch, Select } from '@stump/components'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
@@ -18,6 +18,8 @@ import InterfaceRoundnessPreference from './InterfaceRoundnessPreference'
 import LiveRefetchToggle from './LiveRefetchToggle'
 import { NavigationArrangement } from './navigation-arrangement'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
+import { SidebarCollapseBehavior } from './SidebarCollapseBehavior'
+import { SidebarStyle } from './SidebarStyle'
 import ThemeSelect from './ThemeSelect'
 import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 
@@ -76,10 +78,12 @@ export default function AppearanceSettingsScene() {
 					label={t(getKey('navigation.title'))}
 					description={t(getKey('navigation.description'))}
 				>
-					{/*TODO: support sidebar variant preferences*/}
 					<Suspense>
 						<NavigationArrangement />
 					</Suspense>
+
+					<SidebarStyle />
+					<SidebarCollapseBehavior />
 				</NewCard>
 
 				<Suspense>

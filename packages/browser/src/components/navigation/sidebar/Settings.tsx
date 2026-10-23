@@ -2,17 +2,19 @@ import { cn, IconButton, ToolTip } from '@stump/components'
 import { Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 export default function SettingsButton() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const paths = usePaths()
+	const { translate } = useTranslate()
 
 	const isActive = location.pathname.startsWith(paths.settings())
 
 	return (
-		<ToolTip content="Go to settings" align="end">
+		<ToolTip content={translate('shared.common.settings')} align="end" portal>
 			<IconButton
 				variant="ghost"
 				className={cn(

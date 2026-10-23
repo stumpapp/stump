@@ -1,4 +1,4 @@
-import { Text } from '@stump/components'
+import { Badge, Text, ToolTip } from '@stump/components'
 import { useFragment } from '@stump/graphql'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -16,6 +16,17 @@ export default function PatternDisplay() {
 	const {
 		config: { libraryPattern },
 	} = useFragment(LibrarySettingsConfig, library)
+
+	return (
+		<>
+			<div className="flex-1" />
+			<ToolTip content={t(getKey(`${libraryPattern}.description`))} align="end">
+				<Badge size="md" variant="secondary">
+					{t(getKey(`${libraryPattern}.label`))}
+				</Badge>
+			</ToolTip>
+		</>
+	)
 
 	return (
 		<div

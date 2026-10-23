@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
-import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -10,13 +9,6 @@ import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UsersStats from './UsersStats'
 
-// TODO: Super weird scrolling issues here???
-
-// TODO: I might want to turn this into a tiny Router with breadcrumbs? Not entirely sure yet,
-// the only sub-scene I can think of is user creation which isn't essential to have perfect UX
-// out the gate
-
-// TODO(sea-orm): Re-add stats
 export default function UsersScene() {
 	const { t } = useTranslate()
 	// TODO(permissions): isServerOwner will be replaced by discrete permissions
@@ -25,20 +17,18 @@ export default function UsersScene() {
 	const { isServerOwner } = useAppContext()
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/users.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				{isServerOwner && (
-					<Suspense>
-						<UsersStats />
-					</Suspense>
-				)}
-				<UserTableSection />
-				{isServerOwner && <LoginActivitySection />}
-			</ContentContainer>
+			{isServerOwner && (
+				<Suspense>
+					<UsersStats />
+				</Suspense>
+			)}
+			<UserTableSection />
+			{isServerOwner && <LoginActivitySection />}
 		</SceneContainer>
 	)
 }

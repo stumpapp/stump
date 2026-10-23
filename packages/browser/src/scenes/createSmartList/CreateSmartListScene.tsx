@@ -6,8 +6,7 @@ import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import { SceneContainer } from '@/components/container'
-import { SteppedFormSceneHeader } from '@/components/steppedForm'
+import { CreateSceneHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
@@ -27,7 +26,7 @@ export default function CreateSmartListScene() {
 	const paths = usePaths()
 	const client = useQueryClient()
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const navigate = useNavigate()
 
 	const {
@@ -61,15 +60,14 @@ export default function CreateSmartListScene() {
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<SteppedFormSceneHeader localeBase="createSmartListScene" />
+			<CreateSceneHeader
+				parent={{ label: translate('shared.common.smartLists'), to: paths.smartLists() }}
+				title={t('sidebar.buttons.createSmartlist')}
+			/>
 
-			<SceneContainer>
-				<div className="gap-12 flex flex-col">
-					<Suspense>
-						<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
-					</Suspense>
-				</div>
-			</SceneContainer>
+			<Suspense>
+				<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
+			</Suspense>
 		</div>
 	)
 }

@@ -1,6 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import { graphql, LibrarySideBarSectionQuery, UserPermission } from '@stump/graphql'
+import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
@@ -12,6 +12,13 @@ import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
+const fragment = graphql(`
+	fragment LibraryOptionsMenu on Library {
+		id
+		name
+	}
+`)
+
 const mutation = graphql(`
 	mutation ScanLibraryMutation($id: ID!) {
 		scanLibrary(id: $id)
@@ -19,13 +26,14 @@ const mutation = graphql(`
 `)
 
 type Props = {
-	library: LibrarySideBarSectionQuery['libraries']['nodes'][number]
+	library: FragmentType<typeof fragment>
 }
 
 const LOCALE_KEY = 'sidebar.libraryOptions'
 const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
-export default function LibraryOptionsMenu({ library }: Props) {
+export default function LibraryOptionsMenu({ library: fragmentRef }: Props) {
+	const library = useFragment(fragment, fragmentRef)
 	const client = useQueryClient()
 	const paths = usePaths()
 
@@ -133,7 +141,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 															e.stopPropagation()
 															setIsDeleting(true)
 														},
-														isDestructive: true,
+														variant: 'destructive' as const,
 													},
 												]
 											: []),

@@ -1,22 +1,19 @@
 import { cn, Heading, Text } from '@stump/components'
 
-import { useTheme } from '../hooks'
+import { useIsDarkTheme } from '@/hooks/useTheme'
 
 export type OwlType =
 	// | 'search'
-	// | 'construction'
+	| 'construction'
 	// | 'developing'
-	'shrug'
-// | 'empty'
-// | 'error'
+	| 'shrug'
+	// | 'empty'
+	| 'error'
 // | 'network-error'
 
 const getOwl = (owl: OwlType, isDark: boolean): string | undefined => {
 	const postfix = isDark ? 'dark' : 'light'
-	switch (owl) {
-		case 'shrug':
-			return `/assets/owls/owl-shrug-${postfix}.png`
-	}
+	return `/assets/owls/owl-${owl}-${postfix}.png`
 }
 
 type OwlProps = {
@@ -24,7 +21,7 @@ type OwlProps = {
 } & Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'>
 
 export function Owl({ owl, className, ...props }: OwlProps) {
-	const { isDarkVariant } = useTheme()
+	const isDarkVariant = useIsDarkTheme()
 	const src = getOwl(owl, isDarkVariant)
 	if (!src) return null
 	return <img src={src} className={cn('sm:size-98 size-72', className)} {...props} />

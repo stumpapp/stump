@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet'
 
-import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -11,15 +10,13 @@ export default function GeneralSettingsScene() {
 	const { t } = useTranslate()
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.app/account.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<ProfileForm />
-				<LocalePreferences />
-			</ContentContainer>
+			<ProfileForm />
+			<LocalePreferences />
 		</SceneContainer>
 	)
 }

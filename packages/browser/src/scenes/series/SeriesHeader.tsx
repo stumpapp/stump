@@ -167,6 +167,10 @@ export default function SeriesHeader() {
 
 			<EntityHeader
 				name={resolvedName}
+				parents={[
+					{ label: translate('shared.common.libraries'), to: paths.libraries() },
+					{ label: libraryName, to: paths.librarySeries(libraryId) },
+				]}
 				tabs={tabs}
 				actions={actions}
 				stats={resolvedStats}

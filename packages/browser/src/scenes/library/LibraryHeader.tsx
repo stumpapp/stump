@@ -137,6 +137,7 @@ export default function LibraryHeader() {
 		<>
 			<EntityHeader
 				name={name}
+				parents={[{ label: translate('shared.common.libraries'), to: paths.libraries() }]}
 				tabs={tabs}
 				stats={resolvedStats}
 				settingsLink={paths.libraryManage(id)}

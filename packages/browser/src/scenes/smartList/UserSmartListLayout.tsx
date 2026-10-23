@@ -27,19 +27,13 @@ export default function UserSmartListLayout() {
 	const { t } = useTranslate()
 
 	const {
-		preferences: {
-			enableDoubleSidebar,
-			primaryNavigationMode,
-			layoutMaxWidthPx,
-			enableHideScrollbar,
-		},
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+	const displaySideBar = !isMobile && isSettings
 
 	if (!id) {
 		throw new Error(t(withLocaleKey('missingIdError')))
@@ -87,6 +81,7 @@ export default function UserSmartListLayout() {
 			<GenericSettingsHeader
 				localeBase="smartListSettingsScene"
 				routeGroups={createRouteGroups(list?.id ?? '', viewerRole)}
+				entityName={list?.name}
 			/>
 		) : (
 			<UserSmartListHeader />
@@ -111,30 +106,23 @@ export default function UserSmartListLayout() {
 					viewerRole,
 				}}
 			>
-				<div
-					className={cn('relative flex flex-1 flex-col', {
-						'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
-					})}
-					style={{
-						maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-					}}
-				>
-					{renderHeader()}
-
+				<div className="relative flex flex-1">
 					{displaySideBar && <SmartListSettingsSideBar />}
 
-					<SceneContainer
-						className={cn('gap-4 md:pb-0 relative flex flex-1 flex-col', {
-							'md:hide-scrollbar': !!enableHideScrollbar,
-							'p-0': !isSettings,
-							// pl-48 is for the sidebar, plus pl-4 for the padding
-							'pl-52': displaySideBar,
-						})}
-					>
-						<Suspense fallback={null}>
-							<Outlet />
-						</Suspense>
-					</SceneContainer>
+					<div className="min-w-0 flex flex-1 flex-col">
+						{renderHeader()}
+
+						<SceneContainer
+							className={cn('gap-4 md:pb-0 relative flex flex-1 flex-col', {
+								'md:hide-scrollbar': !!enableHideScrollbar,
+								'p-0': !isSettings,
+							})}
+						>
+							<Suspense fallback={null}>
+								<Outlet />
+							</Suspense>
+						</SceneContainer>
+					</div>
 				</div>
 			</SmartListContext.Provider>
 		</SmartListViewStoreContext.Provider>

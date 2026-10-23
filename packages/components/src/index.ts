@@ -7,7 +7,12 @@ export type Any = any
 export { Accordion } from './accordion'
 export { Alert, AlertDescription, AlertTitle } from './alert'
 export { Badge, type BadgeProps } from './badge'
-export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
+export {
+	Breadcrumb,
+	Breadcrumbs,
+	type BreadcrumbSegment,
+	type BreadcrumbsProps,
+} from './breadcrumbs'
 export {
 	Button,
 	ButtonOrLink,

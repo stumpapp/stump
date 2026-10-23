@@ -5,8 +5,8 @@ import { useState } from 'react'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSteppedFormContext } from './context'
+import { StepList } from './StepList'
 import { getStepKey } from './utils'
-import { VerticalStepper } from './VerticalStepper'
 
 type Props = {
 	className?: string
@@ -22,7 +22,8 @@ export function MobileStepHeader({ className }: Props) {
 	return (
 		<div
 			className={cn(
-				'top-0 -mx-4 px-4 pt-2 pb-3 sticky z-10 border-b border-border bg-background',
+				// top-12 for page header offset
+				'top-12 -mx-4 -mt-4 px-4 pt-2 pb-3 sticky z-10 border-b border-border bg-background',
 				className,
 			)}
 		>
@@ -62,7 +63,7 @@ export function MobileStepHeader({ className }: Props) {
 				title={t('steppedForm.sheetTitle')}
 			>
 				<div className="px-4 pb-4 max-h-[70svh] overflow-y-auto">
-					<VerticalStepper onSelect={() => setOpen(false)} />
+					<StepList onSelect={() => setOpen(false)} />
 				</div>
 			</Sheet>
 		</div>

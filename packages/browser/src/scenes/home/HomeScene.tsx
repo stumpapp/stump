@@ -1,11 +1,12 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { ButtonOrLink } from '@stump/components'
+import { Breadcrumb, ButtonOrLink, Heading } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { OwlEmptyState } from '@/components/Owl'
+import { PageHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
@@ -69,10 +70,24 @@ export default function HomeScene() {
 	const { data } = useSuspenseGraphQL(query, sdk.cacheKey('numberOfLibraries'))
 
 	const helmet = (
-		<Helmet>
-			{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
-			<title>Stump | {'Home'}</title>
-		</Helmet>
+		<>
+			<Helmet>
+				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
+				<title>Stump | {'Home'}</title>
+			</Helmet>
+
+			<PageHeader>
+				<Heading size="sm" className="shrink-0">
+					Home
+				</Heading>
+
+				{/*<Breadcrumb>
+					<Breadcrumb.List>
+						<Breadcrumb.Page>Home</Breadcrumb.Page>
+					</Breadcrumb.List>
+				</Breadcrumb>*/}
+			</PageHeader>
+		</>
 	)
 
 	if (!data) {
@@ -99,28 +114,33 @@ export default function HomeScene() {
 	}
 
 	return (
-		<SceneContainer className="gap-6 flex flex-1 flex-col">
+		<>
 			{helmet}
 
-			{sections.map((section) => {
-				const id = getHomeSectionId(section)
-				if (!id || !section.visible) return null
-				const Component = components[id]
-				return <Component key={id} />
-			})}
+			<SceneContainer className="gap-6 flex flex-1 flex-col">
+				{sections.map((section) => {
+					const id = getHomeSectionId(section)
+					if (!id || !section.visible) return null
+					const Component = components[id]
+					return <Component key={id} />
+				})}
 
-			{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
-				<OwlEmptyState
-					title={translate('shared.homeSections.allSectionsHidden.label')}
-					description={translate('shared.homeSections.allSectionsHidden.description')}
-					actions={
-						<ButtonOrLink href={paths.settings('preferences')} data-testid="customize-home-button">
-							{translate('shared.homeSections.allSectionsHidden.customizeHome')}
-						</ButtonOrLink>
-					}
-				/>
-			)}
-			<div className="pb-5 sm:pb-0" />
-		</SceneContainer>
+				{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
+					<OwlEmptyState
+						title={translate('shared.homeSections.allSectionsHidden.label')}
+						description={translate('shared.homeSections.allSectionsHidden.description')}
+						actions={
+							<ButtonOrLink
+								href={paths.settings('preferences')}
+								data-testid="customize-home-button"
+							>
+								{translate('shared.homeSections.allSectionsHidden.customizeHome')}
+							</ButtonOrLink>
+						}
+					/>
+				)}
+				<div className="pb-5 sm:pb-0" />
+			</SceneContainer>
+		</>
 	)
 }

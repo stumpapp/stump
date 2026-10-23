@@ -5,7 +5,7 @@ import omit from 'lodash/omit'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from './context'
@@ -104,14 +104,12 @@ export default function EditEmailerScene() {
 	}
 
 	return (
-		<SceneContainer>
-			<ContentContainer>
-				<CreateOrUpdateEmailerForm
-					emailer={emailer}
-					existingNames={existingNames}
-					onSubmit={onSubmit}
-				/>
-			</ContentContainer>
+		<SceneContainer variant="settings">
+			<CreateOrUpdateEmailerForm
+				emailer={emailer}
+				existingNames={existingNames}
+				onSubmit={onSubmit}
+			/>
 		</SceneContainer>
 	)
 }

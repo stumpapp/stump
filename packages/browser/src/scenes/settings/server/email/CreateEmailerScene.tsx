@@ -5,7 +5,7 @@ import omit from 'lodash/omit'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from './context'
@@ -73,13 +73,11 @@ export default function CreateEmailerScene() {
 	}
 
 	return (
-		<SceneContainer>
-			<ContentContainer>
-				<CreateOrUpdateEmailerForm
-					existingNames={emailers.map((e) => e.name) || []}
-					onSubmit={onSubmit}
-				/>
-			</ContentContainer>
+		<SceneContainer variant="settings">
+			<CreateOrUpdateEmailerForm
+				existingNames={emailers.map((e) => e.name) || []}
+				onSubmit={onSubmit}
+			/>
 		</SceneContainer>
 	)
 }

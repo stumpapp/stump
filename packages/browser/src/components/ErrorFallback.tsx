@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import { copyTextToClipboard } from '../utils/misc'
+import { Owl } from './Owl'
 
 // TODO: take in platform?
 export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
@@ -26,11 +27,8 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			data-testid="error-fallback"
 			className="flex h-full w-full flex-col items-center justify-center overflow-hidden"
 		>
-			<img
-				src="/assets/svg/bomb.svg"
-				alt={t('errorScene.imageAlt')}
-				className="max-h-64 sm:inline-block mx-auto hidden w-1/2 shrink-0 object-scale-down"
-			/>
+			<Owl owl="error" className="mx-auto" />
+
 			<div className="max-w-sm sm:max-w-md md:max-w-xl">
 				<div className="text-left">
 					<h1 className="text-4xl font-semibold text-foreground" data-testid="criticalErrorHeading">

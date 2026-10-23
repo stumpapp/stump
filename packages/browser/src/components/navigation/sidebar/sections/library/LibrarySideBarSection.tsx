@@ -12,6 +12,7 @@ import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/queries'
 
 import { EntityOptionProps } from '../../../types'
 import useCurrentLibraryId from '../../../useCurrentLibraryId'
+import { CollapsedSidebarSection, useIsSidebarIconMode } from '../../CollapsedSidebarItems'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import { SectionEmptyMessage } from '../SectionEmptyMessage'
 import LibraryEmoji from './LibraryEmoji'
@@ -24,6 +25,8 @@ const query = graphql(`
 				id
 				name
 				emoji
+				...LibraryEmoji
+				...LibraryOptionsMenu
 			}
 		}
 	}
@@ -58,6 +61,44 @@ export default function LibrarySideBarSection({
 		[checkPermission],
 	)
 	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
+	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
+
+	const isIconMode = useIsSidebarIconMode()
+	if (isIconMode) {
+		return (
+			<CollapsedSidebarSection
+				label={translate('shared.common.libraries')}
+				icon={Library}
+				emptyMessage={t('sidebar.buttons.noLibraries')}
+				items={libraries.map((library) => ({
+					key: library.id,
+					label: library.name,
+					to: paths.librarySeries(library.id),
+					isActive: currentLibraryId === library.id,
+					icon: library.emoji ? (
+						<span className="w-4 text-center">{library.emoji}</span>
+					) : (
+						<Library />
+					),
+					onMouseEnter: () => prefetchSeries(library.id),
+				}))}
+				actions={[
+					...(showLinkToAll
+						? [{ key: 'all', label: t('sidebar.buttons.seeAll'), to: paths.libraries() }]
+						: []),
+					...(showCreateLink
+						? [
+								{
+									key: 'create',
+									label: t('sidebar.buttons.createLibrary'),
+									to: paths.libraryCreate(),
+								},
+							]
+						: []),
+				]}
+			/>
+		)
+	}
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -103,7 +144,7 @@ export default function LibrarySideBarSection({
 					{translate('shared.common.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
-					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
+					{showLinkToAll && (
 						<SideBarButtonLink
 							to={paths.libraries()}
 							isActive={location.pathname === paths.libraries()}

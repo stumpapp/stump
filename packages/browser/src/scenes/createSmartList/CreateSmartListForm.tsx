@@ -86,7 +86,14 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 	}
 
 	return (
-		<Form form={form} onSubmit={onSubmit} id="createSmartListForm" onKeyDown={handleKeyDown}>
+		<Form
+			form={form}
+			onSubmit={onSubmit}
+			id="createSmartListForm"
+			className="flex flex-1 flex-col"
+			fieldsetClassName="flex-1"
+			onKeyDown={handleKeyDown}
+		>
 			<SteppedForm
 				localeBase="createSmartListScene"
 				steps={steps}

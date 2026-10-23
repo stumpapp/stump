@@ -1,16 +1,14 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { cn, Spacer } from '@stump/components'
+import { cn } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,
 	graphql,
 	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
-import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { Suspense, useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router'
-import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
 import { useAppContext, useRouterContext } from '@/context'
@@ -18,8 +16,11 @@ import { useTheme } from '@/hooks'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
+import { useLocalPreferencesStore } from '@/stores/user'
 
 import UserMenu from '../../UserMenu'
+import { Sidebar, useSidebar } from './base'
+import { useIsSidebarIconMode } from './CollapsedSidebarItems'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
@@ -47,14 +48,8 @@ const query = graphql(`
 	}
 `)
 
-type Props = {
-	asChild?: boolean
-	hidden?: boolean
-}
-
-export default function SideBar({ asChild, hidden }: Props) {
+export default function AppSidebar() {
 	const location = useLocation()
-
 	const paths = usePaths()
 
 	const { basePath } = useRouterContext()
@@ -70,9 +65,15 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
+	const { isMobile, setOpenMobile } = useSidebar()
 
-	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
-	const isMobile = useMediaMatch('(max-width: 768px)')
+	const sidebarConfig = useLocalPreferencesStore((store) => store.sidebar)
+
+	// anytime we navigate on mobile we close the sidebar (which is more like a
+	// burger+sheet for mobile)
+	useEffect(() => {
+		setOpenMobile(false)
+	}, [location.pathname, setOpenMobile])
 
 	const checkSectionPermission = useCallback(
 		(variant: SystemArrangement) => {
@@ -88,6 +89,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	)
 
 	const prefetchHome = usePrefetchHomeScene()
+	const isIconMode = useIsSidebarIconMode()
 
 	const renderSystemSection = useCallback(
 		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
@@ -96,10 +98,10 @@ export default function SideBar({ asChild, hidden }: Props) {
 					<SideBarButtonLink
 						key="home-sidebar-navlink"
 						to={paths.home()}
+						icon={Home}
 						isActive={location.pathname === basePath + '/'}
 						onMouseEnter={() => prefetchHome()}
 					>
-						<Home className="mr-2 h-4 w-4 shrink-0" />
 						{translate('shared.common.home')}
 					</SideBarButtonLink>
 				))
@@ -107,9 +109,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 					<SideBarButtonLink
 						key="explore-sidebar-navlink"
 						to={paths.bookSearch()}
+						icon={Book}
 						isActive={location.pathname === paths.bookSearch()}
 					>
-						<Book className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.books')}
 					</SideBarButtonLink>
 				))
@@ -138,70 +140,33 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
-							if (!checkSectionPermission(config.variant)) {
-								return null
-							}
-							return renderSystemSection(config)
-						})
+						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
+							checkSectionPermission(config.variant) ? renderSystemSection(config) : null,
+						)
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
 		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
 
-	const renderContent = () => {
-		return (
-			<>
-				<div className="gap-1 scrollbar-hide flex max-h-full grow flex-col overflow-y-auto">
-					{isAtLeastMedium && (
-						<div>
-							<UserMenu />
-							<div className="h-1" />
-						</div>
-					)}
-
-					{sections}
-				</div>
-
-				<Spacer />
-
-				{isAtLeastMedium && <SideBarFooter />}
-			</>
-		)
-	}
-
-	if (asChild) {
-		return <div className="min-h-full">{renderContent()}</div>
-	}
-
-	const variants = {
-		hidden: { width: 0, x: -SIDEBAR_WIDTH },
-		visible: { width: SIDEBAR_WIDTH, x: 0 },
-	}
-
 	return (
-		<motion.aside
-			key="primary-sidebar"
-			// @ts-expect-error: It is there I promise
-			className="md:inline-block hidden min-h-full"
-			animate={hidden ? 'hidden' : 'visible'}
-			variants={variants}
-			initial={false}
-			transition={{ duration: 0.2, ease: 'easeInOut' }}
+		<Sidebar
+			variant={sidebarConfig.variant}
+			collapsible={sidebarConfig.collapsible}
+			className={cn('gap-2 pt-2', {
+				'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to': shouldUseGradient,
+			})}
 		>
-			<div
-				className={cn(
-					'w-56 gap-2 px-2 py-2 relative z-10 flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar',
-					{
-						'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to': shouldUseGradient,
-					},
-				)}
-			>
-				{renderContent()}
-			</div>
-		</motion.aside>
+			<Sidebar.Content className={cn('gap-1 px-2', { 'items-center': isIconMode })}>
+				<div>
+					<UserMenu />
+					<div className="h-1" />
+				</div>
+				{sections}
+				<SideBarFooter />
+			</Sidebar.Content>
+
+			{sidebarConfig.variant === 'sidebar' && <Sidebar.Rail />}
+		</Sidebar>
 	)
 }
-
-export const SIDEBAR_WIDTH = 224

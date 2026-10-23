@@ -83,7 +83,14 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	}
 
 	return (
-		<Form id="create-club-form" form={form} onSubmit={onSubmit} onKeyDown={handleKeyDown}>
+		<Form
+			id="create-club-form"
+			className="flex flex-1 flex-col"
+			fieldsetClassName="flex-1"
+			form={form}
+			onSubmit={onSubmit}
+			onKeyDown={handleKeyDown}
+		>
 			<SteppedForm
 				localeBase="createBookClubScene"
 				steps={steps}

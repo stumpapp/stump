@@ -6,12 +6,11 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import { SceneContainer } from '@/components/container'
 import {
 	CreateOrUpdateLibrarySchema,
 	intoThumbnailConfig,
 } from '@/components/library/createOrUpdate'
-import { SteppedFormSceneHeader } from '@/components/steppedForm'
+import { CreateSceneHeader } from '@/components/sharedLayout'
 import { useConfetti } from '@/hooks/useConfetti'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
@@ -49,7 +48,7 @@ export default function CreateLibraryScene() {
 			libraries: { nodes: libraries },
 		},
 	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const {
 		mutate: createLibrary,
 		isPending,
@@ -109,22 +108,19 @@ export default function CreateLibraryScene() {
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<SteppedFormSceneHeader
-				localeBase="createLibraryScene"
-				subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
+			<CreateSceneHeader
+				parent={{ label: translate('shared.common.libraries'), to: paths.libraries() }}
+				title={t('sidebar.buttons.createLibrary')}
+				docsLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
 			/>
 
-			<SceneContainer>
-				<div className="gap-12 flex flex-col">
-					{libraries && (
-						<CreateLibraryForm
-							existingLibraries={libraries}
-							onSubmit={handleSubmit}
-							isLoading={isPending}
-						/>
-					)}
-				</div>
-			</SceneContainer>
+			{libraries && (
+				<CreateLibraryForm
+					existingLibraries={libraries}
+					onSubmit={handleSubmit}
+					isLoading={isPending}
+				/>
+			)}
 		</div>
 	)
 }

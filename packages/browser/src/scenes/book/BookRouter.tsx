@@ -11,6 +11,17 @@ const EpubReaderScene = lazy(() => import('./reader/EpubReaderScene.tsx'))
 const PDFReaderScene = lazy(() => import('./reader/PDFReaderScene.tsx'))
 const BookManagementScene = lazy(() => import('./settings/BookManagementScene.tsx'))
 
+// TODO(ui): conform to the pattern ive been leaning on:
+// - tab nav in page header
+//    - details
+//    - metadata
+//    - reading timeline (wordy for this)
+// - not sure if settings needed really
+// - breadcrumbs? the current pattern ive been doing is:
+//    - breadcrumbs for settings pages
+//    - bigger header for entities (e.g., library name, etc) + stats
+//   but book names can be longer, so unsure?
+
 export default function BookRouter() {
 	return (
 		<Suspense>

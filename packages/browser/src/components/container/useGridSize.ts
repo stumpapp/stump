@@ -3,10 +3,6 @@ import { useWindowSize } from 'rooks'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { usePreferences } from '@/hooks/usePreferences'
-
-import { SIDEBAR_WIDTH } from '../navigation/sidebar'
-
 export type GridDensity =
 	| 'ultra-compact'
 	| 'compact'
@@ -136,24 +132,8 @@ export const useGridSize = () => {
 	const dimensions = useWindowSize()
 	const { density, setDensity } = useGridSizeStore()
 
-	const {
-		preferences: { primaryNavigationMode },
-	} = usePreferences()
-	const { innerWidth } = useMemo(
-		() => ({
-			innerWidth: dimensions.innerWidth ?? window.innerWidth,
-		}),
-		[dimensions],
-	)
-	const adjustedWidth = useMemo(
-		() =>
-			primaryNavigationMode === 'SIDEBAR' && innerWidth <= 768
-				? innerWidth - SIDEBAR_WIDTH
-				: innerWidth,
-		[innerWidth, primaryNavigationMode],
-	)
-
-	const deviceType = useMemo(() => getDeviceType(adjustedWidth), [adjustedWidth])
+	const innerWidth = dimensions.innerWidth ?? window.innerWidth
+	const deviceType = useMemo(() => getDeviceType(innerWidth), [innerWidth])
 
 	const currentDensity = density ?? DEFAULT_DENSITY
 	const columns = useMemo(

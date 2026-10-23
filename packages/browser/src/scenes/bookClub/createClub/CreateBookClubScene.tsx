@@ -9,8 +9,8 @@ import {
 	CreateOrUpdateBookClubSchema,
 	defaultMemberSpec,
 } from '@/components/bookClub/createOrUpdateForm/schema'
-import { SceneContainer } from '@/components/container'
-import { SteppedFormSceneHeader } from '@/components/steppedForm'
+import { CreateSceneHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateBookClubForm from './CreateBookClubForm'
@@ -27,6 +27,7 @@ const mutation = graphql(`
 export default function CreateBookClubScene() {
 	const paths = usePaths()
 	const navigate = useNavigate()
+	const { t } = useTranslate()
 
 	const { mutate: createClub } = useGraphQLMutation(mutation, {
 		onSuccess: ({ createBookClub: { slug } }) => {
@@ -68,15 +69,14 @@ export default function CreateBookClubScene() {
 				<title>Stump | Create a book club</title>
 			</Helmet>
 
-			<SteppedFormSceneHeader localeBase="createBookClubScene" />
+			<CreateSceneHeader
+				parent={{ label: t('sidebar.buttons.bookClubs'), to: paths.bookClubs() }}
+				title={t('sidebar.buttons.createBookClub')}
+			/>
 
-			<SceneContainer>
-				<div className="gap-12 flex flex-col">
-					<Suspense>
-						<CreateBookClubForm onSubmit={handleSubmit} />
-					</Suspense>
-				</div>
-			</SceneContainer>
+			<Suspense>
+				<CreateBookClubForm onSubmit={handleSubmit} />
+			</Suspense>
 		</div>
 	)
 }

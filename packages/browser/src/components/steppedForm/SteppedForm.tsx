@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 
+import { SceneContainer } from '../container'
 import { SteppedFormContext } from './context'
 import { MobileStepHeader } from './MobileStepHeader'
 import { StepHeader } from './StepHeader'
 import { SteppedFormFooter } from './SteppedFormFooter'
+import { StepperSidebar } from './StepperSidebar'
 import type { SteppedFormStep } from './types'
 import { useSteppedFormState } from './useSteppedFormState'
-import { VerticalStepper } from './VerticalStepper'
 
 type Props = {
 	localeBase: string
@@ -37,22 +38,23 @@ export function SteppedForm({ localeBase, steps, submitLabel, isSubmitting }: Pr
 
 	return (
 		<SteppedFormContext.Provider value={{ localeBase, steps, ...state }}>
-			<div className="lg:flex-row lg:items-start lg:gap-8 flex w-full flex-col">
-				<MobileStepHeader className="lg:hidden" />
+			<div className="flex w-full flex-1">
+				{/* top-12 for page header offset*/}
+				<StepperSidebar className="top-12 lg:flex hidden h-[calc(var(--main-height)-3rem)]" />
 
-				<aside className="top-4 w-56 lg:block sticky hidden shrink-0">
-					<VerticalStepper />
-				</aside>
+				<SceneContainer className="min-w-0 flex-1">
+					<MobileStepHeader className="lg:hidden" />
 
-				<div className="max-w-4xl min-w-0 flex flex-1 flex-col">
-					<StepHeader />
+					<div className="max-w-4xl flex w-full flex-col">
+						<StepHeader />
 
-					<div key={step?.key} className="mt-6 gap-8 flex flex-col">
-						{step?.render()}
+						<div key={step?.key} className="mt-6 gap-8 flex flex-col">
+							{step?.render()}
+						</div>
+
+						<SteppedFormFooter submitLabel={submitLabel} isSubmitting={isSubmitting} />
 					</div>
-
-					<SteppedFormFooter submitLabel={submitLabel} isSubmitting={isSubmitting} />
-				</div>
+				</SceneContainer>
 			</div>
 		</SteppedFormContext.Provider>
 	)

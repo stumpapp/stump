@@ -130,7 +130,15 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					}}
 				/>
 			)}
-			<Form form={form} onSubmit={onSubmit} id="createLibraryForm" onKeyDown={handleKeyDown}>
+
+			<Form
+				form={form}
+				onSubmit={onSubmit}
+				id="createLibraryForm"
+				className="flex flex-1 flex-col"
+				fieldsetClassName="flex-1"
+				onKeyDown={handleKeyDown}
+			>
 				<SteppedForm
 					localeBase="createLibraryScene"
 					steps={steps}

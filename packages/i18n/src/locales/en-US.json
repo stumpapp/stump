@@ -1812,25 +1812,21 @@
             "label": "Layout and Arrangement",
             "description": "Customize how Stump displays information and organizes content"
           },
-          "primaryNavigation": {
-            "label": "Primary Navigation",
-            "description": "Choose between a minimal sidebar or a topbar navigation",
-            "options": {
-              "sidebar": "Sidebar",
-              "topbar": "Topbar"
-            },
-            "disclaimer": "* Settings for the unselected option will be disabled or hidden"
-          },
-          "doubleSidebar": {
-            "label": "Settings Sidebar",
-            "description": "Enables sidebar navigation for the settings pages"
-          },
-          "replacePrimarySidebar": {
-            "label": "Replace Primary Sidebar",
-            "description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
-            "tooltips": {
-              "doubleSidebar": "This setting requires the settings sidebar to be enabled",
-              "topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+          "sidebar": {
+          	"sidebarStyle": {
+           		"label": "Sidebar Style",
+             	"options": {
+              	"sidebar": "Normal",
+               	"floating": "Floating",
+                "inset": "Inset"
+              }
+           	},
+            "collapseBehavior": {
+            	"label": "Collapse Behavior",
+             	"options": {
+              	"icon": "Show Icons",
+               	"offcanvas": "Fully Hide"
+              }
             }
           },
           "navigationArrangement": {
@@ -3017,6 +3013,8 @@
       },
       "logIn": "Log In",
       "login": "Login",
+      "members_one": "Member",
+      "members_other": "Members",
       "seeError": "See error",
       "remove": "Remove",
       "goBack": "Go Back",
@@ -3102,6 +3100,8 @@
       "unknownTitle": "Untitled",
       "url": "URL",
       "username": "Username",
+      "users_one": "User",
+      "users_other": "Users",
       "value": "Value",
       "version": "Version",
       "accessOpdsV2": "Access OPDS v2.0",

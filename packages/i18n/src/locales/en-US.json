@@ -876,6 +876,16 @@
       },
       "failedToCreateLibrary": "Failed to Create Library"
     },
+    "directoryPicker": {
+    	"title": "Select a Directory",
+     	"description": "Pick the directory where your library is located",
+      "unableToOpen": "Unable to Open",
+      "noSubdirectories": "No subdirectories",
+      "goToParent": "Go to Parent",
+      "goToPath": "Go to Path",
+      "inputPlaceholder": "/path/to/directory",
+      "showHiddenFiles": "Show Hidden"
+    },
     "fileExplorer": {
       "uploadModal": {
         "title": {

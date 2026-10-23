@@ -1,4 +1,5 @@
 import {
+	Breadcrumb,
 	Button,
 	cn,
 	DropdownMenu,
@@ -43,9 +44,26 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoC
 	return (
 		<PageHeader>
 			<div className="gap-3 min-w-0 flex items-center">
-				<Heading size="sm" className="shrink-0">
+				{/*<Heading size="sm" className="shrink-0">
 					{name}
-				</Heading>
+				</Heading>*/}
+
+				{/*TODO: i am tempted by this, it would remove the need for backling to lib in the actions
+				menu, and with one action left i feel like that can just be relocated to a place in settings
+				the problems i see are:
+				- less prominent (ish) name in header, i think enough tho
+				- i don't think two breadcrumbs for e.g. books would be good (i.e., library > series > bookname)
+				  but not doing it would be inconsistent
+				separately i think refactoring entity header would be good so that on mobile the tabs collapse to
+				some other kind of nav? generally some space issues even on md breakpoint
+						*/}
+				<Breadcrumb>
+					<Breadcrumb.List>
+						<Breadcrumb.Link>Books</Breadcrumb.Link>
+						<Breadcrumb.Separator />
+						<Breadcrumb.Page>{name}</Breadcrumb.Page>
+					</Breadcrumb.List>
+				</Breadcrumb>
 
 				{actions && (
 					<DropdownMenu
@@ -61,7 +79,7 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoC
 				)}
 
 				{stats && (
-					<div className="sm:flex gap-2 hidden items-center">
+					<div className="md:flex gap-2 hidden items-center">
 						{stats.map(({ key, ...stat }) => (
 							<MiniStatCard key={key} {...stat} />
 						))}

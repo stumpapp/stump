@@ -2718,11 +2718,10 @@
       "diskUsage": "Disk Usage"
     },
     "noLibraries": {
-      "heading": "Nothing to See Here",
-      "messagePrefix": "You can't see what you don't have",
+      "heading": "You Have No Libraries",
       "message": {
-        "create": "Create a library to get started",
-        "wait": "Once libraries are created, they'll be displayed here"
+        "create": "Once you create a library, content will start showing up here",
+        "wait": "Once a library is created, content will start showing up here"
       },
       "links": {
         "create": "Create Library",
@@ -3044,6 +3043,8 @@
       "xBooks_other": "{{count}} Books",
       "seeMore": "See More",
       "series": "Series",
+      "series_one": "Series",
+      "series_other": "Series",
       "fileUpload": {
         "someRejected": "Some files were rejected. Please check the file types and try again",
         "tooManyFiles": "You have selected too many files",
@@ -3111,6 +3112,8 @@
       "presentTime": "Present",
       "home": "Home",
       "libraries": "Libraries",
+      "libraries_one": "Library",
+      "libraries_other": "Libraries",
       "smartLists": "Smart Lists",
       "files": "Files",
       "search": "Search",

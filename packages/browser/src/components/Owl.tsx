@@ -54,7 +54,7 @@ export function OwlEmptyState({
 				)}
 			</div>
 
-			{actions && <div className="gap-2 flex flex-col items-center">{actions}</div>}
+			{actions && <div className="gap-2 md:flex-row flex flex-col items-center">{actions}</div>}
 		</div>
 	)
 }

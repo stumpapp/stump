@@ -1,4 +1,6 @@
+export { CollectionSceneHeader } from './CollectionSceneHeader'
 export { CreateSceneHeader } from './CreateSceneHeader'
+export { DocsLinkButton } from './DocsLinkButton'
 export { type EntityCrumb, EntityHeader } from './EntityHeader'
 export { EntityOverviewSheet } from './EntityOverviewSheet'
 export { EntitySettingsSidebar } from './EntitySettingsSidebar'

@@ -1,28 +1,14 @@
 import { useGraphQL, useSDK } from '@stump/client'
-import {
-	ButtonOrLink,
-	Heading,
-	InputGroup,
-	ProgressSpinner,
-	ScrollArea,
-	Text,
-	usePreviousIsDifferent,
-} from '@stump/components'
-import { graphql, SmartListsInput } from '@stump/graphql'
-import { Search } from 'lucide-react'
-import pluralize from 'pluralize'
-import { useEffect, useState } from 'react'
-import { useDebouncedValue } from 'rooks'
+import { graphql } from '@stump/graphql'
+import { ListFilter } from 'lucide-react'
+import { useCallback, useRef } from 'react'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { CollectionSceneHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
-import { usePaths } from '@/paths'
 
-import SmartListCard from './SmartListCard'
-
-// TODO: move filter to URL params
-// TODO(cleanup): this scene lowkey ugly
+import SmartListGridItem from './SmartListGridItem'
 
 const LOCALE_BASE_KEY = `userSmartListsScene`
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
@@ -31,134 +17,79 @@ const query = graphql(`
 	query SmartListsWithSearch($input: SmartListsInput!) {
 		smartLists(input: $input) {
 			id
-			creatorId
-			description
-			defaultGrouping
-			filters
-			joiner
-			name
-			visibility
-			...SmartListCard
+			...SmartListWebGridItem
 		}
 	}
 `)
 
 export default function UserSmartListsScene() {
-	const paths = usePaths()
-	const { t } = useTranslate()
-	/**
-	 * The local value state for the search input
-	 */
-	const [value, setValue] = useState<string>()
-	/**
-	 * The debounced value of the local value state
-	 */
-	const [debouncedValue] = useDebouncedValue(value, 500)
-
-	const [search, setSearch] = useState<string>()
-
-	const shouldUpdate = usePreviousIsDifferent(debouncedValue)
-
-	/**
-	 * An effect that updates the search state only when the debounced value *actually* changes
-	 */
-	useEffect(() => {
-		if (shouldUpdate) {
-			setSearch(debouncedValue)
-		}
-	}, [debouncedValue, setSearch, shouldUpdate])
-
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
-	const {
-		data: { smartLists: lists } = {},
-		isLoading,
-		isRefetching,
-	} = useGraphQL(query, [sdk.cacheKeys.smartLists, search], {
-		input: {
-			search,
-		} as SmartListsInput,
+	const { data, isLoading } = useGraphQL(query, [sdk.cacheKeys.smartLists, 'scene'], {
+		input: {},
 	})
 
-	if (isLoading) {
-		return null
-	}
+	const smartLists = data?.smartLists ?? []
 
-	const smartLists = lists ?? []
+	// This makes sure we do not repeat layout variants if possible:
+	//
+	// For example, there are only two layouts for lists with 3 books,
+	// and if only the 1st and 3rd lists have 3 books, then if we used
+	// the list index they would have both used the same layout variant
+	const layoutRegistry = useRef({
+		// The layout variant number (non-modulo) assigned to a smart list ID
+		assignments: new Map<string, number>(),
+		// Record the smallest unused layout variant number (non-modulo) for each catagory
+		counters: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+	})
 
-	const renderLists = () => {
+	const getLayoutNumber = useCallback((smartListId: string, itemCount: number) => {
+		if (itemCount < 1 || itemCount > 5) return undefined
+
+		const { assignments, counters } = layoutRegistry.current
+
+		if (assignments.has(smartListId)) {
+			return assignments.get(smartListId)!
+		}
+
+		const category = itemCount as 1 | 2 | 3 | 4 | 5
+		const layoutNumber = counters[category]
+		assignments.set(smartListId, layoutNumber)
+		counters[category]++
+
+		return layoutNumber
+	}, [])
+
+	const renderContent = () => {
+		if (isLoading) return null
+
 		if (!smartLists.length) {
 			return (
 				<GenericEmptyState
-					containerClassName="justify-start items-start pt-0 pl-1"
-					contentClassName="text-left"
 					title={t(withLocaleKey('list.emptyState.heading'))}
-					subtitle={
-						search
-							? t(withLocaleKey('list.emptyState.noMatchesMessage'))
-							: t(withLocaleKey('list.emptyState.noListsMessage'))
-					}
+					subtitle={t(withLocaleKey('list.emptyState.noListsMessage'))}
 				/>
 			)
 		}
 
-		// TODO: prolly don't scrollarea on mobile... just scroll on the page
 		return (
-			<ScrollArea className="pr-3 md:w-2/3 lg:max-w-xl w-full">
-				<div className="space-y-2 flex-col">
-					{smartLists.map((list) => (
-						<SmartListCard key={list.id} data={list} />
-					))}
-				</div>
-			</ScrollArea>
+			<div className="gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 grid grid-cols-1">
+				{smartLists.map((list) => (
+					<SmartListGridItem key={list.id} data={list} getLayoutNumber={getLayoutNumber} />
+				))}
+			</div>
 		)
 	}
 
-	// TODO: move header to a layout for the smart list router
-	// TODO: can't decide if I like the border-b
 	return (
 		<>
-			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-border">
-				<div>
-					<Heading size="lg" bold>
-						Smart lists
-					</Heading>
-					<Text>Your favorite searches and filters saved for easy access</Text>
-				</div>
+			<CollectionSceneHeader
+				title={translate('shared.common.smartLists')}
+				docsLink="https://stumpapp.dev/docs/guides/features/smart-list"
+				stats={data ? [{ key: 'lists', icon: ListFilter, value: smartLists.length }] : undefined}
+			/>
 
-				<Text variant="muted" size="sm">
-					You have access to {smartLists.length} smart {pluralize('list', smartLists.length)}
-				</Text>
-			</header>
-
-			<SceneContainer className="relative h-full overflow-hidden">
-				<div className="top-0 min-h-10 py-2 backdrop-blur-sm sticky z-10 bg-background">
-					<div className="gap-x-2 pr-3 md:w-2/3 lg:max-w-xl flex w-full flex-row items-center justify-between">
-						<InputGroup>
-							<InputGroup.Addon align="inline-start">
-								<Search className="h-4 w-4 text-muted-foreground" />
-							</InputGroup.Addon>
-
-							<InputGroup.Input
-								placeholder={t(withLocaleKey('searchPlaceholder'))}
-								value={value}
-								onChange={(e) => setValue(e.target.value)}
-							/>
-
-							{isRefetching && (
-								<InputGroup.Addon align="inline-end">
-									<ProgressSpinner size="sm" />
-								</InputGroup.Addon>
-							)}
-						</InputGroup>
-
-						<ButtonOrLink href={paths.smartListCreate()} variant="ghost">
-							{t(withLocaleKey('buttons.createSmartList'))}
-						</ButtonOrLink>
-					</div>
-				</div>
-
-				{renderLists()}
-			</SceneContainer>
+			<SceneContainer>{renderContent()}</SceneContainer>
 		</>
 	)
 }

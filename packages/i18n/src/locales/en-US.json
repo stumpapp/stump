@@ -229,14 +229,6 @@
         "bookClubsEnabled": "Book Club Features"
       },
       "autoSyncLocalData": "Auto-Sync Local Data",
-      "textCase": {
-        "label": "Text Case",
-        "options": {
-          "lowerCase": "Lowercase",
-          "sentenceCase": "Sentence Case",
-          "titleCase": "Title Case"
-        }
-      },
       "tintListBackground": "Tint List Backgrounds",
       "management": {
         "label": "Management",
@@ -3542,6 +3534,14 @@
         "invalidPage": "'{{page}}' is not a page number"
       },
       "showCurrentChapter": "Show Current Chapter"
+    },
+    "textCase": {
+      "label": "Text Case",
+      "options": {
+        "lowerCase": "Lowercase",
+        "sentenceCase": "Sentence Case",
+        "titleCase": "Title Case"
+      }
     },
     "addOrEditServer": {
       "createServer": "Create Server",

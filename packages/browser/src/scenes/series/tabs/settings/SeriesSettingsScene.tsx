@@ -63,8 +63,19 @@ export default function SeriesSettingsScene() {
 
 	const handleAnalyze = useCallback(() => analyze({ id: series.id }), [analyze, series.id])
 	const handleResetMetadata = useCallback(
-		(impact: MetadataResetImpact) => resetMetadata({ id: series.id, impact }),
-		[resetMetadata, series.id],
+		(impact: MetadataResetImpact) =>
+			resetMetadata(
+				{ id: series.id, impact },
+				{
+					onSuccess: () => {
+						// resetting the books of a virtual series takes them all out of it, which deletes it
+						if (!series.path && impact !== MetadataResetImpact.Series) {
+							navigate(paths.librarySeries(series.library.id))
+						}
+					},
+				},
+			),
+		[resetMetadata, series.id, series.path, series.library.id, navigate, paths],
 	)
 
 	useEffect(() => {

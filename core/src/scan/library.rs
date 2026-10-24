@@ -485,22 +485,6 @@ impl JobLifecycle for LibraryScanJob {
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
-		if (did_create || did_update)
-			&& image_options.is_none()
-			&& self.config.as_ref().is_some_and(|config| {
-				config.organization_mode == OrganizationMode::Metadata
-			}) {
-			series::Entity::update_many()
-				.filter(series::Column::LibraryId.eq(&self.id))
-				.filter(series::Column::Kind.eq(SeriesKind::Virtual))
-				.col_expr(
-					series::Column::UpdatedAt,
-					Expr::value(Some(chrono::Utc::now().fixed_offset())),
-				)
-				.exec(ctx.conn())
-				.await?;
-		}
-
 		if let Err(error) = handle_scan_complete(self, ctx, &self.options).await {
 			tracing::error!(error = ?error, "Failed to handle scan completion");
 		}

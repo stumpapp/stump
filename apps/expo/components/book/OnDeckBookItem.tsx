@@ -5,7 +5,7 @@ import { memo } from 'react'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
-import { formatSeriesPosition } from '~/lib/bookUtils'
+import { bookSeriesPosition, formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -80,11 +80,7 @@ function OnDeckBookItem({ book }: Props) {
 	} = data.thumbnail
 
 	const seriesPosition = formatSeriesPosition(
-		data.series
-			? data.metadata?.number == null
-				? data.seriesPosition
-				: Number(data.metadata.number)
-			: null,
+		data.series ? bookSeriesPosition(data) : null,
 		data.series?.metadata?.totalIssues ?? null,
 		{
 			t,

@@ -15,7 +15,8 @@ use models::{
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, TransactionTrait};
 use std::collections::HashMap;
 use stump_core::metadata::{
-	membership::sync_media_membership, provider::ProviderClientCache,
+	membership::{remove_series_thumbnails, sync_media_membership},
+	provider::ProviderClientCache,
 };
 
 #[derive(Default)]
@@ -51,10 +52,11 @@ impl MediaMetadataMutation {
 			active_model.media_id = Set(Some(model.media.id.clone()));
 			active_model.insert(&txn).await?
 		};
-		let book =
+		let (book, thumbnails) =
 			sync_media_membership(&txn, model.media, updated_metadata.series.clone())
 				.await?;
 		txn.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		let model = media::ModelWithMetadata {
 			media: book,

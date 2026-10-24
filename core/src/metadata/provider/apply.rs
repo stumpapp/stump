@@ -10,7 +10,10 @@ use rust_decimal::prelude::FromPrimitive;
 use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
 use serde_json::Value as JsonValue;
 
-use crate::{metadata::membership::sync_media_membership, CoreError};
+use crate::{
+	metadata::membership::{remove_series_thumbnails, sync_media_membership},
+	CoreError,
+};
 
 /// Apply the given match candidate to series metadata, merging fields
 /// according to the provided strategy and locked fields
@@ -135,10 +138,11 @@ where
 			active.insert(&txn).await?
 		},
 	};
-	sync_media_membership(&txn, book, updated.series).await?;
+	let (_, thumbnails) = sync_media_membership(&txn, book, updated.series).await?;
 
 	mark_fetch_status_accepted(&txn, None, Some(media_id), candidate).await?;
 	txn.commit().await?;
+	remove_series_thumbnails(thumbnails).await;
 
 	Ok(())
 }

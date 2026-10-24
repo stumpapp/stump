@@ -13,21 +13,23 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, OnConflict, SimpleExpr},
-	ActiveValue, DatabaseTransaction, IntoActiveModel, Iterable, QueryTrait, Set,
-	TransactionTrait,
+	ActiveValue, DatabaseTransaction, IntoActiveModel, Iterable, QuerySelect, QueryTrait,
+	Set, TransactionTrait,
 };
 
 use crate::{
 	config::StumpConfig,
 	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
 	error::{CoreError, CoreResult},
-	event::CreatedMedia,
+	event::{CreatedManySeries, CreatedMedia},
 	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
 	media::{
 		prepare::{prepare_draft, MediaDraft},
 		processor::{generate_hashes, process_metadata, MediaProcessorOptions},
 	},
-	metadata::membership::resolve_series_membership,
+	metadata::membership::{
+		refresh_series, remove_series_thumbnails, resolve_series_membership,
+	},
 	scan::{
 		options::{BookVisitOperation, BookVisitResult, CustomVisitResult},
 		tag_cache::TagCache,
@@ -438,10 +440,12 @@ async fn insert_media(
 		}
 
 		let mut chunk_created_series = 0;
+		let mut joined_series = Vec::new();
 		if organization_mode == OrganizationMode::Metadata {
 			let (memberships, created) =
 				resolve_series_membership(&txn, library_id, &series_names).await?;
 			chunk_created_series = created;
+			joined_series.extend(memberships.iter().flatten().cloned());
 			for (book, membership) in media_models.iter_mut().zip(memberships) {
 				book.series_id = Set(membership);
 			}
@@ -456,15 +460,15 @@ async fn insert_media(
 			.collect();
 		insert_media_in_txn(&txn, media_models, meta_models, tags_by_media, &tag_cache)
 			.await?;
+		// ponytail: new books only join series, so nothing can be left empty to prune here
+		refresh_series(&txn, joined_series).await?;
 		txn.commit().await?;
 		created_series += chunk_created_series;
 		if chunk_created_series > 0 {
-			worker_ctx.emit_event(CoreEvent::CreatedManySeries(
-				crate::event::CreatedManySeries {
-					count: chunk_created_series,
-					library_id: library_id.to_string(),
-				},
-			));
+			worker_ctx.emit_event(CoreEvent::CreatedManySeries(CreatedManySeries {
+				count: chunk_created_series,
+				library_id: library_id.to_string(),
+			}));
 		}
 
 		// TODO(metadata-fetching): Track media_ids as needing fetching (assuming enabled)
@@ -532,8 +536,9 @@ async fn persist_visit_chunk(
 	library_id: &str,
 	organization_mode: OrganizationMode,
 	mut results: Vec<BookVisitResult>,
-) -> CoreResult<u64> {
+) -> CoreResult<(u64, Vec<String>)> {
 	let mut created_series = 0;
+	let mut touched_series = Vec::new();
 	if organization_mode == OrganizationMode::Metadata {
 		let (indices, names): (Vec<_>, Vec<_>) = results
 			.iter()
@@ -551,9 +556,25 @@ async fn persist_visit_chunk(
 				Some((index, name))
 			})
 			.unzip();
+		let book_ids: Vec<_> = indices
+			.iter()
+			.filter_map(|&index| match &results[index] {
+				BookVisitResult::Built(book) => book.media.id.try_as_ref().cloned(),
+				BookVisitResult::Custom(custom) => Some(custom.id.clone()),
+			})
+			.collect();
+		touched_series = media::Entity::find()
+			.select_only()
+			.column(media::Column::SeriesId)
+			.filter(media::Column::Id.is_in(book_ids))
+			.filter(media::Column::SeriesId.is_not_null())
+			.into_tuple::<String>()
+			.all(txn)
+			.await?;
 		let (memberships, created) =
 			resolve_series_membership(txn, library_id, &names).await?;
 		created_series = created;
+		touched_series.extend(memberships.iter().flatten().cloned());
 		for (index, membership) in indices.into_iter().zip(memberships) {
 			match &mut results[index] {
 				BookVisitResult::Built(book) => book.media.series_id = Set(membership),
@@ -571,7 +592,8 @@ async fn persist_visit_chunk(
 	for result in results {
 		handle_book_visit_operation(txn, result).await?;
 	}
-	Ok(created_series)
+	let thumbnails = refresh_series(txn, touched_series).await?;
+	Ok((created_series, thumbnails))
 }
 
 /// Handles missing media by updating the database with the latest information. A media is
@@ -886,13 +908,14 @@ pub(crate) async fn visit_and_update_media(
 		)
 		.await
 		{
-			Ok(created) => {
+			Ok((created, thumbnails)) => {
 				txn.commit().await?;
+				remove_series_thumbnails(thumbnails).await;
 				output.updated_media += chunk_count as u64;
 				output.created_series += created;
 				if created > 0 {
 					worker_ctx.emit_event(CoreEvent::CreatedManySeries(
-						crate::event::CreatedManySeries {
+						CreatedManySeries {
 							count: created,
 							library_id: library_id.to_string(),
 						},

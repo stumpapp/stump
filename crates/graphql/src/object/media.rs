@@ -282,17 +282,13 @@ impl Media {
 		};
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let kind = self
-			.series(ctx)
-			.await?
-			.ok_or("Series not found")?
-			.model
-			.kind;
+		// without a loadable series, fall back to filesystem (name) ordering
+		let kind = self.series(ctx).await?.map(|series| series.model.kind);
 		if let Some(position) = self
 			.metadata
 			.as_ref()
 			.and_then(|m| m.model.number)
-			.filter(|_| kind == SeriesKind::Filesystem)
+			.filter(|_| kind != Some(SeriesKind::Virtual))
 		{
 			if position.fract().is_zero() {
 				return Ok(Some(position.to_i64().unwrap_or(0)));
@@ -360,12 +356,8 @@ impl Media {
 			});
 		};
 
-		let kind = self
-			.series(ctx)
-			.await?
-			.ok_or("Series not found")?
-			.model
-			.kind;
+		// without a loadable series, fall back to filesystem (name) ordering
+		let kind = self.series(ctx).await?.map(|series| series.model.kind);
 		let (name, id, number) = match pagination.after.as_ref() {
 			Some(after) if after != &self.model.id => {
 				let book = media::ModelWithMetadata::find_for_user(user)
@@ -390,7 +382,7 @@ impl Media {
 		let tie_break = Condition::any()
 			.add(media::Column::Name.gt(&name))
 			.add(media::Column::Name.eq(&name).and(media::Column::Id.gt(&id)));
-		let after = if kind == SeriesKind::Virtual {
+		let after = if kind == Some(SeriesKind::Virtual) {
 			media::Entity::after_number(
 				&name,
 				&id,
@@ -404,7 +396,7 @@ impl Media {
 			media::ModelWithMetadata::find_for_user(user)
 				.filter(media::Column::SeriesId.eq(series_id))
 				.filter(after),
-			kind,
+			kind.unwrap_or(SeriesKind::Filesystem),
 		)
 		.limit(pagination.limit)
 		.into_model::<media::ModelWithMetadata>()

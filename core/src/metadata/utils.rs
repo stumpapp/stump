@@ -1,6 +1,7 @@
 use crate::{
 	media::processor::error::MediaProcessorError, metadata::ProcessedMediaMetadata,
 };
+use models::shared::enums::OrganizationMode;
 use quick_xml::de::from_str as xml_from_str;
 
 pub(crate) fn metadata_from_buf(
@@ -12,14 +13,11 @@ pub(crate) fn metadata_from_buf(
 
 pub(crate) fn comic_info_metadata(
 	contents: &str,
-	organization_mode: models::shared::enums::OrganizationMode,
+	organization_mode: OrganizationMode,
 ) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 	match metadata_from_buf(contents) {
 		Ok(metadata) => Ok(Some(metadata)),
-		Err(error)
-			if organization_mode
-				== models::shared::enums::OrganizationMode::Filesystem =>
-		{
+		Err(error) if organization_mode == OrganizationMode::Filesystem => {
 			tracing::warn!(?error, "Ignoring invalid optional ComicInfo.xml");
 			Ok(None)
 		},

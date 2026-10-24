@@ -284,7 +284,7 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 						value.first().filter(|name| !name.trim().is_empty())
 					{
 						if value.iter().all(|other| other.trim() == name.trim()) {
-							metadata.series = Some(name.clone());
+							metadata.series = Some(name.trim().to_string());
 						} else {
 							tracing::warn!(series = ?value, "Multiple series names are ambiguous; leaving the book standalone");
 						}

@@ -15,6 +15,18 @@ export const parseSeriesPosition = (value: string | number | null | undefined): 
 	return Number.isFinite(position) ? position : null
 }
 
+type MediaLike = {
+	metadata?: { number?: string | number | null } | null
+	seriesPosition?: number | null
+}
+
+/**
+ * A book's position in its series, preferring its metadata number over the position
+ * computed by the server
+ */
+export const bookSeriesPosition = ({ metadata, seriesPosition }: MediaLike): number | null =>
+	parseSeriesPosition(metadata?.number) ?? seriesPosition ?? null
+
 // TODO(metadata): Fix this at the core
 // this is kinda a bandaid fix for one of the items in https://github.com/stumpapp/stump/issues/885
 // a higher fidelity fix would be to correct at core when parsing meta

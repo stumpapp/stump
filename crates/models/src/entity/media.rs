@@ -182,6 +182,7 @@ impl Entity {
 		};
 		query.order_by_asc(Column::Name).order_by_asc(Column::Id)
 	}
+
 	pub fn after_number(
 		name: &str,
 		id: &str,

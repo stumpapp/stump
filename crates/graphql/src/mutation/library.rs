@@ -26,7 +26,10 @@ use stump_core::{
 	},
 	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-	metadata::provider::{MetadataFetchJobParams, MetadataFetchScope},
+	metadata::{
+		membership::{remove_series_thumbnails, reset_media_metadata},
+		provider::{MetadataFetchJobParams, MetadataFetchScope},
+	},
 	scan::options::ScanOptions,
 };
 use tokio::fs;
@@ -327,18 +330,17 @@ impl LibraryMutation {
 			}
 		}
 
-		if matches!(
+		let thumbnails = if matches!(
 			impact,
 			MetadataResetImpact::Books | MetadataResetImpact::Everything
 		) {
-			stump_core::metadata::membership::reset_media_metadata(
-				&tx,
-				media::Column::LibraryId.eq(&library.id),
-			)
-			.await?;
-		}
+			reset_media_metadata(&tx, media::Column::LibraryId.eq(&library.id)).await?
+		} else {
+			vec![]
+		};
 
 		tx.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		tracing::debug!(?impact, library_id = ?library.id, "Reset metadata for library");
 

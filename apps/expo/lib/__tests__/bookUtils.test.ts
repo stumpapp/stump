@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { formatSeriesPosition, parseSeriesPosition } from '../bookUtils'
+import { bookSeriesPosition, formatSeriesPosition, parseSeriesPosition } from '../bookUtils'
 
 describe('bookUtils', () => {
 	describe('parseSeriesPosition', () => {
@@ -19,6 +19,19 @@ describe('bookUtils', () => {
 			[NaN, null],
 		])('parses %s as %s', (value, expected) => {
 			expect(parseSeriesPosition(value)).toBe(expected)
+		})
+	})
+
+	describe('bookSeriesPosition', () => {
+		it('prefers the metadata number, including zero', () => {
+			expect(bookSeriesPosition({ metadata: { number: '0' }, seriesPosition: 3 })).toBe(0)
+			expect(bookSeriesPosition({ metadata: { number: '1.5' }, seriesPosition: 3 })).toBe(1.5)
+		})
+
+		it('falls back to the series position', () => {
+			expect(bookSeriesPosition({ metadata: { number: null }, seriesPosition: 3 })).toBe(3)
+			expect(bookSeriesPosition({ metadata: null, seriesPosition: 3 })).toBe(3)
+			expect(bookSeriesPosition({ metadata: { number: 'abc' } })).toBeNull()
 		})
 	})
 

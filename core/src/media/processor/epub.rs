@@ -588,6 +588,40 @@ fn find_image_in_xhtml(
 	}
 }
 
+/// An EPUB 3 `belongs-to-collection` entry
+#[derive(Debug)]
+struct EpubCollection {
+	id: String,
+	name: String,
+}
+
+/// The series name and position declared by EPUB 3 collections, when exactly one collection
+/// is refined as a series. `types` and `positions` are `(refines, value)` pairs from the
+/// `collection-type` and `group-position` entries.
+fn series_from_collections(
+	collections: &[EpubCollection],
+	types: &[(String, String)],
+	positions: &[(String, String)],
+) -> Option<(String, Option<String>)> {
+	let [collection] = collections else {
+		return None;
+	};
+	let refines_collection =
+		|refines: &String| !refines.is_empty() && *refines == collection.id;
+	let [(refines, kind)] = types else {
+		return None;
+	};
+	if !refines_collection(refines) || kind != "series" {
+		return None;
+	}
+	let position = match positions {
+		[] => None,
+		[(refines, position)] if refines_collection(refines) => Some(position.clone()),
+		_ => return None,
+	};
+	Some((collection.name.clone(), position))
+}
+
 /// Parse OPF XML content and extract supported metadata
 fn parse_opf_xml(
 	opf_content: &str,
@@ -598,9 +632,9 @@ fn parse_opf_xml(
 	let mut current_content = String::new();
 	let mut current_id = String::new();
 	let mut current_refines = String::new();
-	let mut collection_ids = Vec::new();
-	let mut collection_type_refs = Vec::new();
-	let mut collection_position_refs = Vec::new();
+	let mut collections = Vec::new();
+	let mut collection_types = Vec::new();
+	let mut collection_positions = Vec::new();
 	let mut buf = Vec::new();
 	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
 	let mut depth = 0usize;
@@ -776,21 +810,26 @@ fn parse_opf_xml(
 					if !content.is_empty() {
 						match current_tag.as_str() {
 							"belongs-to-collection" => {
-								collection_ids.push(current_id.clone());
+								collections.push(EpubCollection {
+									id: current_id.clone(),
+									name: content.clone(),
+								});
 								opf_metadata
 									.entry("collection_name".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"collection-type" => {
-								collection_type_refs.push(current_refines.clone());
+								collection_types
+									.push((current_refines.clone(), content.clone()));
 								opf_metadata
 									.entry("collection_type".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"group-position" => {
-								collection_position_refs.push(current_refines.clone());
+								collection_positions
+									.push((current_refines.clone(), content.clone()));
 								opf_metadata
 									.entry("collection_position".to_string())
 									.or_default()
@@ -858,28 +897,23 @@ fn parse_opf_xml(
 		buf.clear();
 	}
 
-	if !opf_metadata.contains_key("series") {
-		if let Some(names) = opf_metadata.get("collection_name") {
-			let types = opf_metadata.get("collection_type");
-			let positions = opf_metadata.get("collection_position");
-			let unambiguous = names.len() == 1
-				&& collection_ids.len() == 1
-				&& !collection_ids[0].is_empty()
-				&& types.is_some_and(|types| types == &["series".to_string()])
-				&& collection_type_refs == collection_ids
-				&& positions.is_none_or(|positions| {
-					positions.len() == 1 && collection_position_refs == collection_ids
-				});
-			if unambiguous {
-				let name = names.clone();
-				let position = positions.cloned();
-				opf_metadata.insert("series".into(), name);
+	if !opf_metadata.contains_key("series") && !collections.is_empty() {
+		match series_from_collections(
+			&collections,
+			&collection_types,
+			&collection_positions,
+		) {
+			Some((name, position)) => {
+				opf_metadata.insert("series".into(), vec![name]);
 				if let Some(position) = position {
-					opf_metadata.insert("series_index".into(), position);
+					opf_metadata.insert("series_index".into(), vec![position]);
 				}
-			} else {
-				tracing::warn!(?names, ?types, "EPUB collections do not identify one unambiguous series; leaving the book standalone");
-			}
+			},
+			None => tracing::warn!(
+				?collections,
+				?collection_types,
+				"EPUB collections do not identify one unambiguous series; leaving the book standalone"
+			),
 		}
 	}
 
@@ -1477,5 +1511,125 @@ mod tests {
 		assert!(cover.is_ok());
 		let chapter = get_chapter(path, 1);
 		assert!(chapter.is_ok());
+	}
+
+	fn opf(metadata: &str) -> String {
+		format!(
+			r#"<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+		<dc:title>Test</dc:title>
+		{metadata}
+	</metadata>
+</package>"#
+		)
+	}
+
+	fn series_of(metadata: &str) -> (Option<Vec<String>>, Option<Vec<String>>) {
+		let parsed = parse_opf_xml(&opf(metadata)).expect("Failed to parse OPF");
+		(
+			parsed.get("series").cloned(),
+			parsed.get("series_index").cloned(),
+		)
+	}
+
+	#[test]
+	fn test_collection_maps_to_series() {
+		let (series, index) = series_of(
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c1" property="group-position">2.5</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Wayfarers".to_string()]));
+		assert_eq!(index, Some(vec!["2.5".to_string()]));
+
+		let (series, index) = series_of(
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Wayfarers".to_string()]));
+		assert_eq!(index, None);
+	}
+
+	#[test]
+	fn test_ambiguous_collections_leave_book_standalone() {
+		let cases = [
+			// two series collections
+			r##"<meta property="belongs-to-collection" id="c1">One</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta property="belongs-to-collection" id="c2">Two</meta>
+			<meta refines="#c2" property="collection-type">series</meta>"##,
+			// a collection that isn't a series
+			r##"<meta property="belongs-to-collection" id="c1">Favorites</meta>
+			<meta refines="#c1" property="collection-type">set</meta>"##,
+			// a collection without a type
+			r##"<meta property="belongs-to-collection" id="c1">Favorites</meta>"##,
+			// a type that refines another element
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c2" property="collection-type">series</meta>"##,
+			// a collection without an id can't be refined
+			r##"<meta property="belongs-to-collection">Wayfarers</meta>
+			<meta refines="#" property="collection-type">series</meta>"##,
+			// a position that refines another element
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c2" property="group-position">1</meta>"##,
+		];
+		for case in cases {
+			assert_eq!(series_of(case), (None, None), "{case}");
+		}
+	}
+
+	#[test]
+	fn test_calibre_series_takes_precedence_over_collections() {
+		let (series, index) = series_of(
+			r##"<meta name="calibre:series" content="Calibre Series"/>
+			<meta name="calibre:series_index" content="3"/>
+			<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c1" property="group-position">1</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Calibre Series".to_string()]));
+		assert_eq!(index, Some(vec!["3".to_string()]));
+	}
+
+	#[test]
+	fn test_parse_opf_decodes_entities_and_cdata() {
+		let parsed = parse_opf_xml(&opf(
+			r#"<dc:publisher>Tom &amp; Jerry &#38; Co</dc:publisher>
+			<dc:subject><![CDATA[Fish & <Chips>]]></dc:subject>"#,
+		))
+		.expect("Failed to parse OPF");
+		assert_eq!(
+			parsed.get("publisher"),
+			Some(&vec!["Tom & Jerry & Co".to_string()])
+		);
+		assert_eq!(
+			parsed.get("subject"),
+			Some(&vec!["Fish & <Chips>".to_string()])
+		);
+	}
+
+	#[test]
+	fn test_parse_opf_rejects_truncated_xml() {
+		assert!(parse_opf_xml(r#"<package><metadata><dc:title>Test"#).is_err());
+		assert!(parse_opf_xml("").is_err());
+	}
+
+	#[test]
+	fn test_invalid_opf_sidecar_depends_on_organization_mode() {
+		let dir = tempfile::tempdir().expect("Failed to create temp dir");
+		let book = dir.path().join("book.epub");
+		std::fs::copy(get_test_epub_path(), &book).expect("Failed to copy test EPUB");
+		std::fs::write(book.with_extension("opf"), "<package><metadata>")
+			.expect("Failed to write sidecar");
+
+		let metadata = EpubProcessor
+			.process_metadata(&book, OrganizationMode::Filesystem)
+			.expect("Filesystem libraries should ignore an invalid sidecar");
+		assert!(metadata.is_some());
+		assert!(EpubProcessor
+			.process_metadata(&book, OrganizationMode::Metadata)
+			.is_err());
 	}
 }

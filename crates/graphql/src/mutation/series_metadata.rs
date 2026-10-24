@@ -7,7 +7,10 @@ use models::{
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
-use stump_core::metadata::provider::ProviderClientCache;
+use stump_core::metadata::{
+	membership::{remove_series_thumbnails, reset_media_metadata},
+	provider::ProviderClientCache,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -86,18 +89,18 @@ impl SeriesMetadataMutation {
 			}
 		}
 
-		if matches!(
+		let thumbnails = if matches!(
 			impact,
 			MetadataResetImpact::Books | MetadataResetImpact::Everything
 		) {
-			stump_core::metadata::membership::reset_media_metadata(
-				&tx,
-				media::Column::SeriesId.eq(&model.series.id),
-			)
-			.await?;
-		}
+			reset_media_metadata(&tx, media::Column::SeriesId.eq(&model.series.id))
+				.await?
+		} else {
+			vec![]
+		};
 
 		tx.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		tracing::debug!(?impact, series_id = ?model.series.id, "Reset metadata for series");
 

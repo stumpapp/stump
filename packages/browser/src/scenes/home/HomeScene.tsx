@@ -87,7 +87,7 @@ export default function HomeScene() {
 
 	const { numberOfLibraries } = data
 
-	if (numberOfLibraries != 0) {
+	if (numberOfLibraries === 0) {
 		return (
 			<>
 				{helmet}

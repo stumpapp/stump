@@ -16,6 +16,45 @@ import {
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
 
+export const seriesLayoutQuery = graphql(`
+	query SeriesLayout($id: ID!) {
+		seriesById(id: $id) {
+			id
+			path
+			library {
+				id
+				name
+			}
+			resolvedName
+			resolvedDescription
+			stats {
+				bookCount
+				completedBooks
+				inProgressBooks
+				totalBytes
+				totalReadingTimeSeconds
+			}
+			tags {
+				id
+				name
+			}
+			thumbnail {
+				url
+				metadata {
+					averageColor
+					thumbhash
+					colors {
+						color
+						percentage
+					}
+				}
+			}
+			createdAt
+			updatedAt
+		}
+	}
+`)
+
 export const DEFAULT_SERIES_BOOKS_ORDER_BY: MediaOrderBy[] = [
 	{ metadata: { field: MediaMetadataModelOrdering.Number, direction: OrderDirection.Asc } },
 	...DEFAULT_MEDIA_ORDER_BY,
@@ -116,4 +155,21 @@ export const usePrefetchSeriesBooks = () => {
 	)
 
 	return prefetch
+}
+
+export const usePrefetchSeries = () => {
+	const { sdk } = useSDK()
+
+	const client = useQueryClient()
+	return (id: string) =>
+		client.prefetchQuery({
+			queryKey: ['seriesById', id],
+			queryFn: async () => {
+				const response = await sdk.execute(seriesLayoutQuery, {
+					id,
+				})
+				return response
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
 }

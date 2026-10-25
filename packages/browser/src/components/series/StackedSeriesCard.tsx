@@ -9,11 +9,10 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book'
-import { usePrefetchSeries } from '@/scenes/series'
-import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/queries'
 
 import { usePrefetchBook } from '../book'
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
+import { usePrefetchSeries, usePrefetchSeriesBooks } from './queries'
 
 type ThumbnailConfig = {
 	/**

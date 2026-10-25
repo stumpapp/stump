@@ -16,6 +16,8 @@ import {
 import { useMediaMatch } from 'rooks'
 
 // yoink <- https://ui.shadcn.com/docs/components/base/sidebar
+//
+// TODO: https://animate-ui.com/docs/primitives/base-ui/sidebar is interesting
 
 // shad uses a cookie but that's a bit silly imo
 const SIDEBAR_STORAGE_KEY = 'stump:sidebar_state'

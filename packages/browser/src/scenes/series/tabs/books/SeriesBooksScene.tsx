@@ -31,8 +31,8 @@ import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
-import { useSeriesContext } from '../../context'
-import { getQueryKey, query, usePrefetchSeriesBooks } from './queries'
+import { useSeriesContext } from '../../../../components/series/context'
+import { getQueryKey, query, usePrefetchSeriesBooks } from '../../../../components/series/queries'
 
 export default function SeriesBooksSceneContainer() {
 	return (

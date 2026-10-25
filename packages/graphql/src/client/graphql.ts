@@ -633,6 +633,23 @@ export type CustomEmoji = {
   url: Scalars['String']['output'];
 };
 
+/** The reading activity (time, number of unique sessions) for a specific date */
+export type DailyActivity = {
+  __typename?: 'DailyActivity';
+  date: Scalars['NaiveDate']['output'];
+  sessionCount: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
+};
+
+/**
+ * An explicit date range. `start = null` means from the beginning of the user's
+ * history, `end = null` resolves to the current logical day
+ */
+export type DateRangeInput = {
+  end?: InputMaybe<Scalars['NaiveDate']['input']>;
+  start?: InputMaybe<Scalars['NaiveDate']['input']>;
+};
+
 export type DeleteJobAssociatedLogs = {
   __typename?: 'DeleteJobAssociatedLogs';
   /** The number of logs deleted that were related to a job */
@@ -3611,6 +3628,10 @@ export type Query = {
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
+  /** Reading stats for the authenticated user over an explicit date range */
+  myReadingStats: ReadingStats;
+  /** Current and longest reading streaks across the user's whole history */
+  myReadingStreaks: ReadingStreaks;
   /**
    * A paginated list of reading sessions and events for the authenticated user,
    * for all reading activity across all books
@@ -3864,6 +3885,11 @@ export type QueryMetadataProviderConfigByIdArgs = {
 };
 
 
+export type QueryMyReadingStatsArgs = {
+  range?: DateRangeInput;
+};
+
+
 export type QueryMyReadingTimelineArgs = {
   order?: OrderDirection;
   pagination?: CursorPagination;
@@ -4078,6 +4104,21 @@ export type ReadingSessionConflictResolutionView = {
   remoteSessions: Array<ReadingSession>;
 };
 
+export type ReadingStats = {
+  __typename?: 'ReadingStats';
+  /** One entry per day with at least one session */
+  dailyActivity: Array<DailyActivity>;
+  /** Average reading time per weekday, Monday through Sunday */
+  dayOfWeek: Array<WeekdayActivity>;
+  range: ResolvedDateRange;
+  /**
+   * Median active time and calendar days to finish a book, per library type.
+   * Library types with fewer than 3 samples are omitted
+   */
+  timeToFinish: Array<TimeToFinishStat>;
+  totals: ReadingTotals;
+};
+
 /**
  * the different reading statuses a book can be categorized as based on a user's
  * reading sessions
@@ -4095,6 +4136,22 @@ export enum ReadingStatus {
    */
   Reading = 'READING'
 }
+
+export type ReadingStreaks = {
+  __typename?: 'ReadingStreaks';
+  currentDays: Scalars['Int']['output'];
+  longestDays: Scalars['Int']['output'];
+};
+
+/** The summed stats relative to the aggregation range */
+export type ReadingTotals = {
+  __typename?: 'ReadingTotals';
+  activeDayCount: Scalars['Int']['output'];
+  dnfCount: Scalars['Int']['output'];
+  finishedCount: Scalars['Int']['output'];
+  sessionCount: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
+};
 
 export type ReadiumLocation = {
   __typename?: 'ReadiumLocation';
@@ -4189,6 +4246,13 @@ export type RegisteredEmailDevice = {
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   sendHistory: Array<EmailerSendRecord>;
+};
+
+/** A `DateRangeInput` after resolution, where `end` is always known */
+export type ResolvedDateRange = {
+  __typename?: 'ResolvedDateRange';
+  end: Scalars['NaiveDate']['output'];
+  start?: Maybe<Scalars['NaiveDate']['output']>;
 };
 
 /**
@@ -4909,6 +4973,15 @@ export enum ThumbnailPlaceholderStyle {
   Thumbhash = 'THUMBHASH'
 }
 
+export type TimeToFinishStat = {
+  __typename?: 'TimeToFinishStat';
+  libraryType: LibraryType;
+  medianActiveSeconds: Scalars['Int']['output'];
+  medianCalendarDays: Scalars['Float']['output'];
+  medianSecondsPerPage?: Maybe<Scalars['Float']['output']>;
+  sampleSize: Scalars['Int']['output'];
+};
+
 /**
  * A simple pagination input object which does not paginate. An explicit struct is
  * required as a limitation of async_graphql's [OneofObject], which doesn't allow
@@ -5196,6 +5269,15 @@ export type ValidateMetadataProviderConfigInput = {
   apiToken: Scalars['String']['input'];
   /** The provider type */
   providerType: MetadataProvider;
+};
+
+export type WeekdayActivity = {
+  __typename?: 'WeekdayActivity';
+  /** Total seconds divided by the number of times this weekday occurs in the range */
+  averageSeconds: Scalars['Int']['output'];
+  /** ISO weekday, 1 (Monday) through 7 (Sunday) */
+  isoWeekday: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
 };
 
 export type CreateBookClubMobileMutationVariables = Exact<{
@@ -5881,6 +5963,27 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
+
+export type MyReadingStreaksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyReadingStreaksQuery = { __typename?: 'Query', myReadingStreaks: { __typename?: 'ReadingStreaks', currentDays: number, longestDays: number } };
+
+export type DailyActivityGridFragment = { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, dailyActivity: Array<{ __typename?: 'DailyActivity', date: any, totalSeconds: number, sessionCount: number }> } & { ' $fragmentName'?: 'DailyActivityGridFragment' };
+
+export type RangedUserReadingStatsQueryVariables = Exact<{
+  range?: InputMaybe<DateRangeInput>;
+}>;
+
+
+export type RangedUserReadingStatsQuery = { __typename?: 'Query', myReadingStats: (
+    { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, totals: { __typename?: 'ReadingTotals', totalSeconds: number, sessionCount: number, finishedCount: number, activeDayCount: number } }
+    & { ' $fragmentRefs'?: { 'DailyActivityGridFragment': DailyActivityGridFragment;'WeekdayChartFragment': WeekdayChartFragment;'TimeToFinishStatsFragment': TimeToFinishStatsFragment } }
+  ) };
+
+export type TimeToFinishStatsFragment = { __typename?: 'ReadingStats', timeToFinish: Array<{ __typename?: 'TimeToFinishStat', libraryType: LibraryType, sampleSize: number, medianActiveSeconds: number }> } & { ' $fragmentName'?: 'TimeToFinishStatsFragment' };
+
+export type WeekdayChartFragment = { __typename?: 'ReadingStats', dayOfWeek: Array<{ __typename?: 'WeekdayActivity', isoWeekday: number, averageSeconds: number }> } & { ' $fragmentName'?: 'WeekdayChartFragment' };
 
 export type ReadingSessionCardFragment = (
   { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, isLatest: boolean, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> }
@@ -7868,6 +7971,36 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const DailyActivityGridFragmentDoc = new TypedDocumentString(`
+    fragment DailyActivityGrid on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+    `, {"fragmentName":"DailyActivityGrid"}) as unknown as TypedDocumentString<DailyActivityGridFragment, unknown>;
+export const TimeToFinishStatsFragmentDoc = new TypedDocumentString(`
+    fragment TimeToFinishStats on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+    `, {"fragmentName":"TimeToFinishStats"}) as unknown as TypedDocumentString<TimeToFinishStatsFragment, unknown>;
+export const WeekdayChartFragmentDoc = new TypedDocumentString(`
+    fragment WeekdayChart on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}
+    `, {"fragmentName":"WeekdayChart"}) as unknown as TypedDocumentString<WeekdayChartFragment, unknown>;
 export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCardMedia on SessionWithEvents {
   session {
@@ -11448,6 +11581,56 @@ export const AcceptLocalProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
+export const MyReadingStreaksDocument = new TypedDocumentString(`
+    query MyReadingStreaks {
+  myReadingStreaks {
+    currentDays
+    longestDays
+  }
+}
+    `) as unknown as TypedDocumentString<MyReadingStreaksQuery, MyReadingStreaksQueryVariables>;
+export const RangedUserReadingStatsDocument = new TypedDocumentString(`
+    query RangedUserReadingStats($range: DateRangeInput) {
+  myReadingStats(range: $range) {
+    range {
+      start
+      end
+    }
+    totals {
+      totalSeconds
+      sessionCount
+      finishedCount
+      activeDayCount
+    }
+    ...DailyActivityGrid
+    ...WeekdayChart
+    ...TimeToFinishStats
+  }
+}
+    fragment DailyActivityGrid on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+fragment TimeToFinishStats on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+fragment WeekdayChart on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}`) as unknown as TypedDocumentString<RangedUserReadingStatsQuery, RangedUserReadingStatsQueryVariables>;
 export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
     mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
   patchReadingSession(sessionId: $sessionId, input: $input) {

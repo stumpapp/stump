@@ -1,10 +1,24 @@
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use sea_orm::sqlx::types::Decimal;
 
-use crate::{entity::reading_session, shared::enums::ReadingStatus};
+use crate::{
+	entity::{reading_session, user::AuthUser},
+	shared::enums::ReadingStatus,
+};
 
 pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
 	(now - Duration::hours(offset_hours as i64)).date_naive()
+}
+
+/// The user's current logical day, based on prefs
+pub fn logical_today(user: &AuthUser) -> NaiveDate {
+	let offset_hours = user
+		.preferences
+		.as_ref()
+		.map(|p| p.day_reset_hour_offset)
+		.unwrap_or(0);
+
+	calculate_logical_date(Utc::now(), offset_hours)
 }
 
 /// returns true if `session` was updated within the last `grace_period_secs` seconds

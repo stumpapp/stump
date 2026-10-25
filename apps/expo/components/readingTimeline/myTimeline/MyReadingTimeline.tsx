@@ -4,6 +4,7 @@ import { graphql, MyReadingTimelineScreenQuery } from '@stump/graphql'
 import { intlFormat, parse } from 'date-fns'
 import { View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
 import { OwlEmptyState } from '../../OwlEmptyState'
@@ -44,6 +45,7 @@ type ListItem =
 
 export function MyReadingTimeline() {
 	const order = useReadingTimelineDisplayStore((state) => state.order)
+	const { translate } = useTranslate()
 	const { data, refetch, hasNextPage, fetchNextPage } = useInfiniteCursorGraphQL(
 		query,
 		['myReadingTimeline', order],
@@ -52,12 +54,10 @@ export function MyReadingTimeline() {
 			order,
 		},
 	)
-	const readingTimeline = data?.pages.flatMap((page) => page.myReadingTimeline.nodes)
+	const readingTimeline = data?.pages.flatMap((page) => page.myReadingTimeline.nodes) ?? []
 	const groupBy = useReadingTimelineDisplayStore((state) => state.groupBy)
 
 	const [isRefetching, onRefresh] = useRefetch(refetch)
-
-	if (!readingTimeline) return <OwlEmptyState title="Todo" />
 
 	const renderItem = ({ item }: { item: ListItem }) => {
 		if (item.type === 'dateHeader') {
@@ -117,6 +117,12 @@ export function MyReadingTimeline() {
 			}}
 			// since we are manually grouping things i want to be a little more agressive here
 			onEndReachedThreshold={0.5}
+			ListEmptyComponent={
+				<OwlEmptyState
+					title={translate('shared.readingTimeline.emptyState.label')}
+					description={translate('shared.readingTimeline.emptyState.description')}
+				/>
+			}
 		/>
 	)
 }

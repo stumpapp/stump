@@ -143,6 +143,46 @@ impl From<FileStatus> for String {
 	}
 }
 
+// TODO(reading-goals): continue brainstorming
+
+// pub enum GoalMetric {
+// 	BooksFinished,
+// 	ReadingElapsedSeconds,
+// 	ReadingDays,
+// 	// PagesRead would be cool
+// }
+//
+// pub enum GoalPeriod {
+// 	// Custom, ?? or None??
+// 	Day,
+// 	Week,
+// 	Month,
+// 	Year,
+// }
+
+// ^ brainstorming for a future with goals, my current thoughts are that these
+// would be in some kind of reading_goal::Model so we could do e.g.:
+// - "finish a book once a month"
+//   ^ GoalMetric::BooksFinished + GoalPeriod::Month + target=1 + recurrence???
+// - "read 30 books this year" vs "read 30 books every year"
+//   ^ GoalMetric::BooksFinished + GoalPeriod::Year + target=30 + no recurrence??
+//     kinda same as first, the diff is in semantic of recurrence ig
+// - "read 15 minutes a day"
+//    ^ GoalMetric::ReadingElapsedSeconds + GoalPeriod::Day + target=15*60 + recurrence??
+// - "journal 5 days a week"
+//    ^ GoalMetric::JournalDays??JournalEntries?? + GoalPeriod::Week + target=5 + recurrence??
+//
+// mostly trying to think of goals and work backwards, and this all
+// is assuming the goal model has e.g.:
+// - start_date / option(end_date)
+// - metric (GoalMetric)
+// - target (big num??)
+//
+// the ergonomics of repr both instance (e.g., read 30 books this year) vs recurring
+// (read 30 books every year) is awkward. maybe a recurrence flag? but then like what is
+// GoalPeriod::Day without recurrence? surely nobody would have a single day goal lol
+// i don't care about supporting that, at the very least.
+
 /// The different types of layouts a client-side interface might present to a user
 /// for a collection of items
 #[derive(

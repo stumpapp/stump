@@ -56,7 +56,8 @@
       "settings": "Settings",
       "browse": "Browse",
       "clubs": "Clubs",
-      "activity": "Activity"
+      "activity": "Activity",
+      "stats": "Stats"
     },
     "localLibrary": {
       "title": "Local Library",
@@ -3074,6 +3075,8 @@
       "list": "List",
       "lastCompleted": "Last Completed",
       "modifiedOnDisk": "Modified on Disk",
+      "less": "Less",
+      "more": "More",
       "name": "Name",
       "next": "Next",
       "no": "No",
@@ -3133,8 +3136,11 @@
       "preferences": "Preferences",
       "time": {
 	      "day": "Day",
+		    "daysCount_one": "{{count}} Day",
+				"daysCount_other": "{{count}} Days",
 				"dateAndTime": "Date and Time",
-	      "month": "Month"
+	      "month": "Month",
+				"dateRange": "{{startDate}} - {{endDate}}"
       },
       "yes": "Yes"
     },
@@ -3499,11 +3505,43 @@
       	"label": "Extend Session",
        	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
         "failedToExtend": "Failed to Extend Session"
+      },
+      "emptyState": {
+      	"label": "No Activity",
+       "description": "Once you start reading, come back here to see your timeline"
       }
     },
     "readingJournal": {
     	"editorPlaceholder": "Write some thoughts down...",
     	"failedToSaveEntry": "Failed to Save Journal Entry"
+    },
+    "readingStats": {
+      "title": "Stats",
+      "range": {
+        "week": "This Week",
+        "month": "This Month",
+        "year": "This Year",
+        "lifetime": "Lifetime"
+      },
+      "activeDays_one": "You read on {{count}} day",
+      "activeDays_other": "You read on {{count}} days",
+      "dailyActivity": "Your Days",
+      "streaks": {
+        "current": "Current Streak",
+        "longest": "Longest Streak"
+      },
+      "dayOfWeek": {
+        "title": "By Weekday",
+        "description": "Average time read on each day of the week"
+      },
+      "booksFinished": "Books Finished",
+      "avgPerActiveDay": "Avg. per Day",
+      "avgPerSession": "Avg. Session Time",
+      "timeToFinish": {
+        "title": "Time to Finish",
+        "books_one": "Based on {{count}} book",
+        "books_other": "Based on {{count}} books"
+      }
     },
     "errors": {
       "unknown": "Unknown Error",

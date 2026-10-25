@@ -9,6 +9,7 @@ import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
 import { useAppContext } from '../context'
+import { useIsSidebarIconMode } from './navigation/sidebar/CollapsedSidebarItems'
 
 export default function UserMenu() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -21,8 +22,9 @@ export default function UserMenu() {
 	const platform = useAppStore((store) => store.platform)
 	const paths = usePaths()
 
-	const avatarUrl = user.avatarUrl || undefined
+	const avatarUrl = user.avatarUrl || user.avatar.url || undefined
 	const fallback = user.username.slice(0, 2).toUpperCase()
+	const isIconMode = useIsSidebarIconMode()
 
 	return (
 		<>
@@ -37,13 +39,15 @@ export default function UserMenu() {
 				onConfirm={logout}
 			/>
 
-			<AutoSizer style={{ height: '2.25rem', width: '100%' }}>
+			<AutoSizer style={{ height: isIconMode ? '2rem' : '2.25rem', width: '100%' }}>
 				{({ width }) => (
 					<Dropdown open={isOpen} onOpenChange={setIsOpen} modal>
 						<Dropdown.Trigger asChild>
 							<div
+								aria-label={user.username}
 								className={cn(
-									'h-9 px-2 flex w-full cursor-pointer items-center rounded-md border border-transparent bg-sidebar text-sidebar-foreground transition-all duration-150 hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+									isIconMode ? 'size-8 mx-auto justify-center' : 'h-9 px-2 w-full',
+									'flex cursor-pointer items-center rounded-md border border-transparent bg-sidebar text-sidebar-foreground transition-all duration-150 hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 									isOpen
 										? 'border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground'
 										: 'border-sidebar-border/60',
@@ -55,25 +59,28 @@ export default function UserMenu() {
 									fallbackWrapperClassName="text-xs select-none"
 									className="h-6 w-6"
 								/>
-								<Text className="ml-2 line-clamp-1 text-ellipsis select-none" size="sm">
-									{user.username}
-								</Text>
+								{!isIconMode && (
+									<Text className="ml-2 line-clamp-1 text-ellipsis select-none" size="sm">
+										{user.username}
+									</Text>
+								)}
 							</div>
 						</Dropdown.Trigger>
 
 						<Dropdown.Content
 							className="p-1 shadow-md border-sidebar-border bg-sidebar text-sidebar-foreground"
 							align="start"
-							style={{ width }}
+							side={isIconMode ? 'right' : 'bottom'}
+							style={{ width: isIconMode ? 224 : width }}
 						>
 							<Dropdown.Group>
 								<Dropdown.Item disabled className={cn(itemClasses(), 'opacity-40')}>
-									<Bell className="mr-1.5 h-4 w-4" />
+									<Bell className="h-4 w-4" />
 									Notifications
 								</Dropdown.Item>
 
 								<Dropdown.Item onClick={() => navigate(paths.settings())} className={itemClasses()}>
-									<Settings className="mr-1.5 h-4 w-4" />
+									<Settings className="h-4 w-4" />
 									Settings
 								</Dropdown.Item>
 							</Dropdown.Group>
@@ -83,7 +90,7 @@ export default function UserMenu() {
 							<Dropdown.Group>
 								{platform !== 'browser' && (
 									<Dropdown.Item onClick={() => navigate('/')} className={itemClasses()}>
-										<Server className="mr-1.5 h-4 w-4" />
+										<Server className="h-4 w-4" />
 										Switch server
 									</Dropdown.Item>
 								)}

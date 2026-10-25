@@ -10,6 +10,7 @@ import { LastVisitedLibrary } from '@/components/library'
 import { EntityOptionProps } from '@/components/navigation/types'
 import useCurrentLibraryId from '@/components/navigation/useCurrentLibraryId'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
@@ -32,6 +33,7 @@ export default function LibraryNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const { t, translate } = useTranslate()
 	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
@@ -59,9 +61,9 @@ export default function LibraryNavigationItem({
 					<div className="gap-y-2 flex flex-col items-start">
 						<CircleSlash2 className="h-7 w-7 text-muted-foreground" />
 						<div className="text-left">
-							<Label>No libraries</Label>
+							<Label>{t('sidebar.buttons.noLibraries')}</Label>
 							<Text size="sm" variant="muted">
-								You don&apos;t have any libraries yet
+								{t('topBar.libraries.noLibrariesYet')}
 							</Text>
 						</div>
 					</div>
@@ -102,7 +104,7 @@ export default function LibraryNavigationItem({
 		<NavigationMenu.Item>
 			<NavigationMenu.Trigger className="bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
 				<Library className="mr-2 h-4 w-4" />
-				Libraries
+				{translate('shared.common.libraries')}
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
 				<div
@@ -127,7 +129,9 @@ export default function LibraryNavigationItem({
 										isActive={location.pathname.startsWith(paths.libraryCreate())}
 										className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 									>
-										<span className="text-sm font-medium line-clamp-1">Create library</span>
+										<span className="text-sm font-medium line-clamp-1">
+											{t('sidebar.buttons.createLibrary')}
+										</span>
 									</TopBarLinkListItem>
 								)}
 
@@ -137,7 +141,9 @@ export default function LibraryNavigationItem({
 										isActive={location.pathname.startsWith(paths.libraries())}
 										className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 									>
-										<span className="text-sm font-medium line-clamp-1">See all</span>
+										<span className="text-sm font-medium line-clamp-1">
+											{t('common.seeAll')}
+										</span>
 									</TopBarLinkListItem>
 								)}
 							</div>

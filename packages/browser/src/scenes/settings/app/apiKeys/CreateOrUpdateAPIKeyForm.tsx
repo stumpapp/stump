@@ -106,7 +106,7 @@ export default function CreateOrUpdateAPIKeyForm({
 				}}
 			>
 				<Input
-					label="Name"
+					label={t(getFieldKey('name.label'))}
 					placeholder="Koreader Sync"
 					{...form.register('name')}
 					errorMessage={errors.name?.message}

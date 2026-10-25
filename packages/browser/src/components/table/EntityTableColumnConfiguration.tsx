@@ -37,7 +37,7 @@ type Props = {
 }
 
 export default function EntityTableColumnConfiguration({ entity, configuration, onSave }: Props) {
-	const { translate } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -263,13 +263,13 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 
 	return (
 		<Sheet
-			title="Configure columns"
-			description="Adjust which columns are displayed in book-exploration tables"
+			title={t('common.configureColumns')}
+			description={t('tableColumnConfiguration.description')}
 			open={isOpen}
 			onClose={() => setIsOpen(false)}
 			onOpen={() => setIsOpen(true)}
 			trigger={
-				<ToolTip content="Configure columns" size="sm" align="start">
+				<ToolTip content={t('common.configureColumns')} size="sm" align="start">
 					<IconButton size="xs" variant="ghost" onClick={() => setIsOpen(true)}>
 						<Columns className="h-4 w-4" />
 					</IconButton>
@@ -305,14 +305,16 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 				>
 					<div className="gap-3 p-4 md:grid-cols-2 grid grid-cols-1">
 						<ColumnBucket
-							title="Visible"
+							title={t('common.visible')}
+							isVisible
 							containerId="visible-container"
 							items={visible}
 							identifiers={visibleIdentifiers}
 							onMoveToOtherList={(id) => handleMoveColumn(id, false)}
 						/>
 						<ColumnBucket
-							title="Hidden"
+							title={t('common.hidden')}
+							isVisible={false}
 							containerId="hidden-container"
 							items={hidden}
 							identifiers={hiddenIdentifiers}
@@ -391,6 +393,7 @@ function ColumnOverlay({ column }: { column: ReturnType<typeof resolveConfigurat
 
 type ColumnBucketProps = {
 	title: string
+	isVisible: boolean
 	containerId: string
 	items: ReturnType<typeof resolveConfiguration>
 	identifiers: string[]
@@ -399,13 +402,17 @@ type ColumnBucketProps = {
 
 function ColumnBucket({
 	title,
+	isVisible,
 	containerId,
 	items,
 	identifiers,
 	onMoveToOtherList,
 }: ColumnBucketProps) {
+	const { t } = useTranslate()
 	const { setNodeRef } = useDroppable({ id: containerId })
-	const moveLabel = title === 'Visible' ? 'Move to hidden' : 'Move to visible'
+	const moveLabel = isVisible
+		? t('tableColumnConfiguration.moveToHidden')
+		: t('tableColumnConfiguration.moveToVisible')
 
 	return (
 		<div ref={setNodeRef} className="p-3 rounded-md border border-border bg-background">
@@ -430,9 +437,9 @@ function ColumnBucket({
 					))}
 					{items.length === 0 && (
 						<div className="min-h-10 rounded px-2 py-3 flex items-center justify-center border border-dashed border-border">
-							<Text size="xs" variant="muted">
-								Drop columns here
-							</Text>
+						<Text size="xs" variant="muted">
+							{t('tableColumnConfiguration.dropColumnsHere')}
+						</Text>
 						</div>
 					)}
 				</div>

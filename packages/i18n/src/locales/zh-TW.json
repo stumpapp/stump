@@ -327,6 +327,44 @@
     }
   },
   "webApp": {
+    "common": {
+      "nothingToShow": "暫無內容",
+      "filter": "篩選",
+      "filterOptions": "篩選選項",
+      "searchForABook": "搜尋書籍",
+      "cannotBeUndone": "此操作無法撤銷",
+      "goHome": "返回首頁",
+      "seeAll": "查看全部",
+      "notifications": "通知",
+      "role": "角色",
+      "write": "撰寫",
+      "preview": "預覽",
+      "missing": "缺失",
+      "brightness": "亮度",
+      "noMetadata": "無元資料",
+      "seriesName": "系列名",
+      "addBooks": "新增書籍",
+      "addSeries": "新增系列",
+      "noFiles": "暫無檔案",
+      "folderEmpty": "此資料夾為空",
+      "serverNotConnected": "伺服器未連線",
+      "selectDirectory": "選擇目錄",
+      "showHiddenDirectories": "顯示隱藏目錄",
+      "lastVisited": "最近造訪",
+      "section": "分區",
+      "experimentalAnimatedReader": "實驗性動態閱讀器",
+      "tableConfiguration": "表格配置",
+      "groupColumns": "分組欄位",
+      "bookColumns": "書籍欄位",
+      "configureColumns": "配置欄位",
+      "visible": "可見",
+      "hidden": "已隱藏",
+      "filterData": "篩選資料",
+      "or": "或",
+      "selectAThumbnail": "選擇縮圖",
+      "tags": "標籤",
+      "clickHere": "點擊此處"
+    },
     "underConstruction": {
       "heading": "有點尷尬",
       "message": "你來到一個仍在開發中的頁面。我很想讓你看看，但它還沒準備好。",
@@ -396,7 +434,26 @@
         },
         "description": "將此書寄送至指定裝置或電子郵件地址"
       },
-      "nextInSeries": "系列中的下一個"
+      "nextInSeries": "系列中的下一個",
+      "metadata": "元資料",
+      "actions": {
+        "continueReading": "繼續閱讀",
+        "readFromBeginning": "從頭開始閱讀",
+        "incognitoMode": "隱身模式",
+        "nativePdfViewer": "原生 PDF 檢視器",
+        "manage": "管理",
+        "email": "郵件"
+      },
+      "toasts": {
+        "failedToUpdateCompletion": "更新書籍完成狀態失敗",
+        "failedToDeleteCurrentSession": "刪除目前工作階段失敗",
+        "failedToDeleteReadHistory": "刪除閱讀歷史失敗"
+      },
+      "deleteHistoryConfirmation": {
+        "title": "刪除閱讀歷史",
+        "description": "你確定要刪除閱讀歷史嗎？",
+        "warning": "閱讀完成記錄一經刪除將無法復原"
+      }
     },
     "createOrUpdateBookClubForm": {
       "fields": {
@@ -556,7 +613,10 @@
           }
         }
       },
-      "subtitle": "書庫可用來整理書籍。若想了解書庫的運作方式，請參閱"
+      "subtitle": "書庫可用來整理書籍。若想了解書庫的運作方式，請參閱",
+      "errors": {
+        "createFailed": "建立書庫失敗"
+      }
     },
     "librarySettingsScene": {
       "heading": "設定",
@@ -586,7 +646,42 @@
         "sections": {
           "management": {
             "heading": "管理縮圖",
-            "description": "管理此書庫現有的縮圖"
+            "description": "管理此書庫現有的縮圖",
+            "processThumbnailColors": {
+              "heading": "處理縮圖顏色",
+              "description": "擷取缺少的縮圖顏色元資料，或強制為所有縮圖重新產生",
+              "trigger": "擷取顏色",
+              "missingOnly": "僅缺少項",
+              "reprocessAll": "全部重新處理"
+            },
+            "regenerateThumbnails": {
+              "heading": "重新產生縮圖",
+              "description": "產生缺少的縮圖，或強制重新產生所有縮圖",
+              "trigger": "產生縮圖",
+              "missingOnly": "僅產生缺少項",
+              "forceRecreateAll": "強制重建全部"
+            },
+            "deleteThumbnails": {
+              "heading": "刪除縮圖",
+              "description": "移除此書庫已產生的所有縮圖",
+              "trigger": "刪除縮圖",
+              "confirmation": {
+                "title": "刪除書庫縮圖",
+                "text": "確定要刪除此書庫的所有縮圖嗎？",
+                "confirm": "刪除縮圖"
+              },
+              "warning": {
+                "description": "刪除書庫縮圖將移除所有已產生的圖片，之後需要手動重新產生"
+              },
+              "toasts": {
+                "success": "書庫縮圖已刪除",
+                "error": "刪除書庫縮圖時發生錯誤"
+              }
+            },
+            "selectThumbnail": {
+              "description": "為此書庫選擇其他縮圖，可從書籍中選取或上傳自訂圖片",
+              "librarySeriesDescription": "從書庫中選擇一個系列"
+            }
           }
         },
         "title": "縮圖",
@@ -613,7 +708,11 @@
           }
         },
         "title": "分析",
-        "description": "分析此書庫的內容，以識別潛在問題或可改進項"
+        "description": "分析此書庫的內容，以識別潛在問題或可改進項",
+        "workInProgress": {
+          "title": "開發中",
+          "description": "此頁面功能有限，仍在開發中"
+        }
       },
       "danger-zone/delete": {
         "title": "刪除",
@@ -783,6 +882,10 @@
     "seriesOverviewScene": {
       "buttons": {
         "downloadSeries": "下載系列"
+      },
+      "completeSeriesConfirmation": {
+        "title": "將系列標記為已完成",
+        "description": "你確定要將此系列中的所有書籍都標記為已完成嗎？"
       }
     },
     "userSmartListsScene": {
@@ -1190,6 +1293,14 @@
             "saveFailed": "儲存變更失敗",
             "unsupported": "設定無效",
             "unsupportedDescription": "請重設為預設值後再試一次"
+          },
+          "debugSettings": {
+            "label": "除錯設定",
+            "description": "這些設定不會出現在正式環境中，但對除錯很有用",
+            "queryTools": {
+              "label": "查詢工具",
+              "description": "啟用查詢除錯工具"
+            }
           }
         }
       },
@@ -1642,10 +1753,19 @@
             "ageRestrictionTooLow": "年齡限制不能小於 0",
             "missingUsername": "使用者名稱為必填項",
             "missingPassword": "密碼為必填項",
-            "usernameAlreadyExists": "使用者名稱已存在"
+            "usernameAlreadyExists": "使用者名稱已存在",
+            "maxSessionsAllowedTooLow": "最大允許工作階段數不能小於 0"
           },
           "createSubmitButton": "建立使用者",
-          "updateSubmitButton": "更新使用者"
+          "updateSubmitButton": "更新使用者",
+          "accountDetails": {
+            "heading": "帳戶詳細資訊",
+            "description": "使用者可以隨時變更這些值"
+          },
+          "maxSessionsAllowed": {
+            "label": "最大允許工作階段數",
+            "description": "同一時間允許的有效工作階段數量上限。當使用者在達到上限後嘗試登入時，最早的工作階段將會失效。"
+          }
         },
         "userStats": {
           "users": "使用者",
@@ -1658,7 +1778,32 @@
             "title": "刪除活動",
             "description": "登入活動的所有記錄將從資料庫中永久刪除",
             "confirm": "刪除"
+          },
+          "heading": "身分驗證歷史",
+          "description": "基於安全考量，所有登入嘗試都會被記錄並儲存",
+          "empty": {
+            "heading": "目前沒有登入活動",
+            "description": "是你清空的吧？"
           }
+        },
+        "userTable": {
+          "existingAccounts": {
+            "heading": "現有帳戶",
+            "description": "伺服器上所有現有帳戶的清單"
+          },
+          "deleteUser": {
+            "title": "刪除使用者帳戶",
+            "description": "確定要刪除此使用者嗎？如果選取硬刪除選項，該使用者及其所有資料將被永久刪除。",
+            "hardDelete": "硬刪除使用者",
+            "confirm": "刪除使用者"
+          },
+          "inspectUser": {
+            "heading": "檢視使用者",
+            "description": "檢視使用者的詳細資訊與設定",
+            "json": "JSON"
+          },
+          "sessions": "工作階段數",
+          "sessionsTooltip": "此使用者未過期的登入工作階段數量"
         }
       },
       "server/email": {
@@ -1679,7 +1824,8 @@
                     "createdAt": "傳送時間"
                   }
                 },
-                "emptySubtitle": "此郵件服務的歷史為空。它要麼未被使用，要麼歷史已被清除"
+                "emptySubtitle": "此郵件服務的歷史為空。它要麼未被使用，要麼歷史已被清除",
+                "notFound": "找不到"
               }
             },
             "title": "SMTP 郵件服務",
@@ -1715,6 +1861,14 @@
             "table": {
               "emptyHeading": "沒有已註冊的裝置",
               "emptySubtitle": "建立一個新的裝置別名以供將來使用"
+            },
+            "deleteDevice": {
+              "title": "刪除裝置",
+              "description": "確定要刪除此裝置嗎？",
+              "confirm": "刪除裝置",
+              "toasts": {
+                "error": "刪除裝置失敗"
+              }
             }
           }
         },
@@ -1787,7 +1941,9 @@
               "title": "測試郵件傳送失敗",
               "description": "檢查你的 SMTP 設定並重試"
             }
-          }
+          },
+          "nameAlreadyExists": "已存在同名郵件發送器",
+          "nameIsForbidden": "此名稱為保留名稱"
         },
         "createEmailer": {
           "helmet": "建立郵件服務",
@@ -1853,6 +2009,11 @@
               "action": "建立一個 API 金鑰以開始使用"
             },
             "noExpiration": "未設定過期時間"
+          },
+          "deleteKey": {
+            "title": "刪除 API 金鑰",
+            "description": "所有使用此金鑰的用戶端將立即失去身分驗證",
+            "confirm": "刪除金鑰"
           }
         }
       },
@@ -2056,7 +2217,9 @@
             "allOption": "所有已啟用的提供者"
           }
         }
-      }
+      },
+      "analysis": "分析",
+      "thumbnail": "縮圖"
     },
     "bookClubSettingsScene": {
       "sidebar": {
@@ -2085,7 +2248,11 @@
       },
       "members": {
         "title": "成員",
-        "description": "管理此讀書會的成員"
+        "description": "管理此讀書會的成員",
+        "removeConfirmation": {
+          "title": "移除成員",
+          "description": "確定要移除該成員嗎？"
+        }
       },
       "roles": {
         "title": "角色",
@@ -2095,6 +2262,11 @@
             "heading": "現有角色對應",
             "description": "此讀書會目前的角色對應"
           }
+        },
+        "customNames": {
+          "heading": "自訂名稱",
+          "description": "你可以覆寫任何角色的預設名稱。這僅影響顯示，不會影響權限",
+          "showAs": "顯示為"
         }
       },
       "scheduling/scheduler": {
@@ -2115,7 +2287,15 @@
               "永久刪除此讀書會及其全部內容。",
               "此操作不可撤銷"
             ],
-            "trigger": "刪除讀書會"
+            "trigger": "刪除讀書會",
+            "confirmation": {
+              "title": "刪除讀書會",
+              "description": "確定要刪除這個讀書會嗎？此操作無法復原。",
+              "confirm": "刪除讀書會"
+            },
+            "errors": {
+              "failedToDelete": "刪除讀書會失敗"
+            }
           }
         }
       }
@@ -2247,6 +2427,10 @@
           "quality": {
             "label": "品質",
             "description": "縮圖影像的品質，範圍為 1 到 100"
+          },
+          "colors": {
+            "label": "縮圖顏色",
+            "description": "擷取縮圖的主色調，用於縮圖佔位符和強調色"
           }
         },
         "ignoreRules": {
@@ -2375,7 +2559,15 @@
           "series": "拖拽壓縮檔案到此處",
           "alt": "或點選瀏覽你電腦中的書籍進行上傳"
         },
-        "addedFiles": "已新增檔案"
+        "addedFiles": "已新增檔案",
+        "toasts": {
+          "uploadBooksSuccess": "檔案上傳成功",
+          "uploadBooksFailed": "上傳書籍失敗",
+          "uploadSeriesSuccess": "系列上傳成功",
+          "uploadSeriesFailed": "上傳系列失敗"
+        },
+        "seriesDirNameDescription": "這將用作系列目錄的名稱。你的 zip 壓縮檔將在此處解壓縮。",
+        "seriesNamePlaceholder": "輸入系列名稱"
       }
     },
     "libraryHeader": {
@@ -2410,6 +2602,21 @@
           "reading": "閱讀中",
           "unread": "未讀"
         }
+      },
+      "labels": {
+        "onlyFromSeries": "僅顯示目前系列可用的選項",
+        "genre": "類型",
+        "writer": "編劇",
+        "penciller": "鉛筆稿",
+        "colorist": "上色",
+        "letterer": "寫字",
+        "inker": "描線",
+        "publisher": "出版社",
+        "editor": "編輯",
+        "character": "角色",
+        "status": "狀態",
+        "continuing": "連載中",
+        "ended": "已完結"
       }
     },
     "metadataEditor": {
@@ -2419,6 +2626,30 @@
       "actions": {
         "removeItem": "移除項目",
         "resetField": "重設欄位"
+      },
+      "resetMetadata": {
+        "deleteButton": "刪除元資料",
+        "title": "刪除元資料",
+        "selectImpact": "選擇刪除的影響範圍",
+        "impact": {
+          "series": {
+            "description": "僅移除此系列的元資料"
+          },
+          "books": {
+            "description": "移除此系列中所有書籍的元資料"
+          },
+          "everything": {
+            "label": "全部",
+            "description": "移除與此系列相關的元資料"
+          }
+        },
+        "warning": {
+          "description": "這將永久刪除所選項目的所有元資料。你需要觸發自訂掃描以重新產生元資料"
+        }
+      },
+      "toasts": {
+        "updateFailed": "更新元資料失敗",
+        "lockedFieldsUpdateFailed": "更新鎖定欄位失敗"
       }
     },
     "metadataMatching": {
@@ -2488,7 +2719,8 @@
         },
         "startReview": "開始檢視",
         "nothingToReview": "目前沒有待檢視的中繼資料比對結果"
-      }
+      },
+      "reviewMatch": "審核匹配"
     },
     "seriesHeader": {
       "tabs": {
@@ -2615,7 +2847,10 @@
                   }
                 },
                 "series_meta": {
-                  "label": "系列中繼資料"
+                  "label": "系列中繼資料",
+                  "attributes": {
+                    "year": "開始年份"
+                  }
                 },
                 "library": {
                   "label": "書庫",
@@ -2646,10 +2881,16 @@
               "emptyState": "沒有可顯示的值"
             },
             "enumValue": {
-              "selectPlaceholder": "選擇值"
+              "selectPlaceholder": "選擇值",
+              "selectMultiplePlaceholder": "選擇值",
+              "emptyState": "沒有可顯示的值"
             }
           }
         }
+      },
+      "rawFilters": {
+        "show": "顯示 JSON",
+        "description": "檢視篩選器的原始 JSON 表示"
       }
     },
     "createSmartListScene": {
@@ -2747,7 +2988,8 @@
               "private": "這將變更清單為私密，將其隱藏在以前曾經存取過的任何人上",
               "shared": "你需要與特定使用者共享清單以給予他們存取權限",
               "fallback": "你確定要變更此清單的可見性嗎？"
-            }
+            },
+            "changeVisibility": "變更可見性"
           },
           "accessManager": {
             "disclaimer": "共享功能尚未準備就緒。請稍後再試！"
@@ -2952,6 +3194,122 @@
         "label": "管理中繼資料比對結果",
         "description": "允許使用者搜尋書籍的外部中繼資料來源，並接受或拒絕候選比對結果"
       }
+    },
+    "seriesSettingsScene": {
+      "analysis": "分析",
+      "thumbnail": "縮圖",
+      "metadata": "元資料",
+      "metadataDescription": "關於此系列的額外資訊"
+    },
+    "directoryPicker": {
+      "description": "指定你的書庫所在的目錄。"
+    },
+    "serverStatusOverlay": {
+      "checkConnection": "請檢查你的網路連線。",
+      "clickHere": "點擊此處",
+      "changeServerUrl": "以變更你的伺服器 URL。"
+    },
+    "cardList": {
+      "empty": {
+        "noResultsReturned": "未傳回任何結果",
+        "noResultsToDisplay": "沒有可顯示的結果"
+      }
+    },
+    "tableColumnConfiguration": {
+      "description": "調整書籍瀏覽表格中顯示的欄位",
+      "moveToHidden": "移至隱藏",
+      "moveToVisible": "移至可見",
+      "dropColumnsHere": "將欄位拖放到此處"
+    },
+    "filters": {
+      "notImplemented": "尚未實作",
+      "useOptionsToNarrowSearch": "使用以下選項縮小搜尋範圍",
+      "clearFilters": "清除篩選",
+      "applyFilters": "套用篩選",
+      "configureUrlFilters": "設定 URL 篩選器",
+      "urlFiltersDescription": "調整套用於目前檢視的篩選器",
+      "configureFilters": "設定篩選器"
+    },
+    "search": {
+      "functionalityUnavailable": "此功能目前無法使用"
+    },
+    "markdownEditor": {
+      "addSpoiler": "新增劇透內容",
+      "tagUser": "提及使用者"
+    },
+    "bookSearchOverlay": {
+      "description": "你可以使用下方的搜尋列尋找書籍"
+    },
+    "stackedSeriesCard": {
+      "seriesMissing": "系列缺失"
+    },
+    "epubReaderControls": {
+      "bookOverviewTitle": "書籍概覽",
+      "decreaseFontSize": "縮小字號",
+      "increaseFontSize": "放大字號",
+      "fontPreviewCap": "即時字體預覽上限為 50px",
+      "decreaseLineHeight": "縮小行高",
+      "increaseLineHeight": "放大行高"
+    },
+    "topBar": {
+      "libraries": {
+        "noLibrariesYet": "你還沒有任何書庫"
+      }
+    },
+    "userMenu": {
+      "logout": "登出",
+      "logoutFailed": "登出時發生錯誤，請再試一次。"
+    },
+    "tableColumnsDrawer": {
+      "chooseColumns": "選擇要顯示或隱藏的欄位",
+      "groupColumnsDescription": "這僅影響書籍分組所依據的父表格",
+      "bookColumnsDescription": "這僅影響內嵌的書籍表格",
+      "enableMultiSort": "啟用多重排序",
+      "multiSortDescription": "按欄位排序會移除之前的排序，此設定允許將多個排序合併使用",
+      "selectAtLeastOneColumn": "必須至少選擇一個欄位"
+    },
+    "notFound": {
+      "description": "你要找的頁面似乎不存在！",
+      "reportIssue": "回報問題"
+    },
+    "bookClub": {
+      "clubs": {
+        "yourClubs": "你的讀書會",
+        "active": "活躍",
+        "inactive": "不活躍",
+        "goToClub": "前往讀書會",
+        "notAMember": "你尚未加入任何讀書會",
+        "explorePublic": "瀏覽公開讀書會",
+        "memberCount_one": "{{count}} 位成員",
+        "memberCount_other": "{{count}} 位成員"
+      },
+      "scheduler": {
+        "booksToAdd": "要新增的書籍",
+        "pickABook": "選擇一本書",
+        "pickABookDescription": "你可以從自己的書庫中新增書籍",
+        "removeSelection": "移除所選",
+        "addExternalBook": "新增外部書籍",
+        "addExternalBookDescription": "如果你想新增一本不在書庫中的書，可以在這裡填寫它的資訊",
+        "author": "作者",
+        "bookUrl": "書籍 URL",
+        "andThen": "然後",
+        "configureDates": "設定日期",
+        "configureDatesDescription": "如果不填寫，將根據上一本書的結束日期自動設定合理的起訖日期",
+        "startDate": "開始日期",
+        "endDate": "結束日期"
+      },
+      "books": {
+        "heading": "書籍",
+        "noBooksToDisplay": "暫無可顯示的書籍",
+        "noBooksScheduled": "該讀書會還沒有安排任何書籍",
+        "showPastBooks": "顯示以往的書籍",
+        "hidePastBooks": "隱藏以往的書籍",
+        "createSchedule": "建立閱讀計畫"
+      }
+    },
+    "pdfViewer": {
+      "loadFailed": "PDF 載入失敗。",
+      "downloadDirect": "嘗試直接下載。"
     }
   },
   "shared": {

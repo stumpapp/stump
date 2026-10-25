@@ -107,7 +107,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
 
 	const { checkPermission } = useAppContext()
-	const { translate } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const columns = useMemo(
 		() => [
@@ -120,7 +120,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 								onClick={() => setShowMissing((prev) => !prev)}
 							/>
 
-							<span className="ml-2">Missing</span>
+							<span className="ml-2">{t('common.missing')}</span>
 						</Label>
 					</div>
 				),
@@ -212,7 +212,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 				cell: () => null,
 			}),
 		],
-		[metadata, paths, checkPermission],
+		[t, metadata, paths, checkPermission],
 	) as ColumnDef<SeriesMetadataEditorRow>[]
 
 	const items = useMemo(
@@ -248,14 +248,14 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 		},
 		onError: (error) => {
 			console.error('Failed to update metadata', error)
-			toast.error('Failed to update metadata')
+			toast.error(t('metadataEditor.toasts.updateFailed'))
 		},
 	})
 
 	const { mutate: setLocked } = useGraphQLMutation(setLockedFieldsMutation, {
 		onError: () => {
 			setLockedFields(new Set(metadata?.lockedFields ?? []))
-			toast.error('Failed to update locked fields')
+			toast.error(t('metadataEditor.toasts.lockedFieldsUpdateFailed'))
 		},
 	})
 

@@ -2,11 +2,13 @@ import { cx, IconButton, Label, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
 
 export default function LineHeightControl() {
+	const { t, translate } = useTranslate()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
@@ -36,10 +38,10 @@ export default function LineHeightControl() {
 
 	return (
 		<div className="gap-y-2.5 flex flex-col">
-			<Label>Line height</Label>
+			<Label>{translate('shared.epubSettings.lineHeight.label')}</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
-					aria-label="Decrease line height"
+					aria-label={t('epubReaderControls.decreaseLineHeight')}
 					onClick={() => incrementLineHeight(-0.1)}
 					variant="ghost"
 					size="xs"
@@ -50,7 +52,7 @@ export default function LineHeightControl() {
 					{localLineHeight.toFixed(1)}
 				</span>
 				<IconButton
-					aria-label="Increase line height"
+					aria-label={t('epubReaderControls.increaseLineHeight')}
 					onClick={() => incrementLineHeight(+0.1)}
 					variant="ghost"
 					size="xs"

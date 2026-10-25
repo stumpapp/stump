@@ -2,6 +2,7 @@ import { cn, Spacer, Text } from '@stump/components'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { usePaths } from '../../../paths'
@@ -17,6 +18,7 @@ import {
 import { LocationManager } from './locations'
 
 export default function EpubReaderHeader() {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const {
 		readerMeta: { bookEntity },
@@ -29,7 +31,10 @@ export default function EpubReaderHeader() {
 	return (
 		<ControlsContainer position="top">
 			<div className="gap-x-2 flex items-center">
-				<Link to={paths.bookOverview(bookEntity?.id || '')} title="Book Overview">
+				<Link
+					to={paths.bookOverview(bookEntity?.id || '')}
+					title={t('epubReaderControls.bookOverviewTitle')}
+				>
 					<ControlButton>
 						<ArrowLeft className="h-4 w-4" />
 					</ControlButton>

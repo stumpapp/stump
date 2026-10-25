@@ -2,9 +2,15 @@ import { Input } from '@stump/components'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { CreateOrUpdateUserSchema } from './schema'
 
+const LOCALE_BASE = 'settingsScene.server/users.createOrUpdateForm.maxSessionsAllowed'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+
 export default function MaxSessionsAllowed() {
+	const { t } = useTranslate()
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 	const { errors } = useFormState({ control: form.control })
 
@@ -37,8 +43,8 @@ export default function MaxSessionsAllowed() {
 	return (
 		<Input
 			id="maxSessionsAllowed"
-			label="Max sessions allowed"
-			description="The maximum number of valid sessions allowed at a time. If a user tries to log in once this limit is reached, the oldest session will be invalidated."
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			type="number"
 			name="maxSessionsAllowed"
 			value={maxSessionsAllowed}

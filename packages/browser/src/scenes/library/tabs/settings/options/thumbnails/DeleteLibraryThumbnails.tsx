@@ -14,6 +14,7 @@ import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import { useLibraryManagement } from '../../context'
@@ -24,7 +25,11 @@ const mutation = graphql(`
 	}
 `)
 
+const LOCALE_KEY = 'librarySettingsScene.options/thumbnails.sections.management.deleteThumbnails'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+
 export default function DeleteLibraryThumbnails() {
+	const { t } = useTranslate()
 	const queryClient = useQueryClient()
 	const {
 		library: { id },
@@ -40,24 +45,24 @@ export default function DeleteLibraryThumbnails() {
 		try {
 			await deleteThumbnails({ id })
 			await invalidateThumbnailQueries(queryClient)
-			toast.success('Library thumbnails deleted')
+			toast.success(t(getKey('toasts.success')))
 		} catch (error) {
 			console.error(error)
-			const fallbackMessage = 'An error occurred while deleting the library thumbnails'
+			const fallbackMessage = t(getKey('toasts.error'))
 			if (error instanceof Error) {
 				toast.error(error.message || fallbackMessage)
 			} else {
 				toast.error(fallbackMessage)
 			}
 		}
-	}, [id, deleteThumbnails, queryClient])
+	}, [id, deleteThumbnails, queryClient, t])
 
 	return (
 		<>
 			<div>
-				<Heading size="sm">Delete thumbnails</Heading>
+				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted">
-					Remove all generated thumbnails for this library
+					{t(getKey('description'))}
 				</Text>
 			</div>
 
@@ -68,14 +73,14 @@ export default function DeleteLibraryThumbnails() {
 					className="shrink-0"
 					disabled={isPending || !!data}
 				>
-					Delete thumbnails
+					{t(getKey('trigger'))}
 				</Button>
 			</div>
 
 			<ConfirmationModal
-				title="Delete library thumbnails"
-				description="Are you sure you want to delete all thumbnails for this library?"
-				confirmText="Delete thumbnails"
+				title={t(getKey('confirmation.title'))}
+				description={t(getKey('confirmation.text'))}
+				confirmText={t(getKey('confirmation.confirm'))}
 				confirmVariant="destructive"
 				isOpen={showConfirmation && !data}
 				onClose={() => setShowConfirmation(false)}
@@ -85,11 +90,8 @@ export default function DeleteLibraryThumbnails() {
 			>
 				<Alert variant="warning">
 					<AlertTriangle />
-					<AlertTitle>This cannot be undone</AlertTitle>
-					<AlertDescription>
-						Deleting the library thumbnails will remove all generated images and you will have to
-						manually regenerate them
-					</AlertDescription>
+					<AlertTitle>{t('common.cannotBeUndone')}</AlertTitle>
+					<AlertDescription>{t(getKey('warning.description'))}</AlertDescription>
 				</Alert>
 			</ConfirmationModal>
 		</>

@@ -4,6 +4,8 @@ import { BookCardFragment, graphql } from '@stump/graphql'
 import { useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { VirtualizedCardGrid } from '../container/DynamicCardGrid'
 import Spinner from '../Spinner'
 import BookCard from './BookCard'
@@ -38,6 +40,8 @@ const query = graphql(`
  *  a filter slide over. Must be used within a `FilterProvider`.
  */
 export default function BookSearch({ onBookSelect }: Props) {
+	const { t } = useTranslate()
+
 	const [search, setSearch] = useState('')
 	const [debouncedValue] = useDebouncedValue(search, 500)
 
@@ -70,7 +74,7 @@ export default function BookSearch({ onBookSelect }: Props) {
 	return (
 		<div className="gap-y-4 flex flex-1 flex-col">
 			<Input
-				placeholder="Search for a book..."
+				placeholder={t('common.searchForABook')}
 				value={search}
 				onChange={(e) => setSearch(e.target.value)}
 			/>

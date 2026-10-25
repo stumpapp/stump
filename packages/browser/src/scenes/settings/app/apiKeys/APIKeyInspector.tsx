@@ -66,8 +66,8 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		<Sheet
 			open={!!apiKey}
 			onClose={onClose}
-			title="API key"
-			description="A detailed view of this key"
+			title={t(getKey('heading'))}
+			description={t(getKey('description'))}
 		>
 			<div className="px-4 gap-4 flex flex-col">
 				{isAllPermissions && (

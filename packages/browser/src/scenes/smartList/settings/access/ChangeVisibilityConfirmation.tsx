@@ -24,7 +24,7 @@ export default function ChangeVisibilityConfirmation({
 	return (
 		<ConfirmationModal
 			isOpen={isOpen}
-			title="Change visibility"
+			title={t('smartListSettingsScene.access.sections.visibility.changeVisibility')}
 			description={description}
 			onConfirm={onConfirm}
 			onClose={onCancel}

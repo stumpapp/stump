@@ -9,9 +9,10 @@ import {
 } from '@tanstack/react-table'
 import { intlFormat } from 'date-fns'
 import { ChevronDown, Copy } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 
 import { getTableModels, SortIcon } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import EmailerSendRecordAttachmentTable from './EmailerSendRecordAttachmentTable'
 
@@ -24,7 +25,9 @@ type Props = {
 }
 
 export default function EmailerSendHistoryTable({ records }: Props) {
+	const { translate } = useTranslate()
 	const [expanded, setExpanded] = useState<ExpandedState>({})
+	const columns = useMemo(() => buildColumns(translate), [translate])
 
 	const table = useReactTable({
 		columns,
@@ -87,7 +90,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 }
 
 const columnHelper = createColumnHelper<EmailerSendRecord>()
-const columns = [
+const buildColumns = (translate: (key: string) => string) => [
 	columnHelper.accessor('sentAt', {
 		cell: ({ getValue }) => (
 			<Text size="sm">
@@ -140,7 +143,7 @@ const columns = [
 					</div>
 				)
 			} else {
-				return <Text size="sm">Unknown</Text>
+				return <Text size="sm">{translate('shared.common.unknown')}</Text>
 			}
 		},
 		header: () => (
@@ -158,7 +161,7 @@ const columns = [
 			} = row
 
 			if (!attachmentMeta) {
-				return <Text size="sm">None</Text>
+				return <Text size="sm">{translate('shared.common.none')}</Text>
 			}
 
 			const isAlreadyExpanded = row.getIsExpanded()

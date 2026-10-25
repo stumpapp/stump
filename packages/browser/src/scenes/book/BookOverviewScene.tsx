@@ -11,6 +11,7 @@ import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import BookActionMenu from './BookActionMenu'
 import BookFileInformation from './BookFileInformation'
@@ -20,6 +21,7 @@ import BooksAfterCursor from './BooksAfterCursor'
 
 export default function BookOverviewScene() {
 	const { id } = useParams()
+	const { t } = useTranslate()
 	const {
 		data: { mediaById: media },
 	} = useBookOverview(id || '')
@@ -71,7 +73,7 @@ export default function BookOverviewScene() {
 					<BooksAfterCursor cursor={media.id} />
 
 					<div className="gap-y-2 flex flex-col">
-						<Heading size="sm">Metadata</Heading>
+						<Heading size="sm">{t('bookOverviewScene.metadata')}</Heading>
 						<MediaMetadataEditor mediaId={media.id} data={media.metadata} />
 					</div>
 				</div>

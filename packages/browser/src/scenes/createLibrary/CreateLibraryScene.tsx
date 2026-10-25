@@ -15,6 +15,7 @@ import {
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
@@ -40,6 +41,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateLibraryScene() {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
@@ -128,7 +130,7 @@ export default function CreateLibraryScene() {
 						{createError && (
 							<Alert variant="destructive">
 								<AlertCircle />
-								<AlertTitle>Failed to create library</AlertTitle>
+								<AlertTitle>{t('errors.createFailed')}</AlertTitle>
 								<AlertDescription>{createError}</AlertDescription>
 							</Alert>
 						)}

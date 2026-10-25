@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { FilterInput, useFilterContext } from './context'
 import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
 
@@ -24,6 +26,7 @@ type Props = {
  * A component that renders a slide over with filter options.
  */
 export default function FilterSlideOver({ prompt, formVariant }: Props) {
+	const { t } = useTranslate()
 	const { filters, setFilters } = useFilterContext()
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +53,7 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 		} else if (formVariant === 'series') {
 			return <SeriesFilterForm />
 		} else {
-			return <Text>Not implemented yet</Text>
+			return <Text>{t('filters.notImplemented')}</Text>
 		}
 	}
 
@@ -59,12 +62,12 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			open={isOpen}
 			onClose={onClose}
 			onOpen={onOpen}
-			title="Filter options"
-			description={prompt || 'Use the options below to narrow your search'}
+			title={t('common.filterOptions')}
+			description={prompt || t('filters.useOptionsToNarrowSearch')}
 			trigger={
 				<Button variant="ghost" className="gap-1.5 flex h-full items-center">
 					<Filter className="h-4 w-4" />
-					<span>Filter</span>
+					<span>{t('common.filter')}</span>
 					<span className="text-brand">({nonSearchFilterCount})</span>
 				</Button>
 			}
@@ -72,11 +75,11 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			footer={
 				<div className="gap-4 py-2 flex items-center">
 					<Button type="button" variant="destructive" onClick={handleClearFilters}>
-						Clear filters
+						{t('filters.clearFilters')}
 					</Button>
 
 					<Button type="submit" form="filter-form">
-						Apply filters
+						{t('filters.applyFilters')}
 					</Button>
 				</div>
 			}

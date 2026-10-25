@@ -1,6 +1,8 @@
 import { Text } from '@stump/components'
 import { useCallback } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { EpubContent, useEpubReaderContext } from '../context'
 
 type Props = {
@@ -36,6 +38,7 @@ function TableOfContentsItem({ item, level, handleSelect }: ItemProps) {
 }
 
 export default function TableOfContents({ onLocationChanged }: Props) {
+	const { translate } = useTranslate()
 	const { readerMeta, controls } = useEpubReaderContext()
 	const { toc } = readerMeta.bookMeta || {}
 
@@ -50,7 +53,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 	return (
 		<div
 			className="px-2 pt-4 scrollbar-hide flex max-h-full flex-col divide-y divide-border overflow-y-auto"
-			aria-label="Table of Contents"
+			aria-label={translate('shared.epubReader.tableOfContents')}
 		>
 			{toc?.map((item) => (
 				<TableOfContentsItem key={item.label} item={item} level={0} handleSelect={handleSelect} />

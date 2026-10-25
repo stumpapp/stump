@@ -7,6 +7,7 @@ import { Link } from '@/context'
 import { useFancyAnimations } from '@/hooks/useFancyAnimations'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book'
 import { usePrefetchSeries } from '@/scenes/series'
@@ -75,6 +76,7 @@ export function StackedSeriesCard({
 	className,
 	oneshotBookId,
 }: Props) {
+	const { t } = useTranslate()
 	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 	const {
 		preferences: { thumbnailRatio, thumbnailRoundness },
@@ -274,7 +276,11 @@ export function StackedSeriesCard({
 						className="mt-0.5 text-xs font-medium leading-tight md:text-sm text-white/75 line-clamp-1"
 						style={{ textShadow: '2px 1px 2px rgba(0, 0, 0, 0.2)' }}
 					>
-						{!isMissing ? subtitle : <span className="text-warning">Series Missing</span>}
+						{!isMissing ? (
+							subtitle
+						) : (
+							<span className="text-warning">{t('stackedSeriesCard.seriesMissing')}</span>
+						)}
 					</Text>
 				</div>
 

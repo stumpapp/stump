@@ -2,6 +2,8 @@ import { useSDK } from '@stump/client'
 import { Link, Text } from '@stump/components'
 import { useEffect, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	/**
 	 * The ID of the media
@@ -19,6 +21,7 @@ type Props = {
  */
 export default function NativePDFViewer({ id }: Props) {
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 
 	const [pdfObjectUrl, setPdfObjectUrl] = useState<string>()
 
@@ -55,8 +58,8 @@ export default function NativePDFViewer({ id }: Props) {
 	return (
 		<object data={pdfObjectUrl} type="application/pdf" width="100%" height="100%">
 			<Text>
-				PDF failed to load. <Link href={sdk.media.downloadURL(id)}>Click here</Link> attempt
-				downloading it directly.
+				{t('pdfViewer.loadFailed')} <Link href={sdk.media.downloadURL(id)}>{t('common.clickHere')}</Link>{' '}
+				{t('pdfViewer.downloadDirect')}
 			</Text>
 		</object>
 	)

@@ -2,11 +2,13 @@ import { cx, IconButton, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
 
 export default function FontSizeControl() {
+	const { t, translate } = useTranslate()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
@@ -42,10 +44,10 @@ export default function FontSizeControl() {
 
 	return (
 		<div className="gap-y-2.5 flex flex-col">
-			<Label>Font size</Label>
+			<Label>{translate('shared.epubSettings.fontSize.label')}</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
-					aria-label="Decrease font size"
+					aria-label={t('epubReaderControls.decreaseFontSize')}
 					onClick={() => incrementFontSize(-1)}
 					variant="ghost"
 					size="xs"
@@ -59,7 +61,7 @@ export default function FontSizeControl() {
 					{localFontSize}px
 				</span>
 				<IconButton
-					aria-label="Increase font size"
+					aria-label={t('epubReaderControls.increaseFontSize')}
 					onClick={() => incrementFontSize(+1)}
 					variant="ghost"
 					size="xs"
@@ -69,7 +71,7 @@ export default function FontSizeControl() {
 			</div>
 			{localFontSize > 50 && (
 				<Text size="xs" className="text-left" variant="muted">
-					Live font preview is capped at 50px
+					{t('epubReaderControls.fontPreviewCap')}
 				</Text>
 			)}
 		</div>

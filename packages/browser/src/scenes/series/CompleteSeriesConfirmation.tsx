@@ -1,6 +1,8 @@
 import { Alert, AlertTitle, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	isOpen: boolean
 	onCancel: () => void
@@ -8,10 +10,14 @@ type Props = {
 }
 
 export default function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm }: Props) {
+	const { t, translate } = useTranslate()
+
 	return (
 		<ConfirmationModal
-			title="Mark series completed"
-			description="Are you sure you want to mark every book in this series completed?"
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
+			confirmText={translate('shared.common.confirm')}
+			cancelText={translate('shared.common.cancel')}
 			isOpen={isOpen}
 			onClose={onCancel}
 			onConfirm={onConfirm}
@@ -19,8 +25,11 @@ export default function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm
 		>
 			<Alert>
 				<AlertTriangle />
-				<AlertTitle>This cannot be undone</AlertTitle>
+				<AlertTitle>{t('common.cannotBeUndone')}</AlertTitle>
 			</Alert>
 		</ConfirmationModal>
 	)
 }
+
+const LOCALE_KEY = 'seriesOverviewScene.completeSeriesConfirmation'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

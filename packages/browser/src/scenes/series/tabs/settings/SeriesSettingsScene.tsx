@@ -9,6 +9,7 @@ import { SceneContainer } from '@/components/container'
 import { ResetMetadata } from '@/components/metadata/metadataEditor'
 import { SeriesMetadataEditor } from '@/components/series/metadata'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useSeriesContext } from '../../context'
@@ -46,6 +47,7 @@ const resetMetadataMutation = graphql(`
 `)
 
 export default function SeriesSettingsScene() {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { series } = useSeriesContext()
 	const { checkPermission } = useAppContext()
@@ -89,7 +91,7 @@ export default function SeriesSettingsScene() {
 
 				<div className="gap-y-2 flex flex-col">
 					<div>
-						<Heading size="sm">Analysis</Heading>
+						<Heading size="sm">{t('seriesSettingsScene.analysis')}</Heading>
 						<Text size="sm" variant="muted">
 							Re-analyze this series to update metadata from its files
 						</Text>
@@ -114,7 +116,7 @@ export default function SeriesSettingsScene() {
 
 				<div className="gap-y-2 flex flex-col">
 					<div>
-						<Heading size="sm">Thumbnail</Heading>
+						<Heading size="sm">{t('seriesSettingsScene.thumbnail')}</Heading>
 						<Text size="sm" variant="muted">
 							Change the cover image for this series
 						</Text>
@@ -126,8 +128,8 @@ export default function SeriesSettingsScene() {
 				<div className="gap-y-2 flex w-full flex-col">
 					<div className="flex items-end justify-between">
 						<div>
-							<Heading size="sm">Metadata</Heading>
-							<Text variant="muted">Extra information about your series</Text>
+							<Heading size="sm">{t('seriesSettingsScene.metadata')}</Heading>
+							<Text variant="muted">{t('seriesSettingsScene.metadataDescription')}</Text>
 						</div>
 						{checkPermission(UserPermission.EditMetadata) && (
 							<ResetMetadata onConfirmReset={handleResetMetadata} />

@@ -54,6 +54,7 @@ type PendingMatchRow = {
 const columnHelper = createColumnHelper<PendingMatchRow>()
 
 function ReviewButton({ records, startIndex }: { records: MatchRecord[]; startIndex: number }) {
+	const { t } = useTranslate()
 	const open = useMatchReviewStore((s) => s.open)
 	return (
 		<div className="md:w-2 inline-flex items-end">
@@ -61,7 +62,7 @@ function ReviewButton({ records, startIndex }: { records: MatchRecord[]; startIn
 				size="icon"
 				variant="ghost"
 				className="h-7 w-7 shrink-0"
-				title="Review match"
+				title={t('metadataMatching.reviewMatch')}
 				onClick={() => open(records, startIndex)}
 			>
 				<Eye className="h-4 w-4" />

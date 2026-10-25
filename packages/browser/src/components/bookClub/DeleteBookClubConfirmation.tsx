@@ -4,6 +4,8 @@ import { graphql } from '@stump/graphql'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { usePaths } from '../../paths'
 
 const mutation = graphql(`
@@ -22,6 +24,7 @@ type Props = {
 }
 
 export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigger }: Props) {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const navigate = useNavigate()
 
@@ -32,15 +35,17 @@ export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigge
 		},
 		onError: (error) => {
 			console.error('Error deleting book club:', error)
-			toast.error('Failed to delete book club')
+			toast.error(
+				t('bookClubSettingsScene.danger-zone/delete.sections.deleteClub.errors.failedToDelete'),
+			)
 		},
 	})
 
 	return (
 		<ConfirmationModal
-			title="Delete book club"
-			description="Are you sure you want to delete this club? This action cannot be undone."
-			confirmText="Delete club"
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
+			confirmText={t(getKey('confirm'))}
 			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}
@@ -50,3 +55,6 @@ export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigge
 		/>
 	)
 }
+
+const LOCALE_KEY = 'bookClubSettingsScene.danger-zone/delete.sections.deleteClub.confirmation'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

@@ -9,6 +9,7 @@ import { HelpCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import Table from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteUserModal from './DeleteUserModal'
 import InspectUserSlideOver from './InspectUserSlideOver'
@@ -67,6 +68,8 @@ export const prefetchUsersTable = async (sdk: Api, client: QueryClient) =>
 export type User = NonNullable<NonNullable<UserTableQuery>['users']>['nodes'][number]
 
 export default function UserTable() {
+	const { t } = useTranslate()
+
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -103,7 +106,7 @@ export default function UserTable() {
 
 	const columns = useMemo(
 		() => [
-			...baseColumns,
+			...buildBaseColumns(t),
 			columnHelper.display({
 				cell: ({ row: { original } }) => (
 					<div className="md:w-2 inline-flex items-end">
@@ -118,7 +121,7 @@ export default function UserTable() {
 				size: 28,
 			}),
 		],
-		[],
+		[t],
 	)
 
 	return (
@@ -149,7 +152,7 @@ export default function UserTable() {
 
 const columnHelper = createColumnHelper<User>()
 
-const baseColumns = [
+const buildBaseColumns = (t: (key: string) => string) => [
 	columnHelper.accessor('username', {
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
 		header: 'User',
@@ -197,8 +200,8 @@ const baseColumns = [
 		),
 		header: () => (
 			<div className="gap-2 flex w-full items-center">
-				<span>Sessions</span>
-				<ToolTip content="The number of non-expired login sessions for this user">
+				<span>{t('settingsScene.server/users.userTable.sessions')}</span>
+				<ToolTip content={t('settingsScene.server/users.userTable.sessionsTooltip')}>
 					<HelpCircle className="h-3 w-3" />
 				</ToolTip>
 			</div>

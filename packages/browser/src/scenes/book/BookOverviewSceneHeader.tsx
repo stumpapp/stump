@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import BadgeList from '@/components/BadgeList'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function BookOverviewSceneHeader({ media, book, completedAt }: Props) {
+	const { t, translate } = useTranslate()
 	const paths = usePaths()
 	const metadata = media.metadata
 	const tags = media.tags as Tag[] | undefined
@@ -50,17 +52,25 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 
 			{hasStats && (
 				<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
-					{pages > 0 && <Statistic.Item label="Pages" value={pages} />}
-					{size > 0 && <Statistic.Item label="Size" value={formatBytes(size) ?? '—'} />}
+					{pages > 0 && <Statistic.Item label={translate('shared.common.pages')} value={pages} />}
+					{size > 0 && (
+						<Statistic.Item
+							label={translate('shared.bookMetadata.size')}
+							value={formatBytes(size) ?? '—'}
+						/>
+					)}
 					{media.extension && (
-						<Statistic.Item label="Format" value={media.extension.toUpperCase()} />
+						<Statistic.Item
+							label={translate('shared.bookMetadata.format')}
+							value={media.extension.toUpperCase()}
+						/>
 					)}
 					{metadata?.year && metadata.year > 0 && (
-						<Statistic.Item label="Year" value={metadata.year} />
+						<Statistic.Item label={translate('shared.bookMetadata.year')} value={metadata.year} />
 					)}
 					{progressPercent != null && progressPercent > 0 && progressPercent < 100 && (
 						<Statistic.Item
-							label="Progress"
+							label={translate('shared.common.progress')}
 							value={`${progressPercent}%`}
 							suffix={readProgress?.page ? `(p. ${readProgress.page})` : undefined}
 						/>
@@ -148,7 +158,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasTags && (
 				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
-						Tags
+						{t('common.tags')}
 					</Text>
 					<TagList
 						tags={tags}

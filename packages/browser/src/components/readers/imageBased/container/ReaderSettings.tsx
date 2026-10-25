@@ -236,7 +236,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 
 				{/* TODO: Once UX for settings is settled remove this */}
 				{!forBook && (
-					<NewCard.Row label="Experimental animated reader">
+					<NewCard.Row label={t('common.experimentalAnimatedReader')}>
 						<RawSwitch
 							checked={store.settings.animatedReader || false}
 							onCheckedChange={(checked) => onChangeExperimentalReader(checked)}

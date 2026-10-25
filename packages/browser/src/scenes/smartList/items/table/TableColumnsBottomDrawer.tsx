@@ -12,11 +12,15 @@ import { TableProperties } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { getColumnOptionMap as getGroupColumnOptionMap } from './groupColumns'
 import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 
 export default function TableColumnsBottomDrawer() {
+	const { t, translate } = useTranslate()
+
 	const [isOpen, setIsOpen] = useState(false)
 	const {
 		list: { defaultGrouping },
@@ -118,7 +122,7 @@ export default function TableColumnsBottomDrawer() {
 			.map(([id], idx) => ({ id, position: idx }))
 
 		if (!bookColumns.length || (isGrouped && !groupColumns.length)) {
-			toast.error('You must select at least one column')
+			toast.error(t('tableColumnsDrawer.selectAtLeastOneColumn'))
 			return
 		}
 
@@ -181,7 +185,7 @@ export default function TableColumnsBottomDrawer() {
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChanged}>
-			<ToolTip content="Adjust columns">
+			<ToolTip content={t('common.configureColumns')}>
 				<Drawer.Trigger asChild onClick={() => setIsOpen(true)}>
 					<IconButton variant="ghost">
 						<TableProperties className="h-4 w-4 text-muted-foreground" />
@@ -191,15 +195,15 @@ export default function TableColumnsBottomDrawer() {
 			<Drawer.Content>
 				<div className="max-w-2xl mx-auto w-full">
 					<Drawer.Header>
-						<Drawer.Title>Table configuration</Drawer.Title>
-						<Drawer.Description>Choose which columns to display or hide</Drawer.Description>
+						<Drawer.Title>{t('common.tableConfiguration')}</Drawer.Title>
+						<Drawer.Description>{t('tableColumnsDrawer.chooseColumns')}</Drawer.Description>
 					</Drawer.Header>
 					<div className="gap-y-6 p-4 pb-0 flex flex-col">
 						{isGrouped && (
 							<div>
-								<Label>Group columns</Label>
+								<Label>{t('common.groupColumns')}</Label>
 								<Text size="sm" variant="muted">
-									This only affects the parent table by which books are grouped
+									{t('tableColumnsDrawer.groupColumnsDescription')}
 								</Text>
 								<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 									{groupColumnOptions.map(({ label, value, isSelected }) => (
@@ -216,9 +220,9 @@ export default function TableColumnsBottomDrawer() {
 						)}
 
 						<div>
-							<Label>Book columns</Label>
+							<Label>{t('common.bookColumns')}</Label>
 							<Text size="sm" variant="muted">
-								This only affects the nested book table(s)
+								{t('tableColumnsDrawer.bookColumnsDescription')}
 							</Text>
 							<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 								{bookColumnOptions.map(({ label, value, isSelected }) => (
@@ -235,10 +239,11 @@ export default function TableColumnsBottomDrawer() {
 
 						<div className="flex items-center justify-between">
 							<div className="gap-2 flex grow flex-col text-left">
-								<Label htmlFor="enable_multi_sort">Enable multi-sort</Label>
+								<Label htmlFor="enable_multi_sort">
+									{t('tableColumnsDrawer.enableMultiSort')}
+								</Label>
 								<Text size="sm" variant="muted">
-									Sorting by a column removes the previous sort. This setting allows combining them,
-									instead
+									{t('tableColumnsDrawer.multiSortDescription')}
 								</Text>
 							</div>
 
@@ -253,10 +258,10 @@ export default function TableColumnsBottomDrawer() {
 					</div>
 					<Drawer.Footer className="w-full flex-row">
 						<Button className="w-full" onClick={handleSave}>
-							Save
+							{translate('shared.common.save')}
 						</Button>
 						<Drawer.Close asChild className="w-full">
-							<Button variant="outline">Cancel</Button>
+							<Button variant="outline">{translate('shared.common.cancel')}</Button>
 						</Drawer.Close>
 					</Drawer.Footer>
 				</div>

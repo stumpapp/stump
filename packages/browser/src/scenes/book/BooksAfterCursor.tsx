@@ -6,6 +6,7 @@ import { Suspense, useCallback } from 'react'
 
 import BookCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
@@ -60,6 +61,7 @@ export default function BooksAfterCurrentContainer({ cursor }: Props) {
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
+	const { t } = useTranslate()
 	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['booksAfterCursor', cursor],
@@ -83,7 +85,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 
 	return (
 		<HorizontalCardList
-			title="Next in series"
+			title={t('bookOverviewScene.nextInSeries')}
 			items={cards}
 			onFetchMore={handleFetchMore}
 			footerHeight={64 + 17}
@@ -93,7 +95,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 						<BookX className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
-						<Text>Nothing to show</Text>
+						<Text>{t('common.nothingToShow')}</Text>
 						<Text size="sm" variant="muted">
 							No books remain after this one
 						</Text>

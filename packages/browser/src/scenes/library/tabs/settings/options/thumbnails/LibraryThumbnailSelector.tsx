@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { useTranslate } from '@/hooks/useTranslate'
 import BookPageGrid from '@/scenes/book/settings/BookPageGrid'
 import { useLibraryContext } from '@/scenes/library/context'
 import SeriesBookGrid, { SelectedBook } from '@/scenes/series/tabs/settings/SeriesBookGrid'
@@ -14,6 +15,9 @@ import { invalidateThumbnailQueries } from '@/utils/query'
 import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'
 
 // TODO: Redesign this ugly shit
+
+const LOCALE_KEY = 'librarySettingsScene.options/thumbnails.sections.management.selectThumbnail'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
 const updateMutation = graphql(`
 	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
@@ -46,6 +50,7 @@ export default function LibraryThumbnailSelector() {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const { library } = useLibraryContext()
+	const { t, translate } = useTranslate()
 
 	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
@@ -79,10 +84,10 @@ export default function LibraryThumbnailSelector() {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('thumbnailSelector.errors.uploadFailed'))
 			}
 		},
-		[library.id, uploadThumbnail],
+		[library.id, uploadThumbnail, t],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -93,9 +98,9 @@ export default function LibraryThumbnailSelector() {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('thumbnailSelector.errors.updateFailed'))
 		}
-	}, [patchThumbnail, selectedBook, page, library.id])
+	}, [patchThumbnail, selectedBook, page, library.id, t])
 
 	useEffect(() => {
 		return () => {
@@ -124,11 +129,11 @@ export default function LibraryThumbnailSelector() {
 
 	const renderDescription = () => {
 		if (selectedBook) {
-			return 'Choose a page from this book to use as the new thumbnail'
+			return t('thumbnailSelector.descriptions.chooseBookPage')
 		} else if (selectedSeries) {
-			return 'Select a book from the series'
+			return t('thumbnailSelector.descriptions.chooseSeriesBook')
 		} else {
-			return 'Select a series from the library'
+			return t(getKey('librarySeriesDescription'))
 		}
 	}
 
@@ -147,7 +152,7 @@ export default function LibraryThumbnailSelector() {
 					}
 				}}
 			>
-				Go back
+				{translate('shared.common.goBack')}
 			</span>
 		)
 	}
@@ -155,9 +160,9 @@ export default function LibraryThumbnailSelector() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
-				<Label>Select thumbnail</Label>
+				<Label>{t('common.selectAThumbnail')}</Label>
 				<Text size="sm" variant="muted">
-					Choose a different thumbnail for this library, either from a book or upload a custom one
+					{t(getKey('description'))}
 				</Text>
 			</div>
 
@@ -171,7 +176,7 @@ export default function LibraryThumbnailSelector() {
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('thumbnailSelector.title')}</Dialog.Title>
 						<Dialog.Description>
 							{renderDescription()}
 							{renderGoBack()}
@@ -182,14 +187,14 @@ export default function LibraryThumbnailSelector() {
 					<Suspense>{renderContent()}</Suspense>
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedSeries || !selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('thumbnailSelector.actions.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

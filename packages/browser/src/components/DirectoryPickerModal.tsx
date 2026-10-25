@@ -6,6 +6,8 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 interface Props {
 	isOpen: boolean
 	onClose(): void
@@ -19,6 +21,8 @@ export default function DirectoryPickerModal({
 	startingPath,
 	onPathChange,
 }: Props) {
+	const { t, translate } = useTranslate()
+
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
 	const [showHidden, { toggle }] = useBoolean(false)
@@ -80,10 +84,8 @@ export default function DirectoryPickerModal({
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Content size="md">
 				<Dialog.Header>
-					<Dialog.Title>Select a Directory</Dialog.Title>
-					<Dialog.Description>
-						Specify the directory where your library is located.
-					</Dialog.Description>
+					<Dialog.Title>{t('common.selectDirectory')}</Dialog.Title>
+					<Dialog.Description>{t('directoryPicker.description')}</Dialog.Description>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
 
@@ -147,11 +149,15 @@ export default function DirectoryPickerModal({
 				</div>
 
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
-					<CheckBox label="Show Hidden Directories" checked={showHidden} onClick={toggle} />
+					<CheckBox
+						label={t('common.showHiddenDirectories')}
+						checked={showHidden}
+						onClick={toggle}
+					/>
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
-						<Button onClick={onClose}>Cancel</Button>
-						<Button onClick={handleConfirm}>Confirm</Button>
+						<Button onClick={onClose}>{translate('shared.common.cancel')}</Button>
+						<Button onClick={handleConfirm}>{translate('shared.common.confirm')}</Button>
 					</div>
 				</Dialog.Footer>
 			</Dialog.Content>

@@ -1,15 +1,18 @@
 import { useDebounce } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	onChange: (value: string) => void
 }
 export default function TableSearchInput({ onChange }: Props) {
+	const { t } = useTranslate()
 	const handleChange = useDebounce(onChange, 750)
 
 	return (
 		<input
 			type="text"
-			placeholder="Filter data"
+			placeholder={t('common.filterData')}
 			className="py-1.5 pl-2 pr-20 text-sm leading-6 block w-full border-b border-border bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
 			onChange={(e) => handleChange(e.target.value)}
 		/>

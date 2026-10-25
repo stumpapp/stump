@@ -128,8 +128,8 @@ export default function ThumbnailConfigForm() {
 
 			<div className="max-w-2xl gap-4 flex flex-col">
 				<WideSwitch
-					description="Generate thumbnail images for this library"
-					label="Enabled"
+					description={t(getKey('enableSwitch.description'))}
+					label={t(getKey('enableSwitch.label'))}
 					checked={enabled}
 					onCheckedChange={() => handleEnabledChange(!enabled)}
 				/>

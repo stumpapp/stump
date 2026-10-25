@@ -3,6 +3,8 @@ import { ListFilter } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
 import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
 
@@ -15,6 +17,7 @@ type Props = {
 }
 
 export default function URLFilterDrawer({ entity }: Props) {
+	const { t } = useTranslate()
 	const { filters, setFilters } = useFilterContext()
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -48,10 +51,10 @@ export default function URLFilterDrawer({ entity }: Props) {
 			open={isOpen}
 			onClose={() => setIsOpen(false)}
 			onOpen={() => setIsOpen(true)}
-			title="Configure URL filters"
-			description="Adjust the filters applied to the current view"
+			title={t('filters.configureUrlFilters')}
+			description={t('filters.urlFiltersDescription')}
 			trigger={
-				<ToolTip content="Configure filters" size="sm">
+				<ToolTip content={t('filters.configureFilters')} size="sm">
 					<span className="relative inline-flex">
 						<IconButton
 							variant="ghost"
@@ -82,11 +85,11 @@ export default function URLFilterDrawer({ entity }: Props) {
 						variant="destructive"
 						onClick={handleClearFilters}
 					>
-						Clear filters
+						{t('filters.clearFilters')}
 					</Button>
 
 					<Button size="sm" type="submit" form="filter-form" className="flex-1">
-						Apply filters
+						{t('filters.applyFilters')}
 					</Button>
 				</div>
 			}

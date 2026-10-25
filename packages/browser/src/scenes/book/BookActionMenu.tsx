@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { isEbookExtension, isEbookReadProgress } from '@/utils/readingProgress'
 
@@ -52,6 +53,7 @@ type Props = {
 export default function BookActionMenu({ book }: Props) {
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
+	const { t, translate } = useTranslate()
 
 	const client = useQueryClient()
 
@@ -64,21 +66,21 @@ export default function BookActionMenu({ book }: Props) {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to update book completion status')
+			toast.error(t('bookOverviewScene.toasts.failedToUpdateCompletion'))
 		},
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to delete current session')
+			toast.error(t('bookOverviewScene.toasts.failedToDeleteCurrentSession'))
 		},
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to delete read history')
+			toast.error(t('bookOverviewScene.toasts.failedToDeleteReadHistory'))
 		},
 	})
 
@@ -143,26 +145,26 @@ export default function BookActionMenu({ book }: Props) {
 						...(continueReadingLink
 							? [
 									{
-										label: 'Continue reading',
+										label: t('bookOverviewScene.actions.continueReading'),
 										leftIcon: <Play className="mr-2 h-4 w-4" />,
 										onClick: () => navigate(continueReadingLink),
 									},
 								]
 							: []),
 						{
-							label: 'Read from beginning',
+							label: t('bookOverviewScene.actions.readFromBeginning'),
 							leftIcon: <BookOpen className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(getReadFromBeginningLink(false)),
 						},
 						{
-							label: 'Incognito mode',
+							label: t('bookOverviewScene.actions.incognitoMode'),
 							leftIcon: <EyeOff className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(getReadFromBeginningLink(true)),
 						},
 						...(book.extension?.match(PDF_EXTENSION)
 							? [
 									{
-										label: 'Native PDF viewer',
+										label: t('bookOverviewScene.actions.nativePdfViewer'),
 										leftIcon: <FileText className="mr-2 h-4 w-4" />,
 										onClick: () =>
 											navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false })),
@@ -176,7 +178,7 @@ export default function BookActionMenu({ book }: Props) {
 						...(progression.isUntouched || progression.isReading
 							? [
 									{
-										label: 'Mark as read',
+										label: translate('shared.bookActions.markAsRead.label'),
 										leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
 										onClick: () => {
 											actions.completeBook({ id: book.id })
@@ -187,7 +189,7 @@ export default function BookActionMenu({ book }: Props) {
 						...(progression.isReading
 							? [
 									{
-										label: 'Clear progress',
+										label: translate('shared.bookActions.clearProgress.label'),
 										leftIcon: <BookMinus className="mr-2 h-4 w-4" />,
 										onClick: () => {
 											actions.deleteCurrentSession({ id: book.id })
@@ -198,7 +200,7 @@ export default function BookActionMenu({ book }: Props) {
 						...(progression.isPreviouslyCompleted
 							? [
 									{
-										label: 'Delete history',
+										label: translate('shared.bookActions.deleteReadHistory.label'),
 										leftIcon: <BookX className="mr-2 h-4 w-4" />,
 										onClick: () => {
 											setShowDeleteHistoryConfirmation(true)
@@ -214,7 +216,7 @@ export default function BookActionMenu({ book }: Props) {
 						checkPermission(UserPermission.EditThumbnails)
 							? [
 									{
-										label: 'Manage',
+										label: t('bookOverviewScene.actions.manage'),
 										leftIcon: <Settings className="mr-2 h-4 w-4" />,
 										onClick: () => {
 											navigate(paths.bookManagement(book.id))
@@ -226,7 +228,7 @@ export default function BookActionMenu({ book }: Props) {
 						checkPermission(UserPermission.EmailArbitrarySend)
 							? [
 									{
-										label: 'Email',
+										label: t('bookOverviewScene.actions.email'),
 										leftIcon: <Send className="mr-2 h-4 w-4" />,
 										onClick: () => setShowEmailDialog(true),
 									},
@@ -244,6 +246,8 @@ export default function BookActionMenu({ book }: Props) {
 			actions,
 			continueReadingLink,
 			getReadFromBeginningLink,
+			t,
+			translate,
 		],
 	)
 
@@ -277,10 +281,10 @@ export default function BookActionMenu({ book }: Props) {
 						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
-						title="Download"
+						title={translate('shared.common.download')}
 					>
 						<Download className="mr-2 h-4 w-4" />
-						Download
+						{translate('shared.common.download')}
 					</ButtonOrLink>
 				)}
 

@@ -5,20 +5,11 @@ import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import z from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { useSeriesFilterContext } from '../context'
 import AgeRatingFilter from './AgeRatingFilter'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
-
-const DEFAULT_STATUS_OPTIONS = [
-	{
-		label: 'Continuing',
-		value: 'continuing',
-	},
-	{
-		label: 'Ended',
-		value: 'ended',
-	},
-]
 
 const schema = z.object({
 	metadata: z
@@ -37,6 +28,7 @@ export type SeriesFilterFormSchema = z.infer<typeof schema>
 
 export default function SeriesFilterForm() {
 	const { filters, setFilters } = useSeriesFilterContext()
+	const { t } = useTranslate()
 
 	const defaultValues = useMemo(
 		() =>
@@ -78,9 +70,12 @@ export default function SeriesFilterForm() {
 			onSubmit={handleSubmit}
 		>
 			<GenericFilterMultiselect
-				label="Status"
+				label={t('mediaFilterForm.labels.status')}
 				name="metadata.status"
-				options={DEFAULT_STATUS_OPTIONS}
+				options={[
+					{ label: t('mediaFilterForm.labels.continuing'), value: 'continuing' },
+					{ label: t('mediaFilterForm.labels.ended'), value: 'ended' },
+				]}
 			/>
 
 			<AgeRatingFilter variant="series" />

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useUserStore } from '@/stores'
 
@@ -12,6 +13,7 @@ import TopBarButtonItem from '../TopBarButtonItem'
 import TopBarLinkListItem from '../TopBarLinkListItem'
 
 export default function UserMenu() {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const { sdk } = useSDK()
 	const { user } = useAppContext()
@@ -27,7 +29,7 @@ export default function UserMenu() {
 			navigate('/auth')
 		} catch (error) {
 			console.error(error)
-			toast.error('There was an error logging you out. Please try again.')
+			toast.error(t('userMenu.logoutFailed'))
 		}
 	}
 
@@ -57,12 +59,12 @@ export default function UserMenu() {
 						isDisabled
 					>
 						<Bell className="mr-2 h-4 w-4 shrink-0" />
-						<span className="ml-1 font-medium line-clamp-1">Notifications</span>
+						<span className="ml-1 font-medium line-clamp-1">{t('common.notifications')}</span>
 					</TopBarLinkListItem>
 
 					<TopBarButtonItem className="py-3 rounded-md" onClick={logout}>
 						<LogOut className="mr-2 h-4 w-4 shrink-0" />
-						Logout
+						{t('userMenu.logout')}
 					</TopBarButtonItem>
 				</ul>
 			</NavigationMenu.Content>

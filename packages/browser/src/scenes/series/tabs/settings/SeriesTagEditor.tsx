@@ -6,6 +6,7 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import TagSelect, { TagOption } from '@/components/TagSelect'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {
@@ -25,6 +26,7 @@ type Props = {
 }
 
 export default function SeriesTagEditor({ seriesId, tags }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 
@@ -60,7 +62,7 @@ export default function SeriesTagEditor({ seriesId, tags }: Props) {
 	return (
 		<div className="gap-y-2 flex flex-col">
 			<div>
-				<Heading size="sm">Tags</Heading>
+				<Heading size="sm">{t('common.tags')}</Heading>
 				<Text size="sm" variant="muted">
 					Assign tags to this series
 				</Text>

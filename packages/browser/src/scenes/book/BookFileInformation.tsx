@@ -2,6 +2,8 @@ import { formatBytes } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 export const BookFileInformationFragment = graphql(`
 	fragment BookFileInformation on Media {
 		id
@@ -18,6 +20,7 @@ type Props = {
 
 // TODO: redesign!!
 export default function BookFileInformation({ fragment }: Props) {
+	const { t } = useTranslate()
 	const data = useFragment(BookFileInformationFragment, fragment)
 
 	/**
@@ -33,7 +36,7 @@ export default function BookFileInformation({ fragment }: Props) {
 
 	return (
 		<div className="space-y-1 pb-3 pt-2 text-sm flex flex-col">
-			<Heading size="xs">File Information</Heading>
+			<Heading size="xs">{t('bookOverviewScene.fileInformation.heading')}</Heading>
 			<div className="space-x-4 flex">
 				<Text size="sm" variant="muted">
 					Size: {formatBytes(data.size)}

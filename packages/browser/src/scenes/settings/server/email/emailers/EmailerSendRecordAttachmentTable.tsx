@@ -7,13 +7,16 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { getTableModels, SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { EmailerSendRecord } from './EmailerSendHistoryTable'
+
+const NOT_FOUND_KEY = 'settingsScene.server/email.sections.emailers.list.sendHistory.notFound'
 
 type Props = {
 	attachments: EmailerSendRecord['attachmentMeta']
@@ -22,8 +25,10 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()
+	const { t } = useTranslate()
 
 	const [sorting, setSorting] = useState<SortingState>([])
+	const columns = useMemo(() => buildColumns(t), [t])
 
 	const table = useReactTable({
 		columns,
@@ -107,7 +112,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 }
 
 const columnHelper = createColumnHelper<EmailerSendRecord['attachmentMeta'][number]>()
-const columns = [
+const buildColumns = (t: (key: string) => string) => [
 	columnHelper.display({
 		id: 'media',
 		cell: ({ row }) => {
@@ -116,7 +121,7 @@ const columns = [
 			} = row
 
 			if (!media) {
-				return <Text size="sm">Not Found</Text>
+				return <Text size="sm">{t(NOT_FOUND_KEY)}</Text>
 			}
 
 			return (

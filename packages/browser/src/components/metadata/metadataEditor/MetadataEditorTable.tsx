@@ -9,6 +9,8 @@ import {
 import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useWindowSize } from 'rooks'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import { getCommonPinningStyles } from '../../table/Table'
 import { calculateOptimalColumnWidth, calculateTableSizing } from './utils'
 
@@ -26,6 +28,8 @@ export default function MetadataEditorTable<Item extends RowData>({
 	items,
 	showMissing,
 }: Props<Item>) {
+	const { t } = useTranslate()
+
 	const table = useReactTable({
 		columns,
 		data: items,
@@ -180,7 +184,9 @@ export default function MetadataEditorTable<Item extends RowData>({
 					{!rows.length && (
 						<tr className="flex w-full">
 							<td colSpan={columns.length} className="flex-1">
-								<div className="h-32 flex w-full items-center justify-center">No Metadata</div>
+								<div className="h-32 flex w-full items-center justify-center">
+									{t('common.noMetadata')}
+								</div>
 							</td>
 						</tr>
 					)}

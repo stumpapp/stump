@@ -5,6 +5,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 const mutation = graphql(`
 	mutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {
 		deleteEmailDevice(id: $id) {
@@ -22,6 +24,7 @@ type Props = {
 
 export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 
 	const client = useQueryClient()
 	const { mutate, isPending: isDeleting } = useGraphQLMutation(mutation, {
@@ -33,7 +36,7 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 		},
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to delete device')
+			toast.error(t('settingsScene.server/email.sections.devices.deleteDevice.toasts.error'))
 		},
 	})
 
@@ -45,9 +48,9 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 
 	return (
 		<ConfirmationModal
-			title="Delete device"
-			description="Are you sure you want to delete this device?"
-			confirmText="Delete device"
+			title={t('settingsScene.server/email.sections.devices.deleteDevice.title')}
+			description={t('settingsScene.server/email.sections.devices.deleteDevice.description')}
+			confirmText={t('settingsScene.server/email.sections.devices.deleteDevice.confirm')}
 			confirmVariant="destructive"
 			isOpen={!!device}
 			onClose={onClose}

@@ -1,6 +1,8 @@
 import { Alert, AlertDescription, AlertTitle, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	isOpen: boolean
 	onCancel: () => void
@@ -8,10 +10,14 @@ type Props = {
 }
 
 export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm }: Props) {
+	const { t, translate } = useTranslate()
+
 	return (
 		<ConfirmationModal
-			title="Delete reading history"
-			description="Are you sure you want to delete your reading history?"
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
+			confirmText={translate('shared.common.confirm')}
+			cancelText={translate('shared.common.cancel')}
 			isOpen={isOpen}
 			onClose={onCancel}
 			onConfirm={onConfirm}
@@ -19,11 +25,12 @@ export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm 
 		>
 			<Alert>
 				<AlertTriangle />
-				<AlertTitle>This cannot be undone</AlertTitle>
-				<AlertDescription>
-					Your completion history cannot be recovered once deleted
-				</AlertDescription>
+				<AlertTitle>{t('common.cannotBeUndone')}</AlertTitle>
+				<AlertDescription>{t(getKey('warning'))}</AlertDescription>
 			</Alert>
 		</ConfirmationModal>
 	)
 }
+
+const LOCALE_KEY = 'bookOverviewScene.deleteHistoryConfirmation'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

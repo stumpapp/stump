@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
 import { EntityImage } from '@/components/entity'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
 
@@ -15,6 +16,7 @@ type Props = {
 // FIXME(clubs): this component is a MESS and desperately needs a rewrite
 
 export default function AddBookCard({ index }: Props) {
+	const { t, translate } = useTranslate()
 	const [selectedBook, setSelectedBook] = useState<BookCardFragment | null>(null)
 
 	const form = useFormContext<Schema>()
@@ -75,13 +77,13 @@ export default function AddBookCard({ index }: Props) {
 							onClick={() => setSelectedBook(null)}
 							className="shrink-0"
 						>
-							Remove selection
+							{t('bookClub.scheduler.removeSelection')}
 						</Button>
 					</div>
 				</div>
 			</div>
 		)
-	}, [selectedBook])
+	}, [selectedBook, t])
 
 	const renderSelectedBookOptions = useCallback(() => {
 		if (selectedBook) {
@@ -97,9 +99,9 @@ export default function AddBookCard({ index }: Props) {
 		return (
 			<>
 				<div>
-					<Heading size="xs">Pick a book</Heading>
+					<Heading size="xs">{t('bookClub.scheduler.pickABook')}</Heading>
 					<Text variant="muted" size="sm" className="mt-1">
-						You can add a book from your library
+						{t('bookClub.scheduler.pickABookDescription')}
 					</Text>
 				</div>
 
@@ -109,7 +111,7 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 			</>
 		)
-	}, [isDefiningExternalBook, renderBookInfo, renderSelectedBookOptions])
+	}, [isDefiningExternalBook, renderBookInfo, renderSelectedBookOptions, t])
 
 	const renderExternalBookOption = () => {
 		if (isEntityBook) return null
@@ -117,29 +119,28 @@ export default function AddBookCard({ index }: Props) {
 		return (
 			<>
 				<div>
-					<Heading size="xs">Add an external book</Heading>
+					<Heading size="xs">{t('bookClub.scheduler.addExternalBook')}</Heading>
 					<Text variant="muted" size="sm" className="mt-1">
-						If you want to add a book that isn&apos;t in your library, you can add information about
-						it here
+						{t('bookClub.scheduler.addExternalBookDescription')}
 					</Text>
 				</div>
 
 				<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 					<Input
 						fullWidth
-						label="Title"
+						label={translate('shared.bookMetadata.title')}
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.title`)}
 					/>
 					<Input
-						label="Author"
+						label={t('bookClub.scheduler.author')}
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.author`)}
 					/>
 				</div>
 
 				<Input
-					label="Book URL"
+					label={t('bookClub.scheduler.bookUrl')}
 					disabled={isEntityBook}
 					{...form.register(`books.${index}.book.url`)}
 				/>
@@ -150,28 +151,27 @@ export default function AddBookCard({ index }: Props) {
 	return (
 		<Card className="gap-4 p-4 flex w-full flex-col">
 			{renderBookPickerOption()}
-			{!isEntityBook && !isDefiningExternalBook && <LeftAlignedDivider text="OR" />}
+			{!isEntityBook && !isDefiningExternalBook && <LeftAlignedDivider text={t('common.or')} />}
 			{renderExternalBookOption()}
 
-			<LeftAlignedDivider text="AND THEN" />
+			<LeftAlignedDivider text={t('bookClub.scheduler.andThen')} />
 
 			<div>
-				<Heading size="xs">Configure the dates</Heading>
+				<Heading size="xs">{t('bookClub.scheduler.configureDates')}</Heading>
 				<Text variant="muted" size="sm" className="mt-1">
-					If not provided, the start and end dates will be set to a reasonable default based on the
-					last book&apos;s end date
+					{t('bookClub.scheduler.configureDatesDescription')}
 				</Text>
 			</div>
 
 			<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 				<DatePicker
-					label="Start date"
+					label={t('bookClub.scheduler.startDate')}
 					minDate={new Date()}
 					onChange={(date) => form.setValue(`books.${index}.startAt`, date?.toISOString())}
 				/>
 
 				<DatePicker
-					label="End date"
+					label={t('bookClub.scheduler.endDate')}
 					minDate={new Date()}
 					onChange={(date) => form.setValue(`books.${index}.endAt`, date?.toISOString())}
 				/>

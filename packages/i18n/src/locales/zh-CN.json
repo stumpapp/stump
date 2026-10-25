@@ -275,6 +275,44 @@
     }
   },
   "webApp": {
+    "common": {
+      "nothingToShow": "暂无内容",
+      "filter": "筛选",
+      "filterOptions": "筛选选项",
+      "searchForABook": "搜索书籍",
+      "cannotBeUndone": "此操作无法撤销",
+      "goHome": "返回首页",
+      "seeAll": "查看全部",
+      "notifications": "通知",
+      "role": "角色",
+      "write": "编写",
+      "preview": "预览",
+      "missing": "缺失",
+      "brightness": "亮度",
+      "noMetadata": "无元数据",
+      "seriesName": "系列名",
+      "addBooks": "添加书籍",
+      "addSeries": "添加系列",
+      "noFiles": "暂无文件",
+      "folderEmpty": "此文件夹为空",
+      "serverNotConnected": "服务器未连接",
+      "selectDirectory": "选择目录",
+      "showHiddenDirectories": "显示隐藏目录",
+      "lastVisited": "最近访问",
+      "section": "分区",
+      "experimentalAnimatedReader": "实验性动画阅读器",
+      "tableConfiguration": "表格配置",
+      "groupColumns": "分组列",
+      "bookColumns": "书籍列",
+      "configureColumns": "配置列",
+      "visible": "可见",
+      "hidden": "已隐藏",
+      "filterData": "过滤数据",
+      "or": "或",
+      "selectAThumbnail": "选择缩略图",
+      "tags": "标签",
+      "clickHere": "点击此处"
+    },
     "underConstruction": {
       "heading": "这很尴尬",
       "message": "你已经停留在一个仍在开发的页面上。我很乐意向你展示它，但它还没有做好准备。",
@@ -343,7 +381,9 @@
             "allOption": "所有已启用的提供方"
           }
         }
-      }
+      },
+      "analysis": "分析",
+      "thumbnail": "缩略图"
     },
     "bookOverviewScene": {
       "fileInformation": {
@@ -371,7 +411,26 @@
           }
         }
       },
-      "nextInSeries": "系列中的下一个"
+      "nextInSeries": "系列中的下一个",
+      "metadata": "元数据",
+      "actions": {
+        "continueReading": "继续阅读",
+        "readFromBeginning": "从头开始阅读",
+        "incognitoMode": "隐身模式",
+        "nativePdfViewer": "原生 PDF 查看器",
+        "manage": "管理",
+        "email": "邮件"
+      },
+      "toasts": {
+        "failedToUpdateCompletion": "更新书籍完成状态失败",
+        "failedToDeleteCurrentSession": "删除当前会话失败",
+        "failedToDeleteReadHistory": "删除阅读历史失败"
+      },
+      "deleteHistoryConfirmation": {
+        "title": "删除阅读历史",
+        "description": "您确定要删除阅读历史吗？",
+        "warning": "阅读完成记录一经删除将无法恢复"
+      }
     },
     "createOrUpdateBookClubForm": {
       "fields": {
@@ -419,7 +478,8 @@
         "membershipOptions": {
           "displayName": {
             "label": "显示名",
-            "description": "你在读书俱乐部中的可选显示名称。如果设置，它将优先于你的用户名"
+            "description": "你在读书俱乐部中的可选显示名称。如果设置，它将优先于你的用户名",
+            "placeholder": "oromei"
           },
           "hideProgress": {
             "label": "隐藏阅读进度",
@@ -498,7 +558,11 @@
       },
       "members": {
         "title": "成员",
-        "description": "管理此读书俱乐部的成员"
+        "description": "管理此读书俱乐部的成员",
+        "removeConfirmation": {
+          "title": "移除成员",
+          "description": "确定要移除该成员吗？"
+        }
       },
       "roles": {
         "title": "角色",
@@ -508,6 +572,11 @@
             "heading": "现有角色映射",
             "description": "此读书俱乐部的当前角色映射"
           }
+        },
+        "customNames": {
+          "heading": "自定义名称",
+          "description": "你可以覆盖任何角色的默认名称。这仅影响显示，不会影响权限",
+          "showAs": "显示为"
         }
       },
       "scheduling/scheduler": {
@@ -528,7 +597,15 @@
               "永久删除此读书俱乐部及其全部内容。",
               "此操作不可撤销"
             ],
-            "trigger": "删除俱乐部"
+            "trigger": "删除俱乐部",
+            "confirmation": {
+              "title": "删除读书会",
+              "description": "确定要删除这个读书会吗？此操作无法撤销。",
+              "confirm": "删除读书会"
+            },
+            "errors": {
+              "failedToDelete": "删除读书会失败"
+            }
           }
         }
       }
@@ -655,6 +732,10 @@
           "quality": {
             "label": "质量",
             "description": "生成的缩略图图像的质量，范围 1 到 100"
+          },
+          "colors": {
+            "label": "缩略图颜色",
+            "description": "提取缩略图的主色调，用于缩略图占位符和强调色"
           }
         },
         "ignoreRules": {
@@ -752,7 +833,8 @@
         },
         "oneshotsDirectory": {
           "label": "单篇目录",
-          "description": "存放单篇作品的目录名，相对于书库路径。若留空，则不会处理单篇作品"
+          "description": "存放单篇作品的目录名，相对于书库路径。若留空，则不会处理单篇作品",
+          "placeholder": "_oneshots"
         }
       },
       "scan": {
@@ -819,12 +901,16 @@
             "generateKoreaderHashes": "生成 KoReader 哈希值",
             "scaleEvenlyByFactor": "按比例缩放",
             "exact": "精确大小",
-            "scaleDimension": "按维度缩放"
+            "scaleDimension": "按维度缩放",
+            "oneshotsDirectory": "单行本目录"
           }
         },
         "buttons": {
           "confirm": "新建书库"
         }
+      },
+      "errors": {
+        "createFailed": "创建书库失败"
       }
     },
     "fileExplorer": {
@@ -847,13 +933,22 @@
           "series": "拖拽压缩文件到此处",
           "alt": "或点击浏览你电脑中的书籍进行上传"
         },
-        "addedFiles": "已添加文件"
+        "addedFiles": "已添加文件",
+        "toasts": {
+          "uploadBooksSuccess": "文件上传成功",
+          "uploadBooksFailed": "上传书籍失败",
+          "uploadSeriesSuccess": "系列上传成功",
+          "uploadSeriesFailed": "上传系列失败"
+        },
+        "seriesDirNameDescription": "这将用作系列目录的名称。您的 zip 压缩包将在此处解压。",
+        "seriesNamePlaceholder": "输入系列名称"
       }
     },
     "libraryHeader": {
       "tabs": {
         "books": "书籍",
-        "series": "系列"
+        "series": "系列",
+        "oneshots": "单行本"
       }
     },
     "librarySettingsScene": {
@@ -966,7 +1061,42 @@
         "sections": {
           "management": {
             "heading": "管理缩略图",
-            "description": "管理此库现有的缩略图"
+            "description": "管理此库现有的缩略图",
+            "processThumbnailColors": {
+              "heading": "处理缩略图颜色",
+              "description": "提取缺失的缩略图颜色元数据，或强制为所有缩略图重新生成",
+              "trigger": "提取颜色",
+              "missingOnly": "仅缺失项",
+              "reprocessAll": "全部重新处理"
+            },
+            "regenerateThumbnails": {
+              "heading": "重新生成缩略图",
+              "description": "生成缺失的缩略图，或强制重新生成所有缩略图",
+              "trigger": "生成缩略图",
+              "missingOnly": "仅生成缺失项",
+              "forceRecreateAll": "强制重建全部"
+            },
+            "deleteThumbnails": {
+              "heading": "删除缩略图",
+              "description": "移除此书库已生成的所有缩略图",
+              "trigger": "删除缩略图",
+              "confirmation": {
+                "title": "删除书库缩略图",
+                "text": "确定要删除此书库的所有缩略图吗？",
+                "confirm": "删除缩略图"
+              },
+              "warning": {
+                "description": "删除书库缩略图将移除所有已生成的图像，之后需要手动重新生成"
+              },
+              "toasts": {
+                "success": "书库缩略图已删除",
+                "error": "删除书库缩略图时发生错误"
+              }
+            },
+            "selectThumbnail": {
+              "description": "为此书库选择其他缩略图，可从书籍中选取或上传自定义图片",
+              "librarySeriesDescription": "从书库中选择一个系列"
+            }
           }
         }
       },
@@ -991,6 +1121,10 @@
             "description": "磁盘上可能重复的文件",
             "noDuplicateFiles": "该书库未检测到重复文件"
           }
+        },
+        "workInProgress": {
+          "title": "开发中",
+          "description": "此页面功能有限，仍在开发中"
         }
       },
       "integrations/metadata": {
@@ -1085,6 +1219,30 @@
       "actions": {
         "removeItem": "移除条目",
         "resetField": "重置字段"
+      },
+      "resetMetadata": {
+        "deleteButton": "删除元数据",
+        "title": "删除元数据",
+        "selectImpact": "选择删除的影响范围",
+        "impact": {
+          "series": {
+            "description": "仅移除此系列的元数据"
+          },
+          "books": {
+            "description": "移除此系列中所有书籍的元数据"
+          },
+          "everything": {
+            "label": "全部",
+            "description": "移除与此系列相关的所有元数据"
+          }
+        },
+        "warning": {
+          "description": "这将永久删除所选项的所有元数据。您需要触发自定义扫描以重新生成元数据"
+        }
+      },
+      "toasts": {
+        "updateFailed": "更新元数据失败",
+        "lockedFieldsUpdateFailed": "更新锁定字段失败"
       }
     },
     "metadataMatching": {
@@ -1154,11 +1312,16 @@
         },
         "startReview": "开始审核",
         "nothingToReview": "没有待审核的元数据匹配"
-      }
+      },
+      "reviewMatch": "审核匹配"
     },
     "seriesOverviewScene": {
       "buttons": {
         "downloadSeries": "下载系列"
+      },
+      "completeSeriesConfirmation": {
+        "title": "将系列标记为已完成",
+        "description": "您确定要将此系列中的所有书籍都标记为已完成吗？"
       }
     },
     "seriesHeader": {
@@ -1286,7 +1449,10 @@
                   }
                 },
                 "series_meta": {
-                  "label": "系列元数据"
+                  "label": "系列元数据",
+                  "attributes": {
+                    "year": "开始年份"
+                  }
                 },
                 "library": {
                   "label": "书库",
@@ -1317,10 +1483,16 @@
               "emptyState": "没有可显示的值"
             },
             "enumValue": {
-              "selectPlaceholder": "选择值"
+              "selectPlaceholder": "选择值",
+              "selectMultiplePlaceholder": "选择值",
+              "emptyState": "没有可显示的值"
             }
           }
         }
+      },
+      "rawFilters": {
+        "show": "显示 JSON",
+        "description": "查看筛选器的原始 JSON 表示"
       }
     },
     "createSmartListScene": {
@@ -1442,7 +1614,8 @@
               "private": "这将更改列表为私密，将其隐藏在以前曾经访问过的任何人上",
               "shared": "你需要与特定用户共享列表以给予他们访问权限",
               "fallback": "你确定要更改此列表的可见性吗？"
-            }
+            },
+            "changeVisibility": "更改可见性"
           },
           "accessManager": {
             "disclaimer": "共享功能尚未准备就绪。请稍后再试！"
@@ -1848,7 +2021,19 @@
             "description": "调整首页版块",
             "label": "首页版块",
             "hint": "拖动排列版块，或完全隐藏",
-            "reorder": "排序 {{section}}"
+            "reorder": "排序 {{section}}",
+            "reset": "重置",
+            "saveFailed": "保存更改失败",
+            "unsupported": "无效配置",
+            "unsupportedDescription": "请重置为默认配置后重试"
+          },
+          "debugSettings": {
+            "label": "调试设置",
+            "description": "这些设置不会出现在生产环境中，但对调试很有用",
+            "queryTools": {
+              "label": "查询工具",
+              "description": "启用查询调试工具"
+            }
           }
         }
       },
@@ -1905,6 +2090,11 @@
               "action": "创建一个 API 密钥以开始使用"
             },
             "noExpiration": "未设置过期时间"
+          },
+          "deleteKey": {
+            "title": "删除 API 密钥",
+            "description": "所有使用此密钥的客户端将立即失去身份验证",
+            "confirm": "删除密钥"
           }
         }
       },
@@ -1939,6 +2129,14 @@
                 "button": "清除偏好设置"
               }
             }
+          },
+          "universal": {
+            "label": "通用",
+            "description": "适用于所有类型书籍的设置"
+          },
+          "formats": {
+            "label": "格式",
+            "description": "独立配置各格式的阅读器默认设置"
           }
         }
       },
@@ -1999,6 +2197,10 @@
               "label": "Discord 状态",
               "description": "使用 Discord Rich Presence 在 Discord 中显示你的 Stump 活动",
               "reconnect": "重新连接到 Discord"
+            },
+            "restartRequired": {
+              "title": "需要重启",
+              "description": "所做更改需要重启应用后才能生效"
             }
           }
         }
@@ -2032,6 +2234,15 @@
             "renameError": "重命名 Emoji 失败",
             "deleteSuccess": "Emoji 已删除",
             "deleteError": "删除 Emoji 失败"
+          },
+          "serverConfig": {
+            "label": "服务器配置",
+            "description": "可在此管理的一部分服务器配置选项",
+            "publicUrl": {
+              "label": "公开 URL",
+              "description": "服务器对外的公开访问地址",
+              "updateFailed": "更新公开 URL 失败"
+            }
           }
         }
       },
@@ -2095,7 +2306,8 @@
               },
               "schedule": {
                 "label": "Cron 表达式",
-                "description": "使用 Cron 表达式定义执行频率"
+                "description": "使用 Cron 表达式定义执行频率",
+                "placeholder": "输入 cron 表达式"
               },
               "schedulePreset": {
                 "label": "预设",
@@ -2142,7 +2354,8 @@
             },
             "errors": {
               "invalidCron": "计划必须是有效的 Cron 表达式"
-            }
+            },
+            "createScheduledJob": "创建计划任务"
           },
           "history": {
             "title": "历史记录",
@@ -2166,6 +2379,11 @@
               "confirmText": "你确定要删除全部历史吗？",
               "confirm": "删除",
               "emptyState": "没有要清除的任务"
+            },
+            "inspector": {
+              "title": "任务详情",
+              "description": "此次任务运行的详细信息",
+              "associatedLogs": "相关日志"
             }
           }
         }
@@ -2197,7 +2415,8 @@
               "enforceUnset": {
                 "label": "在未设置时生效",
                 "description": "如果启用此选项，用户将被限制访问没有年龄评级的内容"
-              }
+              },
+              "placeholder": "例如：18"
             },
             "tagRestriction": {
               "label": "标签限制",
@@ -2337,17 +2556,57 @@
             "ageRestrictionTooLow": "年龄限制不能小于0",
             "missingUsername": "用户名为必填项",
             "missingPassword": "密码为必填项",
-            "usernameAlreadyExists": "用户名已存在"
+            "usernameAlreadyExists": "用户名已存在",
+            "maxSessionsAllowedTooLow": "最大允许会话数不能小于 0"
           },
           "createSubmitButton": "创建用户",
-          "updateSubmitButton": "更新用户"
+          "updateSubmitButton": "更新用户",
+          "accountDetails": {
+            "heading": "账户详情",
+            "description": "用户可以随时更改这些值"
+          },
+          "maxSessionsAllowed": {
+            "label": "最大允许会话数",
+            "description": "同一时间允许的有效会话数量上限。当用户在达到上限后尝试登录时，最早的会话将失效。"
+          }
         },
         "loginActivity": {
           "deleteConfirmation": {
             "title": "删除活动",
             "description": "登录活动的所有记录将从数据库中永久删除",
             "confirm": "删除"
+          },
+          "heading": "身份验证历史",
+          "description": "出于安全考虑，所有登录尝试都会被记录并存储",
+          "empty": {
+            "heading": "暂无登录活动",
+            "description": "是你清空的吧？"
           }
+        },
+        "userStats": {
+          "users": "用户",
+          "booksCompleted": "已读完书籍",
+          "booksInProgress": "阅读中书籍",
+          "topReader": "最活跃读者"
+        },
+        "userTable": {
+          "existingAccounts": {
+            "heading": "现有账户",
+            "description": "服务器上所有现有账户的列表"
+          },
+          "deleteUser": {
+            "title": "删除用户账户",
+            "description": "确定要删除此用户吗？如果选择硬删除选项，该用户及其所有数据将被永久删除。",
+            "hardDelete": "硬删除用户",
+            "confirm": "删除用户"
+          },
+          "inspectUser": {
+            "heading": "查看用户",
+            "description": "查看用户的详细信息和配置",
+            "json": "JSON"
+          },
+          "sessions": "会话数",
+          "sessionsTooltip": "此用户未过期的登录会话数量"
         }
       },
       "server/email": {
@@ -2374,7 +2633,8 @@
                   }
                 },
                 "emptyHeading": "无历史记录",
-                "emptySubtitle": "此邮件发送器的历史为空。它要么未被使用，要么历史已被清除"
+                "emptySubtitle": "此邮件发送器的历史为空。它要么未被使用，要么历史已被清除",
+                "notFound": "未找到"
               }
             }
           },
@@ -2407,6 +2667,14 @@
             "table": {
               "emptyHeading": "没有已注册的设备",
               "emptySubtitle": "创建一个新的设备别名以供将来使用"
+            },
+            "deleteDevice": {
+              "title": "删除设备",
+              "description": "确定要删除此设备吗？",
+              "confirm": "删除设备",
+              "toasts": {
+                "error": "删除设备失败"
+              }
             }
           }
         },
@@ -2476,7 +2744,9 @@
               "title": "测试邮件发送失败",
               "description": "检查您的 SMTP 设置并重试"
             }
-          }
+          },
+          "nameAlreadyExists": "已存在同名邮件发送器",
+          "nameIsForbidden": "此名称为保留名称"
         },
         "createEmailer": {
           "helmet": "创建邮件发送器",
@@ -2865,7 +3135,138 @@
           "reading": "正在阅读",
           "unread": "未读"
         }
+      },
+      "labels": {
+        "onlyFromSeries": "仅显示当前系列可用的选项",
+        "genre": "类型",
+        "writer": "编剧",
+        "penciller": "铅笔稿",
+        "colorist": "上色",
+        "letterer": "写字",
+        "inker": "描线",
+        "publisher": "出版社",
+        "editor": "编辑",
+        "character": "角色",
+        "status": "状态",
+        "continuing": "连载中",
+        "ended": "已完结"
       }
+    },
+    "seriesSettingsScene": {
+      "analysis": "分析",
+      "thumbnail": "缩略图",
+      "metadata": "元数据",
+      "metadataDescription": "关于此系列的额外信息"
+    },
+    "directoryPicker": {
+      "description": "指定您的书库所在的目录。"
+    },
+    "serverStatusOverlay": {
+      "checkConnection": "请检查您的网络连接。",
+      "clickHere": "点击此处",
+      "changeServerUrl": "以更改您的服务器 URL。"
+    },
+    "cardList": {
+      "empty": {
+        "noResultsReturned": "未返回任何结果",
+        "noResultsToDisplay": "没有可显示的结果"
+      }
+    },
+    "tableColumnConfiguration": {
+      "description": "调整书籍浏览表格中显示的列",
+      "moveToHidden": "移至隐藏",
+      "moveToVisible": "移至可见",
+      "dropColumnsHere": "将列拖放到此处"
+    },
+    "filters": {
+      "notImplemented": "尚未实现",
+      "useOptionsToNarrowSearch": "使用以下选项缩小搜索范围",
+      "clearFilters": "清除筛选",
+      "applyFilters": "应用筛选",
+      "configureUrlFilters": "配置 URL 筛选器",
+      "urlFiltersDescription": "调整应用于当前视图的筛选器",
+      "configureFilters": "配置筛选器"
+    },
+    "search": {
+      "functionalityUnavailable": "此功能目前不可用"
+    },
+    "markdownEditor": {
+      "addSpoiler": "添加剧透内容",
+      "tagUser": "提及用户"
+    },
+    "bookSearchOverlay": {
+      "description": "您可以使用下方的搜索栏查找书籍"
+    },
+    "stackedSeriesCard": {
+      "seriesMissing": "系列缺失"
+    },
+    "epubReaderControls": {
+      "bookOverviewTitle": "书籍概览",
+      "decreaseFontSize": "减小字号",
+      "increaseFontSize": "增大字号",
+      "fontPreviewCap": "实时字体预览上限为 50px",
+      "decreaseLineHeight": "减小行高",
+      "increaseLineHeight": "增大行高"
+    },
+    "topBar": {
+      "libraries": {
+        "noLibrariesYet": "您还没有任何书库"
+      }
+    },
+    "userMenu": {
+      "logout": "退出登录",
+      "logoutFailed": "退出登录时出错，请重试。"
+    },
+    "tableColumnsDrawer": {
+      "chooseColumns": "选择要显示或隐藏的列",
+      "groupColumnsDescription": "这仅影响书籍分组所依据的父表格",
+      "bookColumnsDescription": "这仅影响嵌套的书籍表格",
+      "enableMultiSort": "启用多重排序",
+      "multiSortDescription": "按列排序会移除之前的排序，此设置允许将多个排序组合使用",
+      "selectAtLeastOneColumn": "必须至少选择一列"
+    },
+    "notFound": {
+      "description": "您访问的页面似乎不存在！",
+      "reportIssue": "报告问题"
+    },
+    "bookClub": {
+      "clubs": {
+        "yourClubs": "你的读书会",
+        "active": "活跃",
+        "inactive": "不活跃",
+        "goToClub": "前往读书会",
+        "notAMember": "你还没有加入任何读书会",
+        "explorePublic": "浏览公开读书会",
+        "memberCount_one": "{{count}} 位成员",
+        "memberCount_other": "{{count}} 位成员"
+      },
+      "scheduler": {
+        "booksToAdd": "要添加的书籍",
+        "pickABook": "选择一本书",
+        "pickABookDescription": "你可以从自己的书库中添加书籍",
+        "removeSelection": "移除所选",
+        "addExternalBook": "添加外部书籍",
+        "addExternalBookDescription": "如果你想添加一本不在书库中的书，可以在这里填写它的信息",
+        "author": "作者",
+        "bookUrl": "书籍 URL",
+        "andThen": "然后",
+        "configureDates": "设置日期",
+        "configureDatesDescription": "如果不填写，将根据上一本书的结束日期自动设置合理的起止日期",
+        "startDate": "开始日期",
+        "endDate": "结束日期"
+      },
+      "books": {
+        "heading": "书籍",
+        "noBooksToDisplay": "暂无可显示的书籍",
+        "noBooksScheduled": "该读书会还没有安排任何书籍",
+        "showPastBooks": "显示以往的书籍",
+        "hidePastBooks": "隐藏以往的书籍",
+        "createSchedule": "创建阅读计划"
+      }
+    },
+    "pdfViewer": {
+      "loadFailed": "PDF 加载失败。",
+      "downloadDirect": "尝试直接下载。"
     }
   },
   "shared": {

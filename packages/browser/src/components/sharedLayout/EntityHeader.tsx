@@ -14,6 +14,7 @@ import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 type Stat = React.ComponentProps<typeof MiniStatCard> & { key: string }
 
@@ -36,6 +37,7 @@ type Props = {
 export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoClick }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
+	const { translate } = useTranslate()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
@@ -124,7 +126,7 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoC
 							'h-7 w-7 flex shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
 							{ 'bg-muted text-foreground': isSettingsActive },
 						)}
-						aria-label="Settings"
+						aria-label={translate('shared.common.settings')}
 					>
 						<Settings className="h-4 w-4" />
 					</Link>

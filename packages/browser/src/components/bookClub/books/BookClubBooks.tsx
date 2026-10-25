@@ -6,6 +6,7 @@ import { useMediaMatch, useToggle } from 'rooks'
 
 import { useBookClubContext } from '@/components/bookClub'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import BookClubBookItem from './BookClubBookItem'
@@ -27,6 +28,7 @@ const query = graphql(`
 `)
 
 export default function BookClubBooks() {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const { bookClub, viewerCanManage } = useBookClubContext()
 
@@ -74,7 +76,9 @@ export default function BookClubBooks() {
 							onClick={togglePastBooks}
 						>
 							<Text className="cursor-pointer underline" size="sm" variant="muted">
-								{showPastBooks ? 'Hide' : 'Show'} past books
+								{showPastBooks
+									? t('bookClub.books.hidePastBooks')
+									: t('bookClub.books.showPastBooks')}
 							</Text>
 						</button>
 					</div>
@@ -96,14 +100,14 @@ export default function BookClubBooks() {
 			return (
 				<div className="px-4 flex flex-col">
 					<GenericEmptyState
-						title="No books to display"
-						subtitle="The club has no books scheduled"
+						title={t('bookClub.books.noBooksToDisplay')}
+						subtitle={t('bookClub.books.noBooksScheduled')}
 						containerClassName="md:justify-start md:items-start"
 						contentClassName="md:text-left"
 					/>
 					{viewerCanManage && (
 						<ButtonOrLink variant="secondary" href={paths.bookClubScheduler(bookClub.id)}>
-							Create a schedule
+							{t('bookClub.books.createSchedule')}
 						</ButtonOrLink>
 					)}
 				</div>
@@ -127,7 +131,7 @@ export default function BookClubBooks() {
 		<div className="md:-ml-4 md:w-2/3 lg:w-md flex h-full w-full flex-col">
 			{!!bookClub.currentBook && (
 				<Heading size="md" className="px-4 pb-4 flex items-center">
-					Books
+					{t('bookClub.books.heading')}
 				</Heading>
 			)}
 			{renderContent()}

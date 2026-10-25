@@ -14,6 +14,7 @@ import { Fingerprint, Slash } from 'lucide-react'
 import { useState } from 'react'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import UsernameRow from '../user-table/UsernameRow'
 
@@ -47,6 +48,7 @@ export const prefetchLoginActivity = async (sdk: Api, client: QueryClient) =>
 
 export default function LoginActivityTable() {
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 	const {
 		data: { loginActivity },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('loginActivity'))
@@ -68,9 +70,9 @@ export default function LoginActivityTable() {
 					</div>
 
 					<div className="text-center">
-						<Text>No login activity</Text>
+						<Text>{t('settingsScene.server/users.loginActivity.empty.heading')}</Text>
 						<Text size="sm" variant="muted">
-							You cleared this, didn&#39;t you?
+							{t('settingsScene.server/users.loginActivity.empty.description')}
 						</Text>
 					</div>
 				</div>

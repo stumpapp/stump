@@ -105,24 +105,27 @@ export default function UploadModal() {
 
 	const isUploading = isUploadingBooks || isUploadingSeries
 
-	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
-		if (rejections.length) {
-			console.warn('Some files were rejected:', rejections)
-			toast.error('Some files were rejected. Please check the file type and size')
-		}
+	const handleDrop = useCallback(
+		(acceptedFiles: File[], rejections: FileRejection[]) => {
+			if (rejections.length) {
+				console.warn('Some files were rejected:', rejections)
+				toast.error(translate('shared.common.fileUpload.someRejected'))
+			}
 
-		setFiles((prev) => {
-			const existingFingerprints = new Set(prev.map(({ file }) => getFileFingerprint(file)))
-			const nextEntries = acceptedFiles
-				.filter((file) => !existingFingerprints.has(getFileFingerprint(file)))
-				.map((file) => ({
-					id: `${nextFileIdRef.current++}`,
-					file,
-				}))
+			setFiles((prev) => {
+				const existingFingerprints = new Set(prev.map(({ file }) => getFileFingerprint(file)))
+				const nextEntries = acceptedFiles
+					.filter((file) => !existingFingerprints.has(getFileFingerprint(file)))
+					.map((file) => ({
+						id: `${nextFileIdRef.current++}`,
+						file,
+					}))
 
-			return [...prev, ...nextEntries]
-		})
-	}, [])
+				return [...prev, ...nextEntries]
+			})
+		},
+		[translate],
+	)
 
 	const { getRootProps, getInputProps, isFileDialogActive, isDragActive } = useDropzone({
 		accept: {
@@ -152,13 +155,13 @@ export default function UploadModal() {
 		async (params: UploadBooksInput) => {
 			try {
 				await uploadBooks({ input: params })
-				toast.success('Successfully uploaded file(s)')
+				toast.success(t('fileExplorer.uploadModal.toasts.uploadBooksSuccess'))
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload book(s)')
+				toast.error(t('fileExplorer.uploadModal.toasts.uploadBooksFailed'))
 			}
 		},
-		[uploadBooks],
+		[uploadBooks, t],
 	)
 
 	const enableSeries = useSeriesContextSafe() == null
@@ -178,12 +181,12 @@ export default function UploadModal() {
 					seriesDirName,
 				},
 			})
-			toast.success('Successfully uploaded series')
+			toast.success(t('fileExplorer.uploadModal.toasts.uploadSeriesSuccess'))
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to upload series')
+			toast.error(t('fileExplorer.uploadModal.toasts.uploadSeriesFailed'))
 		}
-	}, [uploadSeries, files, seriesDirName, currentPath, libraryID, enableSeries])
+	}, [uploadSeries, files, seriesDirName, currentPath, libraryID, enableSeries, t])
 
 	const onUploadClicked = useCallback(async () => {
 		// Return if files is empty
@@ -310,13 +313,12 @@ export default function UploadModal() {
 
 						{uploadType === 'series' && (
 							<div className="mt-2">
-								<Heading size="xs">Series name</Heading>
+								<Heading size="xs">{t('common.seriesName')}</Heading>
 								<Dialog.Description>
-									This will be used as the name of the series directory. Your zip archive will be
-									unpacked here.
+									{t('fileExplorer.uploadModal.seriesDirNameDescription')}
 								</Dialog.Description>
 								<Input
-									placeholder="Enter series name"
+									placeholder={t('fileExplorer.uploadModal.seriesNamePlaceholder')}
 									value={seriesDirName}
 									onChange={(e) => setSeriesDirName(e.target.value)}
 									className="mt-2"

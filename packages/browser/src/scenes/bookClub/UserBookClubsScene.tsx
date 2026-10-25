@@ -1,10 +1,10 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
 import { graphql, UserBookClubsSceneQuery } from '@stump/graphql'
-import pluralize from 'pluralize'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 // TODO(book-clubs): This query needs a complete rewrite
@@ -30,6 +30,7 @@ type Club = UserBookClubsSceneQuery['bookClubs'][number]
  * A scene that displays all the book clubs the user is a member of
  */
 export default function UserBookClubsScene() {
+	const { t } = useTranslate()
 	const paths = usePaths()
 	const {
 		data: { bookClubs },
@@ -51,7 +52,7 @@ export default function UserBookClubsScene() {
 								'mt-0.5 px-1.5 py-0.5 text-xs font-medium rounded-md whitespace-nowrap ring-1 ring-inset',
 							)}
 						>
-							{isActive ? 'Active' : 'Inactive'}
+							{isActive ? t('bookClub.clubs.active') : t('bookClub.clubs.inactive')}
 						</p>
 					</div>
 					<div className="mt-1 gap-x-2 text-xs leading-5 flex items-center text-gray-500">
@@ -59,12 +60,14 @@ export default function UserBookClubsScene() {
 						<svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
 							<circle cx={1} cy={1} r={1} />
 						</svg>
-						<p className="truncate">{pluralize('member', bookClub.membersCount, true)}</p>
+						<p className="truncate">
+							{t('bookClub.clubs.memberCount', { count: bookClub.membersCount })}
+						</p>
 					</div>
 				</div>
 				<div className="gap-x-4 flex flex-none items-center">
 					<ButtonOrLink href={paths.bookClub(bookClub.slug)} variant="secondary">
-						Go to club
+						{t('bookClub.clubs.goToClub')}
 					</ButtonOrLink>
 				</div>
 			</>
@@ -77,10 +80,10 @@ export default function UserBookClubsScene() {
 				<Card className="p-6 flex items-center justify-center border-dashed">
 					<div className="gap-3 flex flex-col items-center">
 						{!bookClubs?.length && (
-							<Heading size="xs">You are not a member of any book clubs</Heading>
+							<Heading size="xs">{t('bookClub.clubs.notAMember')}</Heading>
 						)}
 						<ButtonOrLink href="explore" variant="secondary">
-							Explore public book clubs
+							{t('bookClub.clubs.explorePublic')}
 						</ButtonOrLink>
 					</div>
 				</Card>
@@ -89,7 +92,7 @@ export default function UserBookClubsScene() {
 
 		return (
 			<>
-				<Heading>Your clubs</Heading>
+				<Heading>{t('bookClub.clubs.yourClubs')}</Heading>
 				<ul role="list" className="divide-y divide-gray-100">
 					{bookClubs?.map((club) => (
 						<li
@@ -109,7 +112,7 @@ export default function UserBookClubsScene() {
 			className={cx({ 'flex h-full items-center justify-center': !bookClubs?.length })}
 		>
 			<Helmet>
-				<title>Stump | Book Clubs</title>
+				<title>Stump | {t('sidebar.buttons.bookClubs')}</title>
 			</Helmet>
 
 			{renderContent()}

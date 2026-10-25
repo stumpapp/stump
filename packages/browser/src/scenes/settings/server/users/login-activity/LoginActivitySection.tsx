@@ -1,18 +1,21 @@
 import { Heading, Text } from '@stump/components'
 import { Suspense } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import ClearLoginActivityConfirmation from './ClearActivityConfirmation'
 import LoginActivityTable from './LoginActivityTable'
 
-// TODO(i8n): add key/values
 export default function LoginActivitySection() {
+	const { t } = useTranslate()
+
 	return (
 		<div data-testid="login-activity-section" className="gap-y-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
-					<Heading size="sm">Authentication history</Heading>
+					<Heading size="sm">{t('settingsScene.server/users.loginActivity.heading')}</Heading>
 					<Text size="sm" variant="muted" className="mt-1">
-						All login attempts are logged and stored for security purposes
+						{t('settingsScene.server/users.loginActivity.description')}
 					</Text>
 				</div>
 

@@ -4,6 +4,8 @@ import { useCallback } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import AddBookCard from './AddBookCard'
 
 const bookEntityOption = z.object({
@@ -33,6 +35,7 @@ export const defaultBook = {
 } as BookSchema
 
 export default function CreateOrAddToScheduleForm() {
+	const { t } = useTranslate()
 	const form = useForm<Schema>({
 		defaultValues: {
 			books: [defaultBook],
@@ -70,7 +73,7 @@ export default function CreateOrAddToScheduleForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<Input
-				label="Books to add"
+				label={t('bookClub.scheduler.booksToAdd')}
 				type="number"
 				value={books.length}
 				onChange={handleChange}

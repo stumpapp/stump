@@ -68,7 +68,7 @@ export default function DeleteJobHistoryConfirmation() {
 					{t(getKey('title'))}
 				</Button>
 			}
-			size="md"
+			size="lg"
 		>
 			<Text>{t(getKey('confirmText'))}</Text>
 		</ConfirmationModal>

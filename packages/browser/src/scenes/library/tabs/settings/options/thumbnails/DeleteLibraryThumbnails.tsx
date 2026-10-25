@@ -70,7 +70,6 @@ export default function DeleteLibraryThumbnails() {
 				onClose={() => setShowConfirmation(false)}
 				onConfirm={handleDeleteThumbnails}
 				confirmIsLoading={isPending}
-				size="sm"
 			/>
 		</>
 	)

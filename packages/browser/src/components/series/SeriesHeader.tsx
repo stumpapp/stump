@@ -4,9 +4,19 @@ import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowUpRight, BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
+import {
+	BookCheck,
+	BookOpen,
+	BookOpenCheck,
+	Clock,
+	FileSearch,
+	HardDrive,
+	Image,
+	ImagePlus,
+	ImageUp,
+} from 'lucide-react'
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation } from 'react-router'
 import { toast } from 'sonner'
 
 import { EntityHeader } from '@/components/sharedLayout'
@@ -14,10 +24,11 @@ import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
-import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
+import { CompleteSeriesConfirmation } from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'
+import { usePrefetchSeriesBooks } from './queries'
 import { SeriesOverviewSheet } from './SeriesOverviewSheet'
-import { usePrefetchSeriesBooks } from './tabs/books/queries'
+import { useSeriesThumbnailActions } from './useSeriesThumbnailActions'
 
 const completeSeriesMutation = graphql(`
 	mutation SeriesActionComplete($id: ID!) {
@@ -25,7 +36,13 @@ const completeSeriesMutation = graphql(`
 	}
 `)
 
-export default function SeriesHeader() {
+const analyzeMutation = graphql(`
+	mutation SeriesHeaderAnalyze($id: ID!) {
+		analyzeSeries(id: $id)
+	}
+`)
+
+export function SeriesHeader() {
 	const { checkPermission } = useAppContext()
 	const {
 		series: {
@@ -33,13 +50,13 @@ export default function SeriesHeader() {
 			resolvedName,
 			path,
 			stats,
-			library: { id: libraryId },
+			library: { id: libraryId, name: libraryName },
 		},
 	} = useSeriesContext()
 	const { t, translate } = useTranslate()
 
 	const location = useLocation()
-	const navigate = useNavigate()
+
 	const paths = usePaths()
 	const formattedTime = stats.totalReadingTimeSeconds
 		? formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
@@ -65,12 +82,25 @@ export default function SeriesHeader() {
 		},
 	})
 
+	const thumbnail = useSeriesThumbnailActions(id)
+	const { mutate: analyze, isPending: isAnalyzing } = useGraphQLMutation(analyzeMutation, {
+		onSuccess: () => toast.success('Analysis started'),
+		onError: (error) => {
+			console.error(error)
+			toast.error('Failed to start analysis')
+		},
+	})
+
+	const canAnalyze = checkPermission(UserPermission.ManageLibrary)
+	const canEditThumbnail = checkPermission(UserPermission.EditThumbnails)
+	const canUpload = checkPermission(UserPermission.UploadFile)
+
 	const actions = [
 		{
 			items: [
 				{
 					label: t('seriesHeader.actions.markAsRead'),
-					leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
+					leftIcon: <BookOpenCheck />,
 					onClick: () => {
 						setShowCompleteSeriesConfirmation(true)
 					},
@@ -79,16 +109,43 @@ export default function SeriesHeader() {
 		},
 		{
 			items: [
-				{
-					label: translate('shared.bookActions.goToLibrary'),
-					leftIcon: <ArrowUpRight className="mr-2 h-4 w-4" />,
-					onClick: () => {
-						navigate(paths.librarySeries(libraryId))
-					},
-				},
+				...(canAnalyze
+					? [
+							{
+								label: translate('shared.bookActions.analyze'),
+								leftIcon: <FileSearch />,
+								disabled: isAnalyzing,
+								onClick: () => analyze({ id }),
+							},
+						]
+					: []),
+				...(canEditThumbnail
+					? [
+							{
+								label: translate('shared.common.thumbnail'),
+								leftIcon: <Image />,
+								subItems: [
+									{
+										label: t('thumbnailSelector.chooseFromBooks'),
+										leftIcon: <ImagePlus />,
+										onClick: thumbnail.openSelector,
+									},
+									...(canUpload
+										? [
+												{
+													label: t('thumbnailSelector.uploadImage'),
+													leftIcon: <ImageUp />,
+													onClick: thumbnail.openUpload,
+												},
+											]
+										: []),
+								],
+							},
+						]
+					: []),
 			],
 		},
-	] satisfies DropdownItemGroup[]
+	].filter((group) => group.items.length > 0) satisfies DropdownItemGroup[]
 
 	const prefetchSeriesBooks = usePrefetchSeriesBooks()
 	const prefetchFiles = usePrefetchFiles()
@@ -177,6 +234,8 @@ export default function SeriesHeader() {
 				settingsLink={paths.seriesSettings(id)}
 				onInfoClick={() => setIsOverviewSheetOpen(true)}
 			/>
+
+			{canEditThumbnail && thumbnail.dialogs}
 
 			<SeriesOverviewSheet
 				isOpen={isOverviewSheetOpen}

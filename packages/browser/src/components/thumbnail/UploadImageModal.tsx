@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 
 import { useTranslate } from '@/hooks/useTranslate'
 
-const LOCALE_BASE_KEY = 'thumbnailDropdown.uploadImage'
+const LOCALE_BASE_KEY = 'thumbnailSelector.uploadDialog'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 type Props = {
@@ -14,6 +14,8 @@ type Props = {
 	onClose: () => void
 	onUploadImage: (file: File) => Promise<void>
 }
+
+// TODO(ui): make this a bit prettier
 
 export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Props) {
 	const { t, translate } = useTranslate()

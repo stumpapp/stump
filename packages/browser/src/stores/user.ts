@@ -9,12 +9,15 @@ export const useUserStore = createUserStore(localStorage)
 export const useUser = () =>
 	useUserStore(useShallow((store) => ({ setUser: store.setUser, user: store.user })))
 
+export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
+
 type LocalPreferences = {
 	sidebar: {
 		side?: 'left' | 'right'
 		variant?: 'sidebar' | 'floating' | 'inset'
 		collapsible?: 'offcanvas' | 'icon' | 'none'
 	}
+	textCase: TextCase
 }
 
 type LocalPreferencesStore = {
@@ -30,6 +33,7 @@ export const useLocalPreferencesStore = create<LocalPreferencesStore>()(
 					variant: 'sidebar',
 					collapsible: 'offcanvas',
 				},
+				textCase: 'sentenceCase',
 				patch: (partial) => {
 					set({
 						...merge({}, get(), partial),

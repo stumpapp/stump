@@ -1,10 +1,11 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Breadcrumb, ButtonOrLink, Heading } from '@stump/components'
+import { Breadcrumbs, ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
+import { NoLibraries } from '@/components/library'
 import { OwlEmptyState } from '@/components/Owl'
 import { PageHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -17,7 +18,6 @@ import {
 	useHomeArrangementKey,
 } from './arrangement'
 import ContinueReadingMedia, { usePrefetchContinueReading } from './ContinueReading'
-import NoLibraries from './NoLibraries'
 import OnDeck, { usePrefetchOnDeck } from './OnDeck'
 import RecentlyAddedMedia, { usePrefetchRecentlyAddedMedia } from './RecentlyAddedMedia'
 import RecentlyAddedSeries, { usePrefetchRecentlyAddedSeries } from './RecentlyAddedSeries'
@@ -61,7 +61,6 @@ export const usePrefetchHomeScene = () => {
 	}
 }
 
-// TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
 	const { translate } = useTranslate()
 	const paths = usePaths()
@@ -77,15 +76,7 @@ export default function HomeScene() {
 			</Helmet>
 
 			<PageHeader>
-				<Heading size="sm" className="shrink-0">
-					Home
-				</Heading>
-
-				{/*<Breadcrumb>
-					<Breadcrumb.List>
-						<Breadcrumb.Page>Home</Breadcrumb.Page>
-					</Breadcrumb.List>
-				</Breadcrumb>*/}
+				<Breadcrumbs segments={[{ label: translate('shared.common.home') }]} />
 			</PageHeader>
 		</>
 	)

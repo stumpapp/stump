@@ -20,10 +20,9 @@ import { NavigationArrangement } from './navigation-arrangement'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { SidebarCollapseBehavior } from './SidebarCollapseBehavior'
 import { SidebarStyle } from './SidebarStyle'
+import { TextCaseSelect } from './TextCaseSelect'
 import ThemeSelect from './ThemeSelect'
 import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
-
-// TODO: The more I look at this the less I kinda like it
 
 export default function AppearanceSettingsScene() {
 	const { t } = useTranslate()
@@ -53,6 +52,7 @@ export default function AppearanceSettingsScene() {
 					<ThemeSelect />
 					<GradientToggle />
 					<FontSelect />
+					<TextCaseSelect />
 					<InterfaceRoundnessPreference />
 				</NewCard>
 

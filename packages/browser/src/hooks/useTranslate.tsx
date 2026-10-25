@@ -1,10 +1,12 @@
 import { useCreateTranslate } from '@stump/i18n'
 
+import { useLocalPreferencesStore } from '@/stores/user'
+
 export function useTranslate() {
-	// TODO: support preferences for two prefs in params
+	const textCase = useLocalPreferencesStore((store) => store.textCase)
 	return useCreateTranslate({
 		namespace: 'webApp',
 		displayLanguageKeys: 'none',
-		textCase: 'sentenceCase',
+		textCase,
 	})
 }

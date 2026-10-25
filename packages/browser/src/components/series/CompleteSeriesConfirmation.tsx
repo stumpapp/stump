@@ -1,13 +1,17 @@
 import { Alert, AlertTitle, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 type Props = {
 	isOpen: boolean
 	onCancel: () => void
 	onConfirm: () => void
 }
 
-export default function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm }: Props) {
+export function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm }: Props) {
+	const { translate } = useTranslate()
+
 	return (
 		<ConfirmationModal
 			title="Mark series completed"
@@ -19,7 +23,9 @@ export default function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm
 		>
 			<Alert>
 				<AlertTriangle />
-				<AlertTitle>This cannot be undone</AlertTitle>
+				<AlertTitle>{translate('shared.common.thisActionCannotBeUndone')}</AlertTitle>
+				{/*nuance here, "cannot be undone" in the sense that if you already had progression then
+				you won't be able to untangle it in bulk*/}
 			</Alert>
 		</ConfirmationModal>
 	)

@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { Button, ConfirmationModal, Dialog, Form, ToolTip } from '@stump/components'
-import { ExistingProviderCardFragment, graphql } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import { Cog } from 'lucide-react'
@@ -13,6 +13,16 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { PROVIDER_LABELS } from './constants'
 import ProviderForm from './ProviderForm'
 import { createConfig, getPatchDefaults, PatchProviderConfigSchema } from './schema'
+
+const EditProviderDialogFragment = graphql(`
+	fragment EditProviderDialog on MetadataProviderConfigModel {
+		id
+		providerType
+		enabled
+		apiTokenExpiresAt
+		autoApplyConfig
+	}
+`)
 
 const mutation = graphql(`
 	mutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {
@@ -32,10 +42,11 @@ const deleteMutation = graphql(`
 `)
 
 type Props = {
-	provider: ExistingProviderCardFragment
+	provider: FragmentType<typeof EditProviderDialogFragment>
 }
 
-export function EditProviderDialog({ provider }: Props) {
+export function EditProviderDialog({ provider: fragmentRef }: Props) {
+	const provider = useFragment(EditProviderDialogFragment, fragmentRef)
 	const client = useQueryClient()
 
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)

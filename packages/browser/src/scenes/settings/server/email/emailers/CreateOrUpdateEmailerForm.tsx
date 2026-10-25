@@ -10,7 +10,7 @@ import {
 	PasswordInput,
 	Text,
 } from '@stump/components'
-import { EmailerListItemFragment } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 
@@ -20,14 +20,33 @@ import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schem
 import TestEmailerButton from './TestEmailerButton'
 import { commonHosts, getCommonHost } from './utils'
 
+export const CreateOrUpdateEmailerFormFragment = graphql(`
+	fragment CreateOrUpdateEmailerForm on Emailer {
+		name
+		isPrimary
+		smtpHost
+		smtpPort
+		maxAttachmentSizeBytes
+		senderDisplayName
+		senderEmail
+		tlsEnabled
+		username
+	}
+`)
+
 type Props = {
-	emailer?: EmailerListItemFragment
+	emailer?: FragmentType<typeof CreateOrUpdateEmailerFormFragment>
 	existingNames: string[]
 	onSubmit: (values: CreateOrUpdateEmailerSchema) => void
 }
 
 // TODO: Some of the descriptions are LONG. Use tooltips where necessary, instead of inline descriptions.
-export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSubmit }: Props) {
+export default function CreateOrUpdateEmailerForm({
+	emailer: fragment,
+	existingNames,
+	onSubmit,
+}: Props) {
+	const emailer = useFragment(CreateOrUpdateEmailerFormFragment, fragment)
 	const { t } = useTranslate()
 
 	const schema = useMemo(

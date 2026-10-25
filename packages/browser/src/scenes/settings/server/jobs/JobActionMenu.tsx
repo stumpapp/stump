@@ -113,26 +113,26 @@ export default function JobActionMenu({ job, onInspect }: Props) {
 				? [
 						{
 							label: 'Cancel',
-							leftIcon: <Ban className="mr-2 h-4 w-4" />,
+							leftIcon: <Ban />,
 							onClick: () => handleAction('cancel'),
 						},
 					]
 				: []),
 			{
 				label: 'Inspect',
-				leftIcon: <Database className="mr-2 h-4 w-4" />,
+				leftIcon: <Database />,
 				onClick: () => onInspect(),
 			},
 			...(hasLogs
 				? [
 						{
 							label: 'View logs',
-							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
+							leftIcon: <FileClock />,
 							onClick: () => navigate(paths.serverLogs(jobId)),
 						},
 						{
 							label: 'Clear logs',
-							leftIcon: <ListX className="mr-2 h-4 w-4" />,
+							leftIcon: <ListX />,
 							onClick: () => handleAction('deleteLogs'),
 						},
 					]

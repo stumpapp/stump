@@ -18,16 +18,7 @@ const query = graphql(`
 		}
 		emailerById(id: $id) {
 			id
-			name
-			isPrimary
-			smtpHost
-			smtpPort
-			lastUsedAt
-			maxAttachmentSizeBytes
-			senderDisplayName
-			senderEmail
-			tlsEnabled
-			username
+			...CreateOrUpdateEmailerForm
 		}
 	}
 `)

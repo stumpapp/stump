@@ -1,6 +1,6 @@
 import {
 	CreateMetadataProviderConfigInput,
-	ExistingProviderCardFragment,
+	EditProviderDialogFragment,
 	MergeStrategy,
 	MetadataProvider,
 	PatchMetadataProviderConfigInput,
@@ -56,7 +56,7 @@ export const getCommonDefaults = () => ({
 })
 
 export const getPatchDefaults = (
-	provider: ExistingProviderCardFragment,
+	provider: EditProviderDialogFragment,
 ): PatchProviderConfigSchema & { providerType: MetadataProvider } => ({
 	enabled: provider.enabled,
 	apiToken: null,

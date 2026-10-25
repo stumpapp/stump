@@ -68,7 +68,7 @@ export default function DeleteLogsConfirmationDialog() {
 					{t(getKey('title'))}
 				</Button>
 			}
-			size="md"
+			size="lg"
 		>
 			<Alert variant="warning" className="p-3 text-sm">
 				<AlertDescription>{t(getKey('disclaimer'))} </AlertDescription>

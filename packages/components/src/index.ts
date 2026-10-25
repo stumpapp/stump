@@ -37,6 +37,7 @@ export { Command, type CommandProps } from './command'
 export { Divider, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export {
+	AlertDialog,
 	ConfirmationModal,
 	type ConfirmationModalProps,
 	Dialog,

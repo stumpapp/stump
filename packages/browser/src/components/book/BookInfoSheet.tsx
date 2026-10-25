@@ -1,5 +1,5 @@
 import { formatBytes } from '@stump/client'
-import { Badge, Link, NewCard, SheetPrimitive as Sheet } from '@stump/components'
+import { Badge, cn, Link, NewCard, SheetPrimitive as Sheet } from '@stump/components'
 import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
 import { ComponentProps, ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
@@ -69,7 +69,7 @@ type Props = {
 	onClose: () => void
 }
 
-type Row = { label: string; value: ReactNode; title?: string }
+type Row = { label: string; value: ReactNode; title?: string; wrap?: boolean }
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
 	year: 'numeric',
@@ -199,6 +199,7 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 						label: translate('shared.common.path'),
 						value: book.relativeLibraryPath,
 						title: book.relativeLibraryPath,
+						wrap: true,
 					},
 					{
 						label: translate('shared.common.hash'),
@@ -262,18 +263,20 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 
 					{credits.length > 0 && (
 						<NewCard label={translate('shared.common.credits')}>
-							{credits.map(([key, names]) => (
+							{credits.map(([key, names = []]) => (
 								<NewCard.Row key={key} label={meta(key)} className={rowClassName}>
-									{names!.map((name) => (
-										<RouterLink
-											key={name}
-											to={paths.bookSearchWithFilter({
-												metadata: { [key]: { likeAnyOf: [name] } },
-											})}
-										>
-											<Badge variant={key === 'writers' ? 'primary' : 'secondary'}>{name}</Badge>
-										</RouterLink>
-									))}
+									<div className="min-w-0 gap-1.5 flex flex-1 flex-wrap justify-end">
+										{names.map((name) => (
+											<RouterLink
+												key={name}
+												to={paths.bookSearchWithFilter({
+													metadata: { [key]: { likeAnyOf: [name] } },
+												})}
+											>
+												<Badge variant={key === 'writers' ? 'primary' : 'secondary'}>{name}</Badge>
+											</RouterLink>
+										))}
+									</div>
 								</NewCard.Row>
 							))}
 						</NewCard>
@@ -291,7 +294,8 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 	)
 }
 
-const rowClassName = 'py-2.5 gap-4 lg:flex-row lg:items-center flex-row items-center'
+const rowClassName =
+	'py-2.5 gap-4 lg:flex-row lg:items-center flex-row items-center [&>div:first-child]:flex-none'
 
 type RowCardProps = { label: string; rows: Row[] }
 
@@ -299,9 +303,15 @@ function RowCard({ label, rows }: RowCardProps) {
 	if (!rows.length) return null
 	return (
 		<NewCard label={label}>
-			{rows.map(({ label, value, title }) => (
+			{rows.map(({ label, value, title, wrap }) => (
 				<NewCard.Row key={label} label={label} className={rowClassName}>
-					<span className="min-w-0 text-sm truncate text-right text-muted-foreground" title={title}>
+					<span
+						className={cn(
+							'min-w-0 text-sm flex-1 text-right text-muted-foreground',
+							wrap ? 'break-all' : 'truncate',
+						)}
+						title={title}
+					>
 						{value}
 					</span>
 				</NewCard.Row>

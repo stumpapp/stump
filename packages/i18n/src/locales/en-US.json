@@ -2766,26 +2766,24 @@
       "placeholder": "Select or create tag",
       "placeholderNoTags": "No tags available"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Select Thumbnail",
-      "options": {
-        "selectFromBooks": "Select from Books",
-        "uploadImage": "Upload Image"
+      "chooseAPage": "Choose a Page",
+      "chooseFromBooks": "Choose from Books",
+      "uploadImage": "Upload Image",
+      "title": "Select a Thumbnail",
+      "descriptions": {
+        "chooseBookPage": "Choose a page from this book to use as the new thumbnail",
+        "chooseSeriesBook": "Select a book from the series",
+        "chooseLibrarySeries": "Select a series from the library"
       },
-      "uploadImage": {
+      "uploadDialog": {
         "emptyState": "A preview of your image will appear here",
         "prompt": "Drop image here or click to select",
         "remove": "Remove Image",
         "fileTooLarge": "File Too Large",
         "onlyOneFile": "Only one file is allowed",
         "noFile": "No file was provided"
-      }
-    },
-    "thumbnailSelector": {
-      "title": "Select a Thumbnail",
-      "descriptions": {
-        "chooseBookPage": "Choose a page from this book to use as the new thumbnail",
-        "chooseSeriesBook": "Select a book from the series"
       },
       "actions": {
         "confirmSelection": "Confirm Selection"
@@ -2968,6 +2966,7 @@
       "confirm": "Confirm",
       "copy": "Copy",
       "created": "Created",
+      "credits": "Credits",
       "delete": "Delete",
       "deleteConfirmation": {
         "title": "Delete {{type}}",
@@ -2976,6 +2975,7 @@
         "typeToConfirm": "Type {{name}} to confirm:"
       },
       "documentation": "Documentation",
+      "email": "Email",
       "extract": "Extract",
       "extend": "Extend",
       "experimentalDisclaimer": {
@@ -3068,8 +3068,12 @@
       "favorite": "Favorite",
       "finished": "Finished",
       "grid": "Grid",
+      "hash": "Hash",
+      "koreaderHash": "KOReader Hash",
+      "lastFinished": "Last Finished",
       "list": "List",
       "lastCompleted": "Last Completed",
+      "modifiedOnDisk": "Modified on Disk",
       "name": "Name",
       "next": "Next",
       "no": "No",
@@ -3077,17 +3081,23 @@
       "ok": "Okay",
       "options": "Options",
       "output": "Output",
+      "overview": "Overview",
       "page": "Page",
       "pages": "Pages",
       "pageXOfY": "Page {{current}} of {{total}}",
       "pageX": "Page {{current}}",
       "password": "Password",
+      "path": "Path",
       "progress": "Progress",
       "publication": "Publication",
       "read": "Read",
       "readAgain": "Read Again",
       "readTime": "Reading Time",
+      "reading": "Reading",
       "readthrough": "Readthrough",
+      "readthroughs_one": "Readthrough",
+      "readthroughs_other": "Readthroughs",
+      "readLess": "Read Less",
       "readMore": "Read More",
       "refresh": "Refresh",
       "reset": "Reset",
@@ -3096,9 +3106,10 @@
       "servers": "Servers",
       "size": "Size",
       "test": "Test",
-      "thisActionCannotBeUndone": "Are you sure? This action cannot be undone",
+      "thisActionCannotBeUndone": "This action cannot be undone",
       "thisBook": "this book",
       "thisServer": "this server",
+      "thumbnail": "Thumbnail",
       "truncatedText": "{{text}}...",
       "unknownTitle": "Untitled",
       "url": "URL",
@@ -3179,6 +3190,7 @@
       "genre": "Genre",
       "language": "Language",
       "publisher": "Publisher",
+      "published": "Published",
       "volume": "Volume",
       "writers": "Writers",
       "colorists": "Colorists",
@@ -3290,6 +3302,10 @@
       "ABANDONED": "Abandoned"
     },
     "bookActions": {
+      "analyze": "Analyze",
+      "readFromBeginning": "Read from Beginning",
+      "readIncognito": "Read Incognito",
+      "openNativePdf": "Open in Native PDF Viewer",
       "markAsRead": {
         "label": "Mark as Read",
         "confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
@@ -3303,6 +3319,7 @@
       "deleteReadHistory": {
         "label": "Delete Read History",
         "confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+        "disclaimer": "Your completion history cannot be recovered once deleted",
         "failure": "Failed to delete read history"
       },
       "deleteBook": {

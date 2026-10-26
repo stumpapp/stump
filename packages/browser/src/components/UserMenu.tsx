@@ -1,5 +1,5 @@
 import { Avatar, cn, ConfirmationModal, Dropdown, Text } from '@stump/components'
-import { Bell, Server, Settings } from 'lucide-react'
+import { Bell, LogOut, Server, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -37,11 +37,13 @@ export default function UserMenu() {
 				isOpen={isSignOutConfirmOpen}
 				onClose={() => setIsSignOutConfirmOpen(false)}
 				onConfirm={logout}
+				size="sm"
+				icon={LogOut}
 			/>
 
 			<AutoSizer style={{ height: isIconMode ? '2rem' : '2.25rem', width: '100%' }}>
 				{({ width }) => (
-					<Dropdown open={isOpen} onOpenChange={setIsOpen} modal>
+					<Dropdown open={isOpen} onOpenChange={setIsOpen} modal={false}>
 						<Dropdown.Trigger asChild>
 							<div
 								aria-label={user.username}
@@ -97,7 +99,7 @@ export default function UserMenu() {
 
 								<Dropdown.Item
 									onClick={() => setIsSignOutConfirmOpen(true)}
-									isDestructive
+									variant="destructive"
 									className={itemClasses(true)}
 								>
 									{t('signOutModal.buttons.signOut')}
@@ -113,7 +115,7 @@ export default function UserMenu() {
 
 const itemClasses = (isDestructive?: boolean) =>
 	cn(
-		'h-9 gap-1.5 px-3 text-sm w-full rounded-md bg-transparent transition-colors duration-150 outline-none',
+		'py-1 gap-1.5 px-3 text-sm w-full rounded-md bg-transparent transition-colors duration-150 outline-none',
 		{
 			'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[highlighted]:bg-sidebar-accent/60 data-[highlighted]:text-sidebar-accent-foreground':
 				!isDestructive,

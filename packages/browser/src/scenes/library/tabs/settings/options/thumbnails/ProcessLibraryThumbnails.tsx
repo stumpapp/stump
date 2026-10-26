@@ -1,5 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Button, DropdownMenu, Label, NewCard, Text } from '@stump/components'
+import { Button, DropdownMenu, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import { useCallback } from 'react'
@@ -47,7 +47,7 @@ export default function ProcessLibraryThumbnails() {
 							},
 							{
 								label: t('thumbnailManagement.everything'),
-								isDestructive: true,
+								variant: 'destructive',
 								leftIcon: <AlertTriangle className={iconStyle} />,
 								onClick: () => process(true),
 							},
@@ -57,46 +57,5 @@ export default function ProcessLibraryThumbnails() {
 				align="start"
 			/>
 		</NewCard.Row>
-	)
-
-	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Label>Process thumbnail colors</Label>
-				<Text size="sm" variant="muted">
-					Extract missing thumbnail color metadata or force the regeneration of it for all
-					thumbnails
-				</Text>
-			</div>
-
-			<div>
-				<DropdownMenu
-					trigger={
-						<Button variant="outline">
-							Extract colors
-							<ChevronDown className="ml-2 h-4 w-4" />
-						</Button>
-					}
-					groups={[
-						{
-							items: [
-								{
-									label: 'Missing only',
-									leftIcon: <ImagePlus className={iconStyle} />,
-									onClick: () => process(false),
-								},
-								{
-									label: 'Reprocess all',
-									isDestructive: true,
-									leftIcon: <AlertTriangle className={iconStyle} />,
-									onClick: () => process(true),
-								},
-							],
-						},
-					]}
-					align="start"
-				/>
-			</div>
-		</div>
 	)
 }

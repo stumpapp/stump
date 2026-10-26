@@ -1,7 +1,8 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Button, ConfirmationModal, Text } from '@stump/components'
+import { Alert, AlertTitle, Button, ConfirmationModal } from '@stump/components'
 import { graphql, JobTableQuery } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { AlertTriangle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -15,7 +16,7 @@ const mutation = graphql(`
 `)
 
 export default function DeleteJobHistoryConfirmation() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()
@@ -68,9 +69,11 @@ export default function DeleteJobHistoryConfirmation() {
 					{t(getKey('title'))}
 				</Button>
 			}
-			size="lg"
 		>
-			<Text>{t(getKey('confirmText'))}</Text>
+			<Alert>
+				<AlertTriangle />
+				<AlertTitle>{translate('shared.common.thisActionCannotBeUndone')}</AlertTitle>
+			</Alert>
 		</ConfirmationModal>
 	)
 }

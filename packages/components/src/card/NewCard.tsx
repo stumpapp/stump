@@ -207,6 +207,7 @@ function InputRow({
 			<RowControl actions={actions} errorMessage={errorMessage}>
 				<RawInput
 					id={id}
+					data-testid={id}
 					disabled={disabled}
 					aria-invalid={resolvedInvalid}
 					className={className}
@@ -244,6 +245,7 @@ function TextAreaRow({
 			<RowControl actions={actions} errorMessage={errorMessage}>
 				<RawTextArea
 					id={id}
+					data-testid={id}
 					disabled={disabled}
 					aria-invalid={resolvedInvalid}
 					className={className}

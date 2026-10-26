@@ -142,7 +142,9 @@ describe('CreateOrUpdateEmailerForm', () => {
 			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 
 			// Error message should be displayed
-			await waitFor(() => expect(screen.getByText(/password/i)).toBeInTheDocument())
+			await waitFor(() =>
+				expect(screen.getByTestId('password')).toHaveAttribute('aria-invalid', 'true'),
+			)
 
 			expect(onSubmit).not.toHaveBeenCalled()
 		})

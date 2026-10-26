@@ -7,8 +7,6 @@ import { useCallback } from 'react'
 import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
 
-// TODO: leaving lints to remember to localize
-
 const mutation = graphql(`
 	mutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {
 		generateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)
@@ -50,7 +48,7 @@ export default function RegenerateThumbnails() {
 								},
 								{
 									label: t('thumbnailManagement.everything'),
-									isDestructive: true,
+									variant: 'destructive',
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),
 								},

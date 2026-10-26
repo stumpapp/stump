@@ -55,6 +55,7 @@ export default function SideBarButtonLink({
 		)
 	}
 
+	// TODO(ui): make right content hidden until group hover
 	return (
 		<div
 			className={cn(

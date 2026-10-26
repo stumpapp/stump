@@ -14,7 +14,6 @@ import { useUserStore } from '@/stores'
 import { noop } from '@/utils/misc'
 
 import BookClubHeader from './BookClubHeader'
-import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
 import { createRouteGroups } from './tabs/settings/routes'
 

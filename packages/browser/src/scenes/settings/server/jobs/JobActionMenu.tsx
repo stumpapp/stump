@@ -142,8 +142,9 @@ export default function JobActionMenu({ job, onInspect }: Props) {
 				? [
 						{
 							label: 'Delete',
-							leftIcon: <Trash2 className="mr-2 h-4 w-4" />,
+							leftIcon: <Trash2 />,
 							onClick: () => handleAction('delete'),
+							variant: 'destructive' as const,
 						},
 					]
 				: []),

@@ -151,14 +151,6 @@
         "bookClubsEnabled": "북클럽 기능"
       },
       "autoSyncLocalData": "로컬 데이터 자동 동기화",
-      "textCase": {
-        "label": "대소문자 표시",
-        "options": {
-          "lowerCase": "소문자",
-          "sentenceCase": "문장 첫 글자 대문자",
-          "titleCase": "각 단어 첫 글자 대문자"
-        }
-      },
       "tintListBackground": "목록 배경에 색상 적용",
       "management": {
         "label": "관리",
@@ -389,7 +381,6 @@
     "createLibraryScene": {
       "heading": "라이브러리 만들기",
       "subtitle": "라이브러리는 책을 묶어서 관리하는 데 사용합니다. 사용 방법을 다시 확인하려면",
-      "subtitleLink": "관련 문서를 참고하세요",
       "form": {
         "stepLabel": "단계",
         "steps": [
@@ -415,9 +406,6 @@
           }
         ],
         "review": {
-          "yes": "예",
-          "no": "아니요",
-          "none": "없음",
           "labels": {
             "generateThumbnails": "썸네일 생성",
             "processThumbnailColors": "썸네일 색상 처리",
@@ -471,12 +459,6 @@
         }
       },
       "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "썸네일 관리",
-            "description": "이 라이브러리의 기존 썸네일을 관리합니다"
-          }
-        },
         "title": "썸네일",
         "description": "이 라이브러리의 썸네일 설정 및 관리 옵션입니다"
       },
@@ -852,27 +834,6 @@
             "label": "레이아웃과 배치",
             "description": "Stump가 정보를 표시하고 콘텐츠를 구성하는 방식을 사용자화합니다"
           },
-          "primaryNavigation": {
-            "label": "기본 내비게이션",
-            "description": "간단한 사이드바와 상단바 내비게이션 중 선택합니다",
-            "options": {
-              "sidebar": "사이드바",
-              "topbar": "상단바"
-            },
-            "disclaimer": "* 선택하지 않은 옵션의 설정은 비활성화되거나 숨겨집니다"
-          },
-          "doubleSidebar": {
-            "label": "설정 사이드바",
-            "description": "설정 페이지에서 사이드바 내비게이션을 사용합니다"
-          },
-          "replacePrimarySidebar": {
-            "label": "기본 사이드바 대체",
-            "description": "보조 사이드바가 기본 사이드바 위에 쌓이지 않고 기본 사이드바를 대체합니다",
-            "tooltips": {
-              "doubleSidebar": "이 설정을 사용하려면 설정 사이드바가 활성화되어야 합니다",
-              "topbar": "기본 내비게이션이 상단바일 때는 현재 이 설정을 지원하지 않습니다"
-            }
-          },
           "navigationArrangement": {
             "label": "내비게이션 배치",
             "description": "기본 내비게이션 항목을 재배치하거나 조정합니다",
@@ -1017,7 +978,6 @@
           },
           "optionalFeatures": {
             "label": "선택 기능",
-            "description": "데스크톱 앱 전용 선택 기능을 관리합니다",
             "bundledServer": {
               "label": "내장 서버",
               "description": "데스크톱 앱이 실행되는 동안 내장 서버를 백그라운드에서 실행합니다(재시작 필요)"
@@ -1042,10 +1002,6 @@
         "title": "서버 설정",
         "description": "Stump 서버의 일반 설정입니다",
         "sections": {
-          "serverPublicUrl": {
-            "label": "외부 접속 URL",
-            "description": "네트워크 외부에서 서버에 접근할 수 있는 경우 해당 URL을 입력합니다. 초대 링크 등의 기능에 사용됩니다"
-          },
           "customEmojis": {
             "title": "이모지",
             "description": "서버의 사용자 지정 이미지 이모지를 확인하고 관리합니다",
@@ -1061,10 +1017,7 @@
             "noCustomEmojis": "아직 추가한 사용자 지정 이모지가 없습니다",
             "invalidName": "올바른 이모지 이름을 입력하세요",
             "uploadError": "이모지를 업로드하지 못했습니다",
-            "uploadSuccess": "이모지를 업로드했습니다",
-            "renameSuccess": "이모지 이름을 변경했습니다",
             "renameError": "이모지 이름을 변경하지 못했습니다",
-            "deleteSuccess": "이모지를 삭제했습니다",
             "deleteError": "이모지를 삭제하지 못했습니다"
           },
           "serverConfig": {
@@ -1085,7 +1038,6 @@
             "description": "일부 작업은 정해진 일정에 따라 자동으로 실행되도록 설정할 수 있습니다",
             "restartRequiredTitle": "재시작 필요",
             "restartRequired": "이 설정의 변경 사항은 서버를 재시작한 후 적용됩니다",
-            "newScheduledJob": "새 예약 작업",
             "deleteScheduledJob": {
               "title": "예약 작업 삭제",
               "description": "\"{{name}}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
@@ -1422,17 +1374,6 @@
             "buttons": {
               "confirm": "변경 사항 저장"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "언어"
-            },
-            "heading": "언어 및 지역",
-            "subtitle": [
-              "Stump는 여러 언어와 지역 설정을 지원합니다. 아래에서 원하는 설정을 선택하세요. 가능하다면",
-              "Stump 번역",
-              "개선에 참여해 주세요!"
-            ]
           },
           "language": {
             "label": "언어",
@@ -1831,21 +1772,6 @@
         "seeAll": "모두 보기"
       }
     },
-    "thumbnailDropdown": {
-      "label": "썸네일 선택",
-      "options": {
-        "selectFromBooks": "책에서 선택",
-        "uploadImage": "이미지 업로드"
-      },
-      "uploadImage": {
-        "emptyState": "이미지 미리보기가 여기에 표시됩니다",
-        "prompt": "여기에 이미지를 끌어다 놓거나 클릭하여 선택하세요",
-        "remove": "이미지 제거",
-        "fileTooLarge": "파일이 너무 큽니다",
-        "onlyOneFile": "파일은 하나만 선택할 수 있습니다",
-        "noFile": "선택한 파일이 없습니다"
-      }
-    },
     "underConstruction": {
       "homeLink": "홈으로 이동",
       "message": "아직 개발 중인 페이지입니다. 보여드리고 싶지만 아직 준비가 끝나지 않았습니다.",
@@ -1974,9 +1900,6 @@
           }
         ],
         "review": {
-          "yes": "예",
-          "no": "아니요",
-          "none": "없음",
           "labels": {
             "name": "이름",
             "description": "설명"
@@ -2071,28 +1994,6 @@
         "libraryType": {
           "label": "라이브러리 콘텐츠",
           "description": "이 라이브러리에 있는 콘텐츠의 유형입니다"
-        },
-        "defaultLibraryView": {
-          "label": "라이브러리 기본 보기",
-          "description": "이 라이브러리를 열 때 기본으로 표시할 탭을 설정합니다",
-          "hideSeriesView": {
-            "label": "시리즈 탭 숨기기",
-            "description": "라이브러리 탐색 메뉴에서 시리즈 탭을 숨깁니다"
-          },
-          "skipBookOverview": {
-            "label": "책 개요 건너뛰기",
-            "description": "이 라이브러리에서 책을 선택하면 바로 뷰어를 엽니다"
-          },
-          "options": {
-            "series": {
-              "label": "시리즈",
-              "description": "시리즈 탭을 기본으로 표시합니다"
-            },
-            "books": {
-              "label": "책",
-              "description": "책 탭을 기본으로 표시합니다"
-            }
-          }
         },
         "readingSettings": {
           "section": {
@@ -2231,29 +2132,34 @@
             "description": "KOReader를 사용하는 경우 해당 형식의 해시를 추가로 생성합니다"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "구성 방식",
-            "description": "라이브러리의 폴더 구성에 가장 가까운 방식을 선택합니다",
-            "docs": [
-              "어떤 항목을 선택할지 모르겠다면",
-              "도움말",
-              "링크를 클릭하여 자세히 알아보세요.",
-              "이 설정은 나중에 변경할 수 없습니다"
-            ],
-            "disabled": "이 설정은 변경할 수 없습니다"
-          },
-          "options": {
+        "organization": {
+          "label": "구성 방식",
+          "filesystemPattern": {
             "label": "라이브러리 구성 방식",
-            "description": "Stump가 라이브러리를 구성하는 방식을 결정하는 설정입니다",
-            "collectionPriority": {
-              "label": "컬렉션 우선",
+            "COLLECTION_BASED": {
               "description": "라이브러리 루트 바로 아래의 각 폴더를 하나의 시리즈로 취급합니다"
             },
-            "seriesPriority": {
-              "label": "시리즈 우선",
+            "SERIES_BASED": {
               "description": "깊이에 관계없이 모든 하위 폴더를 각각 하나의 시리즈로 취급합니다"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "라이브러리 기본 보기",
+            "description": "이 라이브러리를 열 때 기본으로 표시할 탭을 설정합니다",
+            "options": {
+              "BOOKS": "책",
+              "SERIES": "시리즈"
+            }
+          },
+          "hideSeries": {
+            "label": "시리즈 탭 숨기기",
+            "description": "라이브러리 탐색 메뉴에서 시리즈 탭을 숨깁니다"
+          },
+          "skipBookOverview": {
+            "label": "책 개요 건너뛰기",
+            "description": "이 라이브러리에서 책을 선택하면 바로 뷰어를 엽니다"
           }
         },
         "oneshotsDirectory": {
@@ -2588,9 +2494,6 @@
           }
         ],
         "review": {
-          "yes": "예",
-          "no": "아니요",
-          "none": "없음",
           "labels": {
             "name": "이름",
             "description": "설명",
@@ -2724,7 +2627,6 @@
     },
     "noLibraries": {
       "heading": "표시할 항목이 없습니다",
-      "messagePrefix": "아직 없는 항목은 볼 수 없어요",
       "message": {
         "create": "라이브러리를 만들어 시작하세요",
         "wait": "라이브러리를 만들면 여기에 표시됩니다"
@@ -2915,10 +2817,21 @@
       }
     },
     "thumbnailSelector": {
+      "label": "썸네일 선택",
+      "chooseFromBooks": "책에서 선택",
+      "uploadImage": "이미지 업로드",
       "title": "썸네일 선택",
       "descriptions": {
         "chooseBookPage": "새 썸네일로 사용할 페이지를 이 책에서 선택하세요",
         "chooseSeriesBook": "시리즈에서 책을 선택하세요"
+      },
+      "uploadDialog": {
+        "emptyState": "이미지 미리보기가 여기에 표시됩니다",
+        "prompt": "여기에 이미지를 끌어다 놓거나 클릭하여 선택하세요",
+        "remove": "이미지 제거",
+        "fileTooLarge": "파일이 너무 큽니다",
+        "onlyOneFile": "파일은 하나만 선택할 수 있습니다",
+        "noFile": "선택한 파일이 없습니다"
       },
       "actions": {
         "confirmSelection": "선택 확인"
@@ -3048,6 +2961,7 @@
       "list": "목록",
       "lastCompleted": "마지막 완독",
       "name": "이름",
+      "no": "아니요",
       "notAvailable": "사용 불가",
       "ok": "확인",
       "options": "옵션",
@@ -3066,6 +2980,7 @@
       "select": "선택",
       "settings": "설정",
       "servers": "서버",
+      "size": "크기",
       "thisBook": "이 책",
       "thisServer": "이 서버",
       "unknownTitle": "제목 없음",
@@ -3085,6 +3000,7 @@
       "files": "파일",
       "search": "검색",
       "preferences": "환경설정",
+      "yes": "예",
       "global": "전체 도서"
     },
     "libraryType": {
@@ -3486,6 +3402,14 @@
       },
       "showCurrentChapter": "현재 장 표시"
     },
+    "textCase": {
+      "label": "대소문자 표시",
+      "options": {
+        "lowerCase": "소문자",
+        "sentenceCase": "문장 첫 글자 대문자",
+        "titleCase": "각 단어 첫 글자 대문자"
+      }
+    },
     "addOrEditServer": {
       "kind": "유형",
       "customHeaders": {
@@ -3566,11 +3490,7 @@
         "description": "Stump 서버의 기본 정보입니다",
         "build": "빌드",
         "nonStableChannel": {
-          "title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다",
-          "description": [
-            "현재 사용 중인 빌드는",
-            "채널의 빌드입니다"
-          ]
+          "title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다"
         },
         "version": "버전",
         "exactCommit": "커밋 해시",

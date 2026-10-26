@@ -227,14 +227,6 @@
         "bookClubsEnabled": "讀書會功能"
       },
       "autoSyncLocalData": "自動同步本機資料",
-      "textCase": {
-        "label": "文字大小寫",
-        "options": {
-          "lowerCase": "小寫",
-          "sentenceCase": "句首大寫",
-          "titleCase": "標題大寫"
-        }
-      },
       "tintListBackground": "清單背景色調",
       "management": {
         "label": "管理",
@@ -486,9 +478,6 @@
         ],
         "submit": "建立讀書會",
         "review": {
-          "yes": "是",
-          "no": "否",
-          "none": "無",
           "labels": {
             "name": "名稱",
             "description": "描述"
@@ -499,7 +488,6 @@
     },
     "createLibraryScene": {
       "heading": "建立書庫",
-      "subtitleLink": "相關文件",
       "form": {
         "buttons": {
           "confirm": "新建書庫"
@@ -528,9 +516,6 @@
           }
         ],
         "review": {
-          "yes": "是",
-          "no": "否",
-          "none": "無",
           "labels": {
             "generateThumbnails": "產生縮圖",
             "processThumbnailColors": "處理縮圖顏色",
@@ -583,12 +568,6 @@
         }
       },
       "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "管理縮圖",
-            "description": "管理此書庫現有的縮圖"
-          }
-        },
         "title": "縮圖",
         "description": "該書庫中縮圖的設定和管理選項"
       },
@@ -952,17 +931,6 @@
               "removeFailed": "刪除頭像失敗"
             }
           },
-          "locale": {
-            "localeSelector": {
-              "label": "语言"
-            },
-            "heading": "语言及地区",
-            "subtitle": [
-              "Stump 支持多种语言和本地化，在下方设置您的偏好。请考虑帮助提升质量",
-              "Stump的翻译",
-              "如果你可以！"
-            ]
-          },
           "language": {
             "label": "語言",
             "contributeIfAble": "如果你方便，歡迎協助翻譯 Stump！",
@@ -1061,27 +1029,6 @@
           "layoutAndArrangement": {
             "label": "佈局與排列",
             "description": "自訂 Stump 顯示資訊及整理內容的方式"
-          },
-          "primaryNavigation": {
-            "label": "主要導覽",
-            "description": "選擇最小側邊欄或頂欄導覽",
-            "options": {
-              "sidebar": "側邊欄",
-              "topbar": "頂部工具條"
-            },
-            "disclaimer": "* 未選中選項的設定將被停用或隱藏"
-          },
-          "doubleSidebar": {
-            "label": "設定邊欄",
-            "description": "為設定頁面啟用側邊欄導覽"
-          },
-          "replacePrimarySidebar": {
-            "label": "替換主側邊欄",
-            "description": "出現二級側邊欄時，用它替換主側邊欄，而不是疊加顯示",
-            "tooltips": {
-              "doubleSidebar": "此設定需要啟用側邊欄",
-              "topbar": "當主導覽設定為頂部欄時，目前不支援此設定"
-            }
           },
           "navigationArrangement": {
             "label": "導覽排列",
@@ -1968,7 +1915,6 @@
     },
     "noLibraries": {
       "heading": "暫無內容",
-      "messagePrefix": "你不能看到你沒有的內容",
       "message": {
         "create": "建立書庫以開始使用",
         "wait": "建立書庫後，就會顯示在這裡"
@@ -2015,21 +1961,6 @@
     "tagSelect": {
       "placeholder": "選擇或建立標籤",
       "placeholderNoTags": "沒有可用的標籤"
-    },
-    "thumbnailDropdown": {
-      "label": "選擇縮圖",
-      "options": {
-        "selectFromBooks": "從書中選擇",
-        "uploadImage": "上傳圖片"
-      },
-      "uploadImage": {
-        "emptyState": "圖片預覽將顯示在這裡",
-        "prompt": "拖放圖片到此處或點選以選擇",
-        "remove": "刪除影像",
-        "fileTooLarge": "檔案大小超出限制",
-        "onlyOneFile": "只允許上傳一個檔案",
-        "noFile": "未選擇檔案"
-      }
     },
     "bookManagementScene": {
       "metadataSearch": {
@@ -2149,28 +2080,6 @@
         "libraryType": {
           "label": "書庫內容",
           "description": "此書庫中內容的類型"
-        },
-        "defaultLibraryView": {
-          "label": "預設書庫檢視方式",
-          "description": "設定開啟此書庫時預設顯示的分頁標籤",
-          "hideSeriesView": {
-            "label": "隱藏系列分頁標籤",
-            "description": "在書庫導覽中隱藏系列分頁標籤"
-          },
-          "skipBookOverview": {
-            "label": "跳過書籍概覽",
-            "description": "選擇書庫時直接開啟閱讀器"
-          },
-          "options": {
-            "series": {
-              "label": "系列",
-              "description": "預設顯示系列分頁標籤"
-            },
-            "books": {
-              "label": "書籍",
-              "description": "預設顯示書籍分頁標籤"
-            }
-          }
         },
         "readingSettings": {
           "section": {
@@ -2309,29 +2218,34 @@
             "description": "如果使用 KoReader，產生它所期望格式的額外雜湊值"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "組織",
-            "description": "確定哪種模式最符合你的書庫的組織方式",
-            "docs": [
-              "不確定該選哪一種？請點選",
-              "這裡",
-              "查看詳細資訊。",
-              "此設定之後無法變更"
-            ],
-            "disabled": "你無法變更此設定"
-          },
-          "options": {
+        "organization": {
+          "label": "組織",
+          "filesystemPattern": {
             "label": "書庫模式",
-            "description": "決定 Stump 如何組織你的書庫的設定",
-            "collectionPriority": {
-              "label": "集合優先",
+            "COLLECTION_BASED": {
               "description": "書庫根目錄最頂層的每個資料夾視為一個系列"
             },
-            "seriesPriority": {
-              "label": "系列優先",
+            "SERIES_BASED": {
               "description": "遞迴任意層級的每個資料夾視為一個系列"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "預設書庫檢視方式",
+            "description": "設定開啟此書庫時預設顯示的分頁標籤",
+            "options": {
+              "BOOKS": "書籍",
+              "SERIES": "系列"
+            }
+          },
+          "hideSeries": {
+            "label": "隱藏系列分頁標籤",
+            "description": "在書庫導覽中隱藏系列分頁標籤"
+          },
+          "skipBookOverview": {
+            "label": "跳過書籍概覽",
+            "description": "選擇書庫時直接開啟閱讀器"
           }
         }
       },
@@ -2667,9 +2581,6 @@
           }
         ],
         "review": {
-          "yes": "是",
-          "no": "否",
-          "none": "無",
           "labels": {
             "name": "名稱",
             "description": "描述",
@@ -2770,10 +2681,21 @@
       }
     },
     "thumbnailSelector": {
+      "label": "選擇縮圖",
+      "chooseFromBooks": "從書中選擇",
+      "uploadImage": "上傳圖片",
       "title": "選擇縮圖",
       "descriptions": {
         "chooseBookPage": "選擇本書中的一頁作為新縮圖",
         "chooseSeriesBook": "選擇系列中的一本"
+      },
+      "uploadDialog": {
+        "emptyState": "圖片預覽將顯示在這裡",
+        "prompt": "拖放圖片到此處或點選以選擇",
+        "remove": "刪除影像",
+        "fileTooLarge": "檔案大小超出限制",
+        "onlyOneFile": "只允許上傳一個檔案",
+        "noFile": "未選擇檔案"
       },
       "actions": {
         "confirmSelection": "確定"
@@ -3036,6 +2958,7 @@
       "list": "清單",
       "lastCompleted": "最近完成",
       "name": "名稱",
+      "no": "否",
       "notAvailable": "不可用",
       "options": "選項",
       "page": "頁面",
@@ -3055,6 +2978,7 @@
       "select": "選擇",
       "settings": "設定",
       "servers": "伺服器",
+      "size": "大小",
       "test": "測試",
       "thisBook": "本書",
       "thisServer": "此伺服器",
@@ -3071,6 +2995,7 @@
       "files": "檔案",
       "search": "搜尋",
       "preferences": "偏好設定",
+      "yes": "是",
       "global": "全域"
     },
     "libraryType": {
@@ -3471,6 +3396,14 @@
       },
       "showCurrentChapter": "顯示目前章節"
     },
+    "textCase": {
+      "label": "文字大小寫",
+      "options": {
+        "lowerCase": "小寫",
+        "sentenceCase": "句首大寫",
+        "titleCase": "標題大寫"
+      }
+    },
     "addOrEditServer": {
       "createServer": "建立伺服器",
       "updateServer": "更新伺服器",
@@ -3553,11 +3486,7 @@
         "version": "版本",
         "exactCommit": "完整提交版本",
         "nonStableChannel": {
-          "title": "你正在執行一個不穩定的 Stump 建置",
-          "description": [
-            "看起來你正在執行",
-            "建置頻道"
-          ]
+          "title": "你正在執行一個不穩定的 Stump 建置"
         },
         "debugInfo": {
           "label": "除錯資訊",

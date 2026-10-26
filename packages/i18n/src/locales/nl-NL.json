@@ -151,8 +151,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "none": "Geen",
           "labels": {
             "name": "Naam",
             "description": "Omschrijving"
@@ -213,11 +211,8 @@
     },
     "createLibraryScene": {
       "heading": "Create New Library",
-      "subtitleLink": "relevante documentatie",
       "form": {
         "review": {
-          "yes": "Ja",
-          "none": "Geen",
           "labels": {
             "format": "Formaat",
             "quality": "Kwaliteit",
@@ -261,13 +256,6 @@
               "default": "Standaard",
               "custom": "Aangepast"
             }
-          }
-        }
-      },
-      "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "Management"
           }
         }
       },
@@ -407,9 +395,6 @@
     "createSmartListScene": {
       "form": {
         "review": {
-          "yes": "Ja",
-          "no": "Nee",
-          "none": "Geen",
           "labels": {
             "name": "Naam",
             "description": "Omschrijving"
@@ -620,12 +605,7 @@
       "server/general": {
         "helmet": "Algemene serverinstellingen",
         "title": "Algemene instellingen",
-        "description": "Algemene instellingen gerelateerd aan je Stump server",
-        "sections": {
-          "serverPublicUrl": {
-            "label": "Openbare URL"
-          }
-        }
+        "description": "Algemene instellingen gerelateerd aan je Stump server"
       },
       "server/jobs": {
         "sections": {
@@ -678,7 +658,6 @@
     },
     "noLibraries": {
       "heading": "Hier valt niks te zien",
-      "messagePrefix": "Je kunt niet zien wat je niet hebt",
       "message": {
         "create": "Maak een bibliotheek om te beginnen",
         "wait": "Zodra er bibliotheken zijn aangemaakt, worden ze hier weergegeven"
@@ -721,13 +700,11 @@
       "placeholder": "Kies of maak een tag",
       "placeholderNoTags": "Geen tags beschikbaar"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edit thumbnail",
-      "options": {
-        "selectFromBooks": "Kies uit boeken",
-        "uploadImage": "Afbeelding uploaden"
-      },
-      "uploadImage": {
+      "chooseFromBooks": "Kies uit boeken",
+      "uploadImage": "Afbeelding uploaden",
+      "uploadDialog": {
         "emptyState": "Een voorbeeld van je afbeelding verschijnt hier"
       }
     }
@@ -752,11 +729,14 @@
       "remove": "Verwijderen",
       "notUsedYet": "Nog niet gebruikt",
       "never": "Nooit",
+      "none": "Geen",
       "scan": "Scannen",
+      "no": "Nee",
       "libraries": "Bibliotheken",
       "smartLists": "Slimme lijsten",
       "files": "Bestanden",
-      "search": "Zoeken"
+      "search": "Zoeken",
+      "yes": "Ja"
     },
     "homeSections": {
       "recentlyAddedSeries": {
@@ -793,16 +773,7 @@
       },
       "serverInfo": {
         "title": "Serverinformatie",
-        "description": "Basisgegevens over uw Stump server instantie",
-        "build": {
-          "label": "Bouwversie",
-          "description": "Details over de versie en bouwversie",
-          "version": {
-            "semver": "Versie",
-            "commitHash": "Exacte commit",
-            "date": "Build-datum"
-          }
-        }
+        "description": "Basisgegevens over uw Stump server instantie"
       }
     }
   }

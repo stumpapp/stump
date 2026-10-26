@@ -140,14 +140,6 @@
         "bookClubsEnabled": "Funkcje klubu książki"
       },
       "autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
-      "textCase": {
-        "label": "Kapitalizacja tekstu",
-        "options": {
-          "lowerCase": "małe litery",
-          "sentenceCase": "Jak w zdaniu",
-          "titleCase": "Jak w Tytule"
-        }
-      },
       "tintListBackground": "Zabarw tła list",
       "management": {
         "label": "Zarządzanie",
@@ -407,9 +399,6 @@
           }
         ],
         "review": {
-          "yes": "Tak",
-          "no": "Nie",
-          "none": "Brak",
           "labels": {
             "name": "Nazwa",
             "description": "Opis"
@@ -500,28 +489,6 @@
         "tags": {
           "label": "Etykiety",
           "description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
-        },
-        "defaultLibraryView": {
-          "label": "Domyślny widok biblioteki",
-          "description": "Skonfiguruj, która karta jest wyświetlana domyślnie podczas otwierania tej biblioteki",
-          "hideSeriesView": {
-            "label": "Ukryj zakładkę serii",
-            "description": "Ukryj zakładkę serii w nawigacji biblioteki"
-          },
-          "skipBookOverview": {
-            "label": "Pomiń przegląd książki",
-            "description": "Przejdź od razu do czytnika, gdy wybierasz książkę z tej biblioteki"
-          },
-          "options": {
-            "series": {
-              "label": "Serie",
-              "description": "Domyślnie pokaż zakładkę serii"
-            },
-            "books": {
-              "label": "Książki",
-              "description": "Domyślnie pokaż zakładkę książek"
-            }
-          }
         },
         "readingSettings": {
           "section": {
@@ -660,29 +627,34 @@
             "description": "Jeśli używasz KoReader, generuj dodatkowe skróty w formacie przezeń oczekiwanym"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organizacja",
-            "description": "Określ który wzór najlepiej pasuje do struktury Twojej biblioteki",
-            "docs": [
-              "Brak pewności, którą wybrać? Kliknij",
-              "tutaj",
-              "aby uzyskać więcej informacji.",
-              "Nie można później zmienić tego ustawienia"
-            ],
-            "disabled": "Nie można zmienić tego ustawienia"
-          },
-          "options": {
+        "organization": {
+          "label": "Organizacja",
+          "filesystemPattern": {
             "label": "Wzorzec biblioteki",
-            "description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
-            "collectionPriority": {
-              "label": "Priorytet kolekcji",
+            "COLLECTION_BASED": {
               "description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
             },
-            "seriesPriority": {
-              "label": "Priorytet serii",
+            "SERIES_BASED": {
               "description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Domyślny widok biblioteki",
+            "description": "Skonfiguruj, która karta jest wyświetlana domyślnie podczas otwierania tej biblioteki",
+            "options": {
+              "BOOKS": "Książki",
+              "SERIES": "Serie"
+            }
+          },
+          "hideSeries": {
+            "label": "Ukryj zakładkę serii",
+            "description": "Ukryj zakładkę serii w nawigacji biblioteki"
+          },
+          "skipBookOverview": {
+            "label": "Pomiń przegląd książki",
+            "description": "Przejdź od razu do czytnika, gdy wybierasz książkę z tej biblioteki"
           }
         }
       },
@@ -701,7 +673,6 @@
     "createLibraryScene": {
       "heading": "Utwórz bibliotekę",
       "subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
-      "subtitleLink": "stosowną dokumentację",
       "form": {
         "stepLabel": "Krok",
         "steps": [
@@ -727,9 +698,6 @@
           }
         ],
         "review": {
-          "yes": "Tak",
-          "no": "Nie",
-          "none": "Brak",
           "labels": {
             "generateThumbnails": "Generuj miniaturki",
             "processThumbnailColors": "Przetwarzaj kolory miniatur",
@@ -892,13 +860,7 @@
       },
       "options/thumbnails": {
         "title": "Miniatury",
-        "description": "Ustawienia i opcje związane z miniaturami tej biblioteki",
-        "sections": {
-          "management": {
-            "heading": "Zarządzanie",
-            "description": "Zarządzaj istniejącymi miniaturami tej biblioteki"
-          }
-        }
+        "description": "Ustawienia i opcje związane z miniaturami tej biblioteki"
       },
       "integrations/analysis": {
         "title": "Analiza",
@@ -1264,9 +1226,6 @@
           }
         ],
         "review": {
-          "yes": "Tak",
-          "no": "Nie",
-          "none": "Brak",
           "labels": {
             "name": "Nazwa",
             "description": "Opis",
@@ -1532,17 +1491,6 @@
             "buttons": {
               "confirm": "Zapisz zmiany"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "Język"
-            },
-            "heading": "Język i ustawienia regionalne",
-            "subtitle": [
-              "Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Jeśli jesteś w stanie, proszę rozważ pomoc w poprawie jakości",
-              "tłumaczeń Stump",
-              "!"
-            ]
           }
         }
       },
@@ -1632,27 +1580,6 @@
           "layoutAndArrangement": {
             "label": "Układ i aranżacja",
             "description": "Dostosuj jak Stump wyświetla informacje i organizuje zawartość"
-          },
-          "primaryNavigation": {
-            "label": "Główna nawigacja",
-            "description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
-            "options": {
-              "sidebar": "Pasek boczny",
-              "topbar": "Pasek górny"
-            },
-            "disclaimer": "* Ustawienia niewybranych opcji będą wyłączone lub ukryte"
-          },
-          "doubleSidebar": {
-            "label": "Panel boczny ustawień",
-            "description": "Umożliwia nawigację z użyciem paska bocznego dla stron ustawień"
-          },
-          "replacePrimarySidebar": {
-            "label": "Zastąp główny panel boczny",
-            "description": "Każde wystąpienie drugorzędnego panelu bocznego zastąpi główny panel boczny, zamiast pokazywać go obok",
-            "tooltips": {
-              "doubleSidebar": "To ustawienie wymaga włączenia panelu bocznego ustawień",
-              "topbar": "To ustawienie nie jest obecnie obsługiwane, gdy główna nawigacja jest ustawiona jako pasek u góry ekranu"
-            }
           },
           "navigationArrangement": {
             "label": "Układ nawigacji",
@@ -1891,7 +1818,6 @@
           },
           "optionalFeatures": {
             "label": "Funkcje opcjonalne",
-            "description": "Zarządzaj funkcjami unikalnymi dla aplikacji desktopowej",
             "bundledServer": {
               "label": "Wbudowany serwer",
               "description": "Uruchom wbudowany serwer w tle podczas działania aplikacji desktopowej (wymaga restartu)"
@@ -1909,10 +1835,6 @@
         "title": "Ustawienia ogólne",
         "description": "Ogólne ustawienia związane z instancją serwera Stump",
         "sections": {
-          "serverPublicUrl": {
-            "label": "Adres publiczny",
-            "description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
-          },
           "customEmojis": {
             "title": "Niestandardowe emotikony",
             "description": "Przesyłaj i zarządzaj niestandardowymi obrazami emotikon dla Twojego serwera",
@@ -1928,10 +1850,7 @@
             "noCustomEmojis": "Nie dodano jeszcze żadnych niestandardowych emotikon",
             "invalidName": "Wprowadź poprawną nazwę dla emotikony",
             "uploadError": "Nie udało się przesłać emotikony",
-            "uploadSuccess": "Przesłano emotikonę",
-            "renameSuccess": "Zmieniono nazwę emotikony",
             "renameError": "Nie udało się zmienić nazwy emotikony",
-            "deleteSuccess": "Usunięto emotikonę",
             "deleteError": "Nie udało się usunąć emotikony"
           }
         }
@@ -1976,7 +1895,6 @@
             "description": "Niektóre zadania można skonfigurować tak, aby uruchomiały się według harmonogramu. Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
             "restartRequiredTitle": "Wymagane ponowne uruchomienie",
             "restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
-            "newScheduledJob": "Nowe zaplanowane zadanie",
             "deleteScheduledJob": {
               "title": "Usuń zaplanowane zadanie",
               "description": "Czy na pewno chcesz usunąć \"{{name}}\"? Tej czynności nie można cofnąć.",
@@ -2496,7 +2414,6 @@
     },
     "noLibraries": {
       "heading": "Nic tu nie ma",
-      "messagePrefix": "Nie możesz zobaczyć tego, czego nie masz",
       "message": {
         "create": "Utwórz bibliotekę, aby rozpocząć",
         "wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
@@ -2544,13 +2461,11 @@
       "placeholder": "Wybierz lub stwórz etykietę",
       "placeholderNoTags": "Brak etykiet"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edytuj miniaturkę",
-      "options": {
-        "selectFromBooks": "Wybierz z książek",
-        "uploadImage": "Prześlij obraz"
-      },
-      "uploadImage": {
+      "chooseFromBooks": "Wybierz z książek",
+      "uploadImage": "Prześlij obraz",
+      "uploadDialog": {
         "emptyState": "Podgląd obrazu pojawi się tutaj",
         "prompt": "Upuść obraz tutaj lub kliknij aby wybrać",
         "remove": "Usuń obraz"
@@ -2799,6 +2714,7 @@
       "list": "Lista",
       "lastCompleted": "Ostatnio ukończone",
       "name": "Nazwa",
+      "no": "Nie",
       "none": "Brak",
       "notAvailable": "Niedostępne",
       "options": "Ustawienia",
@@ -2817,6 +2733,7 @@
       "select": "Zaznacz",
       "settings": "Ustawienia",
       "servers": "Serwery",
+      "size": "Rozmiar",
       "thisBook": "ta książka",
       "thisServer": "ten serwer",
       "unknownTitle": "Bez tytułu",
@@ -2828,7 +2745,8 @@
       "libraries": "Biblioteki",
       "smartLists": "Inteligentne listy",
       "files": "Pliki",
-      "search": "Szukaj"
+      "search": "Szukaj",
+      "yes": "Tak"
     },
     "libraryType": {
       "BOOK": "Książki",
@@ -3155,15 +3073,15 @@
       },
       "showCurrentChapter": "Pokaż bieżący rozdział"
     },
+    "textCase": {
+      "label": "Kapitalizacja tekstu",
+      "options": {
+        "lowerCase": "małe litery",
+        "sentenceCase": "Jak w zdaniu",
+        "titleCase": "Jak w Tytule"
+      }
+    },
     "addOrEditServer": {
-      "addServer": {
-        "title": "Dodaj serwer",
-        "subtitle": "Skonfiguruj nowy serwer, aby uzyskać dostęp do swojej zawartości"
-      },
-      "editServer": {
-        "title": "Edytuj serwer",
-        "subtitle": "Edytuj serwer"
-      },
       "kind": "Wariant",
       "customHeaders": {
         "label": "Niestandardowe nagłówki",
@@ -3171,11 +3089,6 @@
         "invalidHeader": "Nieprawidłowy nagłówek"
       },
       "auth": {
-        "label": "Autoryzacja",
-        "default": {
-          "label": "Logowanie",
-          "description": "Zostaniesz poproszony w razie potrzeby o zalogowanie się podczas dostępu do zawartości"
-        },
         "token": {
           "placeholder": "Nieprzetworzony token"
         },
@@ -3186,14 +3099,12 @@
       "didConnect": "Połączono",
       "checkConnection": "Sprawdź połączenie",
       "setAsDefaultServer": "Ustaw jako domyślny serwer",
-      "enableOPDS": "Włącz OPDS",
       "validation": {
         "nameAlreadyExists": "Podana nazwa jest już używana",
         "cannotSetAuthorizationHeader": "Nie można ustawić nagłówka uwierzytelnienia",
         "nameForbidden": "Ta nazwa jest już zarezerwowana",
         "urlExists": "Serwer z takim adresem już istnieje"
       },
-      "primaryUrlDescription": "Adres serwera Stump",
       "name": {
         "label": "Nazwa",
         "description": "Przyjazna nazwa do identyfikacji tego serwera",
@@ -3207,21 +3118,8 @@
       "serverInfo": {
         "title": "Informacja o serwerze",
         "description": "Podstawowe informacje o Twojej instancji serwera Stump",
-        "build": {
-          "label": "Kompilacja",
-          "description": "Szczegóły dotyczące wersji i kompilacji",
-          "version": {
-            "semver": "Wersja",
-            "commitHash": "Dokładna rewizja",
-            "date": "Data kompilacji"
-          }
-        },
         "nonStableChannel": {
-          "title": "Używasz niestabilnej wersji Stump",
-          "description": [
-            "Wygląda na to, że używasz",
-            "kanał kompilacji"
-          ]
+          "title": "Używasz niestabilnej wersji Stump"
         }
       },
       "helpfulLinks": {

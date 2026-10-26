@@ -150,14 +150,6 @@
         "label": "Stump"
       },
       "autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
-      "textCase": {
-        "label": "Groß-/Kleinschreibung",
-        "options": {
-          "lowerCase": "Kleinschreibung",
-          "sentenceCase": "Satzschreibung",
-          "titleCase": "Titelschreibung"
-        }
-      },
       "tintListBackground": "Färbe Listenhintergrund",
       "management": {
         "label": "Verwaltung",
@@ -513,9 +505,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nein",
-          "none": "Keine",
           "labels": {
             "description": "Beschreibung",
             "name": "Name"
@@ -610,28 +599,6 @@
         "libraryType": {
           "label": "Bibliotheksinhalt",
           "description": "Die Art des Inhalts in dieser Bibliothek"
-        },
-        "defaultLibraryView": {
-          "label": "Standard-Bibliotheksansicht",
-          "description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
-          "hideSeriesView": {
-            "label": "Reihenreiter verbergen",
-            "description": "Verberge den Reihenreiter in der Bibliotheksnavigation"
-          },
-          "skipBookOverview": {
-            "label": "Buchübersicht überspringen",
-            "description": "Öffne den Reader direkt bei der Auswahl von Büchern in dieser Bibliotheken"
-          },
-          "options": {
-            "series": {
-              "label": "Reihe",
-              "description": "Zeige den Reihenreiter standardmäßig"
-            },
-            "books": {
-              "label": "Bücher",
-              "description": "Buchreiter standardmäßig anzeigen"
-            }
-          }
         },
         "readingSettings": {
           "section": {
@@ -770,29 +737,34 @@
             "description": "Wenn der KoReader verwendet wird, generiere zusätzliche Hashes in dem Format, welches dieser erwartet"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organisierung",
-            "description": "Bestimme, welches Muster am besten der Organisation der Bibliothek entspricht",
-            "docs": [
-              "Nicht sicher, welches ausgewählt werden soll? Klicke",
-              "hier",
-              ", um weitere Informationen zu erhalten.",
-              "Diese Einstellung kann später nicht mehr geändert werden"
-            ],
-            "disabled": "Diese Einstellung kann nicht geändert werden"
-          },
-          "options": {
+        "organization": {
+          "label": "Organisierung",
+          "filesystemPattern": {
             "label": "Bibliotheksmuster",
-            "description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
-            "collectionPriority": {
-              "label": "Sammlungspriorität",
+            "COLLECTION_BASED": {
               "description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Reihe"
             },
-            "seriesPriority": {
-              "label": "Reihenpriorität",
+            "SERIES_BASED": {
               "description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Reihe"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Standard-Bibliotheksansicht",
+            "description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
+            "options": {
+              "BOOKS": "Bücher",
+              "SERIES": "Reihe"
+            }
+          },
+          "hideSeries": {
+            "label": "Reihenreiter verbergen",
+            "description": "Verberge den Reihenreiter in der Bibliotheksnavigation"
+          },
+          "skipBookOverview": {
+            "label": "Buchübersicht überspringen",
+            "description": "Öffne den Reader direkt bei der Auswahl von Büchern in dieser Bibliotheken"
           }
         },
         "oneshotsDirectory": {
@@ -816,7 +788,6 @@
     "createLibraryScene": {
       "heading": "Bibliothek erstellen",
       "subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Weitere Informationen über diese Einstellung findest du in der",
-      "subtitleLink": "dazugehörigen Dokumentation",
       "form": {
         "stepLabel": "Schritt",
         "steps": [
@@ -842,9 +813,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nein",
-          "none": "Überspringen",
           "labels": {
             "generateThumbnails": "Vorschaubilder generieren",
             "processThumbnailColors": "Verarbeite Vorschaubildfarben",
@@ -1010,13 +978,7 @@
       },
       "options/thumbnails": {
         "title": "Vorschaubilder",
-        "description": "Einstellungen und Verwaltungsoptionen für Vorschaubilder in dieser Bibliothek",
-        "sections": {
-          "management": {
-            "heading": "Vorschaubilder verwalten",
-            "description": "Existierende Vorschaubilder für diese Bibliothek verwalten"
-          }
-        }
+        "description": "Einstellungen und Verwaltungsoptionen für Vorschaubilder in dieser Bibliothek"
       },
       "integrations/analysis": {
         "title": "Analyse",
@@ -1394,9 +1356,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nein",
-          "none": "Keine",
           "labels": {
             "description": "Beschreibung",
             "visibility": "Sichtbarkeit",
@@ -1663,17 +1622,6 @@
               "confirm": "Änderungen speichern"
             }
           },
-          "locale": {
-            "localeSelector": {
-              "label": "Sprache"
-            },
-            "heading": "Spracheinstellungen",
-            "subtitle": [
-              "Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte überlege dir mitzuhelfen die Qualität von den",
-              "Stump-Übersetzungen",
-              "zu verbessern, wenn du dazu in der Lage bist!"
-            ]
-          },
           "language": {
             "label": "Sprache",
             "contributeIfAble": "Bitte überleg dir, zu Stumps Übersetzungen beizutragen, wenn du dazu in der Lage sind!",
@@ -1772,27 +1720,6 @@
           "layoutAndArrangement": {
             "label": "Layout und Anordnung",
             "description": "Passe an wie Stump Informationen anzeigt und Inhalte organisiert"
-          },
-          "primaryNavigation": {
-            "label": "Primäre Navigation",
-            "description": "Wähle zwischen einer minimalen Seiten- oder einer Topleisten Navigation",
-            "options": {
-              "sidebar": "Seitenleiste",
-              "topbar": "Topleiste"
-            },
-            "disclaimer": "* Einstellungen für die nicht ausgewählten Optionen werden deaktiviert und ausgeblendet"
-          },
-          "doubleSidebar": {
-            "label": "Seitenleisteneinstellungen",
-            "description": "Aktiviert die Seitenleistennavigation für die Einstellungsseiten"
-          },
-          "replacePrimarySidebar": {
-            "label": "Primäre Seitenleiste ersetzen",
-            "description": "Jede Instanz einer sekundären Seitenleiste ersetzt die primäre Seitenleiste, anstatt diese nebeneinander zu stapeln",
-            "tooltips": {
-              "doubleSidebar": "Diese Einstellung erfordert die Seitenleisteneinstellungen aktiviert zu sein",
-              "topbar": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Topleiste eingestellt ist"
-            }
           },
           "navigationArrangement": {
             "label": "Navigationsanordnung",
@@ -2050,7 +1977,6 @@
           },
           "optionalFeatures": {
             "label": "Optionale Funktionen",
-            "description": "Verwalte optionale Funktionen einzigartig zu der Desktopanwendung",
             "bundledServer": {
               "label": "Gebündelte Server",
               "description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft"
@@ -2072,10 +1998,6 @@
         "title": "Einstellungen",
         "description": "Allgemeine Einstellungen von Ihrer Stump Serverinstanz",
         "sections": {
-          "serverPublicUrl": {
-            "label": "Öffentliche URL",
-            "description": "Die URL, über die von außen auf den Server zugegriffen werden kann, sofern verfügbar. Dies aktiviert Einladungslinks und andere Funktionen"
-          },
           "customEmojis": {
             "title": "Emojis",
             "description": "Schaue und Verwalte benutzerdefinierte Bild-Emojis für deinen Server",
@@ -2091,10 +2013,7 @@
             "noCustomEmojis": "Bisher wurden keine benutzerdefinierten Emojis hinzugefügt",
             "invalidName": "Bitte gebe einen gültigen Namen für dein Emoji ein",
             "uploadError": "Emoji konnte nicht hochgeladen werden",
-            "uploadSuccess": "Emoji hochgeladen",
-            "renameSuccess": "Emoji umbenannt",
             "renameError": "Emoji konnte nicht umbenannt werden",
-            "deleteSuccess": "Emoji gelöscht",
             "deleteError": "Emoji konnte nicht gelöscht werden"
           },
           "serverConfig": {
@@ -2146,7 +2065,6 @@
             "description": "Einige Jobs können so konfiguriert werden, dass sie automatisch nach einem Zeitplan ausgeführt werden",
             "restartRequiredTitle": "Neustart erforderlich",
             "restartRequired": "Änderungen an dieser Konfiguration werden nach einem Neustart des Servers wirksam",
-            "newScheduledJob": "Neuer geplanter Job",
             "deleteScheduledJob": {
               "title": "Geplanten Job löschen",
               "description": "Bist du sicher, dass du \"{{name}}\" löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
@@ -2688,7 +2606,6 @@
     },
     "noLibraries": {
       "heading": "Ist ziemlich leer hier",
-      "messagePrefix": "Du kannst nicht sehen, was du nicht hast",
       "message": {
         "create": "Erstelle eine Bibliothek um loszulegen",
         "wait": "Sobald Bibliotheken erstellt werden, werden sie hier angezeigt"
@@ -2735,21 +2652,6 @@
     "tagSelect": {
       "placeholder": "Tag auswählen oder erstellen",
       "placeholderNoTags": "Keine Tags vorhanden"
-    },
-    "thumbnailDropdown": {
-      "label": "Vorschaubild auswählen",
-      "options": {
-        "selectFromBooks": "Aus Büchern auswählen",
-        "uploadImage": "Bild hochladen"
-      },
-      "uploadImage": {
-        "emptyState": "Eine Vorschau des Bildes wird hier angezeigt",
-        "prompt": "Bild hier ablegen oder zum Auswählen klicken",
-        "remove": "Bild entfernen",
-        "fileTooLarge": "Datei zu groß",
-        "onlyOneFile": "Nur eine Datei ist erlaubt",
-        "noFile": "Keine Datei bereitgestellt"
-      }
     },
     "userPermissions": {
       "ACCESS_API_KEYS": {
@@ -2914,10 +2816,21 @@
       }
     },
     "thumbnailSelector": {
+      "label": "Vorschaubild auswählen",
+      "chooseFromBooks": "Aus Büchern auswählen",
+      "uploadImage": "Bild hochladen",
       "title": "Wähle ein Vorschaubild aus",
       "descriptions": {
         "chooseBookPage": "Wähle eine Seite dieses Buches, die als neues Vorschaubild genutzt werden soll",
         "chooseSeriesBook": "Wähle ein Buch aus der Reihe aus"
+      },
+      "uploadDialog": {
+        "emptyState": "Eine Vorschau des Bildes wird hier angezeigt",
+        "prompt": "Bild hier ablegen oder zum Auswählen klicken",
+        "remove": "Bild entfernen",
+        "fileTooLarge": "Datei zu groß",
+        "onlyOneFile": "Nur eine Datei ist erlaubt",
+        "noFile": "Keine Datei bereitgestellt"
       },
       "actions": {
         "confirmSelection": "Auswahl bestätigen"
@@ -3058,6 +2971,7 @@
       "select": "Auswählen",
       "settings": "Einstellungen",
       "servers": "Server",
+      "size": "Größe",
       "thisBook": "dieses Buch",
       "thisServer": "dieser Server",
       "unknownTitle": "Unbenannt",
@@ -3067,6 +2981,7 @@
       "download": "Download",
       "downloads": "Downloads",
       "name": "Name",
+      "no": "Nein",
       "url": "URL",
       "version": "Version",
       "pageX": "Seite {{current}}",
@@ -3081,6 +2996,7 @@
       "files": "Dateien",
       "search": "Suche",
       "preferences": "Präferenzen",
+      "yes": "Ja",
       "global": "Global",
       "ok": "Okay"
     },
@@ -3483,15 +3399,15 @@
       },
       "showCurrentChapter": "Aktuelles Kapitel anzeigen"
     },
+    "textCase": {
+      "label": "Groß-/Kleinschreibung",
+      "options": {
+        "lowerCase": "Kleinschreibung",
+        "sentenceCase": "Satzschreibung",
+        "titleCase": "Titelschreibung"
+      }
+    },
     "addOrEditServer": {
-      "addServer": {
-        "title": "Server hinzufügen",
-        "subtitle": "Konfiguriere einen neuen Server, um auf deine Inhalte zuzugreifen"
-      },
-      "editServer": {
-        "title": "Server bearbeiten",
-        "subtitle": "Server bearbeiten"
-      },
       "kind": "Art",
       "customHeaders": {
         "label": "Benutzerdefinierte Header",
@@ -3499,11 +3415,6 @@
         "invalidHeader": "Ungültiger Header"
       },
       "auth": {
-        "label": "Authentifizierung",
-        "default": {
-          "description": "Du wirst aufgefordert, dich nach Bedarf anzumelden, wenn du auf Inhalte zugreifst",
-          "label": "Anmeldung"
-        },
         "basic": "Einfach",
         "token": {
           "label": "Token",
@@ -3525,7 +3436,6 @@
       "didConnect": "Verbunden",
       "checkConnection": "Verbindung prüfen",
       "setAsDefaultServer": "Als Standardserver festlegen",
-      "enableOPDS": "OPDS aktivieren",
       "validation": {
         "nameAlreadyExists": "Name ist bereits vorhanden",
         "cannotSetAuthorizationHeader": "Authorisierungsheader kann nicht gesetzt werden",
@@ -3577,11 +3487,7 @@
         "description": "Grundlegende Informationen über deine Stump Serverinstanz",
         "build": "Build",
         "nonStableChannel": {
-          "title": "Du führst eine instabile Version von Stump aus",
-          "description": [
-            "Es scheint als ob, du den",
-            "Build Channel ausführst"
-          ]
+          "title": "Du führst eine instabile Version von Stump aus"
         },
         "version": "Version",
         "exactCommit": "Exakter Commit",

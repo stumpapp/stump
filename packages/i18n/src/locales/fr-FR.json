@@ -151,9 +151,6 @@
           }
         ],
         "review": {
-          "yes": "Oui",
-          "no": "Non",
-          "none": "Aucun",
           "labels": {
             "name": "Nom"
           }
@@ -238,21 +235,6 @@
         },
         "tags": {
           "description": "Utilisé pour catégoriser votre bibliothèque et améliorer le contrôle d'accès"
-        },
-        "defaultLibraryView": {
-          "label": "Vue par défaut de la bibliothèque",
-          "hideSeriesView": {
-            "label": "Cacher l'onglet séries"
-          },
-          "options": {
-            "series": {
-              "label": "Séries"
-            },
-            "books": {
-              "label": "Livres",
-              "description": "Afficher l'onglet livres par défaut"
-            }
-          }
         },
         "readingSettings": {
           "section": {
@@ -379,29 +361,28 @@
             "description": "Si vous utilisez KOReader, générez des empreintes supplémentaires dans le format qu’il attend"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organisation",
-            "description": "Identifiez le modèle qui correspond le mieux à l’organisation de votre bibliothèque",
-            "docs": [
-              "Vous ne savez pas quoi choisir ? Cliquez",
-              "ici",
-              "Le paramètre qui détermi.ne la façon dont Stump organisera votre bibliothèque",
-              "Vous ne pourrez pas modifier ce paramètre plus tard"
-            ],
-            "disabled": "Vous ne pourrez pas modifier ce paramètre"
-          },
-          "options": {
+        "organization": {
+          "label": "Organisation",
+          "filesystemPattern": {
             "label": "Modèle de bibliothèque",
-            "description": "Le paramètre qui détermine la façon dont Stump organisera votre bibliothèque",
-            "collectionPriority": {
-              "label": "Priorité de la collection",
+            "COLLECTION_BASED": {
               "description": "Chaque dossier au niveau le plus haut de la racine de la bibliothèque correspond à une série unique"
             },
-            "seriesPriority": {
-              "label": "Priorité de la série",
+            "SERIES_BASED": {
               "description": "Chaque dossier, à n’importe quel niveau de la bibliothèque (de façon récursive), correspond à une série unique"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Vue par défaut de la bibliothèque",
+            "options": {
+              "BOOKS": "Livres",
+              "SERIES": "Séries"
+            }
+          },
+          "hideSeries": {
+            "label": "Cacher l'onglet séries"
           }
         }
       },
@@ -415,7 +396,6 @@
     },
     "createLibraryScene": {
       "heading": "Créer une nouvelle bibliothèque",
-      "subtitleLink": "documentation correspondante",
       "form": {
         "stepLabel": "Étape",
         "steps": [
@@ -441,9 +421,6 @@
           }
         ],
         "review": {
-          "yes": "Oui",
-          "no": "Non",
-          "none": "Aucun",
           "labels": {
             "generateThumbnails": "Générer les vignettes",
             "quality": "Qualité",
@@ -586,13 +563,7 @@
       },
       "options/thumbnails": {
         "title": "Vignettes",
-        "description": "Paramètres et options de gestion des vignettes dans cette bibliothèque",
-        "sections": {
-          "management": {
-            "heading": "Gestion",
-            "description": "Gérer les vignettes existantes de cette bibliothèque"
-          }
-        }
+        "description": "Paramètres et options de gestion des vignettes dans cette bibliothèque"
       },
       "integrations/analysis": {
         "title": "Analyse",
@@ -835,9 +806,6 @@
           }
         ],
         "review": {
-          "yes": "Oui",
-          "no": "Non",
-          "none": "Aucun",
           "labels": {
             "name": "Nom",
             "visibility": "Visibilité",
@@ -1075,17 +1043,6 @@
             "buttons": {
               "confirm": "Enregistrer les modifications"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "Langue"
-            },
-            "heading": "Langue",
-            "subtitle": [
-              "Stump prend en charge plusieurs langues, définissez vos préférences ci-dessous. Pensez à aider à améliorer la qualité des",
-              "traductions de Stump",
-              "si vous le pouvez !"
-            ]
           }
         }
       },
@@ -1269,7 +1226,6 @@
           },
           "optionalFeatures": {
             "label": "Paramètres supplémentaires",
-            "description": "Gérer les fonctionnalités facultatives propres à l’application de bureau",
             "bundledServer": {
               "label": "Serveur intégré",
               "description": "Exécuter le serveur intégré en arrière-plan pendant que l’application de bureau est en cours d’exécution (redémarrage requis)"
@@ -1285,13 +1241,7 @@
       "server/general": {
         "helmet": "Paramètres généraux du serveur",
         "title": "Paramètres généraux",
-        "description": "Paramètres généraux liés à l'instance de votre serveur Stump",
-        "sections": {
-          "serverPublicUrl": {
-            "label": "URL Publique",
-            "description": "L’URL depuis laquelle votre serveur est accessible en dehors de votre réseau, si applicable. Cela activera les liens d’invitation et d’autres fonctionnalités"
-          }
-        }
+        "description": "Paramètres généraux liés à l'instance de votre serveur Stump"
       },
       "server/logs": {
         "helmet": "Journaux",
@@ -1648,7 +1598,6 @@
     },
     "noLibraries": {
       "heading": "Rien à afficher ici",
-      "messagePrefix": "On ne peut pas voir ce que l’on n’a pas",
       "message": {
         "create": "Créez une bibliothèque pour commencer",
         "wait": "Une fois les bibliothèques créées, elles s’afficheront ici"
@@ -1696,13 +1645,11 @@
       "placeholder": "Sélectionner ou créer un tag",
       "placeholderNoTags": "Aucune étiquette disponible"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Éditer l'image de couverture",
-      "options": {
-        "selectFromBooks": "Sélectionner à partir des livres",
-        "uploadImage": "Importer une image"
-      },
-      "uploadImage": {
+      "chooseFromBooks": "Sélectionner à partir des livres",
+      "uploadImage": "Importer une image",
+      "uploadDialog": {
         "emptyState": "Un aperçu de votre image apparaîtra ici",
         "prompt": "Déposez l'image ici ou cliquez pour sélectionner",
         "remove": "Supprimer l’image"
@@ -1734,11 +1681,15 @@
       "notReady": "Cette fonctionnalité n'est pas prête",
       "notUsedYet": "Pas encore utilisé",
       "never": "Jamais",
+      "none": "Aucun",
+      "no": "Non",
+      "size": "Taille",
       "home": "Accueil",
       "libraries": "Bibliothèques",
       "smartLists": "Listes intelligentes",
       "files": "Fichiers",
-      "search": "Recherche"
+      "search": "Recherche",
+      "yes": "Oui"
     },
     "bookMetadata": {
       "month": "Mois",
@@ -1802,8 +1753,6 @@
         "nameForbidden": "Ce nom est réservé",
         "urlExists": "Un serveur avec cette URL existe déjà"
       },
-      "primaryUrlDescription": "L'URL du serveur Stump",
-      "primaryUrlPlaceholder": "https://stump.exemple.com",
       "name": {
         "description": "Un nom convivial pour identifier ce serveur"
       }
@@ -1822,15 +1771,7 @@
       },
       "serverInfo": {
         "title": "Informations du serveur",
-        "description": "Détails de base sur l'instance de votre serveur Stump",
-        "build": {
-          "label": "Version",
-          "description": "Détails à propos de la version",
-          "version": {
-            "commitHash": "Publication",
-            "date": "Date de compilation"
-          }
-        }
+        "description": "Détails de base sur l'instance de votre serveur Stump"
       }
     }
   }

@@ -162,13 +162,9 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 				: null,
 		},
 		{
-			label: 'Library',
+			label: translate('shared.common.libraries', { count: 1 }),
 			value: (
-				<Link
-					to={paths.librarySeries(book.library.id)}
-					underline={false}
-					className="hover:underline"
-				>
+				<Link to={paths.library(book.library.id)} underline={false} className="hover:underline">
 					{book.library.name}
 				</Link>
 			),

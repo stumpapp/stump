@@ -226,7 +226,7 @@ export function SeriesHeader() {
 				name={resolvedName}
 				parents={[
 					{ label: translate('shared.common.libraries'), to: paths.libraries() },
-					{ label: libraryName, to: paths.librarySeries(libraryId) },
+					{ label: libraryName, to: paths.library(libraryId) },
 				]}
 				tabs={tabs}
 				actions={actions}

@@ -642,8 +642,9 @@ export type DailyActivity = {
 };
 
 /**
- * An explicit date range. `start = null` means from the beginning of the user's
- * history, `end = null` resolves to the current logical day
+ * An input for specifying a date range:
+ * - `start = null` means from the beginning of the user's history
+ * - `end = null` resolves to the current logical day (per user prefs)
  */
 export type DateRangeInput = {
   end?: InputMaybe<Scalars['NaiveDate']['input']>;
@@ -3628,9 +3629,9 @@ export type Query = {
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
-  /** Reading stats for the authenticated user over an explicit date range */
+  /** Reading stats for the authenticated user within the provided range */
   myReadingStats: ReadingStats;
-  /** Current and longest reading streaks across the user's whole history */
+  /** The current streaks held for the authenticated user */
   myReadingStreaks: ReadingStreaks;
   /**
    * A paginated list of reading sessions and events for the authenticated user,
@@ -4108,13 +4109,10 @@ export type ReadingStats = {
   __typename?: 'ReadingStats';
   /** One entry per day with at least one session */
   dailyActivity: Array<DailyActivity>;
-  /** Average reading time per weekday, Monday through Sunday */
+  /** Average reading time for each weekday */
   dayOfWeek: Array<WeekdayActivity>;
   range: ResolvedDateRange;
-  /**
-   * Median active time and calendar days to finish a book, per library type.
-   * Library types with fewer than 3 samples are omitted
-   */
+  /** Median active time and days to finish a book per library type */
   timeToFinish: Array<TimeToFinishStat>;
   totals: ReadingTotals;
 };
@@ -4248,7 +4246,7 @@ export type RegisteredEmailDevice = {
   sendHistory: Array<EmailerSendRecord>;
 };
 
-/** A `DateRangeInput` after resolution, where `end` is always known */
+/** A `DateRangeInput` where `end` is always set */
 export type ResolvedDateRange = {
   __typename?: 'ResolvedDateRange';
   end: Scalars['NaiveDate']['output'];
@@ -5275,7 +5273,7 @@ export type WeekdayActivity = {
   __typename?: 'WeekdayActivity';
   /** Total seconds divided by the number of times this weekday occurs in the range */
   averageSeconds: Scalars['Int']['output'];
-  /** ISO weekday, 1 (Monday) through 7 (Sunday) */
+  /** 1 (Monday) -> 7 (Sunday) */
   isoWeekday: Scalars['Int']['output'];
   totalSeconds: Scalars['Int']['output'];
 };

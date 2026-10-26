@@ -73,7 +73,7 @@ export default function LibrarySideBarSection({
 				items={libraries.map((library) => ({
 					key: library.id,
 					label: library.name,
-					to: paths.librarySeries(library.id),
+					to: paths.library(library.id),
 					isActive: currentLibraryId === library.id,
 					icon: library.emoji ? (
 						<span className="w-4 text-center">{library.emoji}</span>
@@ -119,7 +119,7 @@ export default function LibrarySideBarSection({
 			return (
 				<SideBarButtonLink
 					key={library.id}
-					to={paths.librarySeries(library.id)}
+					to={paths.library(library.id)}
 					isActive={currentLibraryId === library.id}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}

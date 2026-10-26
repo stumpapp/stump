@@ -42,7 +42,7 @@ export function LibraryGridItem({ data, getLayoutNumber }: Props) {
 	return (
 		<CollectionGridItem
 			title={name}
-			to={paths.librarySeries(id)}
+			to={paths.library(id)}
 			thumbnails={series.map(({ thumbnail }) => ({
 				url: thumbnail.url,
 				metadata: thumbnail.metadata,

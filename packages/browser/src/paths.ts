@@ -91,6 +91,7 @@ const pathsInternal = {
 	editEmailer: (id: number) => pathsInternal.settings('email') + `/${id}/edit`,
 	home: () => '/',
 	libraries: () => '/libraries',
+	library: (id: string) => `/libraries/${id}`,
 	libraryBooks: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/libraries/${id}/books?page=${page}`
@@ -163,6 +164,7 @@ export function usePaths() {
 		editEmailer: (id: number) => `${basePath}${pathsInternal.editEmailer(id)}`,
 		home: () => `${basePath}${pathsInternal.home()}`,
 		libraries: () => `${basePath}${pathsInternal.libraries()}`,
+		library: (id: string) => `${basePath}${pathsInternal.library(id)}`,
 		libraryBooks: (id: string, page?: number) =>
 			`${basePath}${pathsInternal.libraryBooks(id, page)}`,
 		libraryCreate: () => `${basePath}${pathsInternal.libraryCreate()}`,

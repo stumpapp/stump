@@ -56,7 +56,7 @@ export default function CreateLibraryScene() {
 	} = useGraphQLMutation(mutation, {
 		mutationKey: [sdk.cacheKeys.libraryCreate],
 		onSuccess: ({ createLibrary: { id } }) => {
-			navigate(paths.librarySeries(id))
+			navigate(paths.library(id))
 			startConfetti()
 			client.invalidateQueries({ queryKey: [sdk.cacheKeys.libraries] })
 		},

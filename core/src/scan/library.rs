@@ -10,7 +10,7 @@ use models::{
 		library, library_config, library_scan_record, media, metadata_provider_config,
 		scanned_directory, series,
 	},
-	shared::enums::FileStatus,
+	shared::enums::{FileStatus, OrganizationMode, SeriesKind},
 };
 use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
@@ -46,6 +46,7 @@ use crate::{
 				handle_missing_series, insert_series, safely_build_series,
 				MissingSeriesOutput,
 			},
+			MAX_INSERT_CHUNK_SIZE,
 		},
 		walk::{
 			walk_library, walk_oneshots, walk_series, WalkedLibrary, WalkedOneshots,
@@ -62,6 +63,7 @@ pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
 	WalkOneshotsDirectory(PathBuf),
+	MetadataTask(SeriesScanTask),
 	SeriesTask {
 		id: String,
 		path: String,
@@ -109,6 +111,143 @@ impl LibraryScanJob {
 			pending_dir_mtimes: Arc::new(Mutex::new(vec![])),
 			series_id_by_path: Arc::new(Mutex::new(HashMap::new())),
 		}
+	}
+
+	async fn init_metadata_scan(
+		&self,
+		ctx: &JobContext,
+		ignore_rules: globset::GlobSet,
+	) -> Result<WorkingState<LibraryScanOutput, LibraryScanTask>, JobError> {
+		ctx.report_progress(JobProgress::msg("Discovering books recursively"));
+		let walked = walk_series(
+			Path::new(&self.path),
+			WalkerCtx {
+				db: ctx.apalis_state.conn.clone(),
+				ignore_rules,
+				max_depth: None,
+				options: self.options,
+				dir_mtimes: HashMap::new(),
+				series_id: None,
+				library_id: Some(self.id.clone()),
+				oneshots_directory: None,
+			},
+		)
+		.await?;
+		if walked.series_is_missing {
+			handle_missing_library(ctx.conn(), &self.id).await?;
+			ctx.emit_event(CoreEvent::DiscoveredMissingLibrary(
+				event::DiscoveredMissingLibrary {
+					id: self.id.clone(),
+				},
+			));
+			return Err(JobError::InitFailed(
+				"Library could not be found on disk".into(),
+			));
+		}
+		library::Entity::update_many()
+			.col_expr(
+				library::Column::Status,
+				Expr::value(FileStatus::Ready.to_string()),
+			)
+			.filter(library::Column::Id.eq(&self.id))
+			.filter(library::Column::Status.eq(FileStatus::Missing))
+			.exec(ctx.conn())
+			.await?;
+		let tasks = [
+			(!walked.missing_media.is_empty())
+				.then_some(SeriesScanTask::MarkMissingMedia(walked.missing_media)),
+			(!walked.recovered_media.is_empty())
+				.then_some(SeriesScanTask::RestoreMedia(walked.recovered_media)),
+		]
+		.into_iter()
+		.flatten()
+		.chain(
+			walked
+				.media_to_create
+				.chunks(MAX_INSERT_CHUNK_SIZE)
+				.map(|paths| SeriesScanTask::CreateMedia(paths.to_vec())),
+		)
+		.chain(
+			walked
+				.media_to_visit
+				.chunks(MAX_INSERT_CHUNK_SIZE)
+				.map(|params| SeriesScanTask::VisitMedia(params.to_vec())),
+		)
+		.map(LibraryScanTask::MetadataTask)
+		.collect();
+		Ok(WorkingState {
+			output: Some(LibraryScanOutput {
+				total_files: walked.seen_files,
+				ignored_files: walked.ignored_files,
+				skipped_files: walked.skipped_files,
+				total_directories: walked.seen_directories,
+				ignored_directories: walked.ignored_directories,
+				..Default::default()
+			}),
+			tasks,
+			logs: vec![],
+		})
+	}
+
+	async fn execute_metadata_task(
+		&self,
+		ctx: &JobContext,
+		task: SeriesScanTask,
+	) -> Result<JobTaskOutput<Self>, JobError> {
+		let operation = || {
+			self.config
+				.clone()
+				.map(|library_config| MediaBuildOperation {
+					series_id: None,
+					library_config,
+				})
+				.ok_or_else(|| {
+					JobError::TaskFailed("Library configuration is missing".into())
+				})
+		};
+		let result = match task {
+			SeriesScanTask::MarkMissingMedia(paths) => {
+				handle_missing_media(ctx, media::Column::LibraryId.eq(&self.id), paths)
+					.await
+			},
+			SeriesScanTask::RestoreMedia(ids) => {
+				handle_restored_media(ctx, media::Column::LibraryId.eq(&self.id), ids)
+					.await
+			},
+			SeriesScanTask::CreateMedia(paths) => {
+				build_and_insert_media(operation()?, ctx, paths).await?
+			},
+			SeriesScanTask::VisitMedia(params) => {
+				visit_and_update_media(operation()?, ctx, params).await?
+			},
+		};
+		let changed = result.created_media + result.updated_media;
+		if changed > 0 {
+			if self
+				.config
+				.as_ref()
+				.is_some_and(|config| config.thumbnail_config.is_none())
+			{
+				bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, None).await?;
+			}
+			ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+				CreatedOrUpdatedManyMedia {
+					count: changed,
+					series_id: None,
+					library_id: self.id.clone(),
+				},
+			));
+		}
+		Ok(JobTaskOutput {
+			output: LibraryScanOutput {
+				created_media: result.created_media,
+				updated_media: result.updated_media,
+				created_series: result.created_series,
+				..Default::default()
+			},
+			logs: result.logs,
+			subtasks: vec![],
+		})
 	}
 
 	async fn bump_thumbnail_fallbacks(
@@ -200,6 +339,13 @@ impl JobLifecycle for LibraryScanJob {
 		let oneshots_directory = config.oneshots_directory.clone();
 
 		self.config = Some(config);
+		if self
+			.config
+			.as_ref()
+			.is_some_and(|config| config.organization_mode == OrganizationMode::Metadata)
+		{
+			return self.init_metadata_scan(ctx, ignore_rules).await;
+		}
 
 		let stored_dir_mtimes = scanned_directory::Entity::find()
 			.filter(scanned_directory::Column::Path.starts_with(self.path.as_str()))
@@ -252,6 +398,7 @@ impl JobLifecycle for LibraryScanJob {
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
 				series_id: None,
+				library_id: None,
 				oneshots_directory,
 			},
 		)
@@ -487,6 +634,9 @@ impl JobLifecycle for LibraryScanJob {
 		let mut subtasks = vec![];
 
 		match task {
+			LibraryScanTask::MetadataTask(task) => {
+				return self.execute_metadata_task(ctx, task).await
+			},
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Initializing"));
@@ -705,6 +855,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
 						series_id: series_id.clone(),
+						library_id: None,
 						oneshots_directory: None,
 					},
 				)
@@ -721,6 +872,7 @@ impl JobLifecycle for LibraryScanJob {
 					skipped_files,
 					observed_dir_mtimes,
 					previous_oneshot_entries,
+					..
 				} = match walk_result {
 					Ok(walked_series) => walked_series,
 					Err(core_error) => {
@@ -843,7 +995,8 @@ impl JobLifecycle for LibraryScanJob {
 						max_depth: None, // not needed
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
-						series_id: None,          // not needed
+						series_id: None, // not needed
+						library_id: None,
 						oneshots_directory: None, // not needed
 					},
 				)
@@ -952,7 +1105,12 @@ impl JobLifecycle for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 						..
-					} = handle_restored_media(ctx, &series_id, ids).await;
+					} = handle_restored_media(
+						ctx,
+						media::Column::SeriesId.eq(&series_id),
+						ids,
+					)
+					.await;
 					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
 						.await?;
 
@@ -980,7 +1138,12 @@ impl JobLifecycle for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 						..
-					} = handle_missing_media(ctx, &series_id, paths).await;
+					} = handle_missing_media(
+						ctx,
+						media::Column::SeriesId.eq(&series_id),
+						paths,
+					)
+					.await;
 					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
 						.await?;
 
@@ -1010,7 +1173,7 @@ impl JobLifecycle for LibraryScanJob {
 						..
 					} = build_and_insert_media(
 						MediaBuildOperation {
-							series_id: series_id.clone(),
+							series_id: Some(series_id.clone()),
 							library_config: self.config.clone().ok_or(
 								JobError::TaskFailed(
 									"Library configuration is missing".to_string(),
@@ -1049,7 +1212,7 @@ impl JobLifecycle for LibraryScanJob {
 						..
 					} = visit_and_update_media(
 						MediaBuildOperation {
-							series_id: series_id.clone(),
+							series_id: Some(series_id.clone()),
 							library_config: self.config.clone().ok_or(
 								JobError::TaskFailed(
 									"Library configuration is missing".to_string(),
@@ -1106,6 +1269,7 @@ pub async fn handle_missing_library(
 			Expr::value(FileStatus::Missing.to_string()),
 		)
 		.filter(series::Column::LibraryId.eq(library_id))
+		.filter(series::Column::Kind.eq(SeriesKind::Filesystem))
 		.exec(&txn)
 		.await?
 		.rows_affected;

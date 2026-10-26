@@ -35,7 +35,7 @@ import {
 	readProgress,
 	seriesRefs,
 } from '~/db'
-import { formatSeriesPosition, parseSeriesPosition } from '~/lib/bookUtils'
+import { bookSeriesPosition, formatSeriesPosition } from '~/lib/bookUtils'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -105,7 +105,7 @@ export default function Screen() {
 
 	const seriesName = metadata?.series || downloadedFile.series?.name
 	const seriesPosition = formatSeriesPosition(
-		parseSeriesPosition(metadata?.number),
+		bookSeriesPosition({ metadata }),
 		// We don't have totalBooks offline, pass 0 so it always shows "Book X in Series"
 		0,
 		{

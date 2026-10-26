@@ -1395,7 +1395,6 @@ type Media {
 	"""
 	readingTimeline(order: OrderDirection! = DESC): BookReadingTimeline
 	seriesPosition: Int
-	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	"""
 	The path to the media file **relative** to the library path. This is only useful for

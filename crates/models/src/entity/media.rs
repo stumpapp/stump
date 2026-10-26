@@ -4,14 +4,14 @@ use async_trait::async_trait;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
-	QuerySelect,
+	prelude::*, sea_query::NullOrdering, ActiveValue, Condition, FromQueryResult,
+	JoinType, QueryOrder, QuerySelect,
 };
 
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
-		enums::FileStatus,
+		enums::{FileStatus, SeriesKind},
 		ordering::{OrderBy, OrderDirection},
 	},
 };
@@ -170,6 +170,46 @@ fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select
 }
 
 impl Entity {
+	pub fn order_in_series(query: Select<Entity>, kind: SeriesKind) -> Select<Entity> {
+		let query = if kind == SeriesKind::Virtual {
+			query.order_by_with_nulls(
+				media_metadata::Column::Number,
+				sea_orm::Order::Asc,
+				NullOrdering::Last,
+			)
+		} else {
+			query
+		};
+		query.order_by_asc(Column::Name).order_by_asc(Column::Id)
+	}
+
+	pub fn after_number(
+		name: &str,
+		id: &str,
+		number: Option<Decimal>,
+		direction: OrderDirection,
+	) -> Condition {
+		let tie = Condition::any()
+			.add(Column::Name.gt(name))
+			.add(Column::Name.eq(name).and(Column::Id.gt(id)));
+		match number {
+			Some(number) => Condition::any()
+				.add(match direction {
+					OrderDirection::Asc => media_metadata::Column::Number.gt(number),
+					OrderDirection::Desc => media_metadata::Column::Number.lt(number),
+				})
+				.add(
+					Condition::all()
+						.add(media_metadata::Column::Number.eq(number))
+						.add(tie),
+				)
+				.add(media_metadata::Column::Number.is_null()),
+			None => Condition::all()
+				.add(media_metadata::Column::Number.is_null())
+				.add(tie),
+		}
+	}
+
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		let select = Entity::find().left_join(media_metadata::Entity);
 		let select = apply_series_metadata_join(select);

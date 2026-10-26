@@ -18,6 +18,8 @@ pub enum MediaProcessorError {
 	ImageSize(#[from] imagesize::ImageError),
 	#[error("Image operation failed: {0}")]
 	Image(#[from] image::ImageError),
+	#[error("Failed to parse metadata: {0}")]
+	Metadata(String),
 	#[error("PDFium is not configured or available")]
 	PdfConfiguration,
 	#[error("A PDFium error occurred: {0}")]

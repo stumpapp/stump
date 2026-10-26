@@ -162,29 +162,62 @@ impl MediaQuery {
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
-				let mut cursor = query.cursor_by(media::Column::Name);
-				if let Some(ref id) = info.after {
-					let media = media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(
-							media::Column::Id
-								.eq(id.clone())
-								.and(media::Column::DeletedAt.is_null()),
-						)
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
+				let number_order = match order_by.as_slice() {
+					[MediaOrderBy::Metadata(order)]
+						if order.field
+							== media_metadata::MediaMetadataModelOrdering::Number =>
+					{
+						Some(order.direction)
+					},
+					_ => None,
+				};
+				let models = if let Some(direction) = number_order {
+					if let Some(ref id) = info.after {
+						let book = media::ModelWithMetadata::find_for_user(user)
+							.filter(media::Column::Id.eq(id))
+							.filter(media::Column::DeletedAt.is_null())
+							.into_model::<media::ModelWithMetadata>()
+							.one(conn)
+							.await?
+							.ok_or("Cursor not found")?;
+						query = query.filter(media::Entity::after_number(
+							&book.media.name,
+							&book.media.id,
+							book.metadata.and_then(|metadata| metadata.number),
+							direction,
+						));
+					}
+					query
+						.limit(info.limit)
+						.into_model::<media::ModelWithMetadata>()
+						.all(conn)
 						.await?
-						.ok_or("Cursor not found")?;
-					cursor.after(media.name);
-				}
-				// FIXME: Cursor ordering is broken
-				cursor.first(info.limit);
+				} else {
+					let mut cursor = query.cursor_by(media::Column::Name);
+					if let Some(ref id) = info.after {
+						let media = media::Entity::find_for_user(user)
+							.select_only()
+							.column(media::Column::Name)
+							.filter(
+								media::Column::Id
+									.eq(id.clone())
+									.and(media::Column::DeletedAt.is_null()),
+							)
+							.into_model::<media::MediaNameCmpSelect>()
+							.one(conn)
+							.await?
+							.ok_or("Cursor not found")?;
+						cursor.after(media.name);
+					}
+					// FIXME: Cursor ordering is broken
+					cursor.first(info.limit);
 
-				let models = cursor
-					.into_model::<media::ModelWithMetadata>()
-					.all(conn)
-					.await?;
+					let models = cursor
+						.into_model::<media::ModelWithMetadata>()
+						.all(conn)
+						.await?;
+					models
+				};
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|m| m.media.id.clone()));
@@ -535,11 +568,13 @@ impl MediaQuery {
 						m.series_id,
 						ROW_NUMBER() OVER(
 							PARTITION BY m.series_id
-							ORDER BY m.name
+							ORDER BY CASE WHEN s.kind = 'VIRTUAL' THEN mm.number END NULLS LAST, m.name, m.id
 						) as book_rank,
 						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
 					FROM
 						media m
+                    LEFT JOIN media_metadata mm ON mm.media_id = m.id
+                    LEFT JOIN series s ON s.id = m.series_id
 					LEFT JOIN
 						series_last_read srl ON srl.series_id = m.series_id
 					WHERE
@@ -887,7 +922,7 @@ mod tests {
 
 		assert_eq!(
 			query,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" WHERE "media"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') ORDER BY "media"."name" ASC, "media_metadata"."media_id" DESC"#
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" WHERE "media"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') ORDER BY "media"."name" ASC, "media_metadata"."media_id" DESC, "media"."name" ASC, "media"."id" ASC"#
 		);
 	}
 }

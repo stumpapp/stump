@@ -3,14 +3,17 @@ use metadata_integrations::{
 	FieldMerger, MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride,
 };
 use models::{
-	entity::{media_metadata, metadata_fetch_record, series_metadata},
+	entity::{media, media_metadata, metadata_fetch_record, series_metadata},
 	shared::enums::MetadataFetchStatus,
 };
 use rust_decimal::prelude::FromPrimitive;
-use sea_orm::{prelude::*, IntoActiveModel, Set};
+use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
 use serde_json::Value as JsonValue;
 
-use crate::CoreError;
+use crate::{
+	metadata::membership::{remove_series_thumbnails, sync_media_membership},
+	CoreError,
+};
 
 /// Apply the given match candidate to series metadata, merging fields
 /// according to the provided strategy and locked fields
@@ -83,7 +86,7 @@ pub async fn apply_media_match<C>(
 	overrides: Vec<MetadataFieldOverride>,
 ) -> Result<(), CoreError>
 where
-	C: ConnectionTrait,
+	C: ConnectionTrait + TransactionTrait,
 {
 	let ext = match &candidate.metadata {
 		ExternalMetadata::Media(m) => m,
@@ -95,12 +98,17 @@ where
 		},
 	};
 
+	let txn = conn.begin().await?;
+	let book = media::Entity::find_by_id(media_id)
+		.one(&txn)
+		.await?
+		.ok_or_else(|| CoreError::NotFound(format!("Media {media_id}")))?;
 	let existing = media_metadata::Entity::find()
 		.filter(media_metadata::Column::MediaId.eq(media_id))
-		.one(conn)
+		.one(&txn)
 		.await?;
 
-	match existing {
+	let updated = match existing {
 		Some(model) => {
 			let merger = FieldMerger::with_overrides(
 				strategy,
@@ -115,20 +123,26 @@ where
 
 			apply_media_fields(&merger, &model, &mut active, ext);
 
-			media_metadata::Entity::update(active).exec(conn).await?;
+			media_metadata::Entity::update(active).exec(&txn).await?
 		},
 		None => {
+			let merger =
+				FieldMerger::with_overrides(strategy, vec![], exclude_fields, overrides);
 			let active = build_media_metadata_insert(
 				media_id,
 				ext,
 				&candidate.provider,
 				&candidate.external_id,
+				&merger,
 			);
-			media_metadata::Entity::insert(active).exec(conn).await?;
+			active.insert(&txn).await?
 		},
-	}
+	};
+	let (_, thumbnails) = sync_media_membership(&txn, book, updated.series).await?;
 
-	mark_fetch_status_accepted(conn, None, Some(media_id), candidate).await?;
+	mark_fetch_status_accepted(&txn, None, Some(media_id), candidate).await?;
+	txn.commit().await?;
+	remove_series_thumbnails(thumbnails).await;
 
 	Ok(())
 }
@@ -477,30 +491,16 @@ fn build_media_metadata_insert(
 	ext: &ExternalMediaMetadata,
 	provider: &str,
 	external_id: &str,
+	merger: &FieldMerger,
 ) -> media_metadata::ActiveModel {
-	let ext_isbn = ext.isbn.as_ref().or(ext.isbn_13.as_ref()).cloned();
-
-	media_metadata::ActiveModel {
+	let mut active = media_metadata::ActiveModel {
 		media_id: Set(Some(media_id.to_string())),
-		title: Set(ext.title.clone()),
-		summary: Set(ext.summary.clone()),
-		series: Set(ext.series_name.clone()),
-		number: Set(ext.number.and_then(Decimal::from_f32)),
-		year: Set(ext.year),
-		day: Set(ext.day),
-		month: Set(ext.month),
-		page_count: Set(ext.page_count),
-		identifier_isbn: Set(ext_isbn),
-		genres: Set(ext.genres.as_ref().map(|g| g.join(", "))),
-		writers: Set(ext.writers.as_ref().map(|w| w.join(", "))),
-		colorists: Set(ext.colorists.as_ref().map(|c| c.join(", "))),
-		letterers: Set(ext.letterers.as_ref().map(|l| l.join(", "))),
-		cover_artists: Set(ext.cover_artists.as_ref().map(|c| c.join(", "))),
-		pencillers: Set(ext.artists.as_ref().map(|a| a.join(", "))),
 		metadata_source: Set(Some(provider.to_string())),
 		metadata_external_id: Set(Some(external_id.to_string())),
 		..Default::default()
-	}
+	};
+	apply_media_fields(merger, &media_metadata::Model::default(), &mut active, ext);
+	active
 }
 
 #[cfg(test)]
@@ -553,7 +553,13 @@ mod tests {
 	fn media_metadata_insert_includes_series_and_number() {
 		let ext = external_media(Some("Wayfarers"), Some(1.0));
 
-		let active = build_media_metadata_insert("media-id", &ext, "hardcover", "42");
+		let active = build_media_metadata_insert(
+			"media-id",
+			&ext,
+			"hardcover",
+			"42",
+			&FieldMerger::new(MergeStrategy::PreferExternal, vec![], vec![]),
+		);
 
 		assert_eq!(active.series, Set(Some("Wayfarers".to_string())));
 		assert_eq!(active.number, Set(Decimal::from_f32(1.0)));

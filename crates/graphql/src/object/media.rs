@@ -5,10 +5,13 @@ use async_graphql::{
 use models::{
 	entity::{library, media, media_analysis, reading_session, tag},
 	services::reading_timeline::sessions_with_events,
-	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
+	shared::{
+		analysis::MediaAnalysisData, enums::SeriesKind, image::ImageRef,
+		ordering::OrderDirection,
+	},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, Condition, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -279,7 +282,14 @@ impl Media {
 		};
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
+		// without a loadable series, fall back to filesystem (name) ordering
+		let kind = self.series(ctx).await?.map(|series| series.model.kind);
+		if let Some(position) = self
+			.metadata
+			.as_ref()
+			.and_then(|m| m.model.number)
+			.filter(|_| kind != Some(SeriesKind::Virtual))
+		{
 			if position.fract().is_zero() {
 				return Ok(Some(position.to_i64().unwrap_or(0)));
 			}
@@ -296,14 +306,16 @@ impl Media {
             SELECT position
             FROM (
                 SELECT
-                    id,
+					m.id,
                     ROW_NUMBER() OVER (
-                        PARTITION BY series_id
-                        ORDER BY name
+						PARTITION BY m.series_id
+						ORDER BY CASE WHEN s.kind = 'VIRTUAL' THEN mm.number END NULLS LAST, m.name, m.id
                     ) as position
-                FROM media
-                WHERE series_id = $1
-                AND deleted_at IS NULL
+				FROM media m
+				LEFT JOIN media_metadata mm ON mm.media_id = m.id
+				LEFT JOIN series s ON s.id = m.series_id
+				WHERE m.series_id = $1
+				AND m.deleted_at IS NULL
             ) ranked
             WHERE id = $2
             "#,
@@ -316,7 +328,6 @@ impl Media {
 		Ok(position)
 	}
 
-	/// The next media in the series, ordered by name
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
@@ -345,35 +356,53 @@ impl Media {
 			});
 		};
 
-		let mut cursor = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(series_id))
-			.cursor_by(media::Column::Name);
-
-		let after = match pagination.after.clone() {
-			Some(after) if after != self.model.id => {
-				let media = media::Entity::find_for_user(user)
-					.select_only()
-					.column(media::Column::Name)
-					.filter(
-						media::Column::Id
-							.eq(after)
-							.and(media::Column::SeriesId.eq(series_id)),
-					)
-					.into_model::<media::MediaNameCmpSelect>()
+		// without a loadable series, fall back to filesystem (name) ordering
+		let kind = self.series(ctx).await?.map(|series| series.model.kind);
+		let (name, id, number) = match pagination.after.as_ref() {
+			Some(after) if after != &self.model.id => {
+				let book = media::ModelWithMetadata::find_for_user(user)
+					.filter(media::Column::Id.eq(after))
+					.filter(media::Column::SeriesId.eq(series_id))
+					.into_model::<media::ModelWithMetadata>()
 					.one(conn)
 					.await?
 					.ok_or("Cursor not found")?;
-				media.name
+				(
+					book.media.name,
+					book.media.id,
+					book.metadata.and_then(|m| m.number),
+				)
 			},
-			_ => self.model.name.clone(),
+			_ => (
+				self.model.name.clone(),
+				self.model.id.clone(),
+				self.metadata.as_ref().and_then(|m| m.model.number),
+			),
 		};
+		let tie_break = Condition::any()
+			.add(media::Column::Name.gt(&name))
+			.add(media::Column::Name.eq(&name).and(media::Column::Id.gt(&id)));
+		let after = if kind == Some(SeriesKind::Virtual) {
+			media::Entity::after_number(
+				&name,
+				&id,
+				number,
+				models::shared::ordering::OrderDirection::Asc,
+			)
+		} else {
+			tie_break
+		};
+		let next = media::Entity::order_in_series(
+			media::ModelWithMetadata::find_for_user(user)
+				.filter(media::Column::SeriesId.eq(series_id))
+				.filter(after),
+			kind.unwrap_or(SeriesKind::Filesystem),
+		)
+		.limit(pagination.limit)
+		.into_model::<media::ModelWithMetadata>()
+		.all(conn)
+		.await?;
 
-		cursor.after(after).first(pagination.limit);
-
-		let next = cursor
-			.into_model::<media::ModelWithMetadata>()
-			.all(conn)
-			.await?;
 		let current_cursor = pagination
 			.after
 			.or_else(|| next.first().map(|m| m.media.id.clone()));

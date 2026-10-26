@@ -169,6 +169,7 @@ impl JobLifecycle for SeriesScanJob {
 				options: self.options,
 				dir_mtimes: HashMap::new(),
 				series_id: Some(self.id.clone()),
+				library_id: None,
 				oneshots_directory: None, // not needed for series-level task
 			},
 		)
@@ -296,7 +297,8 @@ impl JobLifecycle for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_restored_media(ctx, &self.id, ids).await;
+				} = handle_restored_media(ctx, media::Column::SeriesId.eq(&self.id), ids)
+					.await;
 				if let Some(library_id) = self.library_id() {
 					ctx.report_progress(JobProgress::msg("Restored media entities"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
@@ -316,7 +318,8 @@ impl JobLifecycle for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_missing_media(ctx, &self.id, paths).await;
+				} = handle_missing_media(ctx, media::Column::SeriesId.eq(&self.id), paths)
+					.await;
 				if let Some(library_id) = self.library_id() {
 					ctx.report_progress(JobProgress::msg("Handled missing media"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
@@ -340,7 +343,7 @@ impl JobLifecycle for SeriesScanJob {
 					..
 				} = build_and_insert_media(
 					MediaBuildOperation {
-						series_id: self.id.clone(),
+						series_id: Some(self.id.clone()),
 						library_config: self.config.clone().ok_or(
 							JobError::TaskFailed(
 								"Library configuration is missing".to_string(),
@@ -374,7 +377,7 @@ impl JobLifecycle for SeriesScanJob {
 					..
 				} = visit_and_update_media(
 					MediaBuildOperation {
-						series_id: self.id.clone(),
+						series_id: Some(self.id.clone()),
 						library_config: self.config.clone().ok_or(
 							JobError::TaskFailed(
 								"Library configuration is missing".to_string(),

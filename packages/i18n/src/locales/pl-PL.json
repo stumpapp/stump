@@ -2445,7 +2445,6 @@
         "seeAll": "Pokaż wszystko"
       },
       "libraryOptions": {
-        "scanLibrary": "Skanuj",
         "manageLibrary": "Zarządzaj",
         "deleteLibrary": "Usuń"
       }
@@ -2998,6 +2997,9 @@
       "goToSeries": "Przejdź do serii",
       "seeDetails": "Zobacz szczegóły",
       "goToLibrary": "Przejdź do biblioteki"
+    },
+    "libraryActions": {
+      "scan": "Skanuj"
     },
     "sorting": {
       "labelEllipsis": "Sortuj według...",

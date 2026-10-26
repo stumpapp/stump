@@ -1755,7 +1755,6 @@
     "sidebar": {
       "libraryOptions": {
         "manageLibrary": "설정",
-        "scanLibrary": "스캔",
         "deleteLibrary": "삭제"
       },
       "buttons": {
@@ -3319,6 +3318,9 @@
       "goToSeries": "시리즈로 이동",
       "seeDetails": "자세히 보기",
       "goToLibrary": "라이브러리로 이동"
+    },
+    "libraryActions": {
+      "scan": "스캔"
     },
     "sorting": {
       "labelEllipsis": "정렬 기준...",

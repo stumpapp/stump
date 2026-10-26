@@ -1,12 +1,14 @@
-import { useGraphQL, useSDK } from '@stump/client'
-import { graphql } from '@stump/graphql'
-import { Book, Library, Rows3 } from 'lucide-react'
+import { useGraphQL, useGraphQLMutation, useSDK } from '@stump/client'
+import { graphql, UserPermission } from '@stump/graphql'
+import { Book, Library, Rows3, ScanLine } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibraryGridItem } from '@/components/library'
 import { CollectionSceneHeader } from '@/components/sharedLayout'
+import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
 	query LibrariesScene {
@@ -23,11 +25,22 @@ const query = graphql(`
 	}
 `)
 
+const mutation = graphql(`
+	mutation LibrariesSceneScanAllLibraries {
+		scanAllLibraries
+	}
+`)
+
 export default function LibrariesScene() {
 	const { sdk } = useSDK()
+	const { checkPermission } = useAppContext()
+	const { translate } = useTranslate()
 	const { data, isLoading } = useGraphQL(query, [sdk.cacheKeys.libraries, 'scene'])
+	const { mutate: scanAllLibraries } = useGraphQLMutation(mutation)
 
 	const libraries = data?.libraries.nodes ?? []
+
+	const canScan = checkPermission(UserPermission.ScanLibrary)
 
 	// This makes sure we do not repeat layout variants if possible:
 	//
@@ -79,6 +92,22 @@ export default function LibrariesScene() {
 			<CollectionSceneHeader
 				title="Libraries"
 				docsLink="https://stumpapp.dev/docs/guides/fundamentals/libraries"
+				actions={
+					canScan
+						? [
+								{
+									items: [
+										{
+											label: translate('shared.libraryActions.scanAll'),
+											leftIcon: <ScanLine />,
+											// FIXME: what an annoying type error
+											onClick: () => scanAllLibraries(undefined as never),
+										},
+									],
+								},
+							]
+						: undefined
+				}
 				stats={
 					data
 						? [

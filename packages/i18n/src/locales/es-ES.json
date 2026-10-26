@@ -2350,7 +2350,6 @@
         "seeAll": "Ver todo"
       },
       "libraryOptions": {
-        "scanLibrary": "Escanear",
         "manageLibrary": "Administrar",
         "deleteLibrary": "Eliminar"
       }
@@ -3009,6 +3008,9 @@
       "goToSeries": "Ir a series",
       "seeDetails": "Ver detalles",
       "goToLibrary": "Ir a Librería"
+    },
+    "libraryActions": {
+      "scan": "Escanear"
     },
     "sorting": {
       "labelEllipsis": "Ordenar por...",

@@ -2582,7 +2582,6 @@
         "seeAll": "Prikažite sve"
       },
       "libraryOptions": {
-        "scanLibrary": "Skenirajte",
         "manageLibrary": "Postavke",
         "deleteLibrary": "Izbrišite"
       }
@@ -3223,6 +3222,9 @@
       "goToSeries": "Idite na serijal",
       "seeDetails": "Prikažite detalje",
       "goToLibrary": "Idite u biblioteku"
+    },
+    "libraryActions": {
+      "scan": "Skenirajte"
     },
     "sorting": {
       "labelEllipsis": "Sortiraj po...",

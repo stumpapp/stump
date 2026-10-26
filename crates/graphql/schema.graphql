@@ -2058,6 +2058,8 @@ type Mutation {
 	setLibrarySeriesLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
 	"Bulk-set locked metadata fields for all media metadata in a library"
 	setLibraryMediaLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
+	"Enqueue a scan job for every library which the authenticated user has access to"
+	scanAllLibraries: Boolean!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
@@ -3718,17 +3720,12 @@ input UpdateUserPreferencesInput {
 	preferredLayoutMode: InterfaceLayout!
 	interfaceRoundness: InterfaceRoundness!
 	thumbnailRoundness: InterfaceRoundness!
-	primaryNavigationMode: String!
-	layoutMaxWidthPx: Int
 	appTheme: String!
 	enableGradients: Boolean!
 	appFont: SupportedFont!
 	showQueryIndicator: Boolean!
 	enableLiveRefetch: Boolean!
 	enableDiscordPresence: Boolean!
-	enableCompactDisplay: Boolean!
-	enableDoubleSidebar: Boolean!
-	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
 	enableJobOverlay: Boolean!
 	enableFancyAnimations: Boolean!
@@ -3904,15 +3901,10 @@ type UserPreferences {
 	locale: String!
 	appTheme: String!
 	appFont: SupportedFont!
-	primaryNavigationMode: String!
-	layoutMaxWidthPx: Int
 	showQueryIndicator: Boolean!
 	enableLiveRefetch: Boolean!
 	enableDiscordPresence: Boolean!
-	enableCompactDisplay: Boolean!
 	enableGradients: Boolean!
-	enableDoubleSidebar: Boolean!
-	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!

@@ -662,7 +662,7 @@
             }
           },
           "scaleEvenlyByFactor": {
-          	"label": "Scale Factor",
+            "label": "Scale Factor",
             "description": "Scale the thumbnail by a factor of the original size"
           },
           "exact": {
@@ -686,14 +686,14 @@
             }
           },
           "output": {
-           	"description": "The format and quality to use for the image (1-100)",
-          	"format": "Format",
-           	"quality": "Quality"
+            "description": "The format and quality to use for the image (1-100)",
+            "format": "Format",
+            "quality": "Quality"
           },
           "thumbnailColors": {
-	          "label": "Thumbnail Colors",
-	          "description": "Extract dominant colors from thumbnails for aesthetic-use throughout the app",
-						"requiredWhenGenerationOn": "This is required when generation is enabled"
+            "label": "Thumbnail Colors",
+            "description": "Extract dominant colors from thumbnails for aesthetic-use throughout the app",
+            "requiredWhenGenerationOn": "This is required when generation is enabled"
           }
         },
         "ignoreRules": {
@@ -765,28 +765,28 @@
           }
         },
         "organization": {
-        	"label": "Organization",
-         	"description": "This will inform Stump how to interpret your library during scans. These settings cannot be changed later",
-	        "filesystemPattern": {
-						"label": "Filesystem Pattern",
-		        "COLLECTION_BASED": {
-			        "label": "Top-Level Collections",
-			        "description": "Each folder at the top-most level of the library root is a single series"
-		        },
-						"SERIES_BASED": {
-						 	"label": "Recursive Series",
+          "label": "Organization",
+          "description": "This will inform Stump how to interpret your library during scans. These settings cannot be changed later",
+          "filesystemPattern": {
+            "label": "Filesystem Pattern",
+            "COLLECTION_BASED": {
+              "label": "Top-Level Collections",
+              "description": "Each folder at the top-most level of the library root is a single series"
+            },
+            "SERIES_BASED": {
+              "label": "Recursive Series",
               "description": "Each folder at any level recursively is a single series"
-						}
-	        }
+            }
+          }
         },
         "viewOptions": {
-        	"label": "View Options",
-         	"defaultTab": {
-          	"label": "Default Tab",
-           	"description": "The tab which will open when you enter the library",
-   	        "options": {
-			      	"BOOKS": "Books",
-			      	"SERIES": "Series"
+          "label": "View Options",
+          "defaultTab": {
+            "label": "Default Tab",
+            "description": "The tab which will open when you enter the library",
+            "options": {
+              "BOOKS": "Books",
+              "SERIES": "Series"
             }
           },
           "hideSeries": {
@@ -870,8 +870,8 @@
       "failedToCreateLibrary": "Failed to Create Library"
     },
     "directoryPicker": {
-    	"title": "Select a Directory",
-     	"description": "Pick the directory where your library is located",
+      "title": "Select a Directory",
+      "description": "Pick the directory where your library is located",
       "unableToOpen": "Unable to Open",
       "noSubdirectories": "No subdirectories",
       "goToParent": "Go to Parent",
@@ -1248,25 +1248,25 @@
       }
     },
     "thumbnailManagement": {
-    	"changeThumbnail": {
-     		"label": "Change Thumbnail",
-       	"descriptionLibrary": "Choose a different thumbnail for this library"
-     	},
-      "deleteThumbnails": {
-      	"label": "Delete Thumbnails",
-       	"descriptionLibrary": "Permanently delete all generated thumbnails for this library"
+      "changeThumbnail": {
+        "label": "Change Thumbnail",
+        "descriptionLibrary": "Choose a different thumbnail for this library"
       },
-	    "regenerateThumbnails": {
-	    	"label": "Regenerate Thumbnails",
-				"description": "Either generate missing thumbnails or force the recreation of all thumbnails"
-	    },
-			"processColors": {
-				"label": "Extract Thumbnail Colors",
-				"description": "The dominant colors from thumbnails for aesthetic-use throughout the app"
-			},
-			"generate": "Generate",
-			"everything": "Everything",
-			"missingOnly": "Missing Only"
+      "deleteThumbnails": {
+        "label": "Delete Thumbnails",
+        "descriptionLibrary": "Permanently delete all generated thumbnails for this library"
+      },
+      "regenerateThumbnails": {
+        "label": "Regenerate Thumbnails",
+        "description": "Either generate missing thumbnails or force the recreation of all thumbnails"
+      },
+      "processColors": {
+        "label": "Extract Thumbnail Colors",
+        "description": "The dominant colors from thumbnails for aesthetic-use throughout the app"
+      },
+      "generate": "Generate",
+      "everything": "Everything",
+      "missingOnly": "Missing Only"
     },
     "createOrUpdateSmartListForm": {
       "validation": {
@@ -1816,19 +1816,19 @@
             "description": "Customize how Stump displays information and organizes content"
           },
           "sidebar": {
-          	"sidebarStyle": {
-           		"label": "Sidebar Style",
-             	"options": {
-              	"sidebar": "Normal",
-               	"floating": "Floating",
+            "sidebarStyle": {
+              "label": "Sidebar Style",
+              "options": {
+                "sidebar": "Normal",
+                "floating": "Floating",
                 "inset": "Inset"
               }
-           	},
+            },
             "collapseBehavior": {
-            	"label": "Collapse Behavior",
-             	"options": {
-              	"icon": "Show Icons",
-               	"offcanvas": "Fully Hide"
+              "label": "Collapse Behavior",
+              "options": {
+                "icon": "Show Icons",
+                "offcanvas": "Fully Hide"
               }
             }
           },
@@ -2751,7 +2751,6 @@
         "seeAll": "See All"
       },
       "libraryOptions": {
-        "scanLibrary": "Scan",
         "manageLibrary": "Settings",
         "deleteLibrary": "Delete"
       }
@@ -3010,8 +3009,8 @@
       "lastUpdated": "Last Updated",
       "limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
       "notFullyImplemented": {
-      	"label": "Not Fully Implemented",
-       	"description": "This feature is still under active development, not fully functional, and not ready for use"
+        "label": "Not Fully Implemented",
+        "description": "This feature is still under active development, not fully functional, and not ready for use"
       },
       "logIn": "Log In",
       "login": "Login",
@@ -3135,12 +3134,12 @@
       "global": "Global",
       "preferences": "Preferences",
       "time": {
-	      "day": "Day",
-		    "daysCount_one": "{{count}} Day",
-				"daysCount_other": "{{count}} Days",
-				"dateAndTime": "Date and Time",
-	      "month": "Month",
-				"dateRange": "{{startDate}} - {{endDate}}"
+        "day": "Day",
+        "daysCount_one": "{{count}} Day",
+        "daysCount_other": "{{count}} Days",
+        "dateAndTime": "Date and Time",
+        "month": "Month",
+        "dateRange": "{{startDate}} - {{endDate}}"
       },
       "yes": "Yes"
     },
@@ -3340,6 +3339,10 @@
       "seeDetails": "See Details",
       "goToLibrary": "Go to Library"
     },
+    "libraryActions": {
+      "scan": "Scan",
+      "scanAll": "Scan All"
+    },
     "sorting": {
       "label": "Sort By",
       "labelEllipsis": "Sort By...",
@@ -3477,11 +3480,11 @@
       "unknownSeriesName": "series"
     },
     "readingDevice": {
-    	"device": "Device",
-    	"description": "Some reading features correlate activity to specific devices. You can set these if you want to opt-in to that behavior",
-     	"placeholder": {
-      	"ios": "My iOS Device",
-       	"android": "My Android Device",
+      "device": "Device",
+      "description": "Some reading features correlate activity to specific devices. You can set these if you want to opt-in to that behavior",
+      "placeholder": {
+        "ios": "My iOS Device",
+        "android": "My Android Device",
         "macos": "My macOS Device"
       }
     },
@@ -3490,30 +3493,30 @@
       "startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
       "readthroughDateRange": "{{startDate}} - {{endDate}}",
       "feedType": {
-	      "sessions": "Sessions",
-	      "events": "Events"
+        "sessions": "Sessions",
+        "events": "Events"
       },
       "goToSession": "Go to Session",
       "deleteSession": {
-      	"label": "Delete Session",
-       	"finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "label": "Delete Session",
+        "finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
         "dnfedConfirm": "This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone",
         "normalConfirm": "This will permanently remove the session from your timeline",
         "failedToDelete": "Failed to Delete Session"
       },
       "extendSession": {
-      	"label": "Extend Session",
-       	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
+        "label": "Extend Session",
+        "description": "This will update the session so that it is still active, which impacts the reported session duration window",
         "failedToExtend": "Failed to Extend Session"
       },
       "emptyState": {
-      	"label": "No Activity",
-       "description": "Once you start reading, come back here to see your timeline"
+        "label": "No Activity",
+        "description": "Once you start reading, come back here to see your timeline"
       }
     },
     "readingJournal": {
-    	"editorPlaceholder": "Write some thoughts down...",
-    	"failedToSaveEntry": "Failed to Save Journal Entry"
+      "editorPlaceholder": "Write some thoughts down...",
+      "failedToSaveEntry": "Failed to Save Journal Entry"
     },
     "readingStats": {
       "title": "Stats",
@@ -3725,7 +3728,7 @@
       }
     },
     "serverSettings": {
-    	"title": "Server Settings",
+      "title": "Server Settings",
       "updateAvailable": {
         "message": "Your server is not up to date. Please update to the latest version!"
       },

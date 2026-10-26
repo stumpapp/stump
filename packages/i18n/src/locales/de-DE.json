@@ -2637,7 +2637,6 @@
         "seeAll": "Alles anzeigen"
       },
       "libraryOptions": {
-        "scanLibrary": "Scannen",
         "manageLibrary": "Einstellungen",
         "deleteLibrary": "Löschen"
       }
@@ -3316,6 +3315,9 @@
       "goToSeries": "Gehe zur Serie",
       "seeDetails": "Details anzeigen",
       "goToLibrary": "Geh zur Bibliothek"
+    },
+    "libraryActions": {
+      "scan": "Scannen"
     },
     "sorting": {
       "labelEllipsis": "Sortieren nach...",

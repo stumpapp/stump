@@ -2258,6 +2258,8 @@ export type Mutation = {
   resetLibraryMetadata: Library;
   resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
+  /** Enqueue a scan job for every library which the authenticated user has access to */
+  scanAllLibraries: Scalars['Boolean']['output'];
   /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
    * and update the database accordingly.
@@ -5037,22 +5039,17 @@ export type UpdateUserPreferencesInput = {
   appTheme: Scalars['String']['input'];
   dayResetHourOffset: Scalars['Int']['input'];
   enableAlphabetSelect: Scalars['Boolean']['input'];
-  enableCompactDisplay: Scalars['Boolean']['input'];
   enableDiscordPresence: Scalars['Boolean']['input'];
-  enableDoubleSidebar: Scalars['Boolean']['input'];
   enableFancyAnimations: Scalars['Boolean']['input'];
   enableGradients: Scalars['Boolean']['input'];
   enableHideScrollbar: Scalars['Boolean']['input'];
   enableJobOverlay: Scalars['Boolean']['input'];
   enableLiveRefetch: Scalars['Boolean']['input'];
   enableReadingJournal: Scalars['Boolean']['input'];
-  enableReplacePrimarySidebar: Scalars['Boolean']['input'];
   interfaceRoundness: InterfaceRoundness;
-  layoutMaxWidthPx?: InputMaybe<Scalars['Int']['input']>;
   locale: Scalars['String']['input'];
   preferAccentColor: Scalars['Boolean']['input'];
   preferredLayoutMode: InterfaceLayout;
-  primaryNavigationMode: Scalars['String']['input'];
   readingSessionGracePeriodSecs: Scalars['Int']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
@@ -5235,24 +5232,19 @@ export type UserPreferences = {
    */
   dayResetHourOffset: Scalars['Int']['output'];
   enableAlphabetSelect: Scalars['Boolean']['output'];
-  enableCompactDisplay: Scalars['Boolean']['output'];
   enableDiscordPresence: Scalars['Boolean']['output'];
-  enableDoubleSidebar: Scalars['Boolean']['output'];
   enableFancyAnimations: Scalars['Boolean']['output'];
   enableGradients: Scalars['Boolean']['output'];
   enableHideScrollbar: Scalars['Boolean']['output'];
   enableJobOverlay: Scalars['Boolean']['output'];
   enableLiveRefetch: Scalars['Boolean']['output'];
   enableReadingJournal: Scalars['Boolean']['output'];
-  enableReplacePrimarySidebar: Scalars['Boolean']['output'];
   homeArrangement: Arrangement;
   interfaceRoundness: InterfaceRoundness;
-  layoutMaxWidthPx?: Maybe<Scalars['Int']['output']>;
   locale: Scalars['String']['output'];
   navigationArrangement: Arrangement;
   preferAccentColor: Scalars['Boolean']['output'];
   preferredLayoutMode: InterfaceLayout;
-  primaryNavigationMode: Scalars['String']['output'];
   /** seconds of inactivity after which the current reading session is considered ended */
   readingSessionGracePeriodSecs: Scalars['Int']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
@@ -6869,6 +6861,11 @@ export type LibrariesSceneQuery = { __typename?: 'Query', libraries: { __typenam
       { __typename?: 'Library', id: string }
       & { ' $fragmentRefs'?: { 'LibraryWebGridItemFragment': LibraryWebGridItemFragment } }
     )> }, librariesStats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number } };
+
+export type LibrariesSceneScanAllLibrariesMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibrariesSceneScanAllLibrariesMutation = { __typename?: 'Mutation', scanAllLibraries: boolean };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -14356,6 +14353,11 @@ export const LibrariesSceneDocument = new TypedDocumentString(`
     bookCount
   }
 }`) as unknown as TypedDocumentString<LibrariesSceneQuery, LibrariesSceneQueryVariables>;
+export const LibrariesSceneScanAllLibrariesDocument = new TypedDocumentString(`
+    mutation LibrariesSceneScanAllLibraries {
+  scanAllLibraries
+}
+    `) as unknown as TypedDocumentString<LibrariesSceneScanAllLibrariesMutation, LibrariesSceneScanAllLibrariesMutationVariables>;
 export const LibraryLayoutDocument = new TypedDocumentString(`
     query LibraryLayout($id: ID!) {
   libraryById(id: $id) {

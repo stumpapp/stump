@@ -2542,7 +2542,6 @@
         "seeAll": "查看全部"
       },
       "libraryOptions": {
-        "scanLibrary": "扫描",
         "manageLibrary": "设置",
         "deleteLibrary": "删除"
       }
@@ -3200,6 +3199,9 @@
       "goToSeries": "前往系列",
       "seeDetails": "查看详情",
       "goToLibrary": "前往书库"
+    },
+    "libraryActions": {
+      "scan": "扫描"
     },
     "sorting": {
       "labelEllipsis": "排序方式...",

@@ -87,6 +87,8 @@ export default function LibraryOptionsMenu({ library: fragmentRef }: Props) {
 
 			<DropdownMenu
 				modal={isMobile}
+				contentWrapperClassName="z-100"
+				// ^ if viewing libraries grid it would be cut off otherwise
 				trigger={
 					<IconButton
 						variant="ghost"
@@ -102,7 +104,7 @@ export default function LibraryOptionsMenu({ library: fragmentRef }: Props) {
 							...(canScan
 								? [
 										{
-											label: t(getLocaleKey('scanLibrary')),
+											label: translate('shared.libraryActions.scan'),
 											leftIcon: <ScanLine className={iconStyle} />,
 											onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 												e.stopPropagation()

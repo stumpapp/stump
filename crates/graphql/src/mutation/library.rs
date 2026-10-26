@@ -1360,6 +1360,30 @@ impl LibraryMutation {
 		Ok(result.rows_affected)
 	}
 
+	/// Enqueue a scan job for every library which the authenticated user has access to
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
+	async fn scan_all_libraries(&self, ctx: &Context<'_>) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let libraries = library::Entity::find_for_user(user)
+			.into_model::<library::LibraryIdentSelect>()
+			.all(core.conn.as_ref())
+			.await?;
+
+		for library in libraries {
+			core.enqueue(StumpJob::library_scan(
+				library.id.clone(),
+				library.path,
+				None,
+			))
+			.await?;
+			tracing::debug!(library_id = ?library.id, "Enqueued library scan job");
+		}
+
+		Ok(true)
+	}
+
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	/// and update the database accordingly.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]

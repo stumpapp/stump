@@ -1946,7 +1946,6 @@
         "seeAll": "檢視全部"
       },
       "libraryOptions": {
-        "scanLibrary": "掃描",
         "manageLibrary": "設定",
         "deleteLibrary": "刪除"
       }
@@ -3313,6 +3312,9 @@
       "goToSeries": "前往系列",
       "seeDetails": "檢視詳情",
       "goToLibrary": "前往書庫"
+    },
+    "libraryActions": {
+      "scan": "掃描"
     },
     "sorting": {
       "labelEllipsis": "排序方式...",

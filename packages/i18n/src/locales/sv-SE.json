@@ -1827,7 +1827,6 @@
         "seeAll": "Se alla"
       },
       "libraryOptions": {
-        "scanLibrary": "Skanna",
         "manageLibrary": "Manage",
         "deleteLibrary": "Radera"
       }
@@ -2036,6 +2035,9 @@
         "label": "Nyligen tillagda böcker",
         "emptyMessage": "De senaste böckerna du lägger till kommer att visas här"
       }
+    },
+    "libraryActions": {
+      "scan": "Skanna"
     },
     "epubReader": {
       "tableOfContents": "Innehållsförteckning",

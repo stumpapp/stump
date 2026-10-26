@@ -55,11 +55,11 @@ export default function SideBarButtonLink({
 		)
 	}
 
-	// TODO(ui): make right content hidden until group hover
 	return (
 		<div
 			className={cn(
-				'group h-8 px-2 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+				'group/sidebar-link h-8 px-2 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+				// ^ group alone collides with sidebar, so named group
 				{
 					'justify-center border border-dashed border-border bg-input/30 hover:bg-input/60 hover:text-foreground':
 						variant === 'action',
@@ -86,7 +86,11 @@ export default function SideBarButtonLink({
 				{Icon && <Icon className="mr-2 h-4 w-4 shrink-0" />}
 				{children}
 			</Link>
-			{rightContent}
+			{rightContent && (
+				<div className="flex shrink-0 items-center opacity-0 transition-opacity duration-150 group-hover/sidebar-link:opacity-100 group-has-focus-visible/sidebar-link:opacity-100 has-data-[state=open]:opacity-100">
+					{rightContent}
+				</div>
+			)}
 		</div>
 	)
 }

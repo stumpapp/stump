@@ -685,7 +685,6 @@
         "settings": "Instellingen"
       },
       "libraryOptions": {
-        "scanLibrary": "Scannen",
         "manageLibrary": "Manage"
       }
     },
@@ -745,6 +744,9 @@
       "continueReading": {
         "label": "Verder lezen"
       }
+    },
+    "libraryActions": {
+      "scan": "Scannen"
     },
     "sorting": {
       "sortDirection": {

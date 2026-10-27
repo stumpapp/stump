@@ -22,13 +22,13 @@ pub enum MediaProcessorError {
 	Image(#[from] image::ImageError),
 	#[error("Failed to parse metadata: {0}")]
 	Metadata(String),
-	#[error("Failed to parse metadata: {0}")]
+	#[error("Failed to parse metadata XML: {0}")]
 	MetadataXml(#[from] quick_xml::Error),
-	#[error("Failed to parse metadata: {0}")]
+	#[error("Failed to parse a metadata XML attribute: {0}")]
 	MetadataAttribute(#[from] quick_xml::events::attributes::AttrError),
-	#[error("Failed to parse metadata: {0}")]
+	#[error("Failed to decode metadata text encoding: {0}")]
 	MetadataEncoding(#[from] quick_xml::encoding::EncodingError),
-	#[error("Failed to parse metadata: {0}")]
+	#[error("Failed to unescape metadata XML text: {0}")]
 	MetadataEscape(#[from] quick_xml::escape::EscapeError),
 	#[error("PDFium is not configured or available")]
 	PdfConfiguration,

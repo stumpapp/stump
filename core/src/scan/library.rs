@@ -190,7 +190,7 @@ impl LibraryScanJob {
 		})
 	}
 
-	async fn execute_media_task(
+	async fn execute_series_scan_task(
 		&self,
 		ctx: &JobContext,
 		task: SeriesScanTask,
@@ -642,7 +642,7 @@ impl JobLifecycle for LibraryScanJob {
 
 		match task {
 			LibraryScanTask::MetadataTask(task) => {
-				return self.execute_media_task(ctx, task, None).await
+				return self.execute_series_scan_task(ctx, task, None).await
 			},
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
@@ -1095,7 +1095,9 @@ impl JobLifecycle for LibraryScanJob {
 					.collect();
 			},
 			LibraryScanTask::SeriesTask { id, path, task } => {
-				return self.execute_media_task(ctx, task, Some((&id, &path))).await
+				return self
+					.execute_series_scan_task(ctx, task, Some((&id, &path)))
+					.await
 			},
 		}
 

@@ -31,6 +31,7 @@ const fragment = graphql(`
 		id
 		resolvedName
 		pages
+		extension
 		series {
 			id
 			resolvedName
@@ -79,7 +80,11 @@ export function BookHeader({ fragment: fragmentRef, onInfoClick }: Props) {
 		deleteReadHistory,
 	} = useBookReadingActions(book)
 
-	const thumbnail = useBookThumbnailActions({ bookId: book.id, pages: book.pages })
+	const thumbnail = useBookThumbnailActions({
+		bookId: book.id,
+		pages: book.pages,
+		extension: book.extension,
+	})
 	const { mutate: analyze, isPending: isAnalyzing } = useGraphQLMutation(analyzeMutation, {
 		onSuccess: () => toast.success('Analysis started'),
 		onError: (error) => {
@@ -95,7 +100,7 @@ export function BookHeader({ fragment: fragmentRef, onInfoClick }: Props) {
 	const canDownload = checkPermission(UserPermission.DownloadFile)
 	const canAnalyze = checkPermission(UserPermission.ManageLibrary)
 	const canEditThumbnail = checkPermission(UserPermission.EditThumbnails)
-	const canUpload = checkPermission(UserPermission.UploadFile)
+	const canUpload = thumbnail.canUpload
 	const canEmail =
 		checkPermission(UserPermission.EmailSend) || checkPermission(UserPermission.EmailArbitrarySend)
 

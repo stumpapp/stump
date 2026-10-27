@@ -193,11 +193,7 @@ impl MediaMutation {
 			.await?
 			.ok_or("Associated library for book not found")?;
 
-		let page = input.page();
-
-		if book.media.extension == "epub" && page > 1 {
-			return Err("Cannot set thumbnail from EPUB chapter".into());
-		}
+		let page = input.page_for(&book.media.extension)?;
 
 		let image_options = config
 			.ok_or("Library config not found")?

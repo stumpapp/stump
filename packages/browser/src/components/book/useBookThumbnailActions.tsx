@@ -1,11 +1,17 @@
-import { useGraphQLMutation, useGraphQLUploadMutation, useSDK } from '@stump/client'
+import {
+	useGraphQLMutation,
+	useGraphQLUploadMutation,
+	useSDK,
+	useUploadConfig,
+} from '@stump/client'
 import { Button, Dialog } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import UploadImageModal from '@/components/thumbnail/UploadImageModal'
+import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
@@ -36,15 +42,21 @@ const uploadMutation = graphql(`
 type Params = {
 	bookId: string
 	pages: number
+	extension: string
 }
 
 /**
  * The state, mutations, and dialogs for changing a book's thumbnail
  */
-export function useBookThumbnailActions({ bookId, pages }: Params) {
+export function useBookThumbnailActions({ bookId, pages, extension }: Params) {
 	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const queryClient = useQueryClient()
+	const { checkPermission } = useAppContext()
+
+	const hasUploadPermission = checkPermission(UserPermission.UploadFile)
+	const { uploadConfig } = useUploadConfig({ enabled: hasUploadPermission })
+	const canUpload = hasUploadPermission && !!uploadConfig?.enabled
 
 	const [isPageSelectorOpen, setIsPageSelectorOpen] = useState(false)
 	const [isUploadOpen, setIsUploadOpen] = useState(false)
@@ -98,7 +110,13 @@ export function useBookThumbnailActions({ bookId, pages }: Params) {
 						<Dialog.Close onClick={closePageSelector} />
 					</Dialog.Header>
 
-					<BookPageGrid bookId={bookId} pages={pages} selectedPage={page} onSelectPage={setPage} />
+					<BookPageGrid
+						bookId={bookId}
+						pages={pages}
+						extension={extension}
+						selectedPage={page}
+						onSelectPage={setPage}
+					/>
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={closePageSelector}>
@@ -115,11 +133,14 @@ export function useBookThumbnailActions({ bookId, pages }: Params) {
 				</Dialog.Content>
 			</Dialog>
 
-			<UploadImageModal
-				isOpen={isUploadOpen}
-				onClose={() => setIsUploadOpen(false)}
-				onUploadImage={handleUploadImage}
-			/>
+			{canUpload && (
+				<UploadImageModal
+					isOpen={isUploadOpen}
+					onClose={() => setIsUploadOpen(false)}
+					onUploadImage={handleUploadImage}
+					maxSize={uploadConfig.maxFileUploadSize}
+				/>
+			)}
 		</>
 	)
 
@@ -128,6 +149,8 @@ export function useBookThumbnailActions({ bookId, pages }: Params) {
 		previewUrl: page ? sdk.media.bookPageURL(bookId, page) : undefined,
 		openPageSelector: () => setIsPageSelectorOpen(true),
 		openUpload: () => setIsUploadOpen(true),
+		/** whether the user has permission and the server has uploads enabled */
+		canUpload,
 		dialogs,
 	}
 }

@@ -826,17 +826,13 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let page = input.params.page();
-
 		let book = media::Entity::find_for_user(user)
 			.filter(media::Column::Id.eq(input.media_id))
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Book not found")?;
 
-		if book.extension == "epub" && page > 1 {
-			return Err("Cannot set thumbnail from EPUB chapter".into());
-		}
+		let page = input.params.page_for(&book.extension)?;
 
 		let image_options = config
 			.ok_or("Library config not found")?

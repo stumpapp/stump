@@ -93,7 +93,7 @@ export function SeriesHeader() {
 
 	const canAnalyze = checkPermission(UserPermission.ManageLibrary)
 	const canEditThumbnail = checkPermission(UserPermission.EditThumbnails)
-	const canUpload = checkPermission(UserPermission.UploadFile)
+	const canUpload = thumbnail.canUpload
 
 	const actions = [
 		{

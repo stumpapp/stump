@@ -6128,7 +6128,7 @@ export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typena
 export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, page?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', href: string } | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookHeaderFragment = (
-  { __typename?: 'Media', id: string, resolvedName: string, pages: number, series: { __typename?: 'Series', id: string, resolvedName: string }, library: { __typename?: 'Library', id: string, name: string } }
+  { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, series: { __typename?: 'Series', id: string, resolvedName: string }, library: { __typename?: 'Library', id: string, name: string } }
   & { ' $fragmentRefs'?: { 'BookReadingActionsFragment': BookReadingActionsFragment } }
 ) & { ' $fragmentName'?: 'BookHeaderFragment' };
 
@@ -6517,7 +6517,7 @@ export type SeriesBookGridQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type SeriesBooksAlphabetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8667,6 +8667,7 @@ export const BookHeaderFragmentDoc = new TypedDocumentString(`
   id
   resolvedName
   pages
+  extension
   series {
     id
     resolvedName
@@ -12160,6 +12161,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   pages
+  extension
   series {
     id
     resolvedName
@@ -13220,6 +13222,7 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
         url
       }
       pages
+      extension
     }
     pageInfo {
       __typename
@@ -13776,6 +13779,7 @@ export const BookSettingsSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   pages
+  extension
   series {
     id
     resolvedName

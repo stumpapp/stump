@@ -1,12 +1,13 @@
-import { useGraphQLMutation, useGraphQLUploadMutation } from '@stump/client'
+import { useGraphQLMutation, useGraphQLUploadMutation, useUploadConfig } from '@stump/client'
 import { Button, Dialog } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useState } from 'react'
 import { toast } from 'sonner'
 
 import BookPageGrid from '@/components/book/BookPageGrid'
 import UploadImageModal from '@/components/thumbnail/UploadImageModal'
+import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
@@ -40,6 +41,11 @@ const uploadMutation = graphql(`
 export function useSeriesThumbnailActions(seriesId: string) {
 	const { t, translate } = useTranslate()
 	const queryClient = useQueryClient()
+	const { checkPermission } = useAppContext()
+
+	const hasUploadPermission = checkPermission(UserPermission.UploadFile)
+	const { uploadConfig } = useUploadConfig({ enabled: hasUploadPermission })
+	const canUpload = hasUploadPermission && !!uploadConfig?.enabled
 
 	const [isSelectorOpen, setIsSelectorOpen] = useState(false)
 	const [isUploadOpen, setIsUploadOpen] = useState(false)
@@ -115,6 +121,7 @@ export function useSeriesThumbnailActions(seriesId: string) {
 							<BookPageGrid
 								bookId={selectedBook.id}
 								pages={selectedBook.pages}
+								extension={selectedBook.extension}
 								selectedPage={page}
 								onSelectPage={setPage}
 							/>
@@ -138,17 +145,22 @@ export function useSeriesThumbnailActions(seriesId: string) {
 				</Dialog.Content>
 			</Dialog>
 
-			<UploadImageModal
-				isOpen={isUploadOpen}
-				onClose={() => setIsUploadOpen(false)}
-				onUploadImage={handleUploadImage}
-			/>
+			{canUpload && (
+				<UploadImageModal
+					isOpen={isUploadOpen}
+					onClose={() => setIsUploadOpen(false)}
+					onUploadImage={handleUploadImage}
+					maxSize={uploadConfig.maxFileUploadSize}
+				/>
+			)}
 		</>
 	)
 
 	return {
 		openSelector: () => setIsSelectorOpen(true),
 		openUpload: () => setIsUploadOpen(true),
+		/** whether the user has permission and the server has uploads enabled */
+		canUpload,
 		dialogs,
 	}
 }

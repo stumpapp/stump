@@ -13,10 +13,19 @@ type Props = {
 	onSelectPage: (page?: number) => void
 	bookId: string
 	pages: number
+	extension: string
 }
 
-export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
+export default function BookPageGrid({
+	bookId,
+	pages,
+	extension,
+	selectedPage,
+	onSelectPage,
+}: Props) {
 	const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null)
+	// EPUB pages past the cover are chapters, which the server rejects as a thumbnail
+	const selectablePages = extension.toLowerCase() === 'epub' ? 1 : pages
 
 	return (
 		<div className="h-96 w-full flex-1">
@@ -33,7 +42,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 						{scrollElement && (
 							<List
 								bookId={bookId}
-								pages={pages}
+								pages={selectablePages}
 								width={width - 16}
 								selectedPage={selectedPage}
 								onSelectPage={onSelectPage}

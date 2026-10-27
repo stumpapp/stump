@@ -1,4 +1,4 @@
-import { useGraphQLMutation, useGraphQLUploadMutation } from '@stump/client'
+import { useGraphQLMutation, useGraphQLUploadMutation, useUploadConfig } from '@stump/client'
 import { Button, Dialog, DropdownMenu, NewCard } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -51,7 +51,9 @@ export default function LibraryThumbnailSelector() {
 	const { checkPermission } = useAppContext()
 	const { t, translate } = useTranslate()
 
-	const canUpload = checkPermission(UserPermission.UploadFile)
+	const hasUploadPermission = checkPermission(UserPermission.UploadFile)
+	const { uploadConfig } = useUploadConfig({ enabled: hasUploadPermission })
+	const canUpload = hasUploadPermission && !!uploadConfig?.enabled
 
 	const onSuccess = () => invalidateThumbnailQueries(queryClient)
 
@@ -164,6 +166,7 @@ export default function LibraryThumbnailSelector() {
 							<BookPageGrid
 								bookId={selectedBook.id}
 								pages={selectedBook.pages}
+								extension={selectedBook.extension}
 								selectedPage={page}
 								onSelectPage={setPage}
 							/>
@@ -189,11 +192,14 @@ export default function LibraryThumbnailSelector() {
 				</Dialog.Content>
 			</Dialog>
 
-			<UploadImageModal
-				isOpen={isUploadOpen}
-				onClose={() => setIsUploadOpen(false)}
-				onUploadImage={handleUploadImage}
-			/>
+			{canUpload && (
+				<UploadImageModal
+					isOpen={isUploadOpen}
+					onClose={() => setIsUploadOpen(false)}
+					onUploadImage={handleUploadImage}
+					maxSize={uploadConfig.maxFileUploadSize}
+				/>
+			)}
 		</NewCard.Row>
 	)
 }

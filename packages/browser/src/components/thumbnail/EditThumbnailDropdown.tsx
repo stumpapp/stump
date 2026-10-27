@@ -1,3 +1,4 @@
+import { useUploadConfig } from '@stump/client'
 import { Button, DropdownMenu } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { ChevronDown } from 'lucide-react'
@@ -21,7 +22,12 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
-	const canUpload = useMemo(() => checkPermission(UserPermission.UploadFile), [checkPermission])
+	const hasUploadPermission = useMemo(
+		() => checkPermission(UserPermission.UploadFile),
+		[checkPermission],
+	)
+	const { uploadConfig } = useUploadConfig({ enabled: hasUploadPermission })
+	const canUpload = hasUploadPermission && !!uploadConfig?.enabled
 
 	const [showUploadModal, setShowUploadModal] = useState(false)
 
@@ -61,11 +67,14 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 				]}
 			/>
 
-			<UploadImageModal
-				isOpen={showUploadModal}
-				onClose={() => setShowUploadModal(false)}
-				onUploadImage={handleUploadImage}
-			/>
+			{canUpload && (
+				<UploadImageModal
+					isOpen={showUploadModal}
+					onClose={() => setShowUploadModal(false)}
+					onUploadImage={handleUploadImage}
+					maxSize={uploadConfig.maxFileUploadSize}
+				/>
+			)}
 		</>
 	)
 }

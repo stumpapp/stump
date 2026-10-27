@@ -6624,7 +6624,7 @@ export type BookTagEditorSetTagsMutationVariables = Exact<{
 
 export type BookTagEditorSetTagsMutation = { __typename?: 'Mutation', setMediaTags: { __typename?: 'Media', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
 
-export type BookThumbnailSelectorFragment = { __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookThumbnailSelectorFragment' };
+export type BookThumbnailSelectorFragment = { __typename?: 'Media', id: string, pages: number, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookThumbnailSelectorFragment' };
 
 export type BookThumbnailSelectorUpdateMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7026,7 +7026,7 @@ export type SeriesBookGridQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type SeriesSettingsSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8897,6 +8897,7 @@ export const BookThumbnailSelectorFragmentDoc = new TypedDocumentString(`
     url
   }
   pages
+  extension
 }
     `, {"fragmentName":"BookThumbnailSelector"}) as unknown as TypedDocumentString<BookThumbnailSelectorFragment, unknown>;
 export const ContinueReadingBookFragmentDoc = new TypedDocumentString(`
@@ -13232,6 +13233,7 @@ export const BookManagementSceneDocument = new TypedDocumentString(`
     url
   }
   pages
+  extension
 }`) as unknown as TypedDocumentString<BookManagementSceneQuery, BookManagementSceneQueryVariables>;
 export const BookManagementSceneAnalyzeDocument = new TypedDocumentString(`
     mutation BookManagementSceneAnalyze($id: ID!) {
@@ -14453,6 +14455,7 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
         url
       }
       pages
+      extension
     }
     pageInfo {
       __typename

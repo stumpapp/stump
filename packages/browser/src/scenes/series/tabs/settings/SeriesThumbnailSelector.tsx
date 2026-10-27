@@ -122,6 +122,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 				<BookPageGrid
 					bookId={selectedBook.id}
 					pages={selectedBook.pages}
+					extension={selectedBook.extension}
 					selectedPage={page}
 					onSelectPage={setPage}
 				/>

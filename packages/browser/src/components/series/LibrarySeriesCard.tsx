@@ -36,7 +36,7 @@ const LibrarySeriesCard = memo(function LibrarySeriesCard({ data }: Props) {
 		return () => observer.disconnect()
 	}, [])
 
-	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
+	const thumbnailData = data.stackedThumbnails
 
 	return (
 		<div ref={containerRef}>

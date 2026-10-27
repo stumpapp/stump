@@ -11,7 +11,7 @@ use models::{
 	},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, ExprTrait, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -30,7 +30,7 @@ use crate::{
 		epub::Epub,
 		reading_timeline::{BookReadingTimeline, SessionWithEvents},
 	},
-	order::order_spec,
+	order::series_position_spec,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -159,7 +159,7 @@ impl Media {
 
 	/// A reference to the thumbnail image for the media. This will be a fully
 	/// qualified URL to the image.
-	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+	pub async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
 		let last_modified = self.model.updated_at;
@@ -358,12 +358,7 @@ impl Media {
 			});
 		};
 
-		let spec = order_spec![
-			(media_metadata::Column::Number, Order::Asc),
-			(media::Column::Name, Order::Asc),
-			(media::Column::Id, Order::Asc),
-		];
-		// ^ this Id addition is really just a tie breaker
+		let spec = series_position_spec();
 
 		let query = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::SeriesId.eq(series_id))

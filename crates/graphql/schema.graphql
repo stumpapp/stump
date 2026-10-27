@@ -3153,6 +3153,14 @@ type Series {
 	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!
+	"""
+	Thumbnails for a stacked series card, in order of:
+	
+	1. the series thumbnail (e.g., if manually set)
+	2. the first `take` amount of books, excluding the one which the thumbnail
+	was derived from
+	"""
+	stackedThumbnails(take: Int! = 3): [ImageRef!]!
 	mediaCount: Int!
 	mediaAlphabet: JSONObject!
 	upNext(take: Int! = 1, cursor: String): [Media!]!

@@ -12,6 +12,7 @@ use crate::{
 		series::SeriesLoader,
 		series_count::SeriesCountLoader,
 		series_finished_count::SeriesFinishedCountLoader,
+		series_thumbnail_media::SeriesThumbnailMediaLoader,
 	},
 	mutation::Mutation,
 	query::Query,
@@ -86,6 +87,10 @@ pub fn add_data_loaders<
 		))
 		.data(DataLoader::new(
 			SeriesFinishedCountLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			SeriesThumbnailMediaLoader::new(conn.clone()),
 			tokio::spawn,
 		))
 		.data(DataLoader::new(

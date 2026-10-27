@@ -62,13 +62,13 @@ export default function SeriesSettingsScene() {
 				{
 					onSuccess: () => {
 						// resetting the books of a virtual series takes them all out of it, which deletes it
-						if (!series.path && impact !== MetadataResetImpact.Series) {
+						if (series.kind === SeriesKind.Virtual && impact !== MetadataResetImpact.Series) {
 							navigate(paths.librarySeries(series.library.id))
 						}
 					},
 				},
 			),
-		[resetMetadata, series.id, series.path, series.library.id, navigate, paths],
+		[resetMetadata, series.id, series.kind, series.library.id, navigate, paths],
 	)
 
 	useEffect(() => {

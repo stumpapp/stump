@@ -4426,6 +4426,14 @@ export type Series = {
   readCount: Scalars['Int']['output'];
   resolvedDescription?: Maybe<Scalars['String']['output']>;
   resolvedName: Scalars['String']['output'];
+  /**
+   * Thumbnails for a stacked series card, in order of:
+   *
+   * 1. the series thumbnail (e.g., if manually set)
+   * 2. the first `take` amount of books, excluding the one which the thumbnail
+   * was derived from
+   */
+  stackedThumbnails: Array<ImageRef>;
   stats: SeriesStats;
   status: FileStatus;
   tags: Array<Tag>;
@@ -4445,6 +4453,11 @@ export type Series = {
 export type SeriesMediaArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type SeriesStackedThumbnailsArgs = {
+  take?: Scalars['Int']['input'];
 };
 
 
@@ -6095,7 +6108,7 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, createdAt: any, resolvedName: string, mediaCount: number, readCount: number, media: Array<{ __typename?: 'Media', resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
+export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, createdAt: any, resolvedName: string, mediaCount: number, readCount: number, stackedThumbnails: Array<{ __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }> } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, isComplete: boolean, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
@@ -6851,7 +6864,7 @@ export type RecentlyAddedSeriesQueryVariables = Exact<{
 }>;
 
 
-export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, oneshotBook?: { __typename?: 'Media', id: string } | null, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, oneshotBook?: { __typename?: 'Media', id: string } | null, stackedThumbnails: Array<{ __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }> }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type HomeArrangementPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6914,7 +6927,7 @@ export type LibrarySeriesQueryVariables = Exact<{
 }>;
 
 
-export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, oneshotBook?: { __typename?: 'Media', id: string } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, stackedThumbnails: Array<{ __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }>, oneshotBook?: { __typename?: 'Media', id: string } | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesGridQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -8470,25 +8483,7 @@ export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
   id
   createdAt
   resolvedName
-  media(take: 2, skip: 1) {
-    resolvedName
-    thumbnail {
-      url
-      metadata {
-        averageColor
-        colors {
-          color
-          percentage
-        }
-        thumbhash
-      }
-      height
-      width
-    }
-  }
-  mediaCount
-  readCount
-  thumbnail {
+  stackedThumbnails {
     url
     metadata {
       averageColor
@@ -8498,7 +8493,11 @@ export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
       }
       thumbhash
     }
+    height
+    width
   }
+  mediaCount
+  readCount
 }
     `, {"fragmentName":"RecentlyAddedSeriesItem"}) as unknown as TypedDocumentString<RecentlyAddedSeriesItemFragment, unknown>;
 export const SeriesGridItemFragmentDoc = new TypedDocumentString(`
@@ -11303,25 +11302,7 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
   id
   createdAt
   resolvedName
-  media(take: 2, skip: 1) {
-    resolvedName
-    thumbnail {
-      url
-      metadata {
-        averageColor
-        colors {
-          color
-          percentage
-        }
-        thumbhash
-      }
-      height
-      width
-    }
-  }
-  mediaCount
-  readCount
-  thumbnail {
+  stackedThumbnails {
     url
     metadata {
       averageColor
@@ -11331,7 +11312,11 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
       }
       thumbhash
     }
+    height
+    width
   }
+  mediaCount
+  readCount
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesHorizontalQuery, RecentlyAddedSeriesHorizontalQueryVariables>;
 export const BooksAfterCursorDocument = new TypedDocumentString(`
     query BooksAfterCursor($id: ID!, $pagination: Pagination) {
@@ -14180,22 +14165,7 @@ export const RecentlyAddedSeriesDocument = new TypedDocumentString(`
       oneshotBook {
         id
       }
-      media(take: 2, skip: 1) {
-        id
-        resolvedName
-        thumbnail {
-          url
-          metadata {
-            averageColor
-            colors {
-              color
-              percentage
-            }
-            thumbhash
-          }
-        }
-      }
-      thumbnail {
+      stackedThumbnails {
         url
         metadata {
           averageColor
@@ -14484,24 +14454,7 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
       mediaCount
       percentageCompleted
       status
-      media(take: 2, skip: 1) {
-        id
-        thumbnail {
-          url
-          metadata {
-            averageColor
-            colors {
-              color
-              percentage
-            }
-            thumbhash
-          }
-        }
-      }
-      oneshotBook {
-        id
-      }
-      thumbnail {
+      stackedThumbnails {
         url
         metadata {
           averageColor
@@ -14511,6 +14464,9 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
           }
           thumbhash
         }
+      }
+      oneshotBook {
+        id
       }
     }
     pageInfo {

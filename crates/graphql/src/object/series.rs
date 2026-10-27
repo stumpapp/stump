@@ -123,7 +123,6 @@ impl Series {
 		let models = media::Entity::order_in_series(
 			media::ModelWithMetadata::find_for_user(user)
 				.filter(media::Column::SeriesId.eq(self.model.id.clone())),
-			self.model.kind,
 		)
 		.apply_if(take, |query, take| query.limit(take))
 		.apply_if(skip, |query, skip| query.offset(skip))

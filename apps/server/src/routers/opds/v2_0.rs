@@ -18,7 +18,7 @@ use models::{
 		library, media, media_metadata, reading_device, reading_session, series,
 		series_metadata, user::AuthUser,
 	},
-	shared::enums::{ReadingStatus, SeriesKind},
+	shared::enums::ReadingStatus,
 };
 use sea_orm::{
 	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, ExprTrait, Order,
@@ -910,7 +910,7 @@ async fn fetch_books_and_generate_feed<C>(
 	for_user: &AuthUser,
 	condition: Option<Condition>,
 	order: (C, Order),
-	series_kind: Option<SeriesKind>,
+	in_series: bool,
 	pagination: OffsetPagination,
 	title: &str,
 	subtitle: Option<String>,
@@ -935,9 +935,11 @@ where
 		)
 		.limit(take)
 		.offset(pagination.offset())
-		.apply_if(series_kind, media::Entity::order_in_series)
+		.apply_if(in_series.then_some(()), |query, _| {
+			media::Entity::order_in_series(query)
+		})
 		.apply_if(
-			series_kind.is_none().then_some(order),
+			(!in_series).then_some(order),
 			|query, (column, direction)| query.order_by(column, direction),
 		)
 		.into_model::<OPDSPublicationEntity>()
@@ -1043,7 +1045,7 @@ async fn browse_library_books(
 		&user,
 		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
-		None,
+		false,
 		pagination.0,
 		"Library Books - All",
 		None,
@@ -1068,7 +1070,7 @@ async fn latest_library_books(
 		&user,
 		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::CreatedAt, Order::Desc),
-		None,
+		false,
 		pagination.0,
 		"Library Books - Latest",
 		None,
@@ -1303,7 +1305,7 @@ async fn browse_series_by_id(
 		&user,
 		Some(Condition::all().add(media::Column::SeriesId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
-		Some(series.kind),
+		true,
 		pagination.0,
 		&title,
 		None,
@@ -1339,7 +1341,7 @@ async fn browse_books(
 		&user,
 		condition,
 		(media::Column::Name, Order::Asc),
-		None,
+		false,
 		params.pagination,
 		"Browse Books",
 		subtitle,
@@ -1364,7 +1366,7 @@ async fn latest_books(
 		&user,
 		None,
 		(media::Column::CreatedAt, Order::Desc),
-		None,
+		false,
 		pagination.0,
 		"Latest Books",
 		None,
@@ -1398,7 +1400,7 @@ async fn keep_reading(
 				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		),
 		(reading_session::Column::UpdatedAt, Order::Desc),
-		None,
+		false,
 		pagination.0,
 		"Currently Reading",
 		None,

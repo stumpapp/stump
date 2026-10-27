@@ -565,7 +565,6 @@ async fn get_series_by_id(
 	let books = media::Entity::order_in_series(
 		OPDSPublicationEntity::find_for_user(&user)
 			.filter(media::Column::SeriesId.eq(id.clone())),
-		series.kind,
 	)
 	.offset(pagination.offset())
 	.limit(pagination.limit())

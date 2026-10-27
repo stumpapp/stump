@@ -11,7 +11,7 @@ use sea_orm::{
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
-		enums::{FileStatus, SeriesKind},
+		enums::FileStatus,
 		ordering::{OrderDirection, OrderingField},
 	},
 };
@@ -228,17 +228,19 @@ fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select
 }
 
 impl Entity {
-	pub fn order_in_series(query: Select<Entity>, kind: SeriesKind) -> Select<Entity> {
-		let query = if kind == SeriesKind::Virtual {
-			query.order_by_with_nulls(
+	/// A selection to order media according to:
+	/// 1. series number (nulls last)
+	/// 2. name
+	/// This is the order regardless of whether its series are virtual
+	pub fn order_in_series(query: Select<Entity>) -> Select<Entity> {
+		query
+			.order_by_with_nulls(
 				media_metadata::Column::Number,
 				sea_orm::Order::Asc,
 				NullOrdering::Last,
 			)
-		} else {
-			query
-		};
-		query.order_by_asc(Column::Name).order_by_asc(Column::Id)
+			.order_by_asc(Column::Name)
+			.order_by_asc(Column::Id)
 	}
 
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {

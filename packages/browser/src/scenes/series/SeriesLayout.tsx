@@ -16,7 +16,7 @@ export default function SeriesLayout() {
 	const { id } = useParams()
 	const {
 		data: { seriesById: series },
-	} = useSuspenseGraphQL(seriesLayoutQuery, ['seriesById'], { id: id || '' })
+	} = useSuspenseGraphQL(seriesLayoutQuery, ['seriesById', id], { id: id || '' })
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()

@@ -998,6 +998,7 @@
       "sidebar": {
         "management": {
           "general": "通用",
+          "llm": "LLM",
           "logs": "日誌",
           "users": "使用者",
           "jobs": "任務",
@@ -1441,6 +1442,29 @@
             "uploadError": "Emoji 上傳失敗",
             "renameError": "重新命名 Emoji 失敗",
             "deleteError": "刪除 Emoji 失敗"
+          }
+        }
+      },
+      "server/llm": {
+        "helmet": "LLM 設定",
+        "title": "LLM",
+        "description": "設定用於 AI 功能的大型語言模型服務",
+        "sections": {
+          "llm": {
+            "url": {
+              "label": "網址",
+              "description": "LLM API 端點的基礎網址"
+            },
+            "apiKey": {
+              "label": "API 金鑰",
+              "description": "加密儲存，僅可寫入"
+            },
+            "modelName": {
+              "label": "模型名稱",
+              "description": "例如：gpt-4o、deepseek-chat"
+            },
+            "updateFailed": "更新 LLM 設定失敗",
+            "updateSuccess": "LLM 設定已更新"
           }
         }
       },

@@ -2312,6 +2312,13 @@ export type Mutation = {
    * will be generated based on the library's thumbnail configuration.
    */
   updateLibraryThumbnail: Library;
+  /**
+   * Update the LLM configuration for the server. A `None` value for any
+   * argument means the corresponding field will remain unchanged, while an
+   * empty string will clear it. The API key is encrypted before being
+   * persisted and is never returned to clients.
+   */
+  updateLlmConfig: ServerConfigModel;
   updateMediaMetadata: Media;
   updateMediaProgress: ReadingSession;
   /**
@@ -3034,6 +3041,13 @@ export type MutationUpdateLibraryExcludedUsersArgs = {
 export type MutationUpdateLibraryThumbnailArgs = {
   id: Scalars['ID']['input'];
   input: UpdateThumbnailInput;
+};
+
+
+export type MutationUpdateLlmConfigArgs = {
+  apiKey?: InputMaybe<Scalars['String']['input']>;
+  modelName?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4571,6 +4585,8 @@ export type ServerConfigModel = {
   __typename?: 'ServerConfigModel';
   id: Scalars['Int']['output'];
   initialWalSetupComplete: Scalars['Boolean']['output'];
+  llmModelName?: Maybe<Scalars['String']['output']>;
+  llmUrl?: Maybe<Scalars['String']['output']>;
   publicUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -7277,6 +7293,20 @@ export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'Pagina
       ) | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type ScheduledJobRowFragment = { __typename?: 'ScheduledJob', id: number, name: string, kind: ScheduledJobKind, schedule: string, config?: any | null, enabled: boolean, createdAt: any, lastRunAt?: any | null } & { ' $fragmentName'?: 'ScheduledJobRowFragment' };
+
+export type ServerConfigLlmQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServerConfigLlmQuery = { __typename?: 'Query', serverConfig: { __typename?: 'ServerConfigModel', llmUrl?: string | null, llmModelName?: string | null } };
+
+export type UpdateLlmConfigMutationVariables = Exact<{
+  url?: InputMaybe<Scalars['String']['input']>;
+  modelName?: InputMaybe<Scalars['String']['input']>;
+  apiKey?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpdateLlmConfigMutation = { __typename?: 'Mutation', updateLlmConfig: { __typename?: 'ServerConfigModel', llmUrl?: string | null, llmModelName?: string | null } };
 
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -14811,6 +14841,22 @@ export const JobTableDocument = new TypedDocumentString(`
     removedThumbnails
   }
 }`) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
+export const ServerConfigLlmDocument = new TypedDocumentString(`
+    query ServerConfigLLM {
+  serverConfig {
+    llmUrl
+    llmModelName
+  }
+}
+    `) as unknown as TypedDocumentString<ServerConfigLlmQuery, ServerConfigLlmQueryVariables>;
+export const UpdateLlmConfigDocument = new TypedDocumentString(`
+    mutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {
+  updateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {
+    llmUrl
+    llmModelName
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLlmConfigMutation, UpdateLlmConfigMutationVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`
     subscription LiveLogsFeed {
   tailLogFile

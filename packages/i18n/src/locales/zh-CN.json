@@ -1739,6 +1739,7 @@
         },
         "management": {
           "general": "服务器",
+          "llm": "LLM",
           "logs": "日志",
           "users": "用户",
           "jobs": "任务",
@@ -2243,6 +2244,29 @@
               "description": "服务器对外的公开访问地址",
               "updateFailed": "更新公开 URL 失败"
             }
+          }
+        }
+      },
+      "server/llm": {
+        "helmet": "LLM 设置",
+        "title": "LLM",
+        "description": "配置用于 AI 功能的大语言模型服务",
+        "sections": {
+          "llm": {
+            "url": {
+              "label": "网址",
+              "description": "LLM API 端点的基础网址"
+            },
+            "apiKey": {
+              "label": "API 密钥",
+              "description": "加密存储，仅可写入"
+            },
+            "modelName": {
+              "label": "模型名",
+              "description": "例如：gpt-4o、deepseek-chat"
+            },
+            "updateFailed": "更新 LLM 配置失败",
+            "updateSuccess": "LLM 配置已更新"
           }
         }
       },

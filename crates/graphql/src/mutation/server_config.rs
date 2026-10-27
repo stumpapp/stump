@@ -2,6 +2,7 @@ use crate::{data::CoreContext, guard::PermissionGuard};
 use async_graphql::{Context, Object, Result};
 use models::{entity::server_config, shared::enums::UserPermission};
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use stump_core::utils::encryption::encrypt_string;
 
 #[derive(Default)]
 pub struct ServerConfigMutation;
@@ -27,6 +28,54 @@ impl ServerConfigMutation {
 
 		let mut config = config.into_active_model();
 		config.public_url = Set(Some(public_url));
+
+		let updated_config = config.update(conn).await?;
+		Ok(updated_config)
+	}
+
+	/// Update the LLM configuration for the server. A `None` value for any
+	/// argument means the corresponding field will remain unchanged, while an
+	/// empty string will clear it. The API key is encrypted before being
+	/// persisted and is never returned to clients.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
+	async fn update_llm_config(
+		&self,
+		ctx: &Context<'_>,
+		url: Option<String>,
+		model_name: Option<String>,
+		api_key: Option<String>,
+	) -> Result<server_config::Model> {
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
+
+		let config = server_config::Entity::find()
+			.one(conn)
+			.await?
+			.ok_or("Server configuration not found")?;
+
+		let mut config = config.into_active_model();
+
+		if let Some(url) = url {
+			config.llm_url = Set(if url.is_empty() { None } else { Some(url) });
+		}
+
+		if let Some(model_name) = model_name {
+			config.llm_model_name = Set(if model_name.is_empty() {
+				None
+			} else {
+				Some(model_name)
+			});
+		}
+
+		if let Some(api_key) = api_key {
+			if api_key.is_empty() {
+				config.llm_encrypted_api_key = Set(None);
+			} else {
+				let encryption_key = core_ctx.get_encryption_key().await?;
+				let encrypted_api_key = encrypt_string(&api_key, &encryption_key)?;
+				config.llm_encrypted_api_key = Set(Some(encrypted_api_key));
+			}
+		}
 
 		let updated_config = config.update(conn).await?;
 		Ok(updated_config)

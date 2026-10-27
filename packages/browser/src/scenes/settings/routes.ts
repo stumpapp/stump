@@ -12,6 +12,7 @@ import {
 	PcCase,
 	ScrollText,
 	Server,
+	Sparkles,
 	Tag,
 	UserCircle,
 	Users,
@@ -70,6 +71,13 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				localeKey: 'server/general',
 				permissions: [UserPermission.ManageServer],
 				to: '/settings/server',
+			},
+			{
+				icon: Sparkles,
+				label: 'LLM',
+				localeKey: 'server/llm',
+				permissions: [UserPermission.ManageServer],
+				to: '/settings/llm',
 			},
 			{
 				icon: ScrollText,

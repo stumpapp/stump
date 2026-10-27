@@ -19,6 +19,13 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
 	pub jwt_refresh_secret: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub llm_url: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub llm_model_name: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub llm_encrypted_api_key: Option<String>,
 }
 
 #[derive(FromQueryResult)]

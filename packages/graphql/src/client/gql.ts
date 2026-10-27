@@ -312,6 +312,8 @@ type Documents = {
     "\n\tmutation DeleteScheduledJob($id: Int!) {\n\t\tdeleteScheduledJob(id: $id)\n\t}\n": typeof types.DeleteScheduledJobDocument,
     "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobTableDocument,
     "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": typeof types.ScheduledJobRowFragmentDoc,
+    "\n\tquery ServerConfigLLM {\n\t\tserverConfig {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": typeof types.ServerConfigLlmDocument,
+    "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": typeof types.UpdateLlmConfigDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": typeof types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
@@ -649,6 +651,8 @@ const documents: Documents = {
     "\n\tmutation DeleteScheduledJob($id: Int!) {\n\t\tdeleteScheduledJob(id: $id)\n\t}\n": types.DeleteScheduledJobDocument,
     "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.JobTableDocument,
     "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": types.ScheduledJobRowFragmentDoc,
+    "\n\tquery ServerConfigLLM {\n\t\tserverConfig {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": types.ServerConfigLlmDocument,
+    "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": types.UpdateLlmConfigDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
@@ -1877,6 +1881,14 @@ export function graphql(source: "\n\tquery JobTable($pagination: Pagination!) {\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n"): typeof import('./graphql').ScheduledJobRowFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ServerConfigLLM {\n\t\tserverConfig {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n"): typeof import('./graphql').ServerConfigLlmDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLlmConfigDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

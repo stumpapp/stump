@@ -19,6 +19,7 @@ const APIKeySettingsScene = lazy(() => import('./app/apiKeys'))
 const GeneralServerSettingsScene = lazy(
 	() => import('./server/general/GeneralServerSettingsScene.tsx'),
 )
+const LLMSettingsScene = lazy(() => import('./server/llm/LLMSettingsScene.tsx'))
 const MetadataIntegrationsScene = lazy(() => import('./server/metadataIntegrations/index.ts'))
 const ServerLogsScene = lazy(() => import('./server/logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./server/jobs/JobSettingsScene.tsx'))
@@ -52,6 +53,7 @@ export default function SettingsRouter() {
 				{isDesktop && <Route path="desktop" element={<DesktopSettingsScene />} />}
 
 				{canManageServer && <Route path="server" element={<GeneralServerSettingsScene />} />}
+				{canManageServer && <Route path="llm" element={<LLMSettingsScene />} />}
 				{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
 				{canReadUsers && <Route path="users/*" element={<UsersRouter />} />}

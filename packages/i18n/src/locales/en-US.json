@@ -1849,6 +1849,7 @@
         },
         "management": {
           "general": "Server",
+          "llm": "LLM",
           "logs": "Logs",
           "users": "Users",
           "jobs": "Jobs",
@@ -2334,6 +2335,29 @@
             "uploadError": "Failed to upload emoji",
             "renameError": "Failed to rename emoji",
             "deleteError": "Failed to delete emoji"
+          }
+        }
+      },
+      "server/llm": {
+        "helmet": "LLM Settings",
+        "title": "LLM",
+        "description": "Configure an LLM provider for AI-powered features",
+        "sections": {
+          "llm": {
+            "url": {
+              "label": "URL",
+              "description": "Base URL of the LLM API endpoint"
+            },
+            "apiKey": {
+              "label": "API Key",
+              "description": "Stored encrypted, write-only"
+            },
+            "modelName": {
+              "label": "Model Name",
+              "description": "e.g. gpt-4o, deepseek-chat"
+            },
+            "updateFailed": "Failed to update LLM configuration",
+            "updateSuccess": "LLM configuration updated"
           }
         }
       },

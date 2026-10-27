@@ -2161,6 +2161,13 @@ type Mutation {
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
 	deleteNotifier(id: Int!): Notifier!
 	updatePublicUrl(publicUrl: String!): ServerConfigModel!
+	"""
+	Update the LLM configuration for the server. A `None` value for any
+	argument means the corresponding field will remain unchanged, while an
+	empty string will clear it. The API key is encrypted before being
+	persisted and is never returned to clients.
+	"""
+	updateLlmConfig(url: String, modelName: String, apiKey: String): ServerConfigModel!
 	createScheduledJob(input: CreateScheduledJobInput!): ScheduledJob!
 	updateScheduledJob(id: Int!, input: UpdateScheduledJobInput!): ScheduledJob!
 	deleteScheduledJob(id: Int!): Boolean!
@@ -3290,6 +3297,8 @@ type ServerConfigModel {
 	id: Int!
 	publicUrl: String
 	initialWalSetupComplete: Boolean!
+	llmUrl: String
+	llmModelName: String
 }
 
 union SessionEvent = Bookmark | MediaAnnotation

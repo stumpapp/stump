@@ -1,7 +1,7 @@
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql, SeriesBookGridQuery } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -17,6 +17,7 @@ const query = graphql(`
 					url
 				}
 				pages
+				extension
 			}
 			pageInfo {
 				__typename
@@ -49,12 +50,12 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 	)
 	const nodes = data.pages.flatMap((page) => page.media.nodes)
 
-	const parentRef = useRef<HTMLDivElement>(null)
+	const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null)
 
 	const handleScroll = () => {
-		if (!hasNextPage) return
+		if (!hasNextPage || !scrollElement) return
 
-		const { scrollHeight, scrollTop, clientHeight } = parentRef.current!
+		const { scrollHeight, scrollTop, clientHeight } = scrollElement
 
 		if (scrollHeight - scrollTop === clientHeight) {
 			fetchNextPage()
@@ -66,7 +67,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 			<AutoSizer>
 				{({ height, width }) => (
 					<div
-						ref={parentRef}
+						ref={setScrollElement}
 						className="overflow-x-hidden overflow-y-auto"
 						style={{
 							height,
@@ -74,12 +75,14 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 						}}
 						onScroll={handleScroll}
 					>
-						<List
-							data={nodes}
-							width={width - 16}
-							onSelectBook={onSelectBook}
-							getScrollElement={() => parentRef.current}
-						/>
+						{scrollElement && (
+							<List
+								data={nodes}
+								width={width - 16}
+								onSelectBook={onSelectBook}
+								scrollElement={scrollElement}
+							/>
+						)}
 					</div>
 				)}
 			</AutoSizer>
@@ -90,10 +93,10 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 type ListProps = {
 	data: SeriesBookGridQuery['media']['nodes']
 	width: number
-	getScrollElement: () => HTMLDivElement | null
+	scrollElement: HTMLDivElement
 } & Pick<Props, 'onSelectBook'>
 
-const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
+const List = ({ data, width, onSelectBook, scrollElement }: ListProps) => {
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -118,7 +121,7 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 	const rowVirtualizer = useVirtualizer({
 		count: Math.ceil(data.length / Math.floor(width / getWidth())),
 		estimateSize: getSize,
-		getScrollElement,
+		getScrollElement: () => scrollElement,
 		overscan: 5,
 	})
 

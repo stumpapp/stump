@@ -24,6 +24,7 @@ export const BookThumbnailSelectorFragment = graphql(`
 			url
 		}
 		pages
+		extension
 	}
 `)
 
@@ -145,6 +146,7 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 					<BookPageGrid
 						bookId={book.id}
 						pages={book.pages}
+						extension={book.extension}
 						selectedPage={page}
 						onSelectPage={setPage}
 					/>

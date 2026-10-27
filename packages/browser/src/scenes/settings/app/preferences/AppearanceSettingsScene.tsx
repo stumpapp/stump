@@ -6,7 +6,6 @@ import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import DebugSettings from './DebugSettings'
-import DisplaySpacingPreference from './DisplaySpacingPreference'
 import EnableAlphabetFiltering from './EnableAlphabetFiltering'
 import EnableFancyAnimations from './EnableFancyAnimations'
 import EnableJobOverlayToggle from './EnableJobOverlayToggle'
@@ -89,13 +88,6 @@ export default function AppearanceSettingsScene() {
 				<Suspense>
 					<HomeArrangementPreference />
 				</Suspense>
-
-				<NewCard
-					label={t(getKey('displayAndSpacing.label'))}
-					description={t(getKey('displayAndSpacing.description'))}
-				>
-					<DisplaySpacingPreference />
-				</NewCard>
 			</div>
 
 			<div className="gap-y-8 flex flex-col">

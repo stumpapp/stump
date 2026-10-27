@@ -88,13 +88,14 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 		<div className="gap-y-6 flex flex-col">
 			<NewCard label={t(getKey('section.heading'))} description={t(getKey('section.description'))}>
 				<NewCard.CheckboxRow
-					id="processMetadata"
-					label={t(getKey('processMetadata.label'))}
-					description={
+					title={
 						isMetadata
 							? t('createOrUpdateLibraryForm.fields.organization.mode.processingRequired')
-							: t(getKey('processMetadata.description'))
+							: undefined
 					}
+					id="processMetadata"
+					label={t(getKey('processMetadata.label'))}
+					description={t(getKey('processMetadata.description'))}
 					disabled={isMetadata}
 					checked={processMetadata}
 					onClick={handleProcessMetadataChange}

@@ -782,15 +782,14 @@
             "label": "Mode",
             "filesystem": {
               "label": "Filesystem",
-              "description": "Group books into series using their folders and a filesystem pattern."
+              "description": "Group books into series using their folders and a filesystem pattern"
             },
             "metadata": {
               "label": "Metadata",
-              "description": "Scan every folder and group books by their series metadata. Books without a series stay standalone."
+              "description": "Scan every folder and group books by their series metadata, if present"
             },
-            "immutable": "This cannot be changed after the library is created.",
-            "processingRequired": "Required for metadata organization. Unchanged files are re-read only when you regenerate metadata.",
-            "noOneshots": "Metadata libraries keep books without series metadata standalone."
+            "processingRequired": "Processing metadata is required to organize a library via metadata",
+            "noOneshots": "Metadata libraries use metadata for oneshot organization"
           }
         },
         "viewOptions": {

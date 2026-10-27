@@ -1,5 +1,5 @@
 import { NewCard, Select } from '@stump/components'
-import { LibraryPattern, LibraryViewMode, OrganizationMode } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode } from '@stump/graphql'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -30,10 +30,11 @@ export default function LibraryPatternRadioGroup() {
 		(mode: OrganizationMode) => {
 			if (!isCreating) return
 			form.setValue('organizationMode', mode, { shouldDirty: true })
+			// it would be nonsensical to allow metadata organizaiton without
+			// opting into processing metadata
 			if (mode === OrganizationMode.Metadata) {
 				form.setValue('processMetadata', true)
 				form.setValue('oneshotsDirectory', null)
-				form.setValue('defaultLibraryViewMode', LibraryViewMode.Books)
 			}
 		},
 		[form, isCreating],
@@ -43,12 +44,7 @@ export default function LibraryPatternRadioGroup() {
 		<NewCard label={t(getKey('label'))} description={t(getKey('description'))}>
 			<NewCard.Row
 				label={t(getKey('mode.label'))}
-				description={
-					<>
-						{t(getKey(`mode.${isMetadata ? 'metadata' : 'filesystem'}.description`))}{' '}
-						{t(getKey('mode.immutable'))}
-					</>
-				}
+				description={t(getKey(`mode.${isMetadata ? 'metadata' : 'filesystem'}.description`))}
 				disabled={!isCreating}
 			>
 				<div>

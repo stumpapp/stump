@@ -1,7 +1,6 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { BookMarked } from 'lucide-react'
 import { memo, Suspense, useCallback, useMemo } from 'react'
@@ -12,6 +11,7 @@ import { ThumbnailImage } from '@/components/thumbnail/ThumbnailImage'
 import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceholder'
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const IMAGE_WIDTH_MOBILE = 160
@@ -97,7 +97,7 @@ export default function OnDeckContainer() {
 }
 
 function OnDeck() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -128,7 +128,7 @@ function OnDeck() {
 
 	return (
 		<HorizontalCardList
-			title={t('homeScene.onDeck.title')}
+			title={translate('shared.homeSections.onDeck.label')}
 			items={cards}
 			height={listHeight}
 			onFetchMore={handleFetchMore}
@@ -138,9 +138,9 @@ function OnDeck() {
 						<BookMarked className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
-						<Text>{t('homeScene.onDeck.emptyState.heading')}</Text>
+						<Text>{translate('shared.homeSections.onDeck.emptyText')}</Text>
 						<Text size="sm" variant="muted">
-							{t('homeScene.onDeck.emptyState.message')}
+							{translate('shared.homeSections.onDeck.emptyMessage')}
 						</Text>
 					</div>
 				</div>

@@ -1,4 +1,4 @@
-use std::{ops::Deref, path::PathBuf};
+use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, Query, State},
@@ -21,8 +21,8 @@ use models::{
 	shared::enums::{ReadingStatus, SeriesKind},
 };
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
-	QueryTrait, TransactionTrait,
+	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, ExprTrait, Order,
+	QueryOrder, QueryTrait, TransactionTrait,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -921,7 +921,7 @@ where
 {
 	let take = pagination.limit();
 
-	let order_by_entity = order.0.entity_name().deref().to_string();
+	let order_by_entity = order.0.entity_name().to_string();
 	let for_user_id = for_user.id.clone();
 	let books = OPDSPublicationEntity::find_for_user(for_user)
 		.apply_if(condition.clone(), |query, condition| {
@@ -1530,27 +1530,36 @@ async fn update_book_progression(
 		_ => {},
 	}
 
-	let device_id = if let Some(input_device) = input.device() {
-		let existing_device = reading_device::Entity::find_by_id(&input_device.id)
+	let mut device_id = None;
+
+	if let Some(input_device) = input.device() {
+		let composite_id = (input_device.id.clone(), user.id.clone());
+		let existing_device = reading_device::Entity::find_by_id(composite_id)
 			.one(conn)
 			.await?;
 
 		if existing_device.is_none() {
-			let new_device = reading_device::ActiveModel {
+			let device = reading_device::ActiveModel {
 				id: Set(input_device.id.clone()),
 				name: Set(input_device.name.clone()),
-				kind: Set(None),
-				email: Set(None),
+				user_id: Set(user.id.clone()),
+				..Default::default()
 			};
-			reading_device::Entity::insert(new_device)
-				.exec(conn)
-				.await?;
+			match device.insert(conn).await {
+				Ok(_) => {
+					device_id = Some(input_device.id.clone());
+				},
+				Err(e) => {
+					tracing::error!("Failed to insert reading device: {}", e);
+					return Err(APIError::InternalServerError(
+						"Failed to insert reading device".to_string(),
+					));
+				},
+			}
+		} else {
+			device_id = Some(input_device.id.clone());
 		}
-
-		Some(input_device.id.clone())
-	} else {
-		None
-	};
+	}
 
 	let page = input.page();
 	let percentage = match page {

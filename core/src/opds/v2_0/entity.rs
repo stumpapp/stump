@@ -12,7 +12,7 @@ use models::{
 use sea_orm::{
 	entity::prelude::*,
 	sea_query::{ConditionType, Expr},
-	Condition, FromQueryResult, JoinType, QuerySelect,
+	Condition, ExprTrait, FromQueryResult, JoinType, QuerySelect,
 };
 
 #[derive(Clone, Debug)]

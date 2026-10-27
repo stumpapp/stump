@@ -16,12 +16,12 @@ impl MigrationTrait for Migration {
 		let conn = manager.get_connection();
 		let backend = conn.get_database_backend();
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			backend,
 			"ALTER TABLE reading_sessions RENAME TO reading_sessions_legacy".to_string(),
 		))
 		.await?;
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			backend,
 			"ALTER TABLE finished_reading_sessions RENAME TO finished_reading_sessions_legacy"
 				.to_string(),
@@ -111,7 +111,7 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			backend,
 			r#"
 				INSERT INTO reading_sessions (
@@ -162,7 +162,7 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			backend,
 			r#"
 				INSERT INTO reading_sessions (

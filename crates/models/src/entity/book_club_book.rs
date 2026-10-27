@@ -4,6 +4,9 @@ use sea_orm::{
 	ActiveValue, QueryOrder, QuerySelect,
 };
 
+use super::{book_club, book_club_discussion, media};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubBookModel")]
 #[sea_orm(table_name = "book_club_books")]
@@ -27,6 +30,27 @@ pub struct Model {
 	pub book_club_id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub added_at: DateTimeWithTimeZone,
+	#[sea_orm(
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub discussion: HasOne<book_club_discussion::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "book_entity_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub book: BelongsTo<Option<media::Entity>>,
 }
 
 impl Model {
@@ -40,46 +64,6 @@ impl Model {
 			?entity_id,
 			"Sanitizing book club book by removing entity ID"
 		);
-	}
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	BookClub,
-	#[sea_orm(has_one = "super::book_club_discussion::Entity")]
-	BookClubDiscussion,
-	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::BookEntityId",
-		to = "super::media::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	Media,
-}
-
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::book_club_discussion::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussion.def()
-	}
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
 	}
 }
 

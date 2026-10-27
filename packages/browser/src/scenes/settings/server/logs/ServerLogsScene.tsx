@@ -1,25 +1,22 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
-import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { LiveLogsSection } from './live-logs'
 import { PersistedLogsSection } from './persisted-logs'
 
 export default function ServerLogsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/logs.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<PersistedLogsSection />
-				<LiveLogsSection />
-			</ContentContainer>
+			<PersistedLogsSection />
+			<LiveLogsSection />
 		</SceneContainer>
 	)
 }

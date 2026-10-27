@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		let txn = manager.get_connection().begin().await?;
-		if txn.query_one(Statement::from_string(txn.get_database_backend(),
+		if txn.query_one_raw(Statement::from_string(txn.get_database_backend(),
 			"SELECT id FROM library_configs WHERE organization_mode = 'METADATA' LIMIT 1"
 		)).await?.is_some() {
 			return Err(DbErr::Custom("Cannot remove organization mode while metadata libraries exist".into()));

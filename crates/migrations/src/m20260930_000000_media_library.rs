@@ -11,7 +11,7 @@ impl MigrationTrait for Migration {
 		let backend = conn.get_database_backend();
 		let txn = conn.begin().await?;
 		let orphans = txn
-			.query_all(Statement::from_string(
+			.query_all_raw(Statement::from_string(
 				backend,
 				"SELECT media.id FROM media
 				 LEFT JOIN series ON series.id = media.series_id
@@ -34,14 +34,14 @@ impl MigrationTrait for Migration {
 			DbBackend::Postgres => "ALTER TABLE media ADD COLUMN library_id TEXT CONSTRAINT fk_media_library REFERENCES libraries(id) ON DELETE CASCADE ON UPDATE CASCADE",
 			_ => return Err(DbErr::Custom("Unsupported database backend".into())),
 		};
-		txn.execute(Statement::from_string(backend, add_column))
+		txn.execute_raw(Statement::from_string(backend, add_column))
 			.await?;
-		txn.execute(Statement::from_string(
+		txn.execute_raw(Statement::from_string(
 			backend,
 			"UPDATE media SET library_id = (SELECT library_id FROM series WHERE series.id = media.series_id)",
 		))
 		.await?;
-		txn.execute(Statement::from_string(
+		txn.execute_raw(Statement::from_string(
 			backend,
 			"CREATE INDEX idx_media_library_id ON media(library_id)",
 		))
@@ -54,7 +54,7 @@ impl MigrationTrait for Migration {
 					"CREATE UNIQUE INDEX idx_series_id_library_id ON series(id, library_id)",
 					"ALTER TABLE media ADD CONSTRAINT fk_media_series_library FOREIGN KEY (series_id, library_id) REFERENCES series(id, library_id)",
 				] {
-					txn.execute(Statement::from_string(backend, sql)).await?;
+					txn.execute_raw(Statement::from_string(backend, sql)).await?;
 				}
 			},
 			DbBackend::Sqlite => {
@@ -63,7 +63,7 @@ impl MigrationTrait for Migration {
 					("update", "UPDATE OF library_id, series_id",
 					 "AND EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)"),
 				] {
-					txn.execute(Statement::from_string(backend, format!(
+					txn.execute_raw(Statement::from_string(backend, format!(
 						"CREATE TRIGGER media_library_{name} BEFORE {event} ON media
 						 WHEN NEW.library_id IS NULL OR
 						 (NEW.series_id IS NOT NULL {cascade_guard} AND NOT EXISTS
@@ -71,7 +71,7 @@ impl MigrationTrait for Migration {
 						 BEGIN SELECT RAISE(ABORT, 'Book must belong to a library and its series must belong to that library'); END",
 					))).await?;
 				}
-				txn.execute(Statement::from_string(
+				txn.execute_raw(Statement::from_string(
 					backend,
 					"CREATE TRIGGER series_media_library_update BEFORE UPDATE OF library_id ON series
 					 WHEN EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)
@@ -90,7 +90,7 @@ impl MigrationTrait for Migration {
 		let backend = conn.get_database_backend();
 		let txn = conn.begin().await?;
 		if txn
-			.query_one(Statement::from_string(
+			.query_one_raw(Statement::from_string(
 				backend,
 				"SELECT id FROM media WHERE series_id IS NULL LIMIT 1",
 			))
@@ -109,7 +109,8 @@ impl MigrationTrait for Migration {
 					"DROP TRIGGER media_library_update",
 					"DROP TRIGGER series_media_library_update",
 				] {
-					txn.execute(Statement::from_string(backend, sql)).await?;
+					txn.execute_raw(Statement::from_string(backend, sql))
+						.await?;
 				}
 			},
 			DbBackend::Postgres => {
@@ -117,17 +118,18 @@ impl MigrationTrait for Migration {
 					"ALTER TABLE media DROP CONSTRAINT fk_media_series_library",
 					"DROP INDEX idx_series_id_library_id",
 				] {
-					txn.execute(Statement::from_string(backend, sql)).await?;
+					txn.execute_raw(Statement::from_string(backend, sql))
+						.await?;
 				}
 			},
 			_ => return Err(DbErr::Custom("Unsupported database backend".into())),
 		}
-		txn.execute(Statement::from_string(
+		txn.execute_raw(Statement::from_string(
 			backend,
 			"DROP INDEX idx_media_library_id",
 		))
 		.await?;
-		txn.execute(Statement::from_string(
+		txn.execute_raw(Statement::from_string(
 			backend,
 			"ALTER TABLE media DROP COLUMN library_id",
 		))

@@ -7,7 +7,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query, SimpleExpr},
-	Iterable, QuerySelect, Set,
+	ExprTrait, Iterable, QuerySelect, Set,
 };
 
 use crate::{

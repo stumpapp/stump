@@ -7,7 +7,12 @@ export type Any = any
 export { Accordion } from './accordion'
 export { Alert, AlertDescription, AlertTitle } from './alert'
 export { Badge, type BadgeProps } from './badge'
-export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
+export {
+	Breadcrumb,
+	Breadcrumbs,
+	type BreadcrumbSegment,
+	type BreadcrumbsProps,
+} from './breadcrumbs'
 export {
 	Button,
 	ButtonOrLink,
@@ -32,6 +37,7 @@ export { Command, type CommandProps } from './command'
 export { Divider, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export {
+	AlertDialog,
 	ConfirmationModal,
 	type ConfirmationModalProps,
 	Dialog,
@@ -67,7 +73,13 @@ export { Preformatted, type PreformattedProps } from './preformatted'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'
 export { ScrollArea, ScrollBar } from './scroll-area'
-export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
+export {
+	ComboBox,
+	type ComboBoxProps,
+	NativeSelect,
+	type NativeSelectProps,
+	Select,
+} from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Slider } from './slider'
 export {
@@ -86,6 +98,7 @@ export {
 	type StatisticItemProps,
 	type StatisticProps,
 	type StatisticSize,
+	TemplatedTranslationText,
 	Text,
 	TEXT_VARIANTS,
 	type TextProps,

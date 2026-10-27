@@ -33,7 +33,7 @@ function RecentlyAddedSeriesHorizontal() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedSeries', serverID, 'horizontal'],
@@ -64,7 +64,7 @@ function RecentlyAddedSeriesHorizontal() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				{t('stumpServer.recentlyAddedSeries.label')}
+				{translate('shared.homeSections.recentlyAddedSeries.label')}
 			</Heading>
 
 			<FlashList
@@ -79,7 +79,7 @@ function RecentlyAddedSeriesHorizontal() {
 				showsHorizontalScrollIndicator={false}
 				ListEmptyComponent={
 					<Text className="text-foreground-muted">
-						{t('stumpServer.recentlyAddedSeries.emptyText')}
+						{translate('shared.homeSections.recentlyAddedSeries.emptyText')}
 					</Text>
 				}
 			/>

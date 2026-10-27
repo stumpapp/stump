@@ -2,7 +2,7 @@
 title: Users
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Step, Steps } from 'fumadocs-ui/components/steps'
 
 Stump has two user account types:
 
@@ -14,7 +14,7 @@ An 'unclaimed' Stump server, or a server that has no user with the `server owner
 ## Management
 
 <Callout title="Permission required">
-	These functionalities are gated behind the `user:manage` user permission. To learn more about
+	These functionalities are gated behind the `MANAGE_USERS` user permission. To learn more about
 	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
@@ -26,18 +26,21 @@ An 'unclaimed' Stump server, or a server that has no user with the `server owner
 ### Navigate to the settings page
 
 Navigate to the primary settings page (`/settings`) in your browser
+
 </Step>
 
 <Step>
 ### Select `Users` in the `Server` section of the sidebar
 
 This will take you to the user management page. It will display a list of users, authentication history, and miscellaneous user stats.
+
 </Step>
 
 <Step>
 ### Click the `Create user` button
 
 This will route you to a subpage which displays a form to create a new user
+
 </Step>
 
 <Step>
@@ -46,11 +49,12 @@ This will route you to a subpage which displays a form to create a new user
 - **Username**: The username of the user. This is used to log in to the server
 - **Password**: The password of the user. This is used to log in to the server. You can click the `Generate` button to generate a random password, or manually enter one
 - **Age restriction**: The _optional_ age restriction of the user. This is used to determine which books the user can access. You may enter a number corresponding to the **maximum** age rating the user can access. For example, if you enter `13` then the user will be able to access books with an age rating of `13` or lower. See the [age restrictions](/docs/guides/access-control/age-restrictions) section of the Access Control guide for more information
-  - **Note**: If you check the `Enforce restrictions for missing metadata` checkbox, then the user will only be able to access books that:
+  - **Note**: If you check the `Enforce on Unset` checkbox, then the user will only be able to access books that:
     1. _Explicitly_ have an age rating set
     2. The age rating is less than or equal to the user's age restriction
 
     Otherwise, the user will be able to access books that _do not_ have an age rating set
+
 </Step>
 
 </Steps>

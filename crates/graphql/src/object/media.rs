@@ -3,7 +3,7 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_analysis, reading_session, tag},
+	entity::{library, media, media_analysis, media_metadata, reading_session, tag},
 	services::reading_timeline::sessions_with_events,
 	shared::{
 		analysis::MediaAnalysisData, enums::SeriesKind, image::ImageRef,
@@ -11,7 +11,7 @@ use models::{
 	},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, Condition, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -30,6 +30,7 @@ use crate::{
 		epub::Epub,
 		reading_timeline::{BookReadingTimeline, SessionWithEvents},
 	},
+	order::order_spec,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -326,6 +327,8 @@ impl Media {
 		Ok(position)
 	}
 
+	/// The next media in the series, ordered by metadata series position
+	/// when available and falling back to name if not
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
@@ -342,7 +345,8 @@ impl Media {
 				)
 			},
 		};
-		let Some(series_id) = &self.model.series_id else {
+
+		let Some(series_id) = self.model.series_id.clone() else {
 			return Ok(PaginatedResponse {
 				nodes: vec![],
 				page_info: CursorPaginationInfo {
@@ -354,53 +358,43 @@ impl Media {
 			});
 		};
 
-		// without a loadable series, fall back to filesystem (name) ordering
-		let kind = self.series(ctx).await?.map(|series| series.model.kind);
-		let (name, id, number) = match pagination.after.as_ref() {
-			Some(after) if after != &self.model.id => {
-				let book = media::ModelWithMetadata::find_for_user(user)
-					.filter(media::Column::Id.eq(after))
-					.filter(media::Column::SeriesId.eq(series_id))
-					.into_model::<media::ModelWithMetadata>()
-					.one(conn)
-					.await?
-					.ok_or("Cursor not found")?;
-				(
-					book.media.name,
-					book.media.id,
-					book.metadata.and_then(|m| m.number),
-				)
-			},
-			_ => (
-				self.model.name.clone(),
-				self.model.id.clone(),
-				self.metadata.as_ref().and_then(|m| m.model.number),
-			),
-		};
-		let tie_break = Condition::any()
-			.add(media::Column::Name.gt(&name))
-			.add(media::Column::Name.eq(&name).and(media::Column::Id.gt(&id)));
-		let after = if kind == Some(SeriesKind::Virtual) {
-			media::Entity::after_number(
-				&name,
-				&id,
-				number,
-				models::shared::ordering::OrderDirection::Asc,
-			)
-		} else {
-			tie_break
-		};
-		let next = media::Entity::order_in_series(
-			media::ModelWithMetadata::find_for_user(user)
-				.filter(media::Column::SeriesId.eq(series_id))
-				.filter(after),
-			kind.unwrap_or(SeriesKind::Filesystem),
-		)
-		.limit(pagination.limit)
-		.into_model::<media::ModelWithMetadata>()
-		.all(conn)
-		.await?;
+		let spec = order_spec![
+			(media_metadata::Column::Number, Order::Asc),
+			(media::Column::Name, Order::Asc),
+			(media::Column::Id, Order::Asc),
+		];
+		// ^ this Id addition is really just a tie breaker
 
+		let query = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::SeriesId.eq(series_id))
+			.filter(media::Column::DeletedAt.is_null());
+
+		let cursor_id = match pagination.after.clone() {
+			Some(after) if after != self.model.id => after,
+			_ => self.model.id.clone(),
+		};
+		let cursor_row = query
+			.clone()
+			.filter(media::Column::Id.eq(cursor_id))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Cursor not found")?;
+		let number = match &cursor_row.metadata {
+			Some(metadata) => metadata.get(media_metadata::Column::Number),
+			None => Option::<Decimal>::None.into(),
+		};
+
+		let next = spec
+			.apply(query.filter(spec.sorts_after(&[
+				number,
+				cursor_row.media.get(media::Column::Name),
+				cursor_row.media.get(media::Column::Id),
+			])))
+			.limit(pagination.limit)
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
 		let current_cursor = pagination
 			.after
 			.or_else(|| next.first().map(|m| m.media.id.clone()));

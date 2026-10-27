@@ -1,12 +1,12 @@
-import { Input, InputGroup, Label, Text, TextArea } from '@stump/components'
+import { InputGroup, NewCard, Text } from '@stump/components'
 import { OrganizationMode, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { Suspense } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -29,68 +29,73 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 		useWatch({ control: form.control, name: 'organizationMode' }) === OrganizationMode.Metadata
 	const tags = useWatch({ control: form.control, name: 'tags' })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { errors } = useFormState({
 		control: form.control,
 	})
 
 	return (
-		<div className="gap-6 flex grow flex-col">
-			<div className="gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6 flex flex-col flex-wrap">
-				<Input
+		<>
+			<NewCard label="Details">
+				<NewCard.InputRow
 					label={t(getKey('name.label'))}
 					description={t(getKey('name.description'))}
 					placeholder={t(getKey('name.placeholder'))}
-					containerClassName="max-w-full md:max-w-sm"
 					required={isCreatingLibrary}
 					errorMessage={errors.name?.message}
 					data-1p-ignore
 					{...form.register('name')}
 				/>
 
-				<div className="gap-2 md:max-w-sm grid w-full max-w-full items-center">
-					<Label htmlFor="path">
-						{t(getKey('path.label'))}
-						{isCreatingLibrary && <span className="text-destructive"> *</span>}
-					</Label>
+				<NewCard.TextAreaRow
+					label={t(getKey('description.label'))}
+					description={t(getKey('description.description'))}
+					placeholder={t(getKey('description.placeholder'))}
+					{...form.register('description')}
+				/>
 
-					<InputGroup>
-						<InputGroup.Input
-							id="path"
-							placeholder={t(getKey('path.placeholder'))}
-							required={isCreatingLibrary}
-							aria-invalid={!!errors.path?.message}
-							{...form.register('path')}
-						/>
+				<Suspense fallback={null}>
+					<NewCard.Row label={t(getKey('tags.label'))} description={t(getKey('tags.description'))}>
+						<TagSelect selected={tags} onChange={(value) => form.setValue('tags', value)} />
+					</NewCard.Row>
+				</Suspense>
 
-						{checkPermission(UserPermission.FileExplorer) && (
-							<InputGroup.Addon align="inline-end">
-								<InputGroup.Button
-									type="button"
-									variant="ghost"
-									size="icon-xs"
-									onClick={() => onSetShowDirectoryPicker(true)}
-								>
-									<Folder className="h-4 w-4 text-muted-foreground" />
-								</InputGroup.Button>
-							</InputGroup.Addon>
+				<LibraryTypeSelect />
+			</NewCard>
+
+			<NewCard label="Folders">
+				<NewCard.Row label={t(getKey('path.label'))} description={t(getKey('path.description'))}>
+					<div className="gap-1.5 lg:flex-1 flex w-full flex-col">
+						<InputGroup>
+							<InputGroup.Input
+								id="path"
+								placeholder={t(getKey('path.placeholder'))}
+								required={isCreatingLibrary}
+								aria-invalid={!!errors.path?.message}
+								{...form.register('path')}
+							/>
+							{checkPermission(UserPermission.FileExplorer) && (
+								<InputGroup.Addon align="inline-end">
+									<InputGroup.Button
+										type="button"
+										variant="ghost"
+										size="icon-xs"
+										onClick={() => onSetShowDirectoryPicker(true)}
+									>
+										<Folder className="h-4 w-4 text-muted-foreground" />
+									</InputGroup.Button>
+								</InputGroup.Addon>
+							)}
+						</InputGroup>
+						{errors.path?.message && (
+							<Text variant="danger" size="xs">
+								{errors.path.message}
+							</Text>
 						)}
-					</InputGroup>
+					</div>
+				</NewCard.Row>
 
-					{errors.path?.message && (
-						<Text variant="danger" size="xs" className="break-all">
-							{errors.path.message}
-						</Text>
-					)}
-
-					{!errors.path?.message && (
-						<Text variant="muted" size="sm">
-							{t(getKey('path.description'))}
-						</Text>
-					)}
-				</div>
-
-				<Input
+				<NewCard.InputRow
 					label={t(getKey('oneshotsDirectory.label'))}
 					id="oneshotsDirectory"
 					placeholder={t(getKey('oneshotsDirectory.placeholder'))}
@@ -98,34 +103,12 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					disabled={isMetadata}
 					description={
 						isMetadata
-							? t(getKey('organizationMode.noOneshots'))
+							? t(getKey('organization.mode.noOneshots'))
 							: t(getKey('oneshotsDirectory.description'))
 					}
 					{...form.register('oneshotsDirectory')}
 				/>
-			</div>
-
-			<TextArea
-				className="flex"
-				label={t(getKey('description.label'))}
-				description={t(getKey('description.description'))}
-				placeholder={t(getKey('description.placeholder'))}
-				containerClassName="max-w-full md:max-w-sm lg:max-w-lg"
-				{...form.register('description')}
-			/>
-
-			<Suspense fallback={null}>
-				<TagSelect
-					label={t(getKey('tags.label'))}
-					description={t(getKey('tags.description'))}
-					selected={tags}
-					onChange={(value) => form.setValue('tags', value)}
-				/>
-			</Suspense>
-
-			<div className="flex">
-				<LibraryTypeSelect />
-			</div>
-		</div>
+			</NewCard>
+		</>
 	)
 }

@@ -5,8 +5,8 @@ use models::{
 };
 use sea_orm::{
 	prelude::{DateTimeWithTimeZone, *},
-	sea_query::{ConditionExpression, Expr, Query, SelectStatement},
-	Condition,
+	sea_query::{Expr, Query, SelectStatement},
+	Condition, ExprTrait,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -17,10 +17,7 @@ use super::{
 	ConceptualFilter, IntoFilter, NumericFilter, StringLikeFilter,
 };
 
-fn apply_reading_status_filter(
-	value: ReadingStatus,
-	not: bool,
-) -> impl Into<ConditionExpression> {
+fn apply_reading_status_filter(value: ReadingStatus, not: bool) -> impl Into<Condition> {
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 	let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 

@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { CheckBox, Label, Text } from '@stump/components'
 import { FragmentType, graphql, MetadataField, useFragment, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import getProperty from 'lodash/get'
@@ -26,6 +25,7 @@ import {
 	TextCell,
 } from '@/components/metadata/metadataEditor'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
@@ -116,7 +116,7 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
 
 	const { checkPermission } = useAppContext()
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 
 	const columns = useMemo(
 		() => [
@@ -271,10 +271,10 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	const items = useMemo(
 		() =>
 			MediaMetadataKeys.map((key) => ({
-				label: t(getLabelKey(key)),
+				label: translate(`shared.bookMetadata.${key}`),
 				field: key,
 			})).filter(({ field }) => showMissing || !isEmptyField(metadata?.[field])),
-		[metadata, showMissing, t],
+		[metadata, showMissing, translate],
 	)
 
 	const form = useForm({
@@ -365,7 +365,3 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 }
 
 const columnHelper = createColumnHelper<MediaMetadataEditorRow>()
-
-const LOCALE_BASE = `metadataEditor`
-const getKey = (key: string) => `${LOCALE_BASE}.${key}`
-const getLabelKey = (binding: string) => getKey(`labels.${binding}`)

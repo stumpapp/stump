@@ -98,6 +98,10 @@ function findClosestLocale(locale: string): AllowedLocale {
 	return 'en-US'
 }
 
+/**
+ * Initializes `date-fns` so that by default the provided locale is used
+ * for any formatting operations
+ */
 export async function initDateFnsLocale(
 	locale: string,
 	signal?: AbortSignal,

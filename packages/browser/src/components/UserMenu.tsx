@@ -1,65 +1,58 @@
 import { Avatar, cn, ConfirmationModal, Dropdown, Text } from '@stump/components'
-import { Bell, Server, Settings } from 'lucide-react'
+import { Bell, LogOut, Server, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
 import { useAppContext } from '../context'
+import { useIsSidebarIconMode } from './navigation/sidebar/CollapsedSidebarItems'
 
-type Props = {
-	variant?: 'sidebar' | 'topbar'
-}
-
-export default function UserMenu({ variant = 'sidebar' }: Props) {
+export default function UserMenu() {
 	const [isOpen, setIsOpen] = useState(false)
 	const [isSignOutConfirmOpen, setIsSignOutConfirmOpen] = useState(false)
 	const navigate = useNavigate()
 
 	const { logout, user } = useAppContext()
+	const { t, translate } = useTranslate()
 
 	const platform = useAppStore((store) => store.platform)
 	const paths = usePaths()
 
-	const avatarUrl = user.avatarUrl || undefined
+	const avatarUrl = user.avatarUrl || user.avatar.url || undefined
 	const fallback = user.username.slice(0, 2).toUpperCase()
-	const isSidebar = variant === 'sidebar'
+	const isIconMode = useIsSidebarIconMode()
 
 	return (
 		<>
 			<ConfirmationModal
-				title="Sign out"
-				description="Are you sure you want sign out?"
-				confirmText="Sign out"
+				title={t('signOutModal.title')}
+				description={t('signOutModal.message')}
+				confirmText={t('signOutModal.buttons.signOut')}
+				cancelText={translate('shared.common.cancel')}
 				confirmVariant="destructive"
 				isOpen={isSignOutConfirmOpen}
 				onClose={() => setIsSignOutConfirmOpen(false)}
 				onConfirm={logout}
+				size="sm"
+				icon={LogOut}
 			/>
 
-			<AutoSizer style={{ height: '2.25rem', width: isSidebar ? '100%' : '2.25rem' }}>
+			<AutoSizer style={{ height: isIconMode ? '2rem' : '2.25rem', width: '100%' }}>
 				{({ width }) => (
-					<Dropdown open={isOpen} onOpenChange={setIsOpen} modal>
+					<Dropdown open={isOpen} onOpenChange={setIsOpen} modal={false}>
 						<Dropdown.Trigger asChild>
 							<div
+								aria-label={user.username}
 								className={cn(
-									'h-9 flex w-full cursor-pointer items-center border border-transparent transition-all duration-150',
-									{ 'px-2 rounded-md': isSidebar },
-									{ 'px-1 justify-center rounded-full': !isSidebar },
-									{
-										'bg-sidebar text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground':
-											isSidebar,
-									},
-									{ 'border-sidebar-border/60': isSidebar && !isOpen },
-									{
-										'border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground':
-											isSidebar && isOpen,
-									},
-									{ 'border-border/60 bg-background/70': !isSidebar && !isOpen },
-									{ 'border-border/80 bg-background': !isSidebar && isOpen },
-									{ 'hover:border-border/60 hover:bg-accent/40': !isSidebar },
+									isIconMode ? 'size-8 mx-auto justify-center' : 'h-9 px-2 w-full',
+									'flex cursor-pointer items-center rounded-md border border-transparent bg-sidebar text-sidebar-foreground transition-all duration-150 hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+									isOpen
+										? 'border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground'
+										: 'border-sidebar-border/60',
 								)}
 							>
 								<Avatar
@@ -68,7 +61,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 									fallbackWrapperClassName="text-xs select-none"
 									className="h-6 w-6"
 								/>
-								{isSidebar && (
+								{!isIconMode && (
 									<Text className="ml-2 line-clamp-1 text-ellipsis select-none" size="sm">
 										{user.username}
 									</Text>
@@ -77,44 +70,39 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 						</Dropdown.Trigger>
 
 						<Dropdown.Content
-							className={cn(
-								'p-1 shadow-md',
-								isSidebar ? 'border-sidebar-border bg-sidebar text-sidebar-foreground' : '',
-							)}
-							align={isSidebar ? 'start' : 'end'}
-							style={{ width: isSidebar ? width : 'auto' }}
+							className="p-1 shadow-md border-sidebar-border bg-sidebar text-sidebar-foreground"
+							align="start"
+							side={isIconMode ? 'right' : 'bottom'}
+							style={{ width: isIconMode ? 224 : width }}
 						>
 							<Dropdown.Group>
-								<Dropdown.Item disabled className={cn(itemClasses(isSidebar), 'opacity-40')}>
-									<Bell className="mr-1.5 h-4 w-4" />
+								<Dropdown.Item disabled className={cn(itemClasses(), 'opacity-40')}>
+									<Bell className="h-4 w-4" />
 									Notifications
 								</Dropdown.Item>
 
-								<Dropdown.Item
-									onClick={() => navigate(paths.settings())}
-									className={itemClasses(isSidebar)}
-								>
-									<Settings className="mr-1.5 h-4 w-4" />
+								<Dropdown.Item onClick={() => navigate(paths.settings())} className={itemClasses()}>
+									<Settings className="h-4 w-4" />
 									Settings
 								</Dropdown.Item>
 							</Dropdown.Group>
 
-							<Dropdown.Separator className={isSidebar ? 'bg-sidebar-border' : ''} />
+							<Dropdown.Separator className="bg-sidebar-border" />
 
 							<Dropdown.Group>
 								{platform !== 'browser' && (
-									<Dropdown.Item onClick={() => navigate('/')} className={itemClasses(isSidebar)}>
-										<Server className="mr-1.5 h-4 w-4" />
+									<Dropdown.Item onClick={() => navigate('/')} className={itemClasses()}>
+										<Server className="h-4 w-4" />
 										Switch server
 									</Dropdown.Item>
 								)}
 
 								<Dropdown.Item
 									onClick={() => setIsSignOutConfirmOpen(true)}
-									isDestructive
-									className={itemClasses(isSidebar, true)}
+									variant="destructive"
+									className={itemClasses(true)}
 								>
-									Sign out
+									{t('signOutModal.buttons.signOut')}
 								</Dropdown.Item>
 							</Dropdown.Group>
 						</Dropdown.Content>
@@ -125,17 +113,12 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 	)
 }
 
-const itemClasses = (isSidebar: boolean, isDestructive?: boolean) =>
+const itemClasses = (isDestructive?: boolean) =>
 	cn(
-		'h-9 gap-1.5 px-3 text-sm w-full rounded-md bg-transparent transition-colors duration-150 outline-none',
+		'py-1 gap-1.5 px-3 text-sm w-full rounded-md bg-transparent transition-colors duration-150 outline-none',
 		{
 			'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[highlighted]:bg-sidebar-accent/60 data-[highlighted]:text-sidebar-accent-foreground':
-				isSidebar && !isDestructive,
-		},
-		{ 'text-muted-foreground': !isSidebar && !isDestructive },
-		{
-			'hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground':
-				!isSidebar && !isDestructive,
+				!isDestructive,
 		},
 		{
 			'text-destructive hover:bg-destructive/25 data-[highlighted]:bg-destructive/25 data-[highlighted]:text-destructive':

@@ -7,7 +7,7 @@ import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const accentColor = usePalette('accent')
 	const listColors = usePreferencesStore((store) => store.tintListBackground)
 
@@ -32,7 +32,7 @@ export default function Screen() {
 				<Stack.Screen
 					name="index"
 					options={{
-						headerTitle: t('readingTimeline.title'),
+						headerTitle: translate('shared.readingTimeline.title'),
 						// for whatever reason, the navigation.setOptions({...}) call won't work unless we set the headerBackground here
 						// i assume it is some lifecycle issue either with some nuance of stump or in react-navigation itself, but this
 						// is a fine enough workaround for now

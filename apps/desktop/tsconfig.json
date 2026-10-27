@@ -11,16 +11,16 @@
 			"@stump/components": ["../../packages/components/src/index.ts"],
 			"@stump/components/*": ["../../packages/components/src/*"],
 			"@stump/browser": ["../../packages/browser/src/index.ts"],
-			"@stump/browser/*": ["../../packages/browser/src/*"],
-		},
+			"@stump/browser/*": ["../../packages/browser/src/*"]
+		}
 	},
 	"include": ["src"],
 	"references": [
 		{
-			"path": "../../packages/client",
+			"path": "../../packages/client"
 		},
 		{
-			"path": "../../packages/browser",
-		},
-	],
+			"path": "../../packages/browser"
+		}
+	]
 }

@@ -8,14 +8,14 @@ use models::{
 	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		enums::{ReadingStatus, SeriesKind},
+		enums::ReadingStatus,
 		image::ImageRef,
 	},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, FromQueryResult, JoinType, QuerySelect, QueryTrait,
+	Condition, ExprTrait, FromQueryResult, JoinType, Order, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -26,6 +26,7 @@ use crate::{
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
 	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
+	order::order_spec,
 	utils::db_statement,
 };
 
@@ -145,7 +146,7 @@ impl Series {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -188,6 +189,13 @@ impl Series {
 		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
+		let spec = order_spec![
+			(media_metadata::Column::Number, Order::Asc),
+			(media::Column::Name, Order::Asc),
+			(media::Column::Id, Order::Asc),
+		];
+		// ^ this Id addition is really just a tie breaker
+
 		let mut query = media::ModelWithMetadata::find_for_user(user)
 			.join_rev(
 				JoinType::LeftJoin,
@@ -220,26 +228,25 @@ impl Series {
 			.group_by(media_metadata::Column::Id); // pgsql requires addtl grouping
 
 		if let Some(id) = cursor {
-			let book = media::ModelWithMetadata::find_by_id_for_user(id, user)
+			let cursor_row = media::ModelWithMetadata::find_by_id_for_user(id, user)
 				.filter(media::Column::SeriesId.eq(self.model.id.clone()))
 				.into_model::<media::ModelWithMetadata>()
 				.one(conn)
 				.await?
 				.ok_or("Cursor not found")?;
-			let after = if self.model.kind == SeriesKind::Virtual {
-				media::Entity::after_number(
-					&book.media.name,
-					&book.media.id,
-					book.metadata.and_then(|metadata| metadata.number),
-					models::shared::ordering::OrderDirection::Asc,
-				)
-			} else {
-				Condition::all().add(media::Column::Name.gt(book.media.name))
+			let number = match &cursor_row.metadata {
+				Some(metadata) => metadata.get(media_metadata::Column::Number),
+				None => Option::<Decimal>::None.into(),
 			};
-			query = query.filter(after);
+			query = query.filter(spec.sorts_after(&[
+				number,
+				cursor_row.media.get(media::Column::Name),
+				cursor_row.media.get(media::Column::Id),
+			]));
 		}
 
-		let books = media::Entity::order_in_series(query, self.model.kind)
+		let books = spec
+			.apply(query)
 			.limit(take)
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)

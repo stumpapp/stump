@@ -36,7 +36,7 @@ impl MigrationTrait for Migration {
 		let backend = conn.get_database_backend();
 		let txn = conn.begin().await?;
 		if txn
-			.query_one(Statement::from_string(
+			.query_one_raw(Statement::from_string(
 				backend,
 				"SELECT id FROM series WHERE kind = 'VIRTUAL' LIMIT 1",
 			))
@@ -70,7 +70,7 @@ async fn set_sqlite_path_nullable(
 	nullable: bool,
 ) -> Result<(), DbErr> {
 	let mut schema = txn
-		.query_one(Statement::from_string(
+		.query_one_raw(Statement::from_string(
 			DbBackend::Sqlite,
 			"SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = 'series'",
 		))
@@ -94,7 +94,7 @@ async fn set_sqlite_path_nullable(
 	};
 	schema.replace_range(*position..*position + from.len(), to);
 	let version = txn
-		.query_one(Statement::from_string(
+		.query_one_raw(Statement::from_string(
 			DbBackend::Sqlite,
 			"PRAGMA schema_version",
 		))
@@ -104,7 +104,7 @@ async fn set_sqlite_path_nullable(
 	txn.execute_unprepared("PRAGMA writable_schema=ON").await?;
 	let result =
 		async {
-			txn.execute(Statement::from_sql_and_values(DbBackend::Sqlite,
+			txn.execute_raw(Statement::from_sql_and_values(DbBackend::Sqlite,
 			"UPDATE sqlite_schema SET sql = ? WHERE type = 'table' AND name = 'series'",
 			[schema.into()],
 		)).await?;
@@ -117,7 +117,7 @@ async fn set_sqlite_path_nullable(
 	result?;
 	reset?;
 	let integrity = txn
-		.query_one(Statement::from_string(
+		.query_one_raw(Statement::from_string(
 			DbBackend::Sqlite,
 			"PRAGMA integrity_check",
 		))

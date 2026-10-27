@@ -1,7 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SmartListBookItemFragment, SmartListScreenQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -15,6 +14,7 @@ import {
 	useSmartListItemsSize,
 } from '~/components/smartList'
 import SmartListActionMenu from '~/components/smartList/SmartListActionMenu'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useSmartListGroupStore } from '~/stores/smartList'
@@ -87,8 +87,8 @@ type Book = Extract<
 type ListData = (string | Book)[] // https://shopify.github.io/flash-list/docs/guides/section-list/
 
 export default function Screen() {
-	const { t } = useLocaleContext()
-	const standaloneLabel = t('userSmartListScene.itemsScene.standaloneBooks')
+	const { translate } = useTranslate()
+	const standaloneLabel = translate('shared.common.standaloneBooks')
 	const { id } = useLocalSearchParams<{ id: string }>()
 	const {
 		activeServer: { id: serverID },

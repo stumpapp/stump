@@ -633,6 +633,24 @@ export type CustomEmoji = {
   url: Scalars['String']['output'];
 };
 
+/** The reading activity (time, number of unique sessions) for a specific date */
+export type DailyActivity = {
+  __typename?: 'DailyActivity';
+  date: Scalars['NaiveDate']['output'];
+  sessionCount: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
+};
+
+/**
+ * An input for specifying a date range:
+ * - `start = null` means from the beginning of the user's history
+ * - `end = null` resolves to the current logical day (per user prefs)
+ */
+export type DateRangeInput = {
+  end?: InputMaybe<Scalars['NaiveDate']['input']>;
+  start?: InputMaybe<Scalars['NaiveDate']['input']>;
+};
+
 export type DeleteJobAssociatedLogs = {
   __typename?: 'DeleteJobAssociatedLogs';
   /** The number of logs deleted that were related to a job */
@@ -1139,6 +1157,17 @@ export type JobUpdate = {
   totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
 
+export type JournalEntryModel = {
+  __typename?: 'JournalEntryModel';
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  mediaId: Scalars['String']['output'];
+  sessionId?: Maybe<Scalars['Int']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type Library = {
   __typename?: 'Library';
   authors: Array<Author>;
@@ -1459,6 +1488,10 @@ export type Media = {
   modifiedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The name of the media, derived from the filename and excluding the extension */
   name: Scalars['String']['output'];
+  /**
+   * The next media in the series, ordered by metadata series position
+   * when available and falling back to name if not
+   */
   nextInSeries: PaginatedMediaResponse;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
@@ -2047,6 +2080,11 @@ export type Mutation = {
    * This operation will also remove any associated thumbnails of the deleted media and series.
    */
   cleanLibrary: CleanLibraryResponse;
+  /**
+   * Clear the stored directory mtimes for a library, forcing the next scan to do a
+   * full walk
+   */
+  clearLibraryScannedDirectories: Scalars['Int']['output'];
   /** trashes current readthrough, if there is one */
   clearMediaProgress: Scalars['Boolean']['output'];
   /** Clear the scan history for a specific library */
@@ -2112,6 +2150,8 @@ export type Mutation = {
   deleteJob: Scalars['Boolean']['output'];
   deleteJobHistory: DeleteJobHistory;
   deleteJobLogs: DeleteJobAssociatedLogs;
+  /** Deletes a reading journal entry for the authenticated user */
+  deleteJournalEntry: Scalars['Boolean']['output'];
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -2129,6 +2169,8 @@ export type Mutation = {
   deleteMessage: BookClubDiscussionMessage;
   deleteMetadataProvider: MetadataProviderConfigModel;
   deleteNotifier: Notifier;
+  /** Deletes a reading device owned by the authenticated user */
+  deleteReadingDevice: Scalars['Boolean']['output'];
   /**
    * Deletes a reading list by ID.
    *
@@ -2160,6 +2202,7 @@ export type Mutation = {
   deleteUserSessions: Scalars['Int']['output'];
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
+  extendReadingSession: ReadingSession;
   favoriteMedia: Media;
   favoriteSeries: Series;
   /** Start a job which will search external metadata providers */
@@ -2220,6 +2263,8 @@ export type Mutation = {
   resetLibraryMetadata: Library;
   resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
+  /** Enqueue a scan job for every library which the authenticated user has access to */
+  scanAllLibraries: Scalars['Boolean']['output'];
   /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
    * and update the database accordingly.
@@ -2353,6 +2398,10 @@ export type Mutation = {
    * called by a server owner
    */
   uploadUserAvatar: User;
+  /** Upserts a reading device for the authenticated user */
+  upsertReadingDevice: ReadingDeviceModel;
+  /** Upserts a reading journal entry for the authenticated user and the given reading session */
+  upsertReadingSessionJournalEntry: JournalEntryModel;
   /** Validate the provided API token by making a test request using a client instance */
   validateProviderConfig: ProviderCredentialVerification;
   /**
@@ -2430,6 +2479,11 @@ export type MutationCancelJobArgs = {
 
 
 export type MutationCleanLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationClearLibraryScannedDirectoriesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2598,6 +2652,11 @@ export type MutationDeleteJobLogsArgs = {
 };
 
 
+export type MutationDeleteJournalEntryArgs = {
+  entryId: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteLibraryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2640,6 +2699,11 @@ export type MutationDeleteMetadataProviderArgs = {
 
 export type MutationDeleteNotifierArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteReadingDeviceArgs = {
+  deviceId: Scalars['Int']['input'];
 };
 
 
@@ -2693,6 +2757,11 @@ export type MutationDeleteUserSessionsArgs = {
 export type MutationEditMessageArgs = {
   input: EditMessageInput;
   messageId: Scalars['ID']['input'];
+};
+
+
+export type MutationExtendReadingSessionArgs = {
+  sessionId: Scalars['Int']['input'];
 };
 
 
@@ -3154,6 +3223,18 @@ export type MutationUploadUserAvatarArgs = {
 };
 
 
+export type MutationUpsertReadingDeviceArgs = {
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationUpsertReadingSessionJournalEntryArgs = {
+  content: Scalars['String']['input'];
+  sessionId: Scalars['Int']['input'];
+};
+
+
 export type MutationValidateProviderConfigArgs = {
   config: ValidateMetadataProviderConfigInput;
 };
@@ -3452,7 +3533,7 @@ export type PatchMetadataProviderConfigInput = {
 };
 
 export type PatchReadingSession = {
-  elapsedSeconds?: InputMaybe<Scalars['String']['input']>;
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<ReadingStatus>;
 };
 
@@ -3560,6 +3641,10 @@ export type Query = {
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
+  /** Reading stats for the authenticated user within the provided range */
+  myReadingStats: ReadingStats;
+  /** The current streaks held for the authenticated user */
+  myReadingStreaks: ReadingStreaks;
   /**
    * A paginated list of reading sessions and events for the authenticated user,
    * for all reading activity across all books
@@ -3813,6 +3898,11 @@ export type QueryMetadataProviderConfigByIdArgs = {
 };
 
 
+export type QueryMyReadingStatsArgs = {
+  range?: DateRangeInput;
+};
+
+
 export type QueryMyReadingTimelineArgs = {
   order?: OrderDirection;
   pagination?: CursorPagination;
@@ -3907,6 +3997,15 @@ export type QueryUsersArgs = {
   pagination?: Pagination;
 };
 
+export type ReadingDeviceModel = {
+  __typename?: 'ReadingDeviceModel';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
 /** The different reading directions supported by any Stump reader */
 export enum ReadingDirection {
   Ltr = 'LTR',
@@ -3958,6 +4057,8 @@ export type ReadingSession = {
   chaptersRead: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deviceIds: Array<Scalars['String']['output']>;
+  /** The devices which were used during this reading session */
+  devices: Array<ReadingDeviceModel>;
   /** accumulated reading time for this session, updated via deltas (not overwritten) */
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
   endLocator?: Maybe<ReadiumLocator>;
@@ -3965,6 +4066,8 @@ export type ReadingSession = {
   endPercentage?: Maybe<Scalars['Decimal']['output']>;
   events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
+  isLatest: Scalars['Boolean']['output'];
+  journalEntry?: Maybe<JournalEntryModel>;
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   /**
    * The media which this session belongs to. Please note that if somehow the user loses access to the
@@ -3974,7 +4077,6 @@ export type ReadingSession = {
    */
   media?: Maybe<Media>;
   mediaId: Scalars['String']['output'];
-  notes?: Maybe<Scalars['String']['output']>;
   /** which read-through of this book this session belongs to (1-indexed) */
   readthroughNumber: Scalars['Int']['output'];
   /** the "logical" date of this session, based on user prefs and start time */
@@ -4015,6 +4117,18 @@ export type ReadingSessionConflictResolutionView = {
   remoteSessions: Array<ReadingSession>;
 };
 
+export type ReadingStats = {
+  __typename?: 'ReadingStats';
+  /** One entry per day with at least one session */
+  dailyActivity: Array<DailyActivity>;
+  /** Average reading time for each weekday */
+  dayOfWeek: Array<WeekdayActivity>;
+  range: ResolvedDateRange;
+  /** Median active time and days to finish a book per library type */
+  timeToFinish: Array<TimeToFinishStat>;
+  totals: ReadingTotals;
+};
+
 /**
  * the different reading statuses a book can be categorized as based on a user's
  * reading sessions
@@ -4032,6 +4146,22 @@ export enum ReadingStatus {
    */
   Reading = 'READING'
 }
+
+export type ReadingStreaks = {
+  __typename?: 'ReadingStreaks';
+  currentDays: Scalars['Int']['output'];
+  longestDays: Scalars['Int']['output'];
+};
+
+/** The summed stats relative to the aggregation range */
+export type ReadingTotals = {
+  __typename?: 'ReadingTotals';
+  activeDayCount: Scalars['Int']['output'];
+  dnfCount: Scalars['Int']['output'];
+  finishedCount: Scalars['Int']['output'];
+  sessionCount: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
+};
 
 export type ReadiumLocation = {
   __typename?: 'ReadiumLocation';
@@ -4126,6 +4256,13 @@ export type RegisteredEmailDevice = {
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   sendHistory: Array<EmailerSendRecord>;
+};
+
+/** A `DateRangeInput` where `end` is always set */
+export type ResolvedDateRange = {
+  __typename?: 'ResolvedDateRange';
+  end: Scalars['NaiveDate']['output'];
+  start?: Maybe<Scalars['NaiveDate']['output']>;
 };
 
 /**
@@ -4853,6 +4990,15 @@ export enum ThumbnailPlaceholderStyle {
   Thumbhash = 'THUMBHASH'
 }
 
+export type TimeToFinishStat = {
+  __typename?: 'TimeToFinishStat';
+  libraryType: LibraryType;
+  medianActiveSeconds: Scalars['Int']['output'];
+  medianCalendarDays: Scalars['Float']['output'];
+  medianSecondsPerPage?: Maybe<Scalars['Float']['output']>;
+  sampleSize: Scalars['Int']['output'];
+};
+
 /**
  * A simple pagination input object which does not paginate. An explicit struct is
  * required as a limitation of async_graphql's [OneofObject], which doesn't allow
@@ -4910,22 +5056,17 @@ export type UpdateUserPreferencesInput = {
   appTheme: Scalars['String']['input'];
   dayResetHourOffset: Scalars['Int']['input'];
   enableAlphabetSelect: Scalars['Boolean']['input'];
-  enableCompactDisplay: Scalars['Boolean']['input'];
   enableDiscordPresence: Scalars['Boolean']['input'];
-  enableDoubleSidebar: Scalars['Boolean']['input'];
   enableFancyAnimations: Scalars['Boolean']['input'];
   enableGradients: Scalars['Boolean']['input'];
   enableHideScrollbar: Scalars['Boolean']['input'];
   enableJobOverlay: Scalars['Boolean']['input'];
   enableLiveRefetch: Scalars['Boolean']['input'];
   enableReadingJournal: Scalars['Boolean']['input'];
-  enableReplacePrimarySidebar: Scalars['Boolean']['input'];
   interfaceRoundness: InterfaceRoundness;
-  layoutMaxWidthPx?: InputMaybe<Scalars['Int']['input']>;
   locale: Scalars['String']['input'];
   preferAccentColor: Scalars['Boolean']['input'];
   preferredLayoutMode: InterfaceLayout;
-  primaryNavigationMode: Scalars['String']['input'];
   readingSessionGracePeriodSecs: Scalars['Int']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
@@ -5108,24 +5249,19 @@ export type UserPreferences = {
    */
   dayResetHourOffset: Scalars['Int']['output'];
   enableAlphabetSelect: Scalars['Boolean']['output'];
-  enableCompactDisplay: Scalars['Boolean']['output'];
   enableDiscordPresence: Scalars['Boolean']['output'];
-  enableDoubleSidebar: Scalars['Boolean']['output'];
   enableFancyAnimations: Scalars['Boolean']['output'];
   enableGradients: Scalars['Boolean']['output'];
   enableHideScrollbar: Scalars['Boolean']['output'];
   enableJobOverlay: Scalars['Boolean']['output'];
   enableLiveRefetch: Scalars['Boolean']['output'];
   enableReadingJournal: Scalars['Boolean']['output'];
-  enableReplacePrimarySidebar: Scalars['Boolean']['output'];
   homeArrangement: Arrangement;
   interfaceRoundness: InterfaceRoundness;
-  layoutMaxWidthPx?: Maybe<Scalars['Int']['output']>;
   locale: Scalars['String']['output'];
   navigationArrangement: Arrangement;
   preferAccentColor: Scalars['Boolean']['output'];
   preferredLayoutMode: InterfaceLayout;
-  primaryNavigationMode: Scalars['String']['output'];
   /** seconds of inactivity after which the current reading session is considered ended */
   readingSessionGracePeriodSecs: Scalars['Int']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
@@ -5140,6 +5276,15 @@ export type ValidateMetadataProviderConfigInput = {
   apiToken: Scalars['String']['input'];
   /** The provider type */
   providerType: MetadataProvider;
+};
+
+export type WeekdayActivity = {
+  __typename?: 'WeekdayActivity';
+  /** Total seconds divided by the number of times this weekday occurs in the range */
+  averageSeconds: Scalars['Int']['output'];
+  /** 1 (Monday) -> 7 (Sunday) */
+  isoWeekday: Scalars['Int']['output'];
+  totalSeconds: Scalars['Int']['output'];
 };
 
 export type CreateBookClubMobileMutationVariables = Exact<{
@@ -5282,7 +5427,7 @@ export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
 
 export type BookReadingTimelineSessionIdScreenQuery = { __typename?: 'Query', readingSessionById?: (
     { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null }
-    & { ' $fragmentRefs'?: { 'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment } }
+    & { ' $fragmentRefs'?: { 'ReadingSessionMenuFragment': ReadingSessionMenuFragment;'SessionEventsTimelineFragment': SessionEventsTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment;'SessionJournalFragment': SessionJournalFragment } }
   ) | null };
 
 export type BookReadingTimelineScreenQueryVariables = Exact<{
@@ -5826,39 +5971,66 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
+export type MyReadingStreaksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyReadingStreaksQuery = { __typename?: 'Query', myReadingStreaks: { __typename?: 'ReadingStreaks', currentDays: number, longestDays: number } };
+
+export type DailyActivityGridFragment = { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, dailyActivity: Array<{ __typename?: 'DailyActivity', date: any, totalSeconds: number, sessionCount: number }> } & { ' $fragmentName'?: 'DailyActivityGridFragment' };
+
+export type RangedUserReadingStatsQueryVariables = Exact<{
+  range?: InputMaybe<DateRangeInput>;
+}>;
+
+
+export type RangedUserReadingStatsQuery = { __typename?: 'Query', myReadingStats: (
+    { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, totals: { __typename?: 'ReadingTotals', totalSeconds: number, sessionCount: number, finishedCount: number, activeDayCount: number } }
+    & { ' $fragmentRefs'?: { 'DailyActivityGridFragment': DailyActivityGridFragment;'WeekdayChartFragment': WeekdayChartFragment;'TimeToFinishStatsFragment': TimeToFinishStatsFragment } }
+  ) };
+
+export type TimeToFinishStatsFragment = { __typename?: 'ReadingStats', timeToFinish: Array<{ __typename?: 'TimeToFinishStat', libraryType: LibraryType, sampleSize: number, medianActiveSeconds: number }> } & { ' $fragmentName'?: 'TimeToFinishStatsFragment' };
+
+export type WeekdayChartFragment = { __typename?: 'ReadingStats', dayOfWeek: Array<{ __typename?: 'WeekdayActivity', isoWeekday: number, averageSeconds: number }> } & { ' $fragmentName'?: 'WeekdayChartFragment' };
+
+export type ReadingSessionCardFragment = (
+  { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, isLatest: boolean, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> }
+  & { ' $fragmentRefs'?: { 'SessionWithEventsTimelineFragment': SessionWithEventsTimelineFragment } }
+) & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
+
+export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
+
+export type PatchReadingSessionEditSheetMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  input: PatchReadingSession;
+}>;
+
+
+export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', patchReadingSession: { __typename?: 'ReadingSession', id: number, elapsedSeconds?: number | null } };
+
 export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, readingTimeline?: { __typename?: 'BookReadingTimeline', totalElapsedSeconds: number, readthroughs: Array<{ __typename?: 'ReadthroughTimeline', readthroughNumber: number, startedAt: any, finishedAt?: any | null, sessions: Array<(
         { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, sessionDate: any } }
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment } }
       )> }> } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
 
-export type MyReadingTimelineScreenQueryVariables = Exact<{
-  pagination?: InputMaybe<CursorPagination>;
-  order?: InputMaybe<OrderDirection>;
-}>;
-
-
-export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTimeline: { __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse', nodes: Array<{ __typename?: 'GlobalReadingTimelineNode', mediaId: string, session: (
-        { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
-        & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
-      ) }> } };
-
-export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
-
-export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
-
-export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
-
 export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', href: string, type: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', position?: number | null, progression?: any | null, totalProgression?: any | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null, after?: string | null, before?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
 export type BookmarkEventFragment = { __typename?: 'Bookmark', id: string, page?: number | null, createdAt: any, bookmarkLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'BookmarkEventFragment' };
 
-export type EventTimelineFragment = { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
-    { __typename: 'Bookmark' }
+export type SessionEventsTimelineFragment = { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
+    { __typename: 'Bookmark', id: string }
     & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
   ) | (
-    { __typename: 'MediaAnnotation' }
+    { __typename: 'MediaAnnotation', id: string }
     & { ' $fragmentRefs'?: { 'AnnotationEventFragment': AnnotationEventFragment } }
-  )>, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'EventTimelineFragment' };
+  )>, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'SessionEventsTimelineFragment' };
+
+export type SessionWithEventsTimelineFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<(
+    { __typename: 'Bookmark', id: string }
+    & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
+  ) | (
+    { __typename: 'MediaAnnotation', id: string }
+    & { ' $fragmentRefs'?: { 'AnnotationEventFragment': AnnotationEventFragment } }
+  )> } & { ' $fragmentName'?: 'SessionWithEventsTimelineFragment' };
 
 export type UpdateAnnotationMobileEventTimelineMutationVariables = Exact<{
   input: UpdateAnnotationInput;
@@ -5873,6 +6045,45 @@ export type DeleteAnnotationMobileEventTimelineMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMobileEventTimelineMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
+
+export type MyReadingTimelineScreenQueryVariables = Exact<{
+  pagination?: InputMaybe<CursorPagination>;
+  order?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTimeline: { __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse', nodes: Array<{ __typename?: 'GlobalReadingTimelineNode', mediaId: string, session: (
+        { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
+        & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
+      ) }> } };
+
+export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null, devices: Array<{ __typename?: 'ReadingDeviceModel', name: string }> } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
+
+export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
+
+export type SessionJournalFragment = { __typename?: 'ReadingSession', id: number, journalEntry?: { __typename?: 'JournalEntryModel', id: number, content: string, updatedAt: any, mediaId: string } | null } & { ' $fragmentName'?: 'SessionJournalFragment' };
+
+export type UpsertReadingSessionJournalEntryMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  content: Scalars['String']['input'];
+}>;
+
+
+export type UpsertReadingSessionJournalEntryMutation = { __typename?: 'Mutation', upsertReadingSessionJournalEntry: { __typename?: 'JournalEntryModel', content: string, updatedAt: any } };
+
+export type DeleteReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteReadingSessionMutation = { __typename?: 'Mutation', deleteReadingSession: boolean };
+
+export type ExtendReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type ExtendReadingSessionMutation = { __typename?: 'Mutation', extendReadingSession: { __typename?: 'ReadingSession', updatedAt?: any | null } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5918,12 +6129,41 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
 
+export type UseSyncDeviceNameMutationVariables = Exact<{
+  deviceId: Scalars['String']['input'];
+  deviceName: Scalars['String']['input'];
+}>;
+
+
+export type UseSyncDeviceNameMutation = { __typename?: 'Mutation', upsertReadingDevice: { __typename?: 'ReadingDeviceModel', id: string, name: string } };
+
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
 export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, page?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', href: string } | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
+
+export type BookHeaderFragment = (
+  { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, series?: { __typename?: 'Series', id: string, resolvedName: string } | null, library: { __typename?: 'Library', id: string, name: string } }
+  & { ' $fragmentRefs'?: { 'BookReadingActionsFragment': BookReadingActionsFragment } }
+) & { ' $fragmentName'?: 'BookHeaderFragment' };
+
+export type BookHeaderAnalyzeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookHeaderAnalyzeMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
+
+export type BookInfoSheetFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, extension: string, hash?: string | null, koreaderHash?: string | null, relativeLibraryPath: string, createdAt: any, modifiedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, series?: { __typename?: 'Series', id: string, resolvedName: string } | null, metadata?: { __typename?: 'MediaMetadata', publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, language?: string | null, ageRating?: number | null, volume?: number | null, number?: any | null, storyArc?: string | null, storyArcNumber?: any | null, writers: Array<string>, pencillers: Array<string>, inkers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, editors: Array<string>, characters: Array<string>, teams: Array<string>, identifierIsbn?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null } | null, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any, dnf: boolean }> } & { ' $fragmentName'?: 'BookInfoSheetFragment' };
+
+export type BookOverviewDetailsFragment = (
+  { __typename?: 'Media', resolvedName: string, seriesPosition?: number | null, series?: { __typename?: 'Series', id: string, resolvedName: string } | null, library: { __typename?: 'Library', id: string, name: string, config: { __typename?: 'LibraryConfig', libraryType: LibraryType } }, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, links: Array<string>, genres: Array<string>, writers: Array<string>, pencillers: Array<string>, number?: any | null, volume?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord' }> }
+  & { ' $fragmentRefs'?: { 'BookStatRowFragment': BookStatRowFragment } }
+) & { ' $fragmentName'?: 'BookOverviewDetailsFragment' };
+
+export type BookSearchSelectionFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookSearchSelectionFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5933,8 +6173,23 @@ export type BookSearchOverlayQueryVariables = Exact<{
 
 export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookSearchSelectionFragment': BookSearchSelectionFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
+export type BookStatRowFragment = { __typename?: 'Media', pages: number, size: number, extension: string, metadata?: { __typename?: 'MediaMetadata', year?: number | null } | null } & { ' $fragmentName'?: 'BookStatRowFragment' };
+
+export type EmailBookDropdownDeviceQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EmailBookDropdownDeviceQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string }> };
+
+export type SendEmailAttachmentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  sendTo: Array<EmailerSendTo> | EmailerSendTo;
+}>;
+
+
+export type SendEmailAttachmentMutation = { __typename?: 'Mutation', sendAttachmentEmail: { __typename?: 'SendAttachmentEmailOutput', sentCount: number, errors: Array<string> } };
 
 export type SimpleBookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SimpleBookCardFragment' };
 
@@ -5962,12 +6217,48 @@ export type BookOverviewSceneQueryVariables = Exact<{
 
 
 export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, extension: string, seriesId?: string | null, pages: number, size: number, metadata?: (
-      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null, ageRating?: number | null, genres: Array<string>, language?: string | null, publisher?: string | null, writers: Array<string>, year?: number | null }
-      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
-    ) | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }
-    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment;'BookLibrarySeriesLinksFragment': BookLibrarySeriesLinksFragment } }
+    { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, library: { __typename?: 'Library', config: { __typename?: 'LibraryConfig', libraryType: LibraryType } }, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
+    & { ' $fragmentRefs'?: { 'BookHeaderFragment': BookHeaderFragment;'BookOverviewDetailsFragment': BookOverviewDetailsFragment;'BookInfoSheetFragment': BookInfoSheetFragment;'BookReadingActionsFragment': BookReadingActionsFragment } }
   ) | null };
+
+export type BookReadingActionsFragment = { __typename?: 'Media', id: string, extension: string, readProgress?: { __typename?: 'ResumeReadingCursor', page?: number | null, locator?: { __typename?: 'ReadiumLocator', href: string } | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord' }> } & { ' $fragmentName'?: 'BookReadingActionsFragment' };
+
+export type BookReadingActionsCompleteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookReadingActionsCompleteMutation = { __typename?: 'Mutation', finishMediaProgress: boolean };
+
+export type BookReadingActionsDeleteSessionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookReadingActionsDeleteSessionMutation = { __typename?: 'Mutation', clearMediaProgress: boolean };
+
+export type BookReadingActionsDeleteHistoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookReadingActionsDeleteHistoryMutation = { __typename?: 'Mutation', deleteMediaReadingHistory: number };
+
+export type BookThumbnailSelectorUpdateMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: PageBasedThumbnailInput;
+}>;
+
+
+export type BookThumbnailSelectorUpdateMutation = { __typename?: 'Mutation', updateMediaThumbnail: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
+export type BookThumbnailSelectorUploadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type BookThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadMediaThumbnail: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
 
 export type DeleteBookClubConfirmationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6034,6 +6325,8 @@ export type LibraryBooksAlphabetQueryVariables = Exact<{
 
 
 export type LibraryBooksAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', mediaAlphabet: any } | null };
+
+export type LibraryWebGridItemFragment = { __typename?: 'Library', id: string, name: string, series: Array<{ __typename?: 'Series', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number } } & { ' $fragmentName'?: 'LibraryWebGridItemFragment' };
 
 export type LibrarySeriesAlphabetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6141,6 +6434,8 @@ export type BookClubSideBarSectionQueryVariables = Exact<{ [key: string]: never;
 
 export type BookClubSideBarSectionQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, emoji?: string | null, members: Array<{ __typename?: 'BookClubMember', id: string, userId: string, role: BookClubMemberRole }> }> };
 
+export type LibraryEmojiFragment = { __typename?: 'Library', id: string } & { ' $fragmentName'?: 'LibraryEmojiFragment' };
+
 export type UpdateLibraryEmojiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   emoji?: InputMaybe<Scalars['String']['input']>;
@@ -6148,6 +6443,8 @@ export type UpdateLibraryEmojiMutationVariables = Exact<{
 
 
 export type UpdateLibraryEmojiMutation = { __typename?: 'Mutation', updateLibraryEmoji: { __typename?: 'Library', id: string } };
+
+export type LibraryOptionsMenuFragment = { __typename?: 'Library', id: string, name: string } & { ' $fragmentName'?: 'LibraryOptionsMenuFragment' };
 
 export type ScanLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6159,32 +6456,15 @@ export type ScanLibraryMutationMutation = { __typename?: 'Mutation', scanLibrary
 export type LibrarySideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
+export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<(
+      { __typename?: 'Library', id: string, name: string, emoji?: string | null }
+      & { ' $fragmentRefs'?: { 'LibraryEmojiFragment': LibraryEmojiFragment;'LibraryOptionsMenuFragment': LibraryOptionsMenuFragment } }
+    )> } };
 
 export type SmartListSideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type SmartListSideBarSectionQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
-
-export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'OnDeckBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
-
-export type BookClubNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type BookClubNavigationItemQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, emoji?: string | null }> };
-
-export type LibraryNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LibraryNavigationItemQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
-
-export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
 export type NavigationEntityLibraryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6245,12 +6525,52 @@ export type UpdateReadiumEpubProgressMutationVariables = Exact<{
 
 export type UpdateReadiumEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
 
+export type SeriesBookGridQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
 export type SeriesBooksAlphabetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
+
+export type SeriesActionCompleteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionCompleteMutation = { __typename?: 'Mutation', finishSeriesProgress: number };
+
+export type SeriesHeaderAnalyzeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesHeaderAnalyzeMutation = { __typename?: 'Mutation', analyzeSeries: boolean };
+
+export type SeriesOverviewSheetExtasQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesOverviewSheetExtasQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', publisher?: string | null, year?: number | null, summary?: string | null, links: Array<string> } | null, upNext: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
+    )> } | null };
+
+export type SeriesTagEditorSetTagsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type SeriesTagEditorSetTagsMutation = { __typename?: 'Mutation', setSeriesTags: { __typename?: 'Series', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
 
 export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField>, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
@@ -6270,6 +6590,41 @@ export type SeriesEditorSetLockedFieldsMutationVariables = Exact<{
 
 export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', setSeriesLockedFields: { __typename?: 'Series', id: string } };
 
+export type SeriesLayoutQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', kind: SeriesKind, id: string, path?: string | null, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+
+export type SeriesBooksSceneQueryVariables = Exact<{
+  filter: MediaFilterInput;
+  orderBy: Array<MediaOrderBy> | MediaOrderBy;
+  pagination: Pagination;
+}>;
+
+
+export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
+    )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type SeriesThumbnailSelectorUpdateMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateThumbnailInput;
+}>;
+
+
+export type SeriesThumbnailSelectorUpdateMutation = { __typename?: 'Mutation', updateSeriesThumbnail: { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
+export type SeriesThumbnailSelectorUploadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type SeriesThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadSeriesThumbnail: { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6281,31 +6636,6 @@ export type UsePreferencesMutationVariables = Exact<{
 
 
 export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
-
-export type BookActionMenuCompleteMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookActionMenuCompleteMutation = { __typename?: 'Mutation', finishMediaProgress: boolean };
-
-export type BookActionMenuDeleteSessionMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookActionMenuDeleteSessionMutation = { __typename?: 'Mutation', clearMediaProgress: boolean };
-
-export type BookActionMenuDeleteHistoryMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookActionMenuDeleteHistoryMutation = { __typename?: 'Mutation', deleteMediaReadingHistory: number };
-
-export type BookFileInformationFragment = { __typename?: 'Media', id: string, size: number, extension: string, hash?: string | null, relativeLibraryPath: string } & { ' $fragmentName'?: 'BookFileInformationFragment' };
-
-export type BookLibrarySeriesLinksFragment = { __typename?: 'Media', library: { __typename?: 'Library', id: string, name: string }, series?: { __typename?: 'Series', id: string, resolvedName: string } | null } & { ' $fragmentName'?: 'BookLibrarySeriesLinksFragment' };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null, volume?: number | null, number?: any | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
@@ -6325,19 +6655,6 @@ export type BooksAlphabetQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type BooksAlphabetQuery = { __typename?: 'Query', mediaAlphabet: any };
 
-export type EmailBookDropdownDeviceQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type EmailBookDropdownDeviceQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string }> };
-
-export type SendEmailAttachmentMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  sendTo: Array<EmailerSendTo> | EmailerSendTo;
-}>;
-
-
-export type SendEmailAttachmentMutation = { __typename?: 'Mutation', sendAttachmentEmail: { __typename?: 'SendAttachmentEmailOutput', sentCount: number, errors: Array<string> } };
-
 export type BookReaderSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -6352,23 +6669,6 @@ export type UpdateReadProgressMutationVariables = Exact<{
 
 
 export type UpdateReadProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
-
-export type BookManagementSceneQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookManagementSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, library: { __typename?: 'Library', id: string, name: string }, series?: { __typename?: 'Series', id: string, resolvedName: string } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }> }
-    & { ' $fragmentRefs'?: { 'BookThumbnailSelectorFragment': BookThumbnailSelectorFragment } }
-  ) | null };
-
-export type BookManagementSceneAnalyzeMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookManagementSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
 
 export type BookMetadataSearchProvidersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6393,6 +6693,19 @@ export type SearchMediaMetadataMutation = { __typename?: 'Mutation', fetchMediaM
     & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
   ) };
 
+export type BookSettingsSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookSettingsSceneQuery = { __typename?: 'Query', mediaById?: (
+    { __typename?: 'Media', id: string, resolvedName: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, metadata?: (
+      { __typename?: 'MediaMetadata' }
+      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
+    ) | null }
+    & { ' $fragmentRefs'?: { 'BookHeaderFragment': BookHeaderFragment } }
+  ) | null };
+
 export type BookTagEditorSetTagsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -6400,24 +6713,6 @@ export type BookTagEditorSetTagsMutationVariables = Exact<{
 
 
 export type BookTagEditorSetTagsMutation = { __typename?: 'Mutation', setMediaTags: { __typename?: 'Media', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
-
-export type BookThumbnailSelectorFragment = { __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookThumbnailSelectorFragment' };
-
-export type BookThumbnailSelectorUpdateMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: PageBasedThumbnailInput;
-}>;
-
-
-export type BookThumbnailSelectorUpdateMutation = { __typename?: 'Mutation', updateMediaThumbnail: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
-
-export type BookThumbnailSelectorUploadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  file: Scalars['Upload']['input'];
-}>;
-
-
-export type BookThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadMediaThumbnail: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
 
 export type BookClubLayoutQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -6569,6 +6864,19 @@ export type UpdateHomeArrangementMutationVariables = Exact<{
 
 
 export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null } | { __typename: 'SystemArrangementConfig' } }> } };
+
+export type LibrariesSceneQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibrariesSceneQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<(
+      { __typename?: 'Library', id: string }
+      & { ' $fragmentRefs'?: { 'LibraryWebGridItemFragment': LibraryWebGridItemFragment } }
+    )> }, librariesStats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number } };
+
+export type LibrariesSceneScanAllLibrariesMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibrariesSceneScanAllLibrariesMutation = { __typename?: 'Mutation', scanAllLibraries: boolean };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6754,76 +7062,15 @@ export type RegenerateThumbnailsMutationVariables = Exact<{
 
 export type RegenerateThumbnailsMutation = { __typename?: 'Mutation', generateLibraryThumbnails: boolean };
 
-export type SeriesActionCompleteMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionCompleteMutation = { __typename?: 'Mutation', finishSeriesProgress: number };
-
-export type SeriesLayoutQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', kind: SeriesKind, id: string, path?: string | null, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
-
-export type SeriesLibrayLinkQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesLibrayLinkQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', id: string, name: string } | null };
-
-export type SeriesOverviewSheetExtasQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesOverviewSheetExtasQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', publisher?: string | null, year?: number | null, summary?: string | null, links: Array<string> } | null, upNext: Array<(
-      { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
-    )> } | null };
-
-export type SeriesBooksSceneQueryVariables = Exact<{
-  filter: MediaFilterInput;
-  orderBy: Array<MediaOrderBy> | MediaOrderBy;
-  pagination: Pagination;
-}>;
-
-
-export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
-      { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
-    )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
-
-export type SeriesBookGridQueryVariables = Exact<{
-  id: Scalars['String']['input'];
-  pagination?: InputMaybe<Pagination>;
-}>;
-
-
-export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
-
 export type SeriesSettingsSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesSettingsSceneQuery = { __typename?: 'Query', seriesById?: (
-    { __typename?: 'Series', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, metadata?: (
+export type SeriesSettingsSceneQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, metadata?: (
       { __typename?: 'SeriesMetadata' }
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
-    ) | null }
-    & { ' $fragmentRefs'?: { 'SeriesThumbnailSelectorFragment': SeriesThumbnailSelectorFragment } }
-  ) | null };
-
-export type SeriesSettingsSceneAnalyzeMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesSettingsSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeSeries: boolean };
+    ) | null } | null };
 
 export type SeriesSettingsSceneResetMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6832,32 +7079,6 @@ export type SeriesSettingsSceneResetMetadataMutationVariables = Exact<{
 
 
 export type SeriesSettingsSceneResetMetadataMutation = { __typename?: 'Mutation', resetSeriesMetadata: { __typename?: 'Series', id: string } };
-
-export type SeriesTagEditorSetTagsMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
-
-
-export type SeriesTagEditorSetTagsMutation = { __typename?: 'Mutation', setSeriesTags: { __typename?: 'Series', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
-
-export type SeriesThumbnailSelectorFragment = { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'SeriesThumbnailSelectorFragment' };
-
-export type SeriesThumbnailSelectorUpdateMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: UpdateThumbnailInput;
-}>;
-
-
-export type SeriesThumbnailSelectorUpdateMutation = { __typename?: 'Mutation', updateSeriesThumbnail: { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
-
-export type SeriesThumbnailSelectorUploadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  file: Scalars['Upload']['input'];
-}>;
-
-
-export type SeriesThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadSeriesThumbnail: { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
 
 export type ApiKeyTableQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6933,7 +7154,10 @@ export type EditEmailerSceneQueryVariables = Exact<{
 }>;
 
 
-export type EditEmailerSceneQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }>, emailerById?: { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } | null };
+export type EditEmailerSceneQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }>, emailerById?: (
+    { __typename?: 'Emailer', id: number }
+    & { ' $fragmentRefs'?: { 'CreateOrUpdateEmailerFormFragment': CreateOrUpdateEmailerFormFragment } }
+  ) | null };
 
 export type EditEmailerSceneEditEmailerMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -6969,6 +7193,8 @@ export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
+
+export type CreateOrUpdateEmailerFormFragment = { __typename?: 'Emailer', name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'CreateOrUpdateEmailerFormFragment' };
 
 export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
 
@@ -7184,6 +7410,8 @@ export type CreateProviderDialogCreateProviderMutationVariables = Exact<{
 
 export type CreateProviderDialogCreateProviderMutation = { __typename?: 'Mutation', createMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean } };
 
+export type EditProviderDialogFragment = { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null } & { ' $fragmentName'?: 'EditProviderDialogFragment' };
+
 export type EditProviderDialogMutationVariables = Exact<{
   id: Scalars['Int']['input'];
   input: PatchMetadataProviderConfigInput;
@@ -7202,7 +7430,10 @@ export type DeleteProviderDialogMutationVariables = Exact<{
 
 export type DeleteProviderDialogMutation = { __typename?: 'Mutation', deleteMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number } };
 
-export type ExistingProviderCardFragment = { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null, createdAt: any, updatedAt?: any | null } & { ' $fragmentName'?: 'ExistingProviderCardFragment' };
+export type ExistingProviderCardFragment = (
+  { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null, createdAt: any, updatedAt?: any | null }
+  & { ' $fragmentRefs'?: { 'EditProviderDialogFragment': EditProviderDialogFragment } }
+) & { ' $fragmentName'?: 'ExistingProviderCardFragment' };
 
 export type ProviderApiKeyInputValidateKeyMutationVariables = Exact<{
   config: ValidateMetadataProviderConfigInput;
@@ -7319,7 +7550,7 @@ export type UserTableQueryVariables = Exact<{
 
 export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type SmartListCardFragment = { __typename?: 'SmartList', id: string, description?: string | null, filters: string, joiner: SmartListJoiner, name: string } & { ' $fragmentName'?: 'SmartListCardFragment' };
+export type SmartListWebGridItemFragment = { __typename?: 'SmartList', id: string, name: string, books: Array<{ __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, meta: { __typename?: 'SmartListMeta', matchedBooks: number, matchedSeries: number, matchedLibraries: number } } & { ' $fragmentName'?: 'SmartListWebGridItemFragment' };
 
 export type SmartListsWithSearchQueryVariables = Exact<{
   input: SmartListsInput;
@@ -7327,8 +7558,8 @@ export type SmartListsWithSearchQueryVariables = Exact<{
 
 
 export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<(
-    { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }
-    & { ' $fragmentRefs'?: { 'SmartListCardFragment': SmartListCardFragment } }
+    { __typename?: 'SmartList', id: string }
+    & { ' $fragmentRefs'?: { 'SmartListWebGridItemFragment': SmartListWebGridItemFragment } }
   )> };
 
 export type SmartListByIdQueryVariables = Exact<{
@@ -7746,10 +7977,158 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const DailyActivityGridFragmentDoc = new TypedDocumentString(`
+    fragment DailyActivityGrid on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+    `, {"fragmentName":"DailyActivityGrid"}) as unknown as TypedDocumentString<DailyActivityGridFragment, unknown>;
+export const TimeToFinishStatsFragmentDoc = new TypedDocumentString(`
+    fragment TimeToFinishStats on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+    `, {"fragmentName":"TimeToFinishStats"}) as unknown as TypedDocumentString<TimeToFinishStatsFragment, unknown>;
+export const WeekdayChartFragmentDoc = new TypedDocumentString(`
+    fragment WeekdayChart on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}
+    `, {"fragmentName":"WeekdayChart"}) as unknown as TypedDocumentString<WeekdayChartFragment, unknown>;
+export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionCardMedia on SessionWithEvents {
+  session {
+    media {
+      resolvedName
+      pages
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}
+    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
+export const BookmarkEventFragmentDoc = new TypedDocumentString(`
+    fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+    `, {"fragmentName":"BookmarkEvent"}) as unknown as TypedDocumentString<BookmarkEventFragment, unknown>;
+export const AnnotationEventFragmentDoc = new TypedDocumentString(`
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+    `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
+export const SessionWithEventsTimelineFragmentDoc = new TypedDocumentString(`
+    fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}`, {"fragmentName":"SessionWithEventsTimeline"}) as unknown as TypedDocumentString<SessionWithEventsTimelineFragment, unknown>;
 export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7762,6 +8141,10 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -7773,8 +8156,69 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
       annotationText
     }
   }
+  ...SessionWithEventsTimeline
 }
-    `, {"fragmentName":"ReadingSessionCard"}) as unknown as TypedDocumentString<ReadingSessionCardFragment, unknown>;
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`, {"fragmentName":"ReadingSessionCard"}) as unknown as TypedDocumentString<ReadingSessionCardFragment, unknown>;
 export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment BookReadingTimeline on Media {
   id
@@ -7810,6 +8254,7 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7822,6 +8267,10 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -7833,78 +8282,9 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
       annotationText
     }
   }
-}`, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
-export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
-    fragment ReadingSessionCardMedia on SessionWithEvents {
-  session {
-    media {
-      resolvedName
-      pages
-      thumbnail {
-        url
-        metadata {
-          averageColor
-          colors {
-            color
-            percentage
-          }
-          thumbhash
-        }
-      }
-    }
-  }
+  ...SessionWithEventsTimeline
 }
-    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
-export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
-    fragment ReadingSessionDetailHeader on ReadingSession {
-  id
-  startPage
-  endPage
-  startLocator {
-    locations {
-      position
-    }
-  }
-  endLocator {
-    locations {
-      position
-    }
-  }
-  startPercentage
-  endPercentage
-  createdAt
-  updatedAt
-  elapsedSeconds
-  chaptersRead
-  media {
-    thumbnail {
-      url
-      metadata {
-        averageColor
-        colors {
-          color
-          percentage
-        }
-        thumbhash
-      }
-    }
-  }
-}
-    `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
-export const BookmarkEventFragmentDoc = new TypedDocumentString(`
-    fragment BookmarkEvent on Bookmark {
-  id
-  page
-  bookmarkLocator: locator {
-    locations {
-      position
-    }
-  }
-  createdAt
-}
-    `, {"fragmentName":"BookmarkEvent"}) as unknown as TypedDocumentString<BookmarkEventFragment, unknown>;
-export const AnnotationEventFragmentDoc = new TypedDocumentString(`
-    fragment AnnotationEvent on MediaAnnotation {
+fragment AnnotationEvent on MediaAnnotation {
   id
   annotationText
   locator {
@@ -7924,9 +8304,49 @@ export const AnnotationEventFragmentDoc = new TypedDocumentString(`
   }
   createdAt
 }
-    `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
-export const EventTimelineFragmentDoc = new TypedDocumentString(`
-    fragment EventTimeline on ReadingSession {
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
+    id
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
+export const SessionEventsTimelineFragmentDoc = new TypedDocumentString(`
+    fragment SessionEventsTimeline on ReadingSession {
   id
   mediaId
   createdAt
@@ -7939,9 +8359,11 @@ export const EventTimelineFragmentDoc = new TypedDocumentString(`
   events(order: $eventOrder) {
     __typename
     ... on Bookmark {
+      id
       ...BookmarkEvent
     }
     ... on MediaAnnotation {
+      id
       ...AnnotationEvent
     }
   }
@@ -7982,7 +8404,67 @@ fragment BookmarkEvent on Bookmark {
     }
   }
   createdAt
-}`, {"fragmentName":"EventTimeline"}) as unknown as TypedDocumentString<EventTimelineFragment, unknown>;
+}`, {"fragmentName":"SessionEventsTimeline"}) as unknown as TypedDocumentString<SessionEventsTimelineFragment, unknown>;
+export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionDetailHeader on ReadingSession {
+  id
+  startPage
+  endPage
+  startLocator {
+    locations {
+      position
+    }
+  }
+  endLocator {
+    locations {
+      position
+    }
+  }
+  startPercentage
+  endPercentage
+  createdAt
+  updatedAt
+  elapsedSeconds
+  chaptersRead
+  media {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  devices {
+    name
+  }
+}
+    `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
+export const ReadingSessionMenuFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
+}
+    `, {"fragmentName":"ReadingSessionMenu"}) as unknown as TypedDocumentString<ReadingSessionMenuFragment, unknown>;
+export const SessionJournalFragmentDoc = new TypedDocumentString(`
+    fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+    mediaId
+  }
+}
+    `, {"fragmentName":"SessionJournal"}) as unknown as TypedDocumentString<SessionJournalFragment, unknown>;
 export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
@@ -8176,6 +8658,166 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
+export const BookReadingActionsFragmentDoc = new TypedDocumentString(`
+    fragment BookReadingActions on Media {
+  id
+  extension
+  readProgress {
+    page
+    locator {
+      href
+    }
+  }
+  readHistory {
+    __typename
+  }
+}
+    `, {"fragmentName":"BookReadingActions"}) as unknown as TypedDocumentString<BookReadingActionsFragment, unknown>;
+export const BookHeaderFragmentDoc = new TypedDocumentString(`
+    fragment BookHeader on Media {
+  id
+  resolvedName
+  pages
+  extension
+  series {
+    id
+    resolvedName
+  }
+  library {
+    id
+    name
+  }
+  ...BookReadingActions
+}
+    fragment BookReadingActions on Media {
+  id
+  extension
+  readProgress {
+    page
+    locator {
+      href
+    }
+  }
+  readHistory {
+    __typename
+  }
+}`, {"fragmentName":"BookHeader"}) as unknown as TypedDocumentString<BookHeaderFragment, unknown>;
+export const BookInfoSheetFragmentDoc = new TypedDocumentString(`
+    fragment BookInfoSheet on Media {
+  id
+  resolvedName
+  pages
+  size
+  extension
+  hash
+  koreaderHash
+  relativeLibraryPath
+  createdAt
+  modifiedAt
+  library {
+    id
+    name
+  }
+  series {
+    id
+    resolvedName
+  }
+  metadata {
+    publisher
+    year
+    month
+    day
+    language
+    ageRating
+    volume
+    number
+    storyArc
+    storyArcNumber
+    writers
+    pencillers
+    inkers
+    colorists
+    letterers
+    coverArtists
+    editors
+    characters
+    teams
+    identifierIsbn
+    identifierAmazon
+    identifierCalibre
+    identifierGoogle
+    identifierMobiAsin
+    identifierUuid
+  }
+  readHistory {
+    completedAt
+    dnf
+  }
+}
+    `, {"fragmentName":"BookInfoSheet"}) as unknown as TypedDocumentString<BookInfoSheetFragment, unknown>;
+export const BookStatRowFragmentDoc = new TypedDocumentString(`
+    fragment BookStatRow on Media {
+  pages
+  size
+  extension
+  metadata {
+    year
+  }
+}
+    `, {"fragmentName":"BookStatRow"}) as unknown as TypedDocumentString<BookStatRowFragment, unknown>;
+export const BookOverviewDetailsFragmentDoc = new TypedDocumentString(`
+    fragment BookOverviewDetails on Media {
+  resolvedName
+  seriesPosition
+  series {
+    id
+    resolvedName
+  }
+  library {
+    id
+    name
+    config {
+      libraryType
+    }
+  }
+  metadata {
+    summary
+    links
+    genres
+    writers
+    pencillers
+    number
+    volume
+  }
+  tags {
+    id
+    name
+  }
+  readProgress {
+    percentageCompleted
+  }
+  readHistory {
+    __typename
+  }
+  ...BookStatRow
+}
+    fragment BookStatRow on Media {
+  pages
+  size
+  extension
+  metadata {
+    year
+  }
+}`, {"fragmentName":"BookOverviewDetails"}) as unknown as TypedDocumentString<BookOverviewDetailsFragment, unknown>;
+export const BookSearchSelectionFragmentDoc = new TypedDocumentString(`
+    fragment BookSearchSelection on Media {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+}
+    `, {"fragmentName":"BookSearchSelection"}) as unknown as TypedDocumentString<BookSearchSelectionFragment, unknown>;
 export const SimpleBookCardFragmentDoc = new TypedDocumentString(`
     fragment SimpleBookCard on Media {
   id
@@ -8256,6 +8898,29 @@ export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
   addedAt
 }
     `, {"fragmentName":"BookClubBookItem"}) as unknown as TypedDocumentString<BookClubBookItemFragment, unknown>;
+export const LibraryWebGridItemFragmentDoc = new TypedDocumentString(`
+    fragment LibraryWebGridItem on Library {
+  id
+  name
+  series(take: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  stats {
+    seriesCount
+    bookCount
+  }
+}
+    `, {"fragmentName":"LibraryWebGridItem"}) as unknown as TypedDocumentString<LibraryWebGridItemFragment, unknown>;
 export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
     fragment PendingMatchRecord on MetadataFetchRecord {
   id
@@ -8353,6 +9018,17 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"PendingMatchRecord"}) as unknown as TypedDocumentString<PendingMatchRecordFragment, unknown>;
+export const LibraryEmojiFragmentDoc = new TypedDocumentString(`
+    fragment LibraryEmoji on Library {
+  id
+}
+    `, {"fragmentName":"LibraryEmoji"}) as unknown as TypedDocumentString<LibraryEmojiFragment, unknown>;
+export const LibraryOptionsMenuFragmentDoc = new TypedDocumentString(`
+    fragment LibraryOptionsMenu on Library {
+  id
+  name
+}
+    `, {"fragmentName":"LibraryOptionsMenu"}) as unknown as TypedDocumentString<LibraryOptionsMenuFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -8383,27 +9059,6 @@ export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
   lockedFields
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
-export const BookFileInformationFragmentDoc = new TypedDocumentString(`
-    fragment BookFileInformation on Media {
-  id
-  size
-  extension
-  hash
-  relativeLibraryPath
-}
-    `, {"fragmentName":"BookFileInformation"}) as unknown as TypedDocumentString<BookFileInformationFragment, unknown>;
-export const BookLibrarySeriesLinksFragmentDoc = new TypedDocumentString(`
-    fragment BookLibrarySeriesLinks on Media {
-  library {
-    id
-    name
-  }
-  series {
-    id
-    resolvedName
-  }
-}
-    `, {"fragmentName":"BookLibrarySeriesLinks"}) as unknown as TypedDocumentString<BookLibrarySeriesLinksFragment, unknown>;
 export const BookMetadataFragmentDoc = new TypedDocumentString(`
     fragment BookMetadata on Media {
   metadata {
@@ -8428,15 +9083,6 @@ export const BookMetadataFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookMetadata"}) as unknown as TypedDocumentString<BookMetadataFragment, unknown>;
-export const BookThumbnailSelectorFragmentDoc = new TypedDocumentString(`
-    fragment BookThumbnailSelector on Media {
-  id
-  thumbnail {
-    url
-  }
-  pages
-}
-    `, {"fragmentName":"BookThumbnailSelector"}) as unknown as TypedDocumentString<BookThumbnailSelectorFragment, unknown>;
 export const ContinueReadingBookFragmentDoc = new TypedDocumentString(`
     fragment ContinueReadingBook on Media {
   id
@@ -8554,14 +9200,19 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
-export const SeriesThumbnailSelectorFragmentDoc = new TypedDocumentString(`
-    fragment SeriesThumbnailSelector on Series {
-  id
-  thumbnail {
-    url
-  }
+export const CreateOrUpdateEmailerFormFragmentDoc = new TypedDocumentString(`
+    fragment CreateOrUpdateEmailerForm on Emailer {
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
 }
-    `, {"fragmentName":"SeriesThumbnailSelector"}) as unknown as TypedDocumentString<SeriesThumbnailSelectorFragment, unknown>;
+    `, {"fragmentName":"CreateOrUpdateEmailerForm"}) as unknown as TypedDocumentString<CreateOrUpdateEmailerFormFragment, unknown>;
 export const EmailerListItemFragmentDoc = new TypedDocumentString(`
     fragment EmailerListItem on Emailer {
   id
@@ -8618,6 +9269,15 @@ export const ScheduledJobRowFragmentDoc = new TypedDocumentString(`
   lastRunAt
 }
     `, {"fragmentName":"ScheduledJobRow"}) as unknown as TypedDocumentString<ScheduledJobRowFragment, unknown>;
+export const EditProviderDialogFragmentDoc = new TypedDocumentString(`
+    fragment EditProviderDialog on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+}
+    `, {"fragmentName":"EditProviderDialog"}) as unknown as TypedDocumentString<EditProviderDialogFragment, unknown>;
 export const ExistingProviderCardFragmentDoc = new TypedDocumentString(`
     fragment ExistingProviderCard on MetadataProviderConfigModel {
   id
@@ -8627,17 +9287,39 @@ export const ExistingProviderCardFragmentDoc = new TypedDocumentString(`
   autoApplyConfig
   createdAt
   updatedAt
+  ...EditProviderDialog
 }
-    `, {"fragmentName":"ExistingProviderCard"}) as unknown as TypedDocumentString<ExistingProviderCardFragment, unknown>;
-export const SmartListCardFragmentDoc = new TypedDocumentString(`
-    fragment SmartListCard on SmartList {
+    fragment EditProviderDialog on MetadataProviderConfigModel {
   id
-  description
-  filters
-  joiner
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+}`, {"fragmentName":"ExistingProviderCard"}) as unknown as TypedDocumentString<ExistingProviderCardFragment, unknown>;
+export const SmartListWebGridItemFragmentDoc = new TypedDocumentString(`
+    fragment SmartListWebGridItem on SmartList {
+  id
   name
+  books(limit: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  meta {
+    matchedBooks
+    matchedSeries
+    matchedLibraries
+  }
 }
-    `, {"fragmentName":"SmartListCard"}) as unknown as TypedDocumentString<SmartListCardFragment, unknown>;
+    `, {"fragmentName":"SmartListWebGridItem"}) as unknown as TypedDocumentString<SmartListWebGridItemFragment, unknown>;
 export const SmartListItemBookMetadataFragmentDoc = new TypedDocumentString(`
     fragment SmartListItemBookMetadata on Media {
   metadata {
@@ -9199,6 +9881,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
     query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
   readingSessionById(id: $sessionId) {
     id
+    ...ReadingSessionMenu
     createdAt
     updatedAt
     startPage
@@ -9210,7 +9893,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
     }
     endPercentage
     elapsedSeconds
-    ...EventTimeline
+    ...SessionEventsTimeline
     media {
       resolvedName
       pages
@@ -9227,9 +9910,69 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
       }
     }
     ...ReadingSessionDetailHeader
+    ...SessionJournal
   }
 }
-    fragment ReadingSessionDetailHeader on ReadingSession {
+    fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionEventsTimeline on ReadingSession {
+  id
+  mediaId
+  createdAt
+  startPage
+  startLocator {
+    locations {
+      position
+    }
+  }
+  events(order: $eventOrder) {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+  updatedAt
+  endPage
+  endLocator {
+    locations {
+      position
+    }
+  }
+}
+fragment ReadingSessionDetailHeader on ReadingSession {
   id
   startPage
   endPage
@@ -9260,6 +10003,97 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
         }
         thumbhash
       }
+    }
+  }
+  devices {
+    name
+  }
+}
+fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
+}
+fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+    mediaId
+  }
+}`) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
+export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
+    query BookReadingTimelineScreen($bookId: ID!) {
+  mediaById(id: $bookId) {
+    id
+    ...BookReadingTimeline
+  }
+}
+    fragment ReadingSessionCard on SessionWithEvents {
+  session {
+    id
+    status
+    createdAt
+    updatedAt
+    startPage
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+    endPercentage
+    elapsedSeconds
+    mediaId
+    journalEntry {
+      content
+    }
+    isLatest
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+    }
+    ... on MediaAnnotation {
+      id
+      annotationText
+    }
+  }
+  ...SessionWithEventsTimeline
+}
+fragment BookReadingTimeline on Media {
+  id
+  readingTimeline {
+    readthroughs {
+      readthroughNumber
+      startedAt
+      finishedAt
+      sessions {
+        session {
+          id
+          sessionDate
+        }
+        ...ReadingSessionCard
+      }
+    }
+    totalElapsedSeconds
+  }
+  resolvedName
+  pages
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
     }
   }
 }
@@ -9293,95 +10127,34 @@ fragment BookmarkEvent on Bookmark {
   }
   createdAt
 }
-fragment EventTimeline on ReadingSession {
-  id
-  mediaId
-  createdAt
-  startPage
-  startLocator {
-    locations {
-      position
-    }
-  }
-  events(order: $eventOrder) {
-    __typename
-    ... on Bookmark {
-      ...BookmarkEvent
-    }
-    ... on MediaAnnotation {
-      ...AnnotationEvent
-    }
-  }
-  updatedAt
-  endPage
-  endLocator {
-    locations {
-      position
-    }
-  }
-}`) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
-export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
-    query BookReadingTimelineScreen($bookId: ID!) {
-  mediaById(id: $bookId) {
-    id
-    ...BookReadingTimeline
-  }
-}
-    fragment BookReadingTimeline on Media {
-  id
-  readingTimeline {
-    readthroughs {
-      readthroughNumber
-      startedAt
-      finishedAt
-      sessions {
-        session {
-          id
-          sessionDate
-        }
-        ...ReadingSessionCard
-      }
-    }
-    totalElapsedSeconds
-  }
-  resolvedName
-  pages
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-}
-fragment ReadingSessionCard on SessionWithEvents {
+fragment SessionWithEventsTimeline on SessionWithEvents {
   session {
     id
+    mediaId
     createdAt
-    updatedAt
     startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
     endPage
     endLocator {
       locations {
         position
       }
     }
-    endPercentage
-    elapsedSeconds
-    mediaId
   }
   events {
     __typename
     ... on Bookmark {
       id
+      ...BookmarkEvent
     }
     ... on MediaAnnotation {
       id
-      annotationText
+      ...AnnotationEvent
     }
   }
 }`) as unknown as TypedDocumentString<BookReadingTimelineScreenQuery, BookReadingTimelineScreenQueryVariables>;
@@ -10819,6 +11592,80 @@ export const AcceptLocalProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
+export const MyReadingStreaksDocument = new TypedDocumentString(`
+    query MyReadingStreaks {
+  myReadingStreaks {
+    currentDays
+    longestDays
+  }
+}
+    `) as unknown as TypedDocumentString<MyReadingStreaksQuery, MyReadingStreaksQueryVariables>;
+export const RangedUserReadingStatsDocument = new TypedDocumentString(`
+    query RangedUserReadingStats($range: DateRangeInput) {
+  myReadingStats(range: $range) {
+    range {
+      start
+      end
+    }
+    totals {
+      totalSeconds
+      sessionCount
+      finishedCount
+      activeDayCount
+    }
+    ...DailyActivityGrid
+    ...WeekdayChart
+    ...TimeToFinishStats
+  }
+}
+    fragment DailyActivityGrid on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+fragment TimeToFinishStats on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+fragment WeekdayChart on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}`) as unknown as TypedDocumentString<RangedUserReadingStatsQuery, RangedUserReadingStatsQueryVariables>;
+export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
+    mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
+  patchReadingSession(sessionId: $sessionId, input: $input) {
+    id
+    elapsedSeconds
+  }
+}
+    `) as unknown as TypedDocumentString<PatchReadingSessionEditSheetMutation, PatchReadingSessionEditSheetMutationVariables>;
+export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
+  updateAnnotation(input: $input) {
+    id
+    annotationText
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateAnnotationMobileEventTimelineMutation, UpdateAnnotationMobileEventTimelineMutationVariables>;
+export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation DeleteAnnotationMobileEventTimeline($id: String!) {
+  deleteAnnotation(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
 export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
   myReadingTimeline(pagination: $pagination, order: $order) {
@@ -10837,6 +11684,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -10849,6 +11697,10 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     endPercentage
     elapsedSeconds
     mediaId
+    journalEntry {
+      content
+    }
+    isLatest
   }
   events {
     __typename
@@ -10860,6 +11712,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
       annotationText
     }
   }
+  ...SessionWithEventsTimeline
 }
 fragment ReadingSessionCardMedia on SessionWithEvents {
   session {
@@ -10879,23 +11732,88 @@ fragment ReadingSessionCardMedia on SessionWithEvents {
       }
     }
   }
-}`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
-export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
-    mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
-  updateAnnotation(input: $input) {
+}
+fragment AnnotationEvent on MediaAnnotation {
+  id
+  annotationText
+  locator {
+    href
+    type
+    chapterTitle
+    locations {
+      position
+      progression
+      totalProgression
+    }
+    text {
+      highlight
+      after
+      before
+    }
+  }
+  createdAt
+}
+fragment BookmarkEvent on Bookmark {
+  id
+  page
+  bookmarkLocator: locator {
+    locations {
+      position
+    }
+  }
+  createdAt
+}
+fragment SessionWithEventsTimeline on SessionWithEvents {
+  session {
     id
-    annotationText
+    mediaId
+    createdAt
+    startPage
+    startLocator {
+      locations {
+        position
+      }
+    }
+    updatedAt
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+      ...BookmarkEvent
+    }
+    ... on MediaAnnotation {
+      id
+      ...AnnotationEvent
+    }
+  }
+}`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
+export const UpsertReadingSessionJournalEntryDocument = new TypedDocumentString(`
+    mutation UpsertReadingSessionJournalEntry($sessionId: Int!, $content: String!) {
+  upsertReadingSessionJournalEntry(sessionId: $sessionId, content: $content) {
+    content
     updatedAt
   }
 }
-    `) as unknown as TypedDocumentString<UpdateAnnotationMobileEventTimelineMutation, UpdateAnnotationMobileEventTimelineMutationVariables>;
-export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
-    mutation DeleteAnnotationMobileEventTimeline($id: String!) {
-  deleteAnnotation(id: $id) {
-    id
+    `) as unknown as TypedDocumentString<UpsertReadingSessionJournalEntryMutation, UpsertReadingSessionJournalEntryMutationVariables>;
+export const DeleteReadingSessionDocument = new TypedDocumentString(`
+    mutation DeleteReadingSession($sessionId: Int!) {
+  deleteReadingSession(sessionId: $sessionId)
+}
+    `) as unknown as TypedDocumentString<DeleteReadingSessionMutation, DeleteReadingSessionMutationVariables>;
+export const ExtendReadingSessionDocument = new TypedDocumentString(`
+    mutation ExtendReadingSession($sessionId: Int!) {
+  extendReadingSession(sessionId: $sessionId) {
+    updatedAt
   }
 }
-    `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
+    `) as unknown as TypedDocumentString<ExtendReadingSessionMutation, ExtendReadingSessionMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(
@@ -11075,6 +11993,14 @@ export const UseFavoriteBookDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
+export const UseSyncDeviceNameDocument = new TypedDocumentString(`
+    mutation UseSyncDeviceName($deviceId: String!, $deviceName: String!) {
+  upsertReadingDevice(id: $deviceId, name: $deviceName) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<UseSyncDeviceNameMutation, UseSyncDeviceNameMutationVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {
@@ -11083,12 +12009,18 @@ export const TagSelectQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<TagSelectQueryQuery, TagSelectQueryQueryVariables>;
+export const BookHeaderAnalyzeDocument = new TypedDocumentString(`
+    mutation BookHeaderAnalyze($id: ID!) {
+  analyzeMedia(id: $id)
+}
+    `) as unknown as TypedDocumentString<BookHeaderAnalyzeMutation, BookHeaderAnalyzeMutationVariables>;
 export const BookSearchOverlayDocument = new TypedDocumentString(`
     query BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {
   media(pagination: $pagination, filter: $filter) {
     nodes {
       id
       ...BookCard
+      ...BookSearchSelection
     }
     pageInfo {
       __typename
@@ -11136,7 +12068,30 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
   libraryConfig {
     skipBookOverview
   }
+}
+fragment BookSearchSelection on Media {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
 }`) as unknown as TypedDocumentString<BookSearchOverlayQuery, BookSearchOverlayQueryVariables>;
+export const EmailBookDropdownDeviceDocument = new TypedDocumentString(`
+    query EmailBookDropdownDevice {
+  emailDevices {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<EmailBookDropdownDeviceQuery, EmailBookDropdownDeviceQueryVariables>;
+export const SendEmailAttachmentDocument = new TypedDocumentString(`
+    mutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {
+  sendAttachmentEmail(input: {mediaIds: [$id], sendTo: $sendTo}) {
+    sentCount
+    errors
+  }
+}
+    `) as unknown as TypedDocumentString<SendEmailAttachmentMutation, SendEmailAttachmentMutationVariables>;
 export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
   updateMediaMetadata(id: $id, input: $input) {
@@ -11155,117 +12110,56 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
     id
-    ...BookCard
-    ...BookFileInformation
-    ...BookLibrarySeriesLinks
     resolvedName
-    extension
     seriesId
-    pages
-    size
-    metadata {
-      links
-      summary
-      ageRating
-      genres
-      language
-      publisher
-      writers
-      year
-      ...MediaMetadataEditor
+    ...BookHeader
+    ...BookOverviewDetails
+    ...BookInfoSheet
+    ...BookReadingActions
+    library {
+      config {
+        libraryType
+      }
     }
-    tags {
-      id
-      name
-    }
-    readHistory {
-      completedAt
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
     }
   }
 }
-    fragment BookCard on Media {
+    fragment BookHeader on Media {
   id
   resolvedName
-  extension
   pages
-  size
-  status
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-    height
-    width
+  extension
+  series {
+    id
+    resolvedName
   }
-  readProgress {
-    percentageCompleted
-    page
-    updatedAt
-    locator {
-      href
-    }
+  library {
+    id
+    name
   }
-  readHistory {
-    __typename
-    completedAt
-  }
-  createdAt
-  libraryConfig {
-    skipBookOverview
-  }
+  ...BookReadingActions
 }
-fragment MediaMetadataEditor on MediaMetadata {
-  ageRating
-  characters
-  colorists
-  coverArtists
-  day
-  editors
-  format
-  identifierAmazon
-  identifierCalibre
-  identifierGoogle
-  identifierIsbn
-  identifierMobiAsin
-  identifierUuid
-  genres
-  inkers
-  language
-  letterers
-  links
-  month
-  notes
-  number
-  pageCount
-  pencillers
-  publisher
-  series
-  seriesGroup
-  storyArc
-  storyArcNumber
-  summary
-  teams
-  title
-  titleSort
-  volume
-  writers
-  year
-  lockedFields
-}
-fragment BookFileInformation on Media {
+fragment BookInfoSheet on Media {
   id
+  resolvedName
+  pages
   size
   extension
   hash
+  koreaderHash
   relativeLibraryPath
-}
-fragment BookLibrarySeriesLinks on Media {
+  createdAt
+  modifiedAt
   library {
     id
     name
@@ -11274,7 +12168,129 @@ fragment BookLibrarySeriesLinks on Media {
     id
     resolvedName
   }
+  metadata {
+    publisher
+    year
+    month
+    day
+    language
+    ageRating
+    volume
+    number
+    storyArc
+    storyArcNumber
+    writers
+    pencillers
+    inkers
+    colorists
+    letterers
+    coverArtists
+    editors
+    characters
+    teams
+    identifierIsbn
+    identifierAmazon
+    identifierCalibre
+    identifierGoogle
+    identifierMobiAsin
+    identifierUuid
+  }
+  readHistory {
+    completedAt
+    dnf
+  }
+}
+fragment BookOverviewDetails on Media {
+  resolvedName
+  seriesPosition
+  series {
+    id
+    resolvedName
+  }
+  library {
+    id
+    name
+    config {
+      libraryType
+    }
+  }
+  metadata {
+    summary
+    links
+    genres
+    writers
+    pencillers
+    number
+    volume
+  }
+  tags {
+    id
+    name
+  }
+  readProgress {
+    percentageCompleted
+  }
+  readHistory {
+    __typename
+  }
+  ...BookStatRow
+}
+fragment BookStatRow on Media {
+  pages
+  size
+  extension
+  metadata {
+    year
+  }
+}
+fragment BookReadingActions on Media {
+  id
+  extension
+  readProgress {
+    page
+    locator {
+      href
+    }
+  }
+  readHistory {
+    __typename
+  }
 }`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
+export const BookReadingActionsCompleteDocument = new TypedDocumentString(`
+    mutation BookReadingActionsComplete($id: ID!) {
+  finishMediaProgress(id: $id)
+}
+    `) as unknown as TypedDocumentString<BookReadingActionsCompleteMutation, BookReadingActionsCompleteMutationVariables>;
+export const BookReadingActionsDeleteSessionDocument = new TypedDocumentString(`
+    mutation BookReadingActionsDeleteSession($id: ID!) {
+  clearMediaProgress(id: $id)
+}
+    `) as unknown as TypedDocumentString<BookReadingActionsDeleteSessionMutation, BookReadingActionsDeleteSessionMutationVariables>;
+export const BookReadingActionsDeleteHistoryDocument = new TypedDocumentString(`
+    mutation BookReadingActionsDeleteHistory($id: ID!) {
+  deleteMediaReadingHistory(id: $id)
+}
+    `) as unknown as TypedDocumentString<BookReadingActionsDeleteHistoryMutation, BookReadingActionsDeleteHistoryMutationVariables>;
+export const BookThumbnailSelectorUpdateDocument = new TypedDocumentString(`
+    mutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {
+  updateMediaThumbnail(id: $id, input: $input) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookThumbnailSelectorUpdateMutation, BookThumbnailSelectorUpdateMutationVariables>;
+export const BookThumbnailSelectorUploadDocument = new TypedDocumentString(`
+    mutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {
+  uploadMediaThumbnail(id: $id, file: $file) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookThumbnailSelectorUploadMutation, BookThumbnailSelectorUploadMutationVariables>;
 export const DeleteBookClubConfirmationDocument = new TypedDocumentString(`
     mutation DeleteBookClubConfirmation($id: ID!) {
   deleteBookClub(id: $id) {
@@ -11977,10 +12993,18 @@ export const LibrarySideBarSectionDocument = new TypedDocumentString(`
       id
       name
       emoji
+      ...LibraryEmoji
+      ...LibraryOptionsMenu
     }
   }
 }
-    `) as unknown as TypedDocumentString<LibrarySideBarSectionQuery, LibrarySideBarSectionQueryVariables>;
+    fragment LibraryEmoji on Library {
+  id
+}
+fragment LibraryOptionsMenu on Library {
+  id
+  name
+}`) as unknown as TypedDocumentString<LibrarySideBarSectionQuery, LibrarySideBarSectionQueryVariables>;
 export const SmartListSideBarSectionDocument = new TypedDocumentString(`
     query SmartListSideBarSection {
   smartLists {
@@ -11989,57 +13013,6 @@ export const SmartListSideBarSectionDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SmartListSideBarSectionQuery, SmartListSideBarSectionQueryVariables>;
-export const TopNavigationDocument = new TypedDocumentString(`
-    query TopNavigation {
-  me {
-    id
-    preferences {
-      navigationArrangement {
-        locked
-        sections {
-          config {
-            __typename
-            ... on SystemArrangementConfig {
-              variant
-              links
-            }
-          }
-          visible
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<TopNavigationQuery, TopNavigationQueryVariables>;
-export const BookClubNavigationItemDocument = new TypedDocumentString(`
-    query BookClubNavigationItem {
-  bookClubs {
-    id
-    name
-    slug
-    emoji
-  }
-}
-    `) as unknown as TypedDocumentString<BookClubNavigationItemQuery, BookClubNavigationItemQueryVariables>;
-export const LibraryNavigationItemDocument = new TypedDocumentString(`
-    query LibraryNavigationItem {
-  libraries(pagination: {none: {unpaginated: true}}) {
-    nodes {
-      id
-      name
-      emoji
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LibraryNavigationItemQuery, LibraryNavigationItemQueryVariables>;
-export const SmartListNavigationItemDocument = new TypedDocumentString(`
-    query SmartListNavigationItem {
-  smartLists {
-    id
-    name
-  }
-}
-    `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
 export const NavigationEntityLibraryDocument = new TypedDocumentString(`
     query NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {
   seriesById(id: $id) @include(if: $isSeries) {
@@ -12219,6 +13192,28 @@ export const UpdateReadiumEpubProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateReadiumEpubProgressMutation, UpdateReadiumEpubProgressMutationVariables>;
+export const SeriesBookGridDocument = new TypedDocumentString(`
+    query SeriesBookGrid($id: String!, $pagination: Pagination) {
+  media(filter: {seriesId: {eq: $id}}, pagination: $pagination) {
+    nodes {
+      id
+      thumbnail {
+        url
+      }
+      pages
+      extension
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
 export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
     query SeriesBooksAlphabet($id: ID!) {
   seriesById(id: $id) {
@@ -12226,6 +13221,59 @@ export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBooksAlphabetQuery, SeriesBooksAlphabetQueryVariables>;
+export const SeriesActionCompleteDocument = new TypedDocumentString(`
+    mutation SeriesActionComplete($id: ID!) {
+  finishSeriesProgress(id: $id)
+}
+    `) as unknown as TypedDocumentString<SeriesActionCompleteMutation, SeriesActionCompleteMutationVariables>;
+export const SeriesHeaderAnalyzeDocument = new TypedDocumentString(`
+    mutation SeriesHeaderAnalyze($id: ID!) {
+  analyzeSeries(id: $id)
+}
+    `) as unknown as TypedDocumentString<SeriesHeaderAnalyzeMutation, SeriesHeaderAnalyzeMutationVariables>;
+export const SeriesOverviewSheetExtasDocument = new TypedDocumentString(`
+    query SeriesOverviewSheetExtas($id: ID!) {
+  seriesById(id: $id) {
+    id
+    metadata {
+      publisher
+      year
+      summary
+      links
+    }
+    upNext(take: 10) {
+      id
+      ...SimpleBookCard
+    }
+  }
+}
+    fragment SimpleBookCard on Media {
+  id
+  resolvedName
+  createdAt
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}`) as unknown as TypedDocumentString<SeriesOverviewSheetExtasQuery, SeriesOverviewSheetExtasQueryVariables>;
+export const SeriesTagEditorSetTagsDocument = new TypedDocumentString(`
+    mutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {
+  setSeriesTags(id: $id, tags: $tags) {
+    id
+    tags {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesTagEditorSetTagsMutation, SeriesTagEditorSetTagsMutationVariables>;
 export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
     mutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {
   updateSeriesMetadata(id: $id, input: $input) {
@@ -12240,6 +13288,144 @@ export const SeriesEditorSetLockedFieldsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesEditorSetLockedFieldsMutation, SeriesEditorSetLockedFieldsMutationVariables>;
+export const SeriesLayoutDocument = new TypedDocumentString(`
+    query SeriesLayout($id: ID!) {
+  seriesById(id: $id) {
+    kind
+    id
+    path
+    library {
+      id
+      name
+    }
+    resolvedName
+    resolvedDescription
+    stats {
+      bookCount
+      completedBooks
+      inProgressBooks
+      totalBytes
+      totalReadingTimeSeconds
+    }
+    tags {
+      id
+      name
+    }
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        thumbhash
+        colors {
+          color
+          percentage
+        }
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
+export const SeriesBooksSceneDocument = new TypedDocumentString(`
+    query SeriesBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
+  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
+    nodes {
+      id
+      ...BookCard
+      ...BookMetadata
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+    height
+    width
+  }
+  readProgress {
+    percentageCompleted
+    page
+    updatedAt
+    locator {
+      href
+    }
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+  createdAt
+  libraryConfig {
+    skipBookOverview
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+    month
+    day
+    volume
+    number
+  }
+}`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
+export const SeriesThumbnailSelectorUpdateDocument = new TypedDocumentString(`
+    mutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
+  updateSeriesThumbnail(id: $id, input: $input) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesThumbnailSelectorUpdateMutation, SeriesThumbnailSelectorUpdateMutationVariables>;
+export const SeriesThumbnailSelectorUploadDocument = new TypedDocumentString(`
+    mutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {
+  uploadSeriesThumbnail(id: $id, file: $file) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesThumbnailSelectorUploadMutation, SeriesThumbnailSelectorUploadMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
   readEvents {
@@ -12291,21 +13477,6 @@ export const UsePreferencesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
-export const BookActionMenuCompleteDocument = new TypedDocumentString(`
-    mutation BookActionMenuComplete($id: ID!) {
-  finishMediaProgress(id: $id)
-}
-    `) as unknown as TypedDocumentString<BookActionMenuCompleteMutation, BookActionMenuCompleteMutationVariables>;
-export const BookActionMenuDeleteSessionDocument = new TypedDocumentString(`
-    mutation BookActionMenuDeleteSession($id: ID!) {
-  clearMediaProgress(id: $id)
-}
-    `) as unknown as TypedDocumentString<BookActionMenuDeleteSessionMutation, BookActionMenuDeleteSessionMutationVariables>;
-export const BookActionMenuDeleteHistoryDocument = new TypedDocumentString(`
-    mutation BookActionMenuDeleteHistory($id: ID!) {
-  deleteMediaReadingHistory(id: $id)
-}
-    `) as unknown as TypedDocumentString<BookActionMenuDeleteHistoryMutation, BookActionMenuDeleteHistoryMutationVariables>;
 export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
   mediaById(id: $id) {
@@ -12367,22 +13538,6 @@ export const BooksAlphabetDocument = new TypedDocumentString(`
   mediaAlphabet
 }
     `) as unknown as TypedDocumentString<BooksAlphabetQuery, BooksAlphabetQueryVariables>;
-export const EmailBookDropdownDeviceDocument = new TypedDocumentString(`
-    query EmailBookDropdownDevice {
-  emailDevices {
-    id
-    name
-  }
-}
-    `) as unknown as TypedDocumentString<EmailBookDropdownDeviceQuery, EmailBookDropdownDeviceQueryVariables>;
-export const SendEmailAttachmentDocument = new TypedDocumentString(`
-    mutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {
-  sendAttachmentEmail(input: {mediaIds: [$id], sendTo: $sendTo}) {
-    sentCount
-    errors
-  }
-}
-    `) as unknown as TypedDocumentString<SendEmailAttachmentMutation, SendEmailAttachmentMutationVariables>;
 export const BookReaderSceneDocument = new TypedDocumentString(`
     query BookReaderScene($id: ID!) {
   mediaById(id: $id) {
@@ -12425,38 +13580,6 @@ export const UpdateReadProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateReadProgressMutation, UpdateReadProgressMutationVariables>;
-export const BookManagementSceneDocument = new TypedDocumentString(`
-    query BookManagementScene($id: ID!) {
-  mediaById(id: $id) {
-    id
-    resolvedName
-    library {
-      id
-      name
-    }
-    series {
-      id
-      resolvedName
-    }
-    tags {
-      id
-      name
-    }
-    ...BookThumbnailSelector
-  }
-}
-    fragment BookThumbnailSelector on Media {
-  id
-  thumbnail {
-    url
-  }
-  pages
-}`) as unknown as TypedDocumentString<BookManagementSceneQuery, BookManagementSceneQueryVariables>;
-export const BookManagementSceneAnalyzeDocument = new TypedDocumentString(`
-    mutation BookManagementSceneAnalyze($id: ID!) {
-  analyzeMedia(id: $id)
-}
-    `) as unknown as TypedDocumentString<BookManagementSceneAnalyzeMutation, BookManagementSceneAnalyzeMutationVariables>;
 export const BookMetadataSearchProvidersDocument = new TypedDocumentString(`
     query BookMetadataSearchProviders {
   metadataProviderConfigs {
@@ -12580,6 +13703,87 @@ export const SearchMediaMetadataDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<SearchMediaMetadataMutation, SearchMediaMetadataMutationVariables>;
+export const BookSettingsSceneDocument = new TypedDocumentString(`
+    query BookSettingsScene($id: ID!) {
+  mediaById(id: $id) {
+    id
+    resolvedName
+    ...BookHeader
+    tags {
+      id
+      name
+    }
+    metadata {
+      ...MediaMetadataEditor
+    }
+  }
+}
+    fragment BookHeader on Media {
+  id
+  resolvedName
+  pages
+  extension
+  series {
+    id
+    resolvedName
+  }
+  library {
+    id
+    name
+  }
+  ...BookReadingActions
+}
+fragment MediaMetadataEditor on MediaMetadata {
+  ageRating
+  characters
+  colorists
+  coverArtists
+  day
+  editors
+  format
+  identifierAmazon
+  identifierCalibre
+  identifierGoogle
+  identifierIsbn
+  identifierMobiAsin
+  identifierUuid
+  genres
+  inkers
+  language
+  letterers
+  links
+  month
+  notes
+  number
+  pageCount
+  pencillers
+  publisher
+  series
+  seriesGroup
+  storyArc
+  storyArcNumber
+  summary
+  teams
+  title
+  titleSort
+  volume
+  writers
+  year
+  lockedFields
+}
+fragment BookReadingActions on Media {
+  id
+  extension
+  readProgress {
+    page
+    locator {
+      href
+    }
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<BookSettingsSceneQuery, BookSettingsSceneQueryVariables>;
 export const BookTagEditorSetTagsDocument = new TypedDocumentString(`
     mutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {
   setMediaTags(id: $id, tags: $tags) {
@@ -12591,26 +13795,6 @@ export const BookTagEditorSetTagsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookTagEditorSetTagsMutation, BookTagEditorSetTagsMutationVariables>;
-export const BookThumbnailSelectorUpdateDocument = new TypedDocumentString(`
-    mutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {
-  updateMediaThumbnail(id: $id, input: $input) {
-    id
-    thumbnail {
-      url
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<BookThumbnailSelectorUpdateMutation, BookThumbnailSelectorUpdateMutationVariables>;
-export const BookThumbnailSelectorUploadDocument = new TypedDocumentString(`
-    mutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {
-  uploadMediaThumbnail(id: $id, file: $file) {
-    id
-    thumbnail {
-      url
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<BookThumbnailSelectorUploadMutation, BookThumbnailSelectorUploadMutationVariables>;
 export const BookClubLayoutDocument = new TypedDocumentString(`
     query BookClubLayout($slug: String!) {
   bookClubBySlug(slug: $slug) {
@@ -13082,6 +14266,45 @@ export const UpdateHomeArrangementDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateHomeArrangementMutation, UpdateHomeArrangementMutationVariables>;
+export const LibrariesSceneDocument = new TypedDocumentString(`
+    query LibrariesScene {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      ...LibraryWebGridItem
+    }
+  }
+  librariesStats {
+    seriesCount
+    bookCount
+  }
+}
+    fragment LibraryWebGridItem on Library {
+  id
+  name
+  series(take: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  stats {
+    seriesCount
+    bookCount
+  }
+}`) as unknown as TypedDocumentString<LibrariesSceneQuery, LibrariesSceneQueryVariables>;
+export const LibrariesSceneScanAllLibrariesDocument = new TypedDocumentString(`
+    mutation LibrariesSceneScanAllLibraries {
+  scanAllLibraries
+}
+    `) as unknown as TypedDocumentString<LibrariesSceneScanAllLibrariesMutation, LibrariesSceneScanAllLibrariesMutationVariables>;
 export const LibraryLayoutDocument = new TypedDocumentString(`
     query LibraryLayout($id: ID!) {
   libraryById(id: $id) {
@@ -13504,195 +14727,10 @@ export const RegenerateThumbnailsDocument = new TypedDocumentString(`
   generateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)
 }
     `) as unknown as TypedDocumentString<RegenerateThumbnailsMutation, RegenerateThumbnailsMutationVariables>;
-export const SeriesActionCompleteDocument = new TypedDocumentString(`
-    mutation SeriesActionComplete($id: ID!) {
-  finishSeriesProgress(id: $id)
-}
-    `) as unknown as TypedDocumentString<SeriesActionCompleteMutation, SeriesActionCompleteMutationVariables>;
-export const SeriesLayoutDocument = new TypedDocumentString(`
-    query SeriesLayout($id: ID!) {
-  seriesById(id: $id) {
-    kind
-    id
-    path
-    library {
-      id
-      name
-    }
-    resolvedName
-    resolvedDescription
-    stats {
-      bookCount
-      completedBooks
-      inProgressBooks
-      totalBytes
-      totalReadingTimeSeconds
-    }
-    tags {
-      id
-      name
-    }
-    thumbnail {
-      url
-      metadata {
-        averageColor
-        thumbhash
-        colors {
-          color
-          percentage
-        }
-      }
-    }
-    createdAt
-    updatedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
-export const SeriesLibrayLinkDocument = new TypedDocumentString(`
-    query SeriesLibrayLink($id: ID!) {
-  libraryById(id: $id) {
-    id
-    name
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesLibrayLinkQuery, SeriesLibrayLinkQueryVariables>;
-export const SeriesOverviewSheetExtasDocument = new TypedDocumentString(`
-    query SeriesOverviewSheetExtas($id: ID!) {
-  seriesById(id: $id) {
-    id
-    metadata {
-      publisher
-      year
-      summary
-      links
-    }
-    upNext(take: 10) {
-      id
-      ...SimpleBookCard
-    }
-  }
-}
-    fragment SimpleBookCard on Media {
-  id
-  resolvedName
-  createdAt
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-}`) as unknown as TypedDocumentString<SeriesOverviewSheetExtasQuery, SeriesOverviewSheetExtasQueryVariables>;
-export const SeriesBooksSceneDocument = new TypedDocumentString(`
-    query SeriesBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
-  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
-    nodes {
-      id
-      ...BookCard
-      ...BookMetadata
-    }
-    pageInfo {
-      __typename
-      ... on OffsetPaginationInfo {
-        currentPage
-        totalPages
-        pageSize
-        pageOffset
-        zeroBased
-      }
-    }
-  }
-}
-    fragment BookCard on Media {
-  id
-  resolvedName
-  extension
-  pages
-  size
-  status
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-    height
-    width
-  }
-  readProgress {
-    percentageCompleted
-    page
-    updatedAt
-    locator {
-      href
-    }
-  }
-  readHistory {
-    __typename
-    completedAt
-  }
-  createdAt
-  libraryConfig {
-    skipBookOverview
-  }
-}
-fragment BookMetadata on Media {
-  metadata {
-    ageRating
-    characters
-    colorists
-    coverArtists
-    editors
-    genres
-    inkers
-    letterers
-    links
-    pencillers
-    publisher
-    teams
-    writers
-    year
-    month
-    day
-    volume
-    number
-  }
-}`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
-export const SeriesBookGridDocument = new TypedDocumentString(`
-    query SeriesBookGrid($id: String!, $pagination: Pagination) {
-  media(filter: {seriesId: {eq: $id}}, pagination: $pagination) {
-    nodes {
-      id
-      thumbnail {
-        url
-      }
-      pages
-    }
-    pageInfo {
-      __typename
-      ... on CursorPaginationInfo {
-        currentCursor
-        nextCursor
-        limit
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
 export const SeriesSettingsSceneDocument = new TypedDocumentString(`
     query SeriesSettingsScene($id: ID!) {
   seriesById(id: $id) {
     id
-    ...SeriesThumbnailSelector
     tags {
       id
       name
@@ -13729,18 +14767,7 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
   writers
   year
   lockedFields
-}
-fragment SeriesThumbnailSelector on Series {
-  id
-  thumbnail {
-    url
-  }
 }`) as unknown as TypedDocumentString<SeriesSettingsSceneQuery, SeriesSettingsSceneQueryVariables>;
-export const SeriesSettingsSceneAnalyzeDocument = new TypedDocumentString(`
-    mutation SeriesSettingsSceneAnalyze($id: ID!) {
-  analyzeSeries(id: $id)
-}
-    `) as unknown as TypedDocumentString<SeriesSettingsSceneAnalyzeMutation, SeriesSettingsSceneAnalyzeMutationVariables>;
 export const SeriesSettingsSceneResetMetadataDocument = new TypedDocumentString(`
     mutation SeriesSettingsSceneResetMetadata($id: ID!, $impact: MetadataResetImpact!) {
   resetSeriesMetadata(id: $id, impact: $impact) {
@@ -13748,37 +14775,6 @@ export const SeriesSettingsSceneResetMetadataDocument = new TypedDocumentString(
   }
 }
     `) as unknown as TypedDocumentString<SeriesSettingsSceneResetMetadataMutation, SeriesSettingsSceneResetMetadataMutationVariables>;
-export const SeriesTagEditorSetTagsDocument = new TypedDocumentString(`
-    mutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {
-  setSeriesTags(id: $id, tags: $tags) {
-    id
-    tags {
-      id
-      name
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesTagEditorSetTagsMutation, SeriesTagEditorSetTagsMutationVariables>;
-export const SeriesThumbnailSelectorUpdateDocument = new TypedDocumentString(`
-    mutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
-  updateSeriesThumbnail(id: $id, input: $input) {
-    id
-    thumbnail {
-      url
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesThumbnailSelectorUpdateMutation, SeriesThumbnailSelectorUpdateMutationVariables>;
-export const SeriesThumbnailSelectorUploadDocument = new TypedDocumentString(`
-    mutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {
-  uploadSeriesThumbnail(id: $id, file: $file) {
-    id
-    thumbnail {
-      url
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesThumbnailSelectorUploadMutation, SeriesThumbnailSelectorUploadMutationVariables>;
 export const ApiKeyTableDocument = new TypedDocumentString(`
     query APIKeyTable {
   apiKeys {
@@ -13898,19 +14894,20 @@ export const EditEmailerSceneDocument = new TypedDocumentString(`
   }
   emailerById(id: $id) {
     id
-    name
-    isPrimary
-    smtpHost
-    smtpPort
-    lastUsedAt
-    maxAttachmentSizeBytes
-    senderDisplayName
-    senderEmail
-    tlsEnabled
-    username
+    ...CreateOrUpdateEmailerForm
   }
 }
-    `) as unknown as TypedDocumentString<EditEmailerSceneQuery, EditEmailerSceneQueryVariables>;
+    fragment CreateOrUpdateEmailerForm on Emailer {
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
+}`) as unknown as TypedDocumentString<EditEmailerSceneQuery, EditEmailerSceneQueryVariables>;
 export const EditEmailerSceneEditEmailerDocument = new TypedDocumentString(`
     mutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {
   updateEmailer(id: $id, input: $input) {
@@ -14270,7 +15267,14 @@ export const EditProviderDialogDocument = new TypedDocumentString(`
     ...ExistingProviderCard
   }
 }
-    fragment ExistingProviderCard on MetadataProviderConfigModel {
+    fragment EditProviderDialog on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+}
+fragment ExistingProviderCard on MetadataProviderConfigModel {
   id
   providerType
   enabled
@@ -14278,6 +15282,7 @@ export const EditProviderDialogDocument = new TypedDocumentString(`
   autoApplyConfig
   createdAt
   updatedAt
+  ...EditProviderDialog
 }`) as unknown as TypedDocumentString<EditProviderDialogMutation, EditProviderDialogMutationVariables>;
 export const DeleteProviderDialogDocument = new TypedDocumentString(`
     mutation DeleteProviderDialog($id: Int!) {
@@ -14302,7 +15307,14 @@ export const ProvidersSectionGetProvidersDocument = new TypedDocumentString(`
     ...ExistingProviderCard
   }
 }
-    fragment ExistingProviderCard on MetadataProviderConfigModel {
+    fragment EditProviderDialog on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+}
+fragment ExistingProviderCard on MetadataProviderConfigModel {
   id
   providerType
   enabled
@@ -14310,6 +15322,7 @@ export const ProvidersSectionGetProvidersDocument = new TypedDocumentString(`
   autoApplyConfig
   createdAt
   updatedAt
+  ...EditProviderDialog
 }`) as unknown as TypedDocumentString<ProvidersSectionGetProvidersQuery, ProvidersSectionGetProvidersQueryVariables>;
 export const CreateTagModalDocument = new TypedDocumentString(`
     mutation CreateTagModal($tags: [String!]!) {
@@ -14480,22 +15493,30 @@ export const SmartListsWithSearchDocument = new TypedDocumentString(`
     query SmartListsWithSearch($input: SmartListsInput!) {
   smartLists(input: $input) {
     id
-    creatorId
-    description
-    defaultGrouping
-    filters
-    joiner
-    name
-    visibility
-    ...SmartListCard
+    ...SmartListWebGridItem
   }
 }
-    fragment SmartListCard on SmartList {
+    fragment SmartListWebGridItem on SmartList {
   id
-  description
-  filters
-  joiner
   name
+  books(limit: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  meta {
+    matchedBooks
+    matchedSeries
+    matchedLibraries
+  }
 }`) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
 export const SmartListByIdDocument = new TypedDocumentString(`
     query SmartListById($id: ID!) {

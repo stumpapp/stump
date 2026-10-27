@@ -14,7 +14,7 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.1.10"
+version = "0.1.11"
 rust-version = "1.97.1"
 
 # I've defined majority of dependencies here in the workspace so that they are
@@ -68,7 +68,7 @@ reqwest = { version = "0.13.4", default-features = false, features = [ "json", "
 reqwest-middleware = { version = "0.5.2", features = ["json"] }
 reqwest-retry = "0.9.1"
 rust_decimal = { version = "1.38.0", features = ["serde-with-float"] }
-sea-orm = { version = "1.1.16", features = [
+sea-orm = { version = "2.0.4", features = [
   "mock",
   "macros",
   "sqlx-sqlite",
@@ -77,7 +77,7 @@ sea-orm = { version = "1.1.16", features = [
   "runtime-tokio-native-tls",
   "debug-print",
 ] }
-sea-orm-migration = { version = "1.1.16", features = [
+sea-orm-migration = { version = "2.0.4", features = [
   "sqlx-sqlite",
   "sqlx-postgres",
   "runtime-tokio-native-tls",

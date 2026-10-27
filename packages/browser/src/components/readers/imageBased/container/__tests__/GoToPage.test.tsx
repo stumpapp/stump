@@ -1,7 +1,19 @@
-import { LocaleProvider } from '@stump/i18n'
 import { fireEvent, render, screen } from '@testing-library/react'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 import GoToPage, { clampPage, GoToPageProps } from '../GoToPage'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: vi.fn(),
+}))
+
+const translate = vi.fn((key: string) => key)
+
+beforeEach(() => {
+	vi.clearAllMocks()
+	vi.mocked(useTranslate).mockReturnValue({ t: translate, translate } as any)
+})
 
 describe('clampPage', () => {
 	it('returns the value when already in range', () => {
@@ -30,25 +42,23 @@ describe('GoToPage', () => {
 		...props
 	}: Partial<GoToPageProps> = {}) =>
 		render(
-			<LocaleProvider locale="en-US">
-				<GoToPage
-					currentPage={currentPage}
-					totalPages={totalPages}
-					onSubmit={onSubmit}
-					{...props}
-				/>
-			</LocaleProvider>,
+			<GoToPage currentPage={currentPage} totalPages={totalPages} onSubmit={onSubmit} {...props} />,
 		)
 
 	const openPopover = () => {
-		fireEvent.click(screen.getByRole('button', { name: 'Go to page' }))
+		fireEvent.click(screen.getByTestId('goto-page-trigger'))
 	}
 	const getInput = () => screen.getByRole('spinbutton')
-	const clickSubmit = () => fireEvent.click(screen.getByRole('button', { name: 'Go' }))
+	const clickSubmit = () => fireEvent.click(screen.getByTestId('goto-page-submit'))
 
 	it('should render the trigger with the current position', () => {
 		renderSubject({ currentPage: 3 })
-		expect(screen.getByText('3 of 42')).toBeInTheDocument()
+
+		expect(screen.getByTestId('goto-page-trigger')).toBeInTheDocument()
+		expect(translate).toHaveBeenCalledWith('shared.common.pageXOfY', {
+			current: 3,
+			total: 42,
+		})
 	})
 
 	it('associates the label with the input', () => {
@@ -60,7 +70,8 @@ describe('GoToPage', () => {
 		 * input should still be reachable by its accessible label. Scope to the input
 		 * since the trigger button also carries a "Go to page" aria-label.
 		 */
-		expect(screen.getByLabelText('Go to page', { selector: 'input' })).toBe(getInput())
+		expect(screen.getByRole('spinbutton')).toHaveAttribute('id', 'go-to-page-input')
+		expect(document.querySelector('label[for="go-to-page-input"]')).toBeInTheDocument()
 	})
 
 	it('submits the entered page when valid', () => {

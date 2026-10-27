@@ -98,7 +98,7 @@ export default function ReadingDefaultsScene() {
 	return (
 		<Form
 			id="reading-defaults"
-			fieldsetClassName="flex flex-col gap-12 md:max-w-xl"
+			fieldsetClassName="flex flex-col gap-12"
 			form={form}
 			onSubmit={handleSubmit}
 		>

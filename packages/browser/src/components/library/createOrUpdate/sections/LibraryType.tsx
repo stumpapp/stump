@@ -1,29 +1,41 @@
-import { Label, NativeSelect, Text } from '@stump/components'
+import { NewCard, Select } from '@stump/components'
 import { LibraryType } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function LibraryTypeSelect() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const { t } = useLocaleContext()
+	const value = useWatch({
+		control: form.control,
+		name: 'libraryType',
+	})
+	const { t, translate } = useTranslate()
 
 	return (
-		<div className="gap-2 flex flex-col">
-			<Label>{t(getKey('label'))}</Label>
-			<NativeSelect
-				options={OPTIONS.map((option) => ({
-					value: option,
-					label: t(getKey(`options.${option}`)),
-				}))}
-				{...form.register('libraryType')}
-			/>
-			<Text size="xs" variant="muted">
-				{t(getKey('description'))}
-			</Text>
-		</div>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<div>
+				<Select
+					value={value}
+					onValueChange={(value) => form.setValue('libraryType', value as LibraryType)}
+				>
+					<Select.Trigger>
+						<Select.Value />
+					</Select.Trigger>
+
+					<Select.Content>
+						{OPTIONS.map((option) => (
+							<Select.Item key={option} value={option}>
+								{translate(`shared.libraryType.${option}`)}
+							</Select.Item>
+						))}
+					</Select.Content>
+				</Select>
+			</div>
+		</NewCard.Row>
 	)
 }
 

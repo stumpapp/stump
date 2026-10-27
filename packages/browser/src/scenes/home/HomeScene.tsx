@@ -1,12 +1,14 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { ButtonOrLink } from '@stump/components'
+import { Breadcrumbs, ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
+import { NoLibraries } from '@/components/library'
 import { OwlEmptyState } from '@/components/Owl'
+import { PageHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import {
@@ -16,7 +18,6 @@ import {
 	useHomeArrangementKey,
 } from './arrangement'
 import ContinueReadingMedia, { usePrefetchContinueReading } from './ContinueReading'
-import NoLibraries from './NoLibraries'
 import OnDeck, { usePrefetchOnDeck } from './OnDeck'
 import RecentlyAddedMedia, { usePrefetchRecentlyAddedMedia } from './RecentlyAddedMedia'
 import RecentlyAddedSeries, { usePrefetchRecentlyAddedSeries } from './RecentlyAddedSeries'
@@ -60,19 +61,24 @@ export const usePrefetchHomeScene = () => {
 	}
 }
 
-// TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const paths = usePaths()
 	const { data: arrangement } = useHomeArrangement()
 	const { sdk } = useSDK()
 	const { data } = useSuspenseGraphQL(query, sdk.cacheKey('numberOfLibraries'))
 
 	const helmet = (
-		<Helmet>
-			{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
-			<title>Stump | {'Home'}</title>
-		</Helmet>
+		<>
+			<Helmet>
+				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
+				<title>Stump | {'Home'}</title>
+			</Helmet>
+
+			<PageHeader>
+				<Breadcrumbs segments={[{ label: translate('shared.common.home') }]} />
+			</PageHeader>
+		</>
 	)
 
 	if (!data) {
@@ -99,28 +105,33 @@ export default function HomeScene() {
 	}
 
 	return (
-		<SceneContainer className="gap-6 flex flex-1 flex-col">
+		<>
 			{helmet}
 
-			{sections.map((section) => {
-				const id = getHomeSectionId(section)
-				if (!id || !section.visible) return null
-				const Component = components[id]
-				return <Component key={id} />
-			})}
+			<SceneContainer className="gap-6 flex flex-1 flex-col">
+				{sections.map((section) => {
+					const id = getHomeSectionId(section)
+					if (!id || !section.visible) return null
+					const Component = components[id]
+					return <Component key={id} />
+				})}
 
-			{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
-				<OwlEmptyState
-					title={t('homeScene.allSectionsHidden.label')}
-					description={t('homeScene.allSectionsHidden.description')}
-					actions={
-						<ButtonOrLink href={paths.settings('preferences')} data-testid="customize-home-button">
-							{t('homeScene.allSectionsHidden.customizeHome')}
-						</ButtonOrLink>
-					}
-				/>
-			)}
-			<div className="pb-5 sm:pb-0" />
-		</SceneContainer>
+				{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
+					<OwlEmptyState
+						title={translate('shared.homeSections.allSectionsHidden.label')}
+						description={translate('shared.homeSections.allSectionsHidden.description')}
+						actions={
+							<ButtonOrLink
+								href={paths.settings('preferences')}
+								data-testid="customize-home-button"
+							>
+								{translate('shared.homeSections.allSectionsHidden.customizeHome')}
+							</ButtonOrLink>
+						}
+					/>
+				)}
+				<div className="pb-5 sm:pb-0" />
+			</SceneContainer>
+		</>
 	)
 }

@@ -1,21 +1,25 @@
 import { Button, cx, Dialog, IconButton, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
-const LOCALE_BASE_KEY = 'thumbnailDropdown.uploadImage'
+import { useTranslate } from '@/hooks/useTranslate'
+
+const LOCALE_BASE_KEY = 'thumbnailSelector.uploadDialog'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 type Props = {
 	isOpen: boolean
 	onClose: () => void
 	onUploadImage: (file: File) => Promise<void>
+	maxSize: number
 }
 
-export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Props) {
-	const { t } = useLocaleContext()
+// TODO(ui): make this a bit prettier
+
+export default function UploadImageModal({ isOpen, onClose, onUploadImage, maxSize }: Props) {
+	const { t, translate } = useTranslate()
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [filePreview, setFilePreview] = useState<string | null>(null)
@@ -29,7 +33,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				toast.error(
 					isTooLarge
 						? t(withLocaleKey('fileTooLarge'))
-						: firstError?.message || t('common.unknownError'),
+						: firstError?.message || translate('shared.common.unknownError'),
 				)
 			} else if (acceptedFiles.length > 1 || !acceptedFiles.length) {
 				toast.error(
@@ -42,15 +46,14 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				setFilePreview(URL.createObjectURL(file))
 			}
 		},
-		[t],
+		[translate, t],
 	)
 
 	const { getRootProps, getInputProps } = useDropzone({
 		accept: {
 			'image/*': [],
 		},
-		// TODO: support custom max size for server
-		maxSize: 20 * 1024 * 1024, // 20MB
+		maxSize,
 		onDrop,
 	})
 
@@ -85,9 +88,9 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				<Dialog.Header>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
-				<div className="gap-y-2 py-2 scrollbar-hide flex h-[300px] flex-col">
-					<div className="flex h-[100px] items-center justify-center">
-						<div className={cx('relative', { 'h-[100px]': filePreview })}>
+				<div className="gap-y-2 py-2 h-75 scrollbar-hide flex flex-col">
+					<div className="h-25 flex items-center justify-center">
+						<div className={cx('relative', { 'h-25': filePreview })}>
 							{filePreview && (
 								<>
 									<div className="-right-2 -top-2 absolute flex items-center justify-center">
@@ -125,7 +128,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 				<Dialog.Footer>
 					<Button variant="outline" onClick={onClose}>
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 					<Button onClick={handleConfirm} disabled={!selectedFile}>
 						{t('thumbnailSelector.actions.confirmSelection')}

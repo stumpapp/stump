@@ -1,10 +1,10 @@
 import { Button, NewCard, Sheet, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
-import { Container, ContentContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import ReaderSettings from '@/components/readers/imageBased/container/ReaderSettings'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useReaderStore } from '@/stores'
 
 import DayResetHourOffsetPreference from '../preferences/DayResetHourOffsetPreference'
@@ -22,7 +22,7 @@ import DefaultReadingDirection from './DefaultReadingDirection'
 // dance of global vs book-level vs format-level vs library-level settings :)
 // TODO(i8n): keys/values
 export default function ReaderDefaultSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const { bookPreferences, clearStore } = useReaderStore(
 		useShallow((state) => ({
@@ -34,92 +34,90 @@ export default function ReaderDefaultSettingsScene() {
 	const canClearStore = Object.keys(bookPreferences).length > 0
 
 	return (
-		<Container>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.app/reader.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<NewCard
-					label={t(getSectionKey('universal.label'))}
-					description={t(getSectionKey('universal.description'))}
-				>
-					<DefaultReadingDirection />
+			<NewCard
+				label={t(getSectionKey('universal.label'))}
+				description={t(getSectionKey('universal.description'))}
+			>
+				<DefaultReadingDirection />
 
-					{/* TODO: not sure these belong here? idk they are reading preferences.
+				{/* TODO: not sure these belong here? idk they are reading preferences.
 						im being a bit pedantic but this should be renamed `reading` preferences and
 						not specifically reader, geared towards readers and not generally reading experience
 					*/}
-					<DayResetHourOffsetPreference />
-					<ReadingSessionGracePeriodPreference />
-				</NewCard>
+				<DayResetHourOffsetPreference />
+				<ReadingSessionGracePeriodPreference />
+			</NewCard>
 
-				<NewCard
-					label={t(getSectionKey('formats.label'))}
-					description={t(getSectionKey('formats.description'))}
+			<NewCard
+				label={t(getSectionKey('formats.label'))}
+				description={t(getSectionKey('formats.description'))}
+			>
+				<NewCard.Row
+					label={t(getSectionKey('imageBasedBooks.label'))}
+					description={t(getSectionKey('imageBasedBooks.description'))}
 				>
-					<NewCard.Row
-						label={t(getSectionKey('imageBasedBooks.label'))}
+					<Sheet
+						title={t(getSectionKey('imageBasedBooks.label'))}
 						description={t(getSectionKey('imageBasedBooks.description'))}
+						trigger={
+							<Button size="sm" variant="outline">
+								{translate('shared.common.edit')}
+							</Button>
+						}
+						size="lg"
+						contentClassName="overflow-y-scroll"
 					>
-						<Sheet
-							title={t(getSectionKey('imageBasedBooks.label'))}
-							description={t(getSectionKey('imageBasedBooks.description'))}
-							trigger={
-								<Button size="sm" variant="outline">
-									{t('common.edit')}
-								</Button>
-							}
-							size="lg"
-							contentClassName="overflow-y-scroll"
-						>
-							<div className="gap-8 pb-16 md:gap-12 px-4 flex flex-col">
-								<ReaderSettings />
-							</div>
-						</Sheet>
-					</NewCard.Row>
+						<div className="gap-8 pb-16 md:gap-12 px-4 flex flex-col">
+							<ReaderSettings />
+						</div>
+					</Sheet>
+				</NewCard.Row>
 
-					<NewCard.Row
-						label={t(getSectionKey('textBasedBooks.label'))}
+				<NewCard.Row
+					label={t(getSectionKey('textBasedBooks.label'))}
+					description={t(getSectionKey('textBasedBooks.description'))}
+				>
+					<Sheet
+						title={t(getSectionKey('textBasedBooks.label'))}
 						description={t(getSectionKey('textBasedBooks.description'))}
+						trigger={
+							<Button size="sm" variant="outline">
+								{translate('shared.common.edit')}
+							</Button>
+						}
+						size="default"
 					>
-						<Sheet
-							title={t(getSectionKey('textBasedBooks.label'))}
-							description={t(getSectionKey('textBasedBooks.description'))}
-							trigger={
-								<Button size="sm" variant="outline">
-									{t('common.edit')}
-								</Button>
-							}
-							size="default"
-						>
-							<div className="gap-y-1.5 md:max-w-md px-4 pb-4 flex flex-col">
-								<DefaultFontFamily />
-								<DefaultFontSize />
-								<DefaultLineHeight />
-							</div>
-						</Sheet>
-					</NewCard.Row>
-				</NewCard>
+						<div className="gap-y-1.5 md:max-w-md px-4 pb-4 flex flex-col">
+							<DefaultFontFamily />
+							<DefaultFontSize />
+							<DefaultLineHeight />
+						</div>
+					</Sheet>
+				</NewCard.Row>
+			</NewCard>
 
-				<div className="gap-y-3 flex flex-col">
-					<div>
-						<h3 className="text-base font-medium text-foreground">
-							{t(getSectionKey('data.sections.clearStore.label'))}
-						</h3>
-						<Text variant="muted" size="sm">
-							{t(getSectionKey('data.sections.clearStore.description'))}
-						</Text>
-					</div>
-
-					<div>
-						<Button variant="destructive" size="sm" onClick={clearStore} disabled={!canClearStore}>
-							{t(getSectionKey('data.sections.clearStore.button'))}
-						</Button>
-					</div>
+			<div className="gap-y-3 flex flex-col">
+				<div>
+					<h3 className="text-base font-medium text-foreground">
+						{t(getSectionKey('data.sections.clearStore.label'))}
+					</h3>
+					<Text variant="muted" size="sm">
+						{t(getSectionKey('data.sections.clearStore.description'))}
+					</Text>
 				</div>
-			</ContentContainer>
-		</Container>
+
+				<div>
+					<Button variant="destructive" size="sm" onClick={clearStore} disabled={!canClearStore}>
+						{t(getSectionKey('data.sections.clearStore.button'))}
+					</Button>
+				</div>
+			</div>
+		</SceneContainer>
 	)
 }
 

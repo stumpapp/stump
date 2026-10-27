@@ -10,12 +10,12 @@ import { useTranslate } from '~/lib/hooks'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ImageCacheActions() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const onClearCache = async (message: string) => {
 		SystemAlert.alert(message, undefined, [
 			{
-				text: t('common.ok'),
+				text: translate('shared.common.ok'),
 			},
 		])
 	}

@@ -6,7 +6,7 @@ import { FileExplorer } from '@/components/explorer'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 
-import { useSeriesContext } from '../../context'
+import { useSeriesContext } from '../../../../components/series/context'
 
 export default function SeriesExplorerScene() {
 	const {

@@ -1,5 +1,6 @@
-import { Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+import { Heading, NewCard, Text } from '@stump/components'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
@@ -7,7 +8,16 @@ import ProcessLibraryThumbnails from './ProcessLibraryThumbnails'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 export default function ThumbnailManagementSection() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
+
+	return (
+		<NewCard label={translate('shared.common.management')}>
+			<LibraryThumbnailSelector />
+			<RegenerateThumbnails />
+			<ProcessLibraryThumbnails />
+			<DeleteLibraryThumbnails />
+		</NewCard>
+	)
 
 	return (
 		<div className="gap-6 flex grow flex-col">
@@ -17,11 +27,6 @@ export default function ThumbnailManagementSection() {
 					{t(getKey('description'))}
 				</Text>
 			</div>
-
-			<LibraryThumbnailSelector />
-			<RegenerateThumbnails />
-			<ProcessLibraryThumbnails />
-			<DeleteLibraryThumbnails />
 		</div>
 	)
 }

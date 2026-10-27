@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-// import { useBookClubsQuery } from '@stump/client'
-import { Button, cn, Form } from '@stump/components'
+import { Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
-import { useCallback, useMemo } from 'react'
+import { ClipboardCheck, Info, Shield, Users } from 'lucide-react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -14,8 +13,8 @@ import {
 	buildSchema,
 	CreateOrUpdateBookClubSchema,
 } from '@/components/bookClub/createOrUpdateForm'
-import { ContentContainer } from '@/components/container'
-import { useSteppedFormContext } from '@/components/steppedForm'
+import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateClubReview from './CreateClubReview'
 
@@ -34,8 +33,7 @@ type Props = {
 
 export default function CreateBookClubForm({ onSubmit }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
-	const { currentStep, setStep } = useSteppedFormContext()
+	const { t } = useTranslate()
 
 	const {
 		data: { bookClubs },
@@ -47,88 +45,57 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 		resolver: zodResolver(schema),
 	})
 
-	/**
-	 * A callback to handle changing the form step. This will validate the current step
-	 * before moving to the next step.
-	 */
-	const handleChangeStep = useCallback(
-		async (nextStep: number) => {
-			let isValid = true
-
-			switch (currentStep) {
-				case 1:
-					isValid = await form.trigger(['name', 'description', 'isPrivate'])
-					break
-				case 2:
-					break
-				default:
-					break
-			}
-
-			if (isValid) {
-				setStep(nextStep)
-			}
-		},
-		[form, currentStep, setStep],
-	)
-
-	const renderNextButton = (nextStep: number) => (
-		<div className="mt-6 md:max-w-sm flex w-full">
-			<Button className="md:w-auto w-full" onClick={() => handleChangeStep(nextStep)}>
-				Next step
-			</Button>
-		</div>
+	const steps = useMemo<SteppedFormStep[]>(
+		() => [
+			{
+				key: 'basics',
+				icon: Info,
+				fields: ['name', 'description', 'isPrivate'],
+				render: () => <BasicBookClubInformation />,
+			},
+			{
+				key: 'roles',
+				icon: Shield,
+				render: () => <BookClubRoleMappingForm />,
+			},
+			{
+				key: 'membership',
+				icon: Users,
+				render: () => <BookClubMembershipOptions />,
+			},
+			{
+				key: 'review',
+				icon: ClipboardCheck,
+				isReview: true,
+				render: () => <CreateClubReview />,
+			},
+		],
+		[],
 	)
 
 	/**
-	 * Render the current step of the form
+	 * Prevent a submit event triggering when the enter key is pressed on an input
 	 */
-	const renderStep = () => {
-		switch (currentStep) {
-			case 1:
-				return (
-					<>
-						<BasicBookClubInformation />
-						{renderNextButton(2)}
-					</>
-				)
-			case 2:
-				return (
-					<>
-						<BookClubRoleMappingForm />
-						{renderNextButton(3)}
-					</>
-				)
-			case 3:
-				return (
-					<>
-						<BookClubMembershipOptions />
-						{renderNextButton(4)}
-					</>
-				)
-			default:
-				return <CreateClubReview />
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+			e.preventDefault()
 		}
 	}
 
 	return (
-		<Form id="create-club-form" form={form} onSubmit={onSubmit}>
-			<ContentContainer className="mt-0">
-				{renderStep()}
-
-				<div
-					className={cn('mt-6 md:max-w-sm flex w-full', {
-						'invisible hidden': currentStep < 4,
-					})}
-				>
-					<Button type="submit" className="md:w-auto w-full">
-						Create club
-					</Button>
-				</div>
-			</ContentContainer>
+		<Form
+			id="create-club-form"
+			className="flex flex-1 flex-col"
+			fieldsetClassName="flex-1"
+			form={form}
+			onSubmit={onSubmit}
+			onKeyDown={handleKeyDown}
+		>
+			<SteppedForm
+				localeBase="createBookClubScene"
+				steps={steps}
+				submitLabel={t('createBookClubScene.form.submit')}
+			/>
 		</Form>
 	)
 }
-
-const LOCAL_BASE = 'createBookClubScene.form'
-export const getLocaleKey = (key: string) => `${LOCAL_BASE}.${key}`

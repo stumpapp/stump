@@ -1,6 +1,9 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+use super::{book_club_discussion_message_reaction, user};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "CustomEmojiModel")]
 #[sea_orm(table_name = "custom_emojis")]
@@ -16,32 +19,18 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub created_by_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::CreatedById",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "created_by_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
-	Reactions,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
-}
-
-impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Reactions.def()
-	}
+	#[graphql(skip)]
+	pub created_by: BelongsTo<user::Entity>,
+	#[sea_orm(has_many, relation_enum = "Reactions")]
+	#[graphql(skip)]
+	pub reactions: HasMany<book_club_discussion_message_reaction::Entity>,
 }
 
 #[async_trait]

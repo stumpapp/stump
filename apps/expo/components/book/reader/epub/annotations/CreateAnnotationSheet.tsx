@@ -5,6 +5,7 @@ import { View } from 'react-native'
 import SheetWithHeader from '~/components/SheetWithHeader'
 import { useColors } from '~/lib/constants'
 import { ReadiumLocator } from '~/modules/readium'
+import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 
 import AnnotatedText from './AnnotatedText'
 import AnnotationInput from './AnnotationInput'
@@ -25,6 +26,8 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 		const [locator, setLocator] = useState<ReadiumLocator | null>(null)
 		const [selectedText, setSelectedText] = useState('')
 		const [annotation, setAnnotation] = useState('')
+
+		const { imageMetadata } = useDerivedColorPalette()
 
 		// TODO: use computed scoped mini-themes to prevent light colours with dark epub theme (and vice versa):
 		//   - Use dark mode colours (i.e. black background, white text, etc.) with dark epub theme?
@@ -66,6 +69,7 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 				headerLabel="New Annotation"
 				headerLeftButton={{ type: 'dismiss' }}
 				headerRightButton={{ type: 'check', onPress: handleCreate }}
+				backgroundColorData={imageMetadata}
 			>
 				<View className="gap-4">
 					{selectedText && <AnnotatedText text={selectedText} />}

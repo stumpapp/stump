@@ -1,13 +1,12 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useNavigate, useParams } from 'react-router'
 
-import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
@@ -42,7 +41,7 @@ export default function UpdateUserScene() {
 	const navigate = useNavigate()
 
 	const { id } = useParams<{ id: string }>()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 
@@ -77,14 +76,12 @@ export default function UpdateUserScene() {
 	}
 
 	return (
-		<SceneContainer className="-mt-4">
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/users.updateUser.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				{user && <CreateOrUpdateUserForm user={user} existingUsernames={existingUsernames} />}
-			</ContentContainer>
+			{user && <CreateOrUpdateUserForm user={user} existingUsernames={existingUsernames} />}
 		</SceneContainer>
 	)
 }

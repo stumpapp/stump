@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { useUserStore } from '@/stores'
+
 import { usePreferences } from './usePreferences'
 
 /**
@@ -73,3 +75,12 @@ export function useTheme() {
 
 export const DARK_THEMES = ['dark', 'ocean', 'cosmic', 'pumpkin', 'autumn', 'midnight']
 export const THEMES_WITH_GRADIENTS = ['cosmic']
+
+/* returns true if the active theme is a dark variant, separate from useTheme since that pings gql */
+export const useIsDarkTheme = () => {
+	const instantTheme = useUserStore((state) => state.userPreferences?.appTheme)
+	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
+	return instantTheme
+		? [...DARK_THEMES, ...(prefersDark ? ['system'] : [])].includes(instantTheme)
+		: prefersDark
+}

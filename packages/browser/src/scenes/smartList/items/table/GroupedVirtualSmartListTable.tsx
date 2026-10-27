@@ -1,6 +1,5 @@
 import { cn } from '@stump/components'
 import { Media, SmartListGroupedItem } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	ExpandedState,
 	flexRender,
@@ -17,6 +16,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useScrollElement } from '../../../../hooks/useScrollElement'
 import { useSafeWorkingView, useSmartListContext } from '../../context'
@@ -39,7 +39,7 @@ const GROUP_ROW_HEIGHT = 40
 const BOOK_HEADER_HEIGHT = 40
 
 export default function GroupedVirtualSmartListTable({ items }: Props) {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const { list } = useSmartListContext()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const listRef = useRef<HTMLDivElement>(null)
@@ -50,7 +50,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
 	const isGroupedBySeries = list.defaultGrouping === 'BY_SERIES'
-	const standaloneLabel = t('userSmartListScene.itemsScene.standaloneBooks')
+	const standaloneLabel = translate('shared.common.standaloneBooks')
 	const groupColumns = useMemo(
 		() => buildGroupColumns(isGroupedBySeries, workingView.groupColumns, standaloneLabel),
 		[isGroupedBySeries, workingView.groupColumns, standaloneLabel],

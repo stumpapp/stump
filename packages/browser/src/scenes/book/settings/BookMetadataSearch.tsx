@@ -11,7 +11,6 @@ import {
 	NativeSelect,
 } from '@stump/components'
 import { extractErrorMessage, graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
 import { Suspense, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -19,6 +18,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { MatchRecord, useMatchReviewStore } from '@/components/metadata/metadataMatching'
+import { useTranslate } from '@/hooks/useTranslate'
 import { PROVIDER_LABELS } from '@/scenes/settings/server/metadataIntegrations/providers/constants'
 
 const providersQuery = graphql(`
@@ -61,7 +61,7 @@ type Props = {
 }
 
 export default function BookMetadataSearch({ mediaId, initialTitle, isOpen, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -93,7 +93,7 @@ type FormProps = {
 }
 
 function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const {
 		data: { metadataProviderConfigs: providers },
@@ -175,11 +175,19 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 						</Alert>
 					)}
 
-					<Input label={t(getFormKey('title.label'))} {...form.register('title')} fullWidth />
-					<Input label={t(getFormKey('author.label'))} {...form.register('author')} fullWidth />
-					<Input label={t(getFormKey('isbn.label'))} {...form.register('isbn')} fullWidth />
 					<Input
-						label={t(getFormKey('year.label'))}
+						label={translate('shared.bookMetadata.title')}
+						{...form.register('title')}
+						fullWidth
+					/>
+					<Input label={t(getFormKey('author.label'))} {...form.register('author')} fullWidth />
+					<Input
+						label={translate('shared.bookMetadata.identifierIsbn')}
+						{...form.register('isbn')}
+						fullWidth
+					/>
+					<Input
+						label={translate('shared.bookMetadata.year')}
 						type="number"
 						{...form.register('year')}
 						fullWidth
@@ -216,7 +224,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 
 			<Dialog.Footer>
 				<Button variant="outline" onClick={onClose} disabled={isPending}>
-					{t('common.cancel')}
+					{translate('shared.common.cancel')}
 				</Button>
 				<Button
 					type="submit"
@@ -224,7 +232,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 					disabled={isPending || enabledProviders.length === 0}
 					isLoading={isPending}
 				>
-					{t(getKey('searchButton'))}
+					{translate('shared.common.search')}
 				</Button>
 			</Dialog.Footer>
 		</>

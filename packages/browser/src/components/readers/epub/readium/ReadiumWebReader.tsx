@@ -1,7 +1,13 @@
 import type { OnDecorationActivatedEvent } from '@readium/navigator'
 import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator } from '@readium/shared'
-import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import {
+	parseGraphQLDecimal,
+	queryClient,
+	useGraphQLMutation,
+	useSDK,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import {
 	Bookmark,
 	EpubProgressInput,
@@ -9,7 +15,6 @@ import {
 	ReadingDirection,
 	type ReadiumLocator,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import type { EpubSearchResponse } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
@@ -17,6 +22,7 @@ import { toast } from 'sonner'
 
 import Spinner from '@/components/Spinner'
 import { useTheme } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookTimer } from '@/stores/reader'
 
@@ -168,7 +174,7 @@ type LoadState =
  * Production Readium Web EPUB reader — streams via Stump RWPM.
  */
 export default function ReadiumWebReader({ id, isIncognito }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -228,9 +234,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	const [openState, setOpenState] = useState<LoadState>({ status: 'loading' })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)
 	const [localProgress, setLocalProgress] = useState<number | null>(
-		ebook.media?.readProgress?.percentageCompleted != null
-			? Number(ebook.media.readProgress.percentageCompleted)
-			: null,
+		parseGraphQLDecimal(ebook.media?.readProgress?.percentageCompleted),
 	)
 
 	// Intentionally does not invalidate `['readiumWebReader', id]` on every success — progress
@@ -276,9 +280,9 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				const opened = await openStumpPublication(sdk, id, abort.signal)
 				if (abort.signal.aborted) return
 
-				const percentageCompleted = ebook.media?.readProgress?.percentageCompleted
-					? Number(ebook.media.readProgress.percentageCompleted)
-					: null
+				const percentageCompleted = parseGraphQLDecimal(
+					ebook.media?.readProgress?.percentageCompleted,
+				)
 
 				const initialLocator = isIncognito
 					? undefined
@@ -294,7 +298,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				console.error('[ReadiumWebReader] open failed', error)
 				setOpenState({
 					status: 'error',
-					message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
+					message:
+						error instanceof Error
+							? error.message
+							: translate('shared.epubReader.errors.openFailed'),
 				})
 			}
 		}
@@ -647,10 +654,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				console.error(err)
 			}
 
-			toast.error(t('epubReader.errors.navigateFailed'))
+			toast.error(translate('shared.epubReader.errors.navigateFailed'))
 			return false
 		},
-		[api, opened, t],
+		[api, opened, translate],
 	)
 
 	const onLinkClick = useCallback(

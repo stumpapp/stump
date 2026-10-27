@@ -469,12 +469,9 @@ mod tests {
 	async fn test_finalize_without_library_config_or_owner() {
 		let db = test_database().await;
 		let schema = Schema::new(DbBackend::Sqlite);
-		db.execute(
-			db.get_database_backend()
-				.build(&schema.create_table_from_entity(job::Entity)),
-		)
-		.await
-		.unwrap();
+		db.execute(&schema.create_table_from_entity(job::Entity))
+			.await
+			.unwrap();
 		let library = fake_data::Library::default().insert(&db).await;
 		let mut config = library
 			.find_related(library_config::Entity)

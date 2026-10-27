@@ -567,6 +567,23 @@ type CustomEmoji {
 	url: String!
 }
 
+"The reading activity (time, number of unique sessions) for a specific date"
+type DailyActivity {
+	date: NaiveDate!
+	totalSeconds: Int!
+	sessionCount: Int!
+}
+
+"""
+An input for specifying a date range:
+- `start = null` means from the beginning of the user's history
+- `end = null` resolves to the current logical day (per user prefs)
+"""
+input DateRangeInput {
+	start: NaiveDate
+	end: NaiveDate
+}
+
 """
 Implement the DateTime<FixedOffset> scalar
 
@@ -1066,6 +1083,16 @@ type JobUpdate {
 	totalSubtasks: Int
 }
 
+type JournalEntryModel {
+	id: Int!
+	content: String!
+	userId: String!
+	mediaId: String!
+	sessionId: Int
+	createdAt: DateTime!
+	updatedAt: DateTime!
+}
+
 type Library {
 	id: String!
 	name: String!
@@ -1397,6 +1424,10 @@ type Media {
 	"""
 	readingTimeline(order: OrderDirection! = DESC): BookReadingTimeline
 	seriesPosition: Int
+	"""
+	The next media in the series, ordered by metadata series position
+	when available and falling back to name if not
+	"""
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	"""
 	The path to the media file **relative** to the library path. This is only useful for
@@ -1983,6 +2014,11 @@ type Mutation {
 	"Clear the scan history for a specific library"
 	clearScanHistory(id: ID!): Int!
 	"""
+	Clear the stored directory mtimes for a library, forcing the next scan to do a
+	full walk
+	"""
+	clearLibraryScannedDirectories(id: ID!): Int!
+	"""
 	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after creation.
 	"""
@@ -2027,6 +2063,8 @@ type Mutation {
 	setLibrarySeriesLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
 	"Bulk-set locked metadata fields for all media metadata in a library"
 	setLibraryMediaLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
+	"Enqueue a scan job for every library which the authenticated user has access to"
+	scanAllLibraries: Boolean!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
@@ -2228,11 +2266,20 @@ type Mutation {
 	may delete it
 	"""
 	deleteReadingSession(sessionId: Int!): Boolean!
+	extendReadingSession(sessionId: Int!): ReadingSession!
 	"""
 	Updates a reading session for the authenticated user, exposing a small
 	set of fields which are editable
 	"""
 	patchReadingSession(sessionId: Int!, input: PatchReadingSession!): ReadingSession!
+	"Upserts a reading journal entry for the authenticated user and the given reading session"
+	upsertReadingSessionJournalEntry(sessionId: Int!, content: String!): JournalEntryModel!
+	"Deletes a reading journal entry for the authenticated user"
+	deleteJournalEntry(entryId: Int!): Boolean!
+	"Upserts a reading device for the authenticated user"
+	upsertReadingDevice(id: String!, name: String!): ReadingDeviceModel!
+	"Deletes a reading device owned by the authenticated user"
+	deleteReadingDevice(deviceId: Int!): Boolean!
 }
 
 """
@@ -2526,7 +2573,7 @@ input PatchMetadataProviderConfigInput {
 }
 
 input PatchReadingSession {
-	elapsedSeconds: String
+	elapsedSeconds: Int
 	status: ReadingStatus
 }
 
@@ -2642,6 +2689,10 @@ type Query {
 	for all reading activity across all books
 	"""
 	myReadingTimeline(pagination: CursorPagination! = {after: null, limit: 20}, order: OrderDirection! = DESC): CursorPaginatedGlobalReadingTimelineNodeResponse!
+	"Reading stats for the authenticated user within the provided range"
+	myReadingStats(range: DateRangeInput! = {start: null, end: null}): ReadingStats!
+	"The current streaks held for the authenticated user"
+	myReadingStreaks: ReadingStreaks!
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
@@ -2697,6 +2748,14 @@ type Query {
 	readingListById(id: ID!): ReadingList!
 	"List the custom emojis available on this server"
 	customEmojis: [CustomEmoji!]!
+}
+
+type ReadingDeviceModel {
+	id: String!
+	userId: String!
+	name: String!
+	createdAt: DateTime!
+	updatedAt: DateTime!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -2758,12 +2817,13 @@ type ReadingSession {
 	state of the session when it was last updated
 	"""
 	status: ReadingStatus!
-	notes: String
 	mediaId: String!
 	userId: String!
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	"The devices which were used during this reading session"
+	devices: [ReadingDeviceModel!]!
 	"""
 	The media which this session belongs to. Please note that if somehow the user loses access to the
 	media record, e.g. via access control, then this will resolve to `None` to avoid leaking
@@ -2780,6 +2840,8 @@ type ReadingSession {
 	of sessions but more a detail view into a single session, etc.
 	"""
 	chaptersRead: [String!]!
+	isLatest: Boolean!
+	journalEntry: JournalEntryModel
 }
 
 """
@@ -2799,6 +2861,17 @@ type ReadingSessionConflictResolutionView {
 	remoteSessions: [ReadingSession!]!
 }
 
+type ReadingStats {
+	range: ResolvedDateRange!
+	totals: ReadingTotals!
+	"One entry per day with at least one session"
+	dailyActivity: [DailyActivity!]!
+	"Average reading time for each weekday"
+	dayOfWeek: [WeekdayActivity!]!
+	"Median active time and days to finish a book per library type"
+	timeToFinish: [TimeToFinishStat!]!
+}
+
 """
 the different reading statuses a book can be categorized as based on a user's
 reading sessions
@@ -2815,6 +2888,20 @@ enum ReadingStatus {
 	ABANDONED
 	"no sessions have been recorded for this book"
 	NOT_STARTED
+}
+
+type ReadingStreaks {
+	currentDays: Int!
+	longestDays: Int!
+}
+
+"The summed stats relative to the aggregation range"
+type ReadingTotals {
+	totalSeconds: Int!
+	sessionCount: Int!
+	finishedCount: Int!
+	dnfCount: Int!
+	activeDayCount: Int!
 }
 
 type ReadiumLocation {
@@ -2903,6 +2990,12 @@ type RegisteredEmailDevice {
 	email: String!
 	forbidden: Boolean!
 	sendHistory: [EmailerSendRecord!]!
+}
+
+"A `DateRangeInput` where `end` is always set"
+type ResolvedDateRange {
+	start: NaiveDate
+	end: NaiveDate!
 }
 
 """
@@ -3579,6 +3672,14 @@ enum ThumbnailPlaceholderStyle {
 	THUMBHASH
 }
 
+type TimeToFinishStat {
+	libraryType: LibraryType!
+	sampleSize: Int!
+	medianActiveSeconds: Int!
+	medianCalendarDays: Float!
+	medianSecondsPerPage: Float
+}
+
 """
 A simple pagination input object which does not paginate. An explicit struct is
 required as a limitation of async_graphql's [OneofObject], which doesn't allow
@@ -3636,17 +3737,12 @@ input UpdateUserPreferencesInput {
 	preferredLayoutMode: InterfaceLayout!
 	interfaceRoundness: InterfaceRoundness!
 	thumbnailRoundness: InterfaceRoundness!
-	primaryNavigationMode: String!
-	layoutMaxWidthPx: Int
 	appTheme: String!
 	enableGradients: Boolean!
 	appFont: SupportedFont!
 	showQueryIndicator: Boolean!
 	enableLiveRefetch: Boolean!
 	enableDiscordPresence: Boolean!
-	enableCompactDisplay: Boolean!
-	enableDoubleSidebar: Boolean!
-	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
 	enableJobOverlay: Boolean!
 	enableFancyAnimations: Boolean!
@@ -3822,15 +3918,10 @@ type UserPreferences {
 	locale: String!
 	appTheme: String!
 	appFont: SupportedFont!
-	primaryNavigationMode: String!
-	layoutMaxWidthPx: Int
 	showQueryIndicator: Boolean!
 	enableLiveRefetch: Boolean!
 	enableDiscordPresence: Boolean!
-	enableCompactDisplay: Boolean!
 	enableGradients: Boolean!
-	enableDoubleSidebar: Boolean!
-	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
@@ -3858,6 +3949,14 @@ input ValidateMetadataProviderConfigInput {
 	providerType: MetadataProvider!
 	"The API token for authenticating with the provider"
 	apiToken: String!
+}
+
+type WeekdayActivity {
+	"1 (Monday) -> 7 (Sunday)"
+	isoWeekday: Int!
+	totalSeconds: Int!
+	"Total seconds divided by the number of times this weekday occurs in the range"
+	averageSeconds: Int!
 }
 
 "Marks an element of a GraphQL schema as no longer supported."

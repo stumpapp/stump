@@ -1,20 +1,20 @@
-import { Heading, Link, RadioGroup, Text } from '@stump/components'
-import { LibraryPattern, OrganizationMode } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
+import { NewCard, Select } from '@stump/components'
+import { LibraryPattern, LibraryViewMode, OrganizationMode } from '@stump/graphql'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function LibraryPatternRadioGroup() {
 	const form = useFormContext()
 	const ctx = useLibraryContextSafe()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const organizationMode = useWatch({ control: form.control, name: 'organizationMode' })
 	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
-	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased
+	const isMetadata = organizationMode === OrganizationMode.Metadata
 	const isCreating = !ctx?.library
 
 	const handleChange = useCallback(
@@ -26,66 +26,76 @@ export default function LibraryPatternRadioGroup() {
 		[form, isCreating],
 	)
 
-	// metadata libraries group books by their series metadata, so folder patterns do not apply
-	if (organizationMode === OrganizationMode.Metadata) return null
+	const handleModeChange = useCallback(
+		(mode: OrganizationMode) => {
+			if (!isCreating) return
+			form.setValue('organizationMode', mode, { shouldDirty: true })
+			if (mode === OrganizationMode.Metadata) {
+				form.setValue('processMetadata', true)
+				form.setValue('oneshotsDirectory', null)
+				form.setValue('defaultLibraryViewMode', LibraryViewMode.Books)
+			}
+		},
+		[form, isCreating],
+	)
 
-	// Note: if this section ever becomes more than library pattern, restore the section locale keys
 	return (
-		<div className="gap-6 flex flex-col">
-			<div>
-				<Heading size="sm">{t(getOptionKey('label'))}</Heading>
-				<Text size="sm" variant="muted">
-					{t(getOptionKey('description'))}
-				</Text>
-			</div>
+		<NewCard label={t(getKey('label'))} description={t(getKey('description'))}>
+			<NewCard.Row
+				label={t(getKey('mode.label'))}
+				description={
+					<>
+						{t(getKey(`mode.${isMetadata ? 'metadata' : 'filesystem'}.description`))}{' '}
+						{t(getKey('mode.immutable'))}
+					</>
+				}
+				disabled={!isCreating}
+			>
+				<div>
+					<Select value={organizationMode} onValueChange={handleModeChange} disabled={!isCreating}>
+						<Select.Trigger size="sm" aria-label={t(getKey('mode.label'))}>
+							<Select.Value />
+						</Select.Trigger>
+						<Select.Content>
+							{[OrganizationMode.Filesystem, OrganizationMode.Metadata].map((mode) => (
+								<Select.Item key={mode} value={mode}>
+									{t(
+										getKey(
+											`mode.${mode === OrganizationMode.Metadata ? 'metadata' : 'filesystem'}.label`,
+										),
+									)}
+								</Select.Item>
+							))}
+						</Select.Content>
+					</Select>
+				</div>
+			</NewCard.Row>
 
-			<div className="gap-y-4 flex flex-col">
-				<input type="hidden" {...form.register('libraryPattern')} />
-
-				<RadioGroup
-					value={libraryPattern}
-					onValueChange={handleChange}
-					className="mt-1 sm:flex-row flex flex-col"
-					disabled={!isCreating}
-					title={isCreating ? undefined : t(getKey('section.disabled'))}
-					defaultValue="SERIES_BASED"
+			{/* metadata libraries group books by their series metadata, so folder patterns do not apply */}
+			{!isMetadata && (
+				<NewCard.Row
+					label={t(getKey('filesystemPattern.label'))}
+					description={t(getKey(`filesystemPattern.${libraryPattern}.description`))}
 				>
-					<RadioGroup.CardItem
-						label={t(getOptionKey('collectionPriority.label'))}
-						description={t(getOptionKey('collectionPriority.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={isCollectionBasedSelected}
-						value={LibraryPattern.CollectionBased}
-						className="md:w-1/2"
-					/>
-
-					<RadioGroup.CardItem
-						label={t(getOptionKey('seriesPriority.label'))}
-						description={t(getOptionKey('seriesPriority.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={!isCollectionBasedSelected}
-						value="SERIES_BASED"
-						className="md:w-1/2"
-					/>
-				</RadioGroup>
-
-				{isCreating && (
-					<Text size="xs" variant="muted">
-						{t(getKey('section.docs.0'))}{' '}
-						<Link
-							target="_blank"
-							href="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
-						>
-							{t(getKey('section.docs.1'))}
-						</Link>{' '}
-						{t(getKey('section.docs.2'))} {<b>{t(getKey('section.docs.3'))}</b>}
-					</Text>
-				)}
-			</div>
-		</div>
+					<div>
+						<Select value={libraryPattern} onValueChange={handleChange}>
+							<Select.Trigger size="sm">
+								<Select.Value />
+							</Select.Trigger>
+							<Select.Content>
+								{[LibraryPattern.CollectionBased, LibraryPattern.SeriesBased].map((pattern) => (
+									<Select.Item key={pattern} value={pattern}>
+										{t(getKey(`filesystemPattern.${pattern}.label`))}
+									</Select.Item>
+								))}
+							</Select.Content>
+						</Select>
+					</div>
+				</NewCard.Row>
+			)}
+		</NewCard>
 	)
 }
 
-const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.libraryPattern'
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.organization'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
-const getOptionKey = (key: string) => getKey(`options.${key}`)

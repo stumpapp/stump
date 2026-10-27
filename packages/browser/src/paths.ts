@@ -50,6 +50,7 @@ const pathsInternal = {
 	bookClubs: () => '/clubs',
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,
+	bookReadingTimeline: (id: string) => `/books/${id}/reading-timeline`,
 	bookReader: (
 		id: string,
 		{ isEpub, isPdf, isAnimated, page, isStreaming, isIncognito }: BookReaderParams = {},
@@ -152,6 +153,7 @@ export function usePaths() {
 		bookClubs: () => `${basePath}${pathsInternal.bookClubs()}`,
 		bookManagement: (id: string) => `${basePath}${pathsInternal.bookManagement(id)}`,
 		bookOverview: (id: string) => `${basePath}${pathsInternal.bookOverview(id)}`,
+		bookReadingTimeline: (id: string) => `${basePath}${pathsInternal.bookReadingTimeline(id)}`,
 		bookReader: (id: string, params: BookReaderParams = {}) =>
 			`${basePath}${pathsInternal.bookReader(id, params)}`,
 		bookSearch: () => `${basePath}${pathsInternal.bookSearch()}`,

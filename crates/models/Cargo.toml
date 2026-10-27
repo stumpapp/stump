@@ -21,5 +21,6 @@ uuid.workspace = true
 filter-gen = { path = "../../crates/macros/filter-gen" }
 
 [dev-dependencies]
+tokio.workspace = true
 tokio-test.workspace = true
 pretty_assertions.workspace = true

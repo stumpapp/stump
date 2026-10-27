@@ -1,45 +1,58 @@
-import { Text } from '@stump/components'
-import { LibraryPattern, OrganizationMode, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
+import { Badge, Text, ToolTip } from '@stump/components'
+import { OrganizationMode, useFragment } from '@stump/graphql'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
 
 import { LibrarySettingsConfig } from '../../LibrarySettingsRouter'
 
+// TODO(ui): this can have a better home I think, even just a disabled
+// card row is probably more consistent
+
 export default function PatternDisplay() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const { library } = useLibraryContext()
 	const {
 		config: { libraryPattern, organizationMode },
 	} = useFragment(LibrarySettingsConfig, library)
 
-	const localeKey =
-		libraryPattern === LibraryPattern.CollectionBased ? 'collectionPriority' : 'seriesPriority'
+	const isMetadata = organizationMode === OrganizationMode.Metadata
+
+	return (
+		<>
+			<div className="flex-1" />
+			<ToolTip
+				content={
+					isMetadata
+						? t(METADATA_MODE_KEY('description'))
+						: t(getKey(`${libraryPattern}.description`))
+				}
+				align="end"
+			>
+				<Badge size="md" variant="secondary">
+					{isMetadata ? t(METADATA_MODE_KEY('label')) : t(getKey(`${libraryPattern}.label`))}
+				</Badge>
+			</ToolTip>
+		</>
+	)
 
 	return (
 		<div
-			className="space-y-1.5 p-1 lg:w-auto flex w-full flex-col rounded-xl bg-warning/15"
+			className="space-y-1.5 p-1 lg:w-auto bg-black/5 dark:bg-white/10 flex w-full flex-col rounded-xl"
 			data-testid="unrestricted-meta"
 		>
-			<div className="px-2.5 py-0.5 flex items-center text-warning">
-				<span className="font-medium">
-					{organizationMode === OrganizationMode.Metadata
-						? t('createOrUpdateLibraryForm.fields.organizationMode.metadata.label')
-						: t(getOptionKey(`${localeKey}.label`))}
-				</span>
+			<div className="px-2.5 py-0.5 flex items-center">
+				<span className="font-medium">{t(getKey(`${libraryPattern}.label`))}</span>
 			</div>
-			<div className="p-2.5 rounded-lg bg-warning/15">
-				<Text size="sm" className="text-warning">
-					{organizationMode === OrganizationMode.Metadata
-						? t('createOrUpdateLibraryForm.fields.organizationMode.metadata.description')
-						: t(getOptionKey(`${localeKey}.description`))}
-				</Text>
+			<div className="p-2.5 bg-black/5 dark:bg-white/10 rounded-lg">
+				<Text size="sm">{t(getKey(`${libraryPattern}.description`))}</Text>
 			</div>
 		</div>
 	)
 }
 
-const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.libraryPattern'
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.organization.filesystemPattern'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
-const getOptionKey = (key: string) => getKey(`options.${key}`)
+const METADATA_MODE_KEY = (key: string) =>
+	`createOrUpdateLibraryForm.fields.organization.mode.metadata.${key}`

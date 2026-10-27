@@ -2,10 +2,9 @@
 title: Libraries
 ---
 
-import { File, Folder, Files } from 'fumadocs-ui/components/files';
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-
+import { File, Folder, Files } from 'fumadocs-ui/components/files'
+import { Step, Steps } from 'fumadocs-ui/components/steps'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 There are a couple key concepts to go over regarding how Stump represents libraries:
 
@@ -348,7 +347,7 @@ Unfortunately, Stump does not support any other patterns, as there are simply to
 
 ## Optional Processing
 
-You can adjust the behavior of the scanner per-library by enabling or disabling certain processing options. These options are available in the library settings page (`/settings/scanning`).
+You can adjust the behavior of the scanner per-library by enabling or disabling certain processing options. These options are available in the library settings page (`/libraries/{libraryId}/settings/scanning`).
 
 To learn more about these options, see the [scanner](/docs/guides/fundamentals/scanner) guide.
 
@@ -364,6 +363,7 @@ The process for creating a library is broken up into a few steps:
 #### Basics
 
 The first step is for filling out the very basic information about the library, such as its name and path. Optionally, you can also configure any tags or a description for the library here.
+
 </Step>
 
 <Step>
@@ -372,6 +372,7 @@ The first step is for filling out the very basic information about the library, 
 The second step is a bit larger, and is primarily focused on gathering information about how the scanner should process the library. This includes the library pattern, metadata processing, file hashing and conversion, and ignore rules.
 
 With the exception of the library pattern, all of these options may be changed at any time after the library is created. So don't worry too much about getting them perfect the first time!
+
 </Step>
 
 <Step>
@@ -384,6 +385,7 @@ When enabled, you will be presented with a few options for defining the generati
 - **Size**: Either "Evenly Scaled", "Auto Scaled", or "Explicitly Sized". Evenly Scaled will scale the image to fit within the specified ratio, while Auto Scaled will resize the image to fit within the exact dimensions (in pixels) specified while maintaining the aspect ratio.
 - **Format**: The output format for the thumbnail, e.g., `JPEG`, `PNG`, etc.
 - **Quality**: The quality of the output image, a number between 0 and 1. Higher numbers generally mean higher quality, but also larger file sizes.
+
 </Step>
 
 <Step>
@@ -392,6 +394,7 @@ When enabled, you will be presented with a few options for defining the generati
 There is a final review step to ensure that all of the information you've entered is correct. If you need to make any changes, you can navigate back to the appropriate step by clicking it in the header. Additionally, you have the option to skip the initial scan.
 
 When you are ready to create the library, click the "Create Library" button. You should be redirected to the library's page by default.
+
 </Step>
 
 </Steps>
@@ -402,9 +405,7 @@ You can edit a library by navigating to the library's settings page. From there,
 
 #### Analysis
 
-<Callout>
-	This section is not feature complete and is subject to change in the future.
-</Callout>
+<Callout>This section is not feature complete and is subject to change in the future.</Callout>
 
 There are more resource-intensive analysis operations which can be done on a library. At the moment, the only option is `Analyze books`.
 
@@ -427,10 +428,14 @@ For deleting a library, see the [delete a library](#delete-a-library) section.
 
 - **Clean library** - Remove any books or series which cannot be located on disk. This is useful for cleaning up the database after moving or deleting files.
 
+### Scan All Libraries
+
+You can enqueue a scan job for every library you have access to by using the `Scan All` action on the libraries page. This is a convenience for when you want to refresh everything at once, e.g. after adding files across multiple libraries. Individual libraries can still be scanned from their respective library menus.
+
 ### Delete a Library
 
 > Deleting a library will remove all of the series, books, and other entities associated with the books (e.g., read progress, reading lists, etc) contained within it. Your actual files will not be deleted, but they will no longer exist in Stump.
 >
 > **This action cannot be undone.**
 
-You can delete a library from the library selection menu on the sidebar, or by navigating to the library's deletion settings page (`/settings/delete`).
+You can delete a library from the library selection menu on the sidebar, or by navigating to the library's deletion settings page (`/libraries/{libraryId}/settings/delete`).

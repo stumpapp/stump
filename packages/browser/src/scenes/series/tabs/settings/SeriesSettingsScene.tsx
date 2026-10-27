@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Button, Heading, Text } from '@stump/components'
-import { graphql, MetadataResetImpact, UserPermission } from '@stump/graphql'
+import { graphql, MetadataResetImpact, SeriesKind, UserPermission } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { Construction } from 'lucide-react'
 import { Suspense, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
@@ -10,6 +11,7 @@ import { ResetMetadata } from '@/components/metadata/metadataEditor'
 import { SeriesMetadataEditor } from '@/components/series/metadata'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import { useSeriesContext } from '../../context'
 import SeriesTagEditor from './SeriesTagEditor'
@@ -59,7 +61,10 @@ export default function SeriesSettingsScene() {
 	})
 
 	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
-	const { mutate: resetMetadata } = useGraphQLMutation(resetMetadataMutation)
+	const queryClient = useQueryClient()
+	const { mutate: resetMetadata } = useGraphQLMutation(resetMetadataMutation, {
+		onSuccess: () => invalidateThumbnailQueries(queryClient),
+	})
 
 	const handleAnalyze = useCallback(() => analyze({ id: series.id }), [analyze, series.id])
 	const handleResetMetadata = useCallback(
@@ -141,7 +146,10 @@ export default function SeriesSettingsScene() {
 							<Text variant="muted">Extra information about your series</Text>
 						</div>
 						{checkPermission(UserPermission.EditMetadata) && (
-							<ResetMetadata onConfirmReset={handleResetMetadata} />
+							<ResetMetadata
+								isVirtual={series.kind === SeriesKind.Virtual}
+								onConfirmReset={handleResetMetadata}
+							/>
 						)}
 					</div>
 					<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />

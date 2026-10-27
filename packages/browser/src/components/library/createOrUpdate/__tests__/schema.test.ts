@@ -1,6 +1,7 @@
-import { Dimension, SupportedImageFormat } from '@stump/graphql'
+import { Dimension, OrganizationMode, SupportedImageFormat } from '@stump/graphql'
+import { z } from 'zod'
 
-import { intoFormThumbnailConfig, intoThumbnailConfig } from '../schema'
+import { intoFormThumbnailConfig, intoThumbnailConfig, refineOrganization } from '../schema'
 
 describe('intoThumbnailConfig', () => {
 	it('should return null when thumbnails are not enabled', () => {
@@ -196,5 +197,57 @@ describe('intoFormThumbnailConfig', () => {
 			format: SupportedImageFormat.Webp,
 			quality: 75,
 		})
+	})
+})
+
+describe('refineOrganization', () => {
+	const organization = (library?: Parameters<typeof refineOrganization>[0]) =>
+		z
+			.object({
+				organizationMode: z.nativeEnum(OrganizationMode),
+				processMetadata: z.boolean(),
+				oneshotsDirectory: z.string().nullish(),
+			})
+			.superRefine(refineOrganization(library))
+
+	const issuePaths = (result: z.SafeParseReturnType<unknown, unknown>) =>
+		result.success ? [] : result.error.issues.map((issue) => issue.path.join('.'))
+
+	const metadata = { organizationMode: OrganizationMode.Metadata, processMetadata: true }
+
+	it('should accept a valid metadata library', () => {
+		expect(organization().safeParse(metadata).success).toBe(true)
+	})
+
+	it('should require metadata processing for metadata libraries', () => {
+		const result = organization().safeParse({ ...metadata, processMetadata: false })
+		expect(issuePaths(result)).toEqual(['processMetadata'])
+	})
+
+	it('should reject a oneshots directory for metadata libraries', () => {
+		const result = organization().safeParse({ ...metadata, oneshotsDirectory: 'oneshots' })
+		expect(issuePaths(result)).toEqual(['oneshotsDirectory'])
+	})
+
+	it('should allow filesystem libraries without metadata processing', () => {
+		const result = organization().safeParse({
+			organizationMode: OrganizationMode.Filesystem,
+			processMetadata: false,
+			oneshotsDirectory: 'oneshots',
+		})
+		expect(result.success).toBe(true)
+	})
+
+	it('should reject changing the organization of an existing library', () => {
+		const library = {
+			config: { organizationMode: OrganizationMode.Filesystem },
+		} as Parameters<typeof refineOrganization>[0]
+		expect(issuePaths(organization(library).safeParse(metadata))).toEqual(['organizationMode'])
+		expect(
+			organization(library).safeParse({
+				organizationMode: OrganizationMode.Filesystem,
+				processMetadata: false,
+			}).success,
+		).toBe(true)
 	})
 })

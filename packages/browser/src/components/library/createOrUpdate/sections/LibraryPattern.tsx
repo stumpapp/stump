@@ -1,5 +1,5 @@
 import { Heading, Link, RadioGroup, Text } from '@stump/components'
-import { LibraryPattern } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -12,6 +12,7 @@ export default function LibraryPatternRadioGroup() {
 
 	const { t } = useLocaleContext()
 
+	const organizationMode = useWatch({ control: form.control, name: 'organizationMode' })
 	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
 	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased
 	const isCreating = !ctx?.library
@@ -24,6 +25,9 @@ export default function LibraryPatternRadioGroup() {
 		},
 		[form, isCreating],
 	)
+
+	// metadata libraries group books by their series metadata, so folder patterns do not apply
+	if (organizationMode === OrganizationMode.Metadata) return null
 
 	// Note: if this section ever becomes more than library pattern, restore the section locale keys
 	return (

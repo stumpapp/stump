@@ -1116,6 +1116,7 @@ type LibraryConfig {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
+	organizationMode: OrganizationMode!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
 	libraryType: LibraryType!
@@ -1132,6 +1133,7 @@ type LibraryConfig {
 }
 
 input LibraryConfigInput {
+	organizationMode: OrganizationMode
 	convertRarToZip: Boolean!
 	hardDeleteConversions: Boolean!
 	generateFileHashes: Boolean!
@@ -2359,6 +2361,11 @@ input OnDeckBooksInput {
 enum OrderDirection {
 	ASC
 	DESC
+}
+
+enum OrganizationMode {
+	FILESYSTEM
+	METADATA
 }
 
 input PageBasedThumbnailInput {

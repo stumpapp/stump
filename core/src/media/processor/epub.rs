@@ -646,8 +646,8 @@ fn parse_opf_xml(
 	loop {
 		let mut html_tag_to_read: Option<(String, String)> = None;
 
-		match reader.read_event_into(&mut buf) {
-			Ok(Event::Start(ref e)) => {
+		match reader.read_event_into(&mut buf)? {
+			Event::Start(ref e) => {
 				has_root = true;
 				depth += 1;
 				current_content.clear();
@@ -661,26 +661,15 @@ fn parse_opf_xml(
 
 				if HTML_CONTENT_TAGS.contains(&base_tag.as_str()) {
 					for attr in e.attributes() {
-						attr.map_err(|error| {
-							MediaProcessorError::Metadata(error.to_string())
-						})?
-						.decode_and_unescape_value(reader.decoder())
-						.map_err(|error| {
-							MediaProcessorError::Metadata(error.to_string())
-						})?;
+						attr?.decode_and_unescape_value(reader.decoder())?;
 					}
 					html_tag_to_read = Some((tag_name, base_tag));
 				} else {
 					current_tag = base_tag.clone();
 
 					for attr in e.attributes() {
-						let attr = attr.map_err(|error| {
-							MediaProcessorError::Metadata(error.to_string())
-						})?;
-						let value =
-							attr.decode_and_unescape_value(reader.decoder()).map_err(
-								|error| MediaProcessorError::Metadata(error.to_string()),
-							)?;
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
 								let scheme = value.to_lowercase();
@@ -708,7 +697,7 @@ fn parse_opf_xml(
 					}
 				}
 			},
-			Ok(Event::Empty(ref e)) => {
+			Event::Empty(ref e) => {
 				has_root = true;
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 
@@ -717,13 +706,8 @@ fn parse_opf_xml(
 					let mut meta_content = String::new();
 
 					for attr in e.attributes() {
-						let attr = attr.map_err(|error| {
-							MediaProcessorError::Metadata(error.to_string())
-						})?;
-						let value =
-							attr.decode_and_unescape_value(reader.decoder()).map_err(
-								|error| MediaProcessorError::Metadata(error.to_string()),
-							)?;
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"name" => {
 								let name = value;
@@ -758,13 +742,8 @@ fn parse_opf_xml(
 					let mut tag_content = String::new();
 
 					for attr in e.attributes() {
-						let attr = attr.map_err(|error| {
-							MediaProcessorError::Metadata(error.to_string())
-						})?;
-						let value =
-							attr.decode_and_unescape_value(reader.decoder()).map_err(
-								|error| MediaProcessorError::Metadata(error.to_string()),
-							)?;
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
 								let scheme = value.to_lowercase();
@@ -782,28 +761,21 @@ fn parse_opf_xml(
 					}
 				}
 			},
-			Ok(Event::Text(e)) => {
-				let raw = e
-					.decode()
-					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+			Event::Text(e) => {
+				let raw = e.decode()?;
 				current_content.push_str(&raw);
 			},
-			Ok(Event::CData(e)) => {
-				let raw = e
-					.decode()
-					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+			Event::CData(e) => {
+				let raw = e.decode()?;
 				current_content.push_str(&raw);
 			},
-			Ok(Event::GeneralRef(e)) => {
-				let reference = e
-					.decode()
-					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+			Event::GeneralRef(e) => {
+				let reference = e.decode()?;
 				let raw = format!("&{reference};");
-				let value = unescape(&raw)
-					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+				let value = unescape(&raw)?;
 				current_content.push_str(&value);
 			},
-			Ok(Event::End(_)) => {
+			Event::End(_) => {
 				depth = depth.saturating_sub(1);
 				if !current_tag.is_empty() {
 					let content = current_content.trim().to_string();
@@ -862,35 +834,26 @@ fn parse_opf_xml(
 				current_tag.clear();
 				current_content.clear();
 			},
-			Ok(Event::Eof) if depth == 0 && has_root => break,
-			Ok(Event::Eof) => {
+			Event::Eof if depth == 0 && has_root => break,
+			Event::Eof => {
 				return Err(MediaProcessorError::Metadata(
 					"Unexpected end of OPF XML".into(),
 				))
-			},
-			Err(e) => {
-				return Err(MediaProcessorError::Metadata(e.to_string()));
 			},
 			_ => {},
 		}
 
 		if let Some((full_tag, base_tag)) = html_tag_to_read.take() {
 			let end = quick_xml::events::BytesEnd::new(&full_tag);
-			match reader.read_text(end.name()) {
-				Ok(raw_text) => {
-					depth = depth.saturating_sub(1);
-					let text = unescape(&raw_text)
-						.map(|c| c.into_owned())
-						.unwrap_or_else(|_| raw_text.into_owned());
-					let trimmed = text.trim().to_string();
+			let raw_text = reader.read_text(end.name())?;
+			depth = depth.saturating_sub(1);
+			let text = unescape(&raw_text)
+				.map(|c| c.into_owned())
+				.unwrap_or_else(|_| raw_text.into_owned());
+			let trimmed = text.trim().to_string();
 
-					if !trimmed.is_empty() {
-						opf_metadata.entry(base_tag).or_default().push(trimmed);
-					}
-				},
-				Err(e) => {
-					return Err(MediaProcessorError::Metadata(e.to_string()));
-				},
+			if !trimmed.is_empty() {
+				opf_metadata.entry(base_tag).or_default().push(trimmed);
 			}
 		}
 

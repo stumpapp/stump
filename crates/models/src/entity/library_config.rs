@@ -34,7 +34,6 @@ pub struct Model {
 	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
 	pub library_pattern: LibraryPattern,
-	#[graphql(skip)]
 	#[sea_orm(column_type = "Text")]
 	pub organization_mode: OrganizationMode,
 	#[sea_orm(column_type = "Text")]

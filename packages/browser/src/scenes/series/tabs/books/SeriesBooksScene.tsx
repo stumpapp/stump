@@ -1,6 +1,12 @@
 import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
-import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
+import {
+	InterfaceLayout,
+	MediaFilterInput,
+	MediaMetadataModelOrdering,
+	OrderDirection,
+	SeriesKind,
+} from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
@@ -43,7 +49,7 @@ export default function SeriesBooksSceneContainer() {
 
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
-	const layoutKey = `library-${series.library.id}-seriesBooks`
+	const layoutKey = `library-${series.library.id}-${series.kind === SeriesKind.Virtual ? 'virtual-' : ''}seriesBooks`
 	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
 		useBooksLayout(
 			layoutKey,
@@ -62,7 +68,14 @@ function SeriesBooksScene() {
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
+	} = useFilterScene({
+		persistedOrdering:
+			persistedOrdering ??
+			(series.kind === SeriesKind.Virtual
+				? { orderBy: MediaMetadataModelOrdering.Number, direction: OrderDirection.Asc }
+				: undefined),
+		setPersistedOrdering,
+	})
 	const filters = mediaFilters as MediaFilterInput
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)

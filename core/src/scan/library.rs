@@ -34,7 +34,7 @@ use crate::{
 			build_ignore_rules,
 			media::{
 				build_and_insert_media, handle_missing_media, handle_restored_media,
-				visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+				visit_and_update_media, MediaBuildOperation,
 			},
 			oneshot::{
 				build_and_insert_oneshots,
@@ -189,16 +189,35 @@ impl LibraryScanJob {
 		})
 	}
 
-	async fn execute_metadata_task(
+	async fn execute_media_task(
 		&self,
 		ctx: &JobContext,
 		task: SeriesScanTask,
+		series: Option<(&str, &str)>,
 	) -> Result<JobTaskOutput<Self>, JobError> {
+		let series_id = series.map(|(id, _)| id);
+		let scope = series_id.map_or_else(
+			|| media::Column::LibraryId.eq(&self.id),
+			|id| media::Column::SeriesId.eq(id),
+		);
+		if let Some((_, path)) = series {
+			let series_name = Path::new(path)
+				.file_name()
+				.map(|name| name.to_string_lossy())
+				.unwrap_or_else(|| path.into());
+			let message = match &task {
+				SeriesScanTask::RestoreMedia(_) => "Restoring media",
+				SeriesScanTask::MarkMissingMedia(_) => "Handling missing media",
+				SeriesScanTask::CreateMedia(_) => "Creating media",
+				SeriesScanTask::VisitMedia(_) => "Visiting media",
+			};
+			ctx.report_progress(JobProgress::msg_with_subtitle(message, &series_name));
+		}
 		let operation = || {
 			self.config
 				.clone()
 				.map(|library_config| MediaBuildOperation {
-					series_id: None,
+					series_id: series_id.map(str::to_string),
 					library_config,
 				})
 				.ok_or_else(|| {
@@ -207,12 +226,10 @@ impl LibraryScanJob {
 		};
 		let result = match task {
 			SeriesScanTask::MarkMissingMedia(paths) => {
-				handle_missing_media(ctx, media::Column::LibraryId.eq(&self.id), paths)
-					.await
+				handle_missing_media(ctx, scope, paths).await
 			},
 			SeriesScanTask::RestoreMedia(ids) => {
-				handle_restored_media(ctx, media::Column::LibraryId.eq(&self.id), ids)
-					.await
+				handle_restored_media(ctx, scope, ids).await
 			},
 			SeriesScanTask::CreateMedia(paths) => {
 				build_and_insert_media(operation()?, ctx, paths).await?
@@ -222,18 +239,13 @@ impl LibraryScanJob {
 			},
 		};
 		let changed = result.created_media + result.updated_media;
-		if changed > 0 {
-			if self
-				.config
-				.as_ref()
-				.is_some_and(|config| config.thumbnail_config.is_none())
-			{
-				bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, None).await?;
-			}
+		if changed > 0 || series_id.is_some() {
+			self.bump_thumbnail_fallbacks(ctx, series_id, changed)
+				.await?;
 			ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 				CreatedOrUpdatedManyMedia {
 					count: changed,
-					series_id: None,
+					series_id: series_id.map(str::to_string),
 					library_id: self.id.clone(),
 				},
 			));
@@ -253,7 +265,7 @@ impl LibraryScanJob {
 	async fn bump_thumbnail_fallbacks(
 		&self,
 		ctx: &JobContext,
-		series_id: &str,
+		series_id: Option<&str>,
 		changed_media: u64,
 	) -> Result<(), JobError> {
 		if changed_media > 0
@@ -262,7 +274,7 @@ impl LibraryScanJob {
 				.as_ref()
 				.is_some_and(|config| config.thumbnail_config.is_none())
 		{
-			bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, Some(series_id)).await?;
+			bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, series_id).await?;
 		}
 
 		Ok(())
@@ -635,7 +647,7 @@ impl JobLifecycle for LibraryScanJob {
 
 		match task {
 			LibraryScanTask::MetadataTask(task) => {
-				return self.execute_metadata_task(ctx, task).await
+				return self.execute_media_task(ctx, task, None).await
 			},
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
@@ -1087,155 +1099,8 @@ impl JobLifecycle for LibraryScanJob {
 					})
 					.collect();
 			},
-			LibraryScanTask::SeriesTask {
-				id: series_id,
-				path: series_path,
-				task: series_task,
-			} => match series_task {
-				SeriesScanTask::RestoreMedia(ids) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Restoring media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = handle_restored_media(
-						ctx,
-						media::Column::SeriesId.eq(&series_id),
-						ids,
-					)
-					.await;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id: Some(series_id),
-							library_id: self.id.clone(),
-						},
-					));
-
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::MarkMissingMedia(paths) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Handling missing media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = handle_missing_media(
-						ctx,
-						media::Column::SeriesId.eq(&series_id),
-						paths,
-					)
-					.await;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id: Some(series_id),
-							library_id: self.id.clone(),
-						},
-					));
-
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::CreateMedia(paths) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Creating media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						created_media,
-						logs: new_logs,
-						..
-					} = build_and_insert_media(
-						MediaBuildOperation {
-							series_id: Some(series_id.clone()),
-							library_config: self.config.clone().ok_or(
-								JobError::TaskFailed(
-									"Library configuration is missing".to_string(),
-								),
-							)?,
-						},
-						ctx,
-						paths,
-					)
-					.await?;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, created_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: created_media,
-							series_id: Some(series_id),
-							library_id: self.id.clone(),
-						},
-					));
-					output.created_media += created_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::VisitMedia(params) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Visiting media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = visit_and_update_media(
-						MediaBuildOperation {
-							series_id: Some(series_id.clone()),
-							library_config: self.config.clone().ok_or(
-								JobError::TaskFailed(
-									"Library configuration is missing".to_string(),
-								),
-							)?,
-						},
-						ctx,
-						params,
-					)
-					.await?;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						event::CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id: Some(series_id),
-							library_id: self.id.clone(),
-						},
-					));
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
+			LibraryScanTask::SeriesTask { id, path, task } => {
+				return self.execute_media_task(ctx, task, Some((&id, &path))).await
 			},
 		}
 

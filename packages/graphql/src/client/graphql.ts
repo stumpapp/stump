@@ -1225,6 +1225,7 @@ export type LibraryConfig = {
    * relative to the library path. this is **not** a fully qualified path
    */
   oneshotsDirectory?: Maybe<Scalars['String']['output']>;
+  organizationMode: OrganizationMode;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
   skipBookOverview: Scalars['Boolean']['output'];
@@ -1246,6 +1247,7 @@ export type LibraryConfigInput = {
   libraryPattern: LibraryPattern;
   libraryType: LibraryType;
   oneshotsDirectory?: InputMaybe<Scalars['String']['input']>;
+  organizationMode?: InputMaybe<OrganizationMode>;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
   skipBookOverview: Scalars['Boolean']['input'];
@@ -3275,6 +3277,11 @@ export type OnDeckBooksInput = {
 export enum OrderDirection {
   Asc = 'ASC',
   Desc = 'DESC'
+}
+
+export enum OrganizationMode {
+  Filesystem = 'FILESYSTEM',
+  Metadata = 'METADATA'
 }
 
 export type PageBasedThumbnailInput = {
@@ -5939,10 +5946,7 @@ export type UpdateMediaMetadataMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMediaMetadata: { __typename?: 'Media', metadata?: (
-      { __typename?: 'MediaMetadata' }
-      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
-    ) | null } };
+export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMediaMetadata: { __typename?: 'Media', id: string } };
 
 export type MediaEditorSetLockedFieldsMutationVariables = Exact<{
   mediaId: Scalars['ID']['input'];
@@ -6256,10 +6260,7 @@ export type UpdateSeriesMetadataMutationVariables = Exact<{
 }>;
 
 
-export type UpdateSeriesMetadataMutation = { __typename?: 'Mutation', updateSeriesMetadata: { __typename?: 'Series', metadata?: (
-      { __typename?: 'SeriesMetadata' }
-      & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
-    ) | null } };
+export type UpdateSeriesMetadataMutation = { __typename?: 'Mutation', updateSeriesMetadata: { __typename?: 'Series', id: string } };
 
 export type SeriesEditorSetLockedFieldsMutationVariables = Exact<{
   seriesId: Scalars['ID']['input'];
@@ -6575,7 +6576,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', organizationMode: OrganizationMode, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6615,7 +6616,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, oneshotsDirectory?: string | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, organizationMode: OrganizationMode, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, oneshotsDirectory?: string | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6765,7 +6766,7 @@ export type SeriesLayoutQueryVariables = Exact<{
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path?: string | null, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', kind: SeriesKind, id: string, path?: string | null, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8525,6 +8526,7 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
+    organizationMode
     libraryType
     thumbnailConfig {
       __typename
@@ -11138,49 +11140,10 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
 export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
   updateMediaMetadata(id: $id, input: $input) {
-    metadata {
-      ...MediaMetadataEditor
-    }
+    id
   }
 }
-    fragment MediaMetadataEditor on MediaMetadata {
-  ageRating
-  characters
-  colorists
-  coverArtists
-  day
-  editors
-  format
-  identifierAmazon
-  identifierCalibre
-  identifierGoogle
-  identifierIsbn
-  identifierMobiAsin
-  identifierUuid
-  genres
-  inkers
-  language
-  letterers
-  links
-  month
-  notes
-  number
-  pageCount
-  pencillers
-  publisher
-  series
-  seriesGroup
-  storyArc
-  storyArcNumber
-  summary
-  teams
-  title
-  titleSort
-  volume
-  writers
-  year
-  lockedFields
-}`) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
+    `) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
 export const MediaEditorSetLockedFieldsDocument = new TypedDocumentString(`
     mutation MediaEditorSetLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
   setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
@@ -12266,39 +12229,10 @@ export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
 export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
     mutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {
   updateSeriesMetadata(id: $id, input: $input) {
-    metadata {
-      ...SeriesMetadataEditor
-    }
+    id
   }
 }
-    fragment SeriesMetadataEditor on SeriesMetadata {
-  ageRating
-  booktype
-  characters
-  collects {
-    series
-    comicid
-    issueid
-    issues
-  }
-  comicImage
-  comicid
-  descriptionFormatted
-  genres
-  imprint
-  links
-  metaType
-  publicationRun
-  publisher
-  status
-  summary
-  title
-  totalIssues
-  volume
-  writers
-  year
-  lockedFields
-}`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
+    `) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
 export const SeriesEditorSetLockedFieldsDocument = new TypedDocumentString(`
     mutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
   setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
@@ -13179,6 +13113,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       }
     }
     config {
+      organizationMode
       defaultLibraryViewMode
       hideSeriesView
     }
@@ -13204,6 +13139,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
+    organizationMode
     libraryType
     thumbnailConfig {
       __typename
@@ -13576,6 +13512,7 @@ export const SeriesActionCompleteDocument = new TypedDocumentString(`
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {
+    kind
     id
     path
     library {

@@ -4,9 +4,7 @@ use std::sync::Arc;
 use async_graphql::SimpleObject;
 use metadata_integrations::{MatchCandidate, SearchQuery};
 use models::{
-	entity::{
-		library_config, media, metadata_fetch_record, metadata_provider_config, series,
-	},
+	entity::{media, metadata_fetch_record, metadata_provider_config, series},
 	shared::enums::{LibraryType, MetadataFetchStatus},
 };
 use sea_orm::QuerySelect;
@@ -18,7 +16,7 @@ use crate::job::{
 	JobTaskOutput, WorkingState,
 };
 
-use super::{apply, ProviderClientCache};
+use super::{apply, fetch::library_type_for_library, ProviderClientCache};
 
 type Id = String;
 
@@ -757,16 +755,7 @@ async fn resolve_library_type(
 	conn: &DatabaseConnection,
 	library_id: &str,
 ) -> Result<LibraryType, JobError> {
-	let config = library_config::Entity::find()
-		.filter(library_config::Column::LibraryId.eq(library_id))
-		.one(conn)
+	library_type_for_library(conn, library_id)
 		.await
-		.map_err(|e| JobError::InitFailed(e.to_string()))?
-		.ok_or_else(|| {
-			JobError::InitFailed(format!(
-				"Library config not found for library {library_id}"
-			))
-		})?;
-
-	Ok(config.library_type)
+		.map_err(|error| JobError::InitFailed(error.to_string()))
 }

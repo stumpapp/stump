@@ -1,7 +1,13 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, SeriesBooksScreenQuery } from '@stump/graphql'
+import {
+	graphql,
+	MediaMetadataModelOrdering,
+	OrderDirection,
+	SeriesBooksScreenQuery,
+	SeriesKind,
+} from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useNavigationState, useScrollToTop } from 'expo-router/react-navigation'
@@ -109,7 +115,14 @@ export default function Screen() {
 	)
 
 	// eslint-disable-next-line react-hooks/refs
-	const store = useRef(createBookFilterStore()).current
+	const store = useRef(
+		createBookFilterStore(
+			{},
+			series.kind === SeriesKind.Virtual
+				? { metadata: { field: MediaMetadataModelOrdering.Number, direction: OrderDirection.Asc } }
+				: undefined,
+		),
+	).current
 	const { filters, sort, resetFilters } = useStore(
 		store,
 		useShallow((state) => ({

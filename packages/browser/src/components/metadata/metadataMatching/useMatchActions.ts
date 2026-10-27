@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { invalidateThumbnailQueries } from '@/utils/query'
+
 import {
 	getMediaFieldComparisons,
 	getSeriesFieldComparisons,
@@ -114,7 +116,6 @@ export function useToggleLockedField() {
 }
 
 export function useMatchActions() {
-	const { sdk } = useSDK()
 	const {
 		records,
 		currentRecordIndex,
@@ -147,14 +148,8 @@ export function useMatchActions() {
 	const queryClient = useQueryClient()
 
 	const invalidateQueries = () => {
-		queryClient.invalidateQueries({
-			predicate: ({ queryKey }) =>
-				queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches') ||
-				queryKey.includes(sdk.cacheKeys.mediaById) ||
-				queryKey.includes(sdk.cacheKeys.bookOverview) ||
-				queryKey.includes(sdk.cacheKeys.bookOverviewHeader) ||
-				queryKey.includes(sdk.cacheKeys.seriesById),
-		})
+		invalidateThumbnailQueries(queryClient)
+		queryClient.invalidateQueries({ queryKey: ['pendingMetadataMatches'] })
 	}
 
 	const advance = () => {

@@ -58,7 +58,7 @@ export default function CreateLibraryScene() {
 	} = useGraphQLMutation(mutation, {
 		mutationKey: [sdk.cacheKeys.libraryCreate],
 		onSuccess: ({ createLibrary: { id } }) => {
-			navigate(paths.librarySeries(id))
+			navigate(paths.library(id))
 			startConfetti()
 			client.invalidateQueries({ queryKey: [sdk.cacheKeys.libraries] })
 		},
@@ -112,7 +112,7 @@ export default function CreateLibraryScene() {
 	}, [createError])
 
 	return (
-		<div className="relative flex flex-1 flex-col">
+		<div className="min-w-0 relative flex flex-1 flex-col">
 			<SteppedFormContext.Provider
 				value={{
 					currentStep: formStep,

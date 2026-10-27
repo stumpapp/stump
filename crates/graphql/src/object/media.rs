@@ -18,7 +18,7 @@ use crate::{
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
 		library::LibraryLoader,
-		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
+		library_config::LibraryConfigLoader,
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
 			ReadingSessionLoader, ReadthroughRecordLoaderKey,
@@ -136,9 +136,7 @@ impl Media {
 		let loader = ctx.data::<DataLoader<LibraryConfigLoader>>()?;
 
 		loader
-			.load_one(LibraryConfigLoaderKey {
-				library_id: self.model.library_id.clone(),
-			})
+			.load_one(self.model.library_id.clone())
 			.await?
 			.map(LibraryConfig::from)
 			.ok_or_else(|| "Library config not found".into())

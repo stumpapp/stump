@@ -9,14 +9,29 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 There are a couple key concepts to go over regarding how Stump represents libraries:
 
-- Libraries are really just paths on your computer that contain subdirectories representing series of books.
+- Libraries are paths on your computer containing books. Series can come from folders or book metadata.
 - A library paths _must_ be recursively unique. This means if you have a library at `/books`, you cannot have a library at `/books/comics`.
 
 As long as a directory is accessible by Stump, and abides by the above specification, you can create a library with it. This allows for convenient configurations like network drives, etc.
 
+## Organization
+
+Choose an organization mode when creating a library. Existing libraries use **Filesystem**. Organization is fixed after creation; create a new library to use another mode.
+
+- **Filesystem** groups books by directories using one of the patterns below. Its oneshots directory keeps the existing per-book series behavior.
+- **Metadata** scans the root and all nested folders, following your ignore rules. A book's trimmed series name groups it with books of the same name in that library. Books without series metadata remain standalone and appear in the Books view. Folder names do not affect grouping.
+
+Metadata organization requires metadata processing. It supports embedded ComicInfo and EPUB metadata. For EPUB files, a matching `.opf` sidecar overrides embedded fields. One unambiguous EPUB 3 series collection with matching refinements is supported; sets and multiple or conflicting collections remain standalone, with a scan diagnostic. Original collection fields remain available in the extracted metadata.
+
+Virtual series have no directory or Files tab. Their books sort by series number, including fractions such as `1.5`, then filename and ID. Books without a number sort last. A virtual series is deleted, along with its metadata and thumbnail, as soon as its last book leaves it.
+
+Normal scans are incremental. To re-read unchanged files or sidecar-only changes, choose a custom library scan and **Rebuild metadata**. Regeneration restores file values over database edits. Failed extraction preserves the previous metadata and membership and records a scan diagnostic.
+
+Editing a book's series metadata or accepting a provider match updates its membership immediately. Clearing or resetting book metadata makes it standalone. Metadata providers work independently of organization, and Stump does not write these edits back to your files.
+
 ## Supported Patterns
 
-There are way too many varying organizational preferences for Stump to support all of them. Instead, Stump supports two different patterns for organizing your library:
+There are way too many varying organizational preferences for Stump to support all of them. For filesystem organization, Stump supports two different patterns for organizing your library:
 
 - **Collection-Priority**: Takes the top most folders and collapses their contents into it as a single series.
 - **Series-Priority**: Will create a separate series for each folder that directly contains media files, not just the top most folder.

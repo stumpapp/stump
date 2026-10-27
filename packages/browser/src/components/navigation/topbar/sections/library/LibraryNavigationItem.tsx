@@ -79,7 +79,7 @@ export default function LibraryNavigationItem({
 						{libraries.map((library) => (
 							<div key={library.id} className="w-full">
 								<TopBarLinkListItem
-									to={paths.librarySeries(library.id)}
+									to={paths.library(library.id)}
 									isActive={currentLibraryId === library.id}
 									className="h-9"
 								>

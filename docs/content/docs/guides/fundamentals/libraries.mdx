@@ -23,7 +23,7 @@ Choose an organization mode when creating a library. Existing libraries use **Fi
 
 Metadata organization requires metadata processing. It supports embedded ComicInfo and EPUB metadata. For EPUB files, a matching `.opf` sidecar overrides embedded fields. One unambiguous EPUB 3 series collection with matching refinements is supported; sets and multiple or conflicting collections remain standalone, with a scan diagnostic. Original collection fields remain available in the extracted metadata.
 
-Virtual series have no directory or Files tab. Their books sort by series number, including fractions such as `1.5`, then filename and ID. Books without a number sort last. Empty groups remain until library cleanup.
+Virtual series have no directory or Files tab. Their books sort by series number, including fractions such as `1.5`, then filename and ID. Books without a number sort last. A virtual series is deleted, along with its metadata and thumbnail, as soon as its last book leaves it.
 
 Normal scans are incremental. To re-read unchanged files or sidecar-only changes, choose a custom library scan and **Rebuild metadata**. Regeneration restores file values over database edits. Failed extraction preserves the previous metadata and membership and records a scan diagnostic.
 

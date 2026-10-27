@@ -90,12 +90,13 @@ impl LibraryConfigInput {
 		}) {
 			return Err("Library organization cannot be changed after creation".into());
 		}
-		validate_organization(
+		ensure_metadata_compatible(
 			self.organization_mode.or(existing).unwrap_or_default(),
 			self.process_metadata,
 			self.oneshots_directory.as_deref(),
 		)
 	}
+
 	pub fn into_active_model(self) -> library_config::ActiveModel {
 		let LibraryConfigInput {
 			organization_mode,
@@ -258,11 +259,12 @@ impl PatchLibraryConfigInput {
 			MaybeUndefined::Null => None,
 			MaybeUndefined::Undefined => model.oneshots_directory.as_deref(),
 		};
-		validate_organization(
+		ensure_metadata_compatible(
 			model.organization_mode,
 			self.process_metadata.unwrap_or(model.process_metadata),
 			oneshots,
 		)?;
+
 		let PatchLibraryConfigInput {
 			convert_rar_to_zip,
 			hard_delete_conversions,
@@ -359,7 +361,7 @@ impl PatchLibraryConfigInput {
 	}
 }
 
-fn validate_organization(
+fn ensure_metadata_compatible(
 	mode: OrganizationMode,
 	process_metadata: bool,
 	oneshots_directory: Option<&str>,
@@ -373,4 +375,118 @@ fn validate_organization(
 		}
 	}
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	fn metadata_config() -> LibraryConfigInput {
+		LibraryConfigInput {
+			organization_mode: Some(OrganizationMode::Metadata),
+			process_metadata: true,
+			..Default::default()
+		}
+	}
+
+	fn config_model(mode: OrganizationMode) -> library_config::Model {
+		library_config::Model {
+			id: 1,
+			convert_rar_to_zip: false,
+			hard_delete_conversions: false,
+			default_reading_dir: ReadingDirection::default(),
+			default_reading_mode: ReadingMode::default(),
+			default_reading_image_scale_fit: ReadingImageScaleFit::default(),
+			generate_file_hashes: false,
+			generate_koreader_hashes: false,
+			process_metadata: true,
+			watch: false,
+			library_pattern: LibraryPattern::default(),
+			organization_mode: mode,
+			default_library_view_mode: LibraryViewMode::default(),
+			hide_series_view: false,
+			library_type: LibraryType::default(),
+			skip_book_overview: false,
+			thumbnail_config: None,
+			process_thumbnail_colors_even_without_config: false,
+			ignore_rules: None,
+			library_id: None,
+			oneshots_directory: None,
+		}
+	}
+
+	#[test]
+	fn test_metadata_library_is_valid() {
+		assert!(metadata_config().validate_organization(None).is_ok());
+	}
+
+	#[test]
+	fn test_organization_cannot_change_after_creation() {
+		let config = metadata_config();
+		assert!(config
+			.validate_organization(Some(OrganizationMode::Filesystem))
+			.is_err());
+		assert!(config
+			.validate_organization(Some(OrganizationMode::Metadata))
+			.is_ok());
+	}
+
+	#[test]
+	fn test_omitted_organization_keeps_existing_mode() {
+		let config = LibraryConfigInput {
+			process_metadata: false,
+			..Default::default()
+		};
+		assert!(config
+			.validate_organization(Some(OrganizationMode::Metadata))
+			.is_err());
+		assert!(config
+			.validate_organization(Some(OrganizationMode::Filesystem))
+			.is_ok());
+	}
+
+	#[test]
+	fn test_metadata_library_requires_metadata_processing() {
+		let config = LibraryConfigInput {
+			process_metadata: false,
+			..metadata_config()
+		};
+		assert!(config.validate_organization(None).is_err());
+	}
+
+	#[test]
+	fn test_metadata_library_rejects_oneshots_directory() {
+		let config = LibraryConfigInput {
+			oneshots_directory: Some("oneshots".to_string()),
+			..metadata_config()
+		};
+		assert!(config.validate_organization(None).is_err());
+	}
+
+	#[test]
+	fn test_patch_validates_against_existing_organization() {
+		let disable_processing = PatchLibraryConfigInput {
+			process_metadata: Some(false),
+			..Default::default()
+		};
+		assert!(disable_processing
+			.apply_to_model(config_model(OrganizationMode::Metadata))
+			.is_err());
+
+		let add_oneshots = PatchLibraryConfigInput {
+			oneshots_directory: MaybeUndefined::Value("oneshots".to_string()),
+			..Default::default()
+		};
+		assert!(add_oneshots
+			.apply_to_model(config_model(OrganizationMode::Metadata))
+			.is_err());
+
+		let disable_processing = PatchLibraryConfigInput {
+			process_metadata: Some(false),
+			..Default::default()
+		};
+		assert!(disable_processing
+			.apply_to_model(config_model(OrganizationMode::Filesystem))
+			.is_ok());
+	}
 }

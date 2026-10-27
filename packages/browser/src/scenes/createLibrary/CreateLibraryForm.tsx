@@ -16,6 +16,7 @@ import {
 	DefaultLibraryView,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
+	OrganizationMode as OrganizationModeSection,
 	ScannerOptInFeatures,
 	ThumbnailConfig,
 } from '@/components/library/createOrUpdate/sections'
@@ -116,6 +117,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 			case 2:
 				return (
 					<>
+						<OrganizationModeSection />
 						<LibraryPatternSection />
 						<DefaultLibraryView />
 						<ScannerOptInFeatures />

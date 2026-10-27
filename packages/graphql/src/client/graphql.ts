@@ -479,7 +479,7 @@ export type ConfidenceFactor = {
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
 
-export type CoreJobOutput = AnalyzeMediaOutput | LibraryScanOutput | MetadataFetchJobOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
+export type CoreJobOutput = AnalyzeMediaOutput | LibraryScanOutput | LlmLibraryTagJobOutput | LlmTagJobOutput | MetadataFetchJobOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
 
 export type CreateAnnotationInput = {
   annotationText?: InputMaybe<Scalars['String']['input']>;
@@ -1366,6 +1366,179 @@ export enum LibraryViewMode {
   Series = 'SERIES'
 }
 
+/** How suggested tags are applied to books */
+export enum LlmApplyStrategy {
+  /**
+   * Only add tags which the book does not already have; never remove
+   * existing tags
+   */
+  MergeOnly = 'MERGE_ONLY'
+}
+
+/**
+ * A media -> tags assignment as persisted inside
+ * `llm_library_tag_drafts.assignments`
+ */
+export type LlmLibraryTagAssignment = {
+  __typename?: 'LlmLibraryTagAssignment';
+  mediaId: Scalars['String']['output'];
+  tags: Array<Scalars['String']['output']>;
+};
+
+export type LlmLibraryTagDraft = {
+  __typename?: 'LlmLibraryTagDraft';
+  /** The per-book tag assignments suggested by the analysis */
+  assignments: Array<LlmLibraryTagAssignment>;
+  /** The number of books with at least one suggested tag */
+  booksAnalyzed: Scalars['Int']['output'];
+  /** Resume cursor: the number of batches already completed */
+  completedBatches: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** JSON array of the final global tag vocabulary produced by the analysis */
+  finalTagList?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['Int']['output'];
+  libraryId: Scalars['String']['output'];
+  status: LlmLibraryTagDraftStatus;
+  /** The total number of batches planned for this run */
+  totalBatches: Scalars['Int']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The status of a library-wide LLM tag analysis draft */
+export enum LlmLibraryTagDraftStatus {
+  /** The suggestions were applied */
+  Applied = 'APPLIED',
+  /** The analysis finished and awaits user review */
+  AwaitingReview = 'AWAITING_REVIEW',
+  /** The analysis failed */
+  Failed = 'FAILED',
+  /** The analysis is (still) running, used for resuming interrupted runs */
+  InProgress = 'IN_PROGRESS',
+  /** The analysis was interrupted by rate limiting, eligible for a later retry */
+  RateLimited = 'RATE_LIMITED'
+}
+
+export type LlmLibraryTagJobOutput = {
+  __typename?: 'LlmLibraryTagJobOutput';
+  /** Number of books with at least one suggested tag */
+  booksAnalyzed: Scalars['Int']['output'];
+  /** Number of batches completed in this run */
+  completedBatches: Scalars['Int']['output'];
+  /** Number of batches that failed */
+  failedBatches: Scalars['Int']['output'];
+  /** Number of batches that were rate-limited */
+  rateLimitedBatches: Scalars['Int']['output'];
+  /** Size of the final tag vocabulary */
+  tagsInVocabulary: Scalars['Int']['output'];
+  /** Approximate total token usage reported by the LLM API */
+  tokensUsed: Scalars['Int']['output'];
+  /** Total number of batches planned */
+  totalBatches: Scalars['Int']['output'];
+};
+
+/** A suggested tag as persisted inside `llm_tag_suggestions.suggested_tags` */
+export type LlmSuggestedTag = {
+  __typename?: 'LlmSuggestedTag';
+  confidence: Scalars['Float']['output'];
+  name: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+};
+
+/** The scope of books an LLM tagging run should consider */
+export enum LlmTagBatchScope {
+  /** Consider all books, regardless of existing tags */
+  AllBooks = 'ALL_BOOKS',
+  /** Only tag books which do not have any tags linked yet */
+  NewBooksOnly = 'NEW_BOOKS_ONLY'
+}
+
+export type LlmTagJobOutput = {
+  __typename?: 'LlmTagJobOutput';
+  /** Number of books whose suggestions were auto-applied */
+  autoApplied: Scalars['Int']['output'];
+  /** Number of books that failed */
+  failed: Scalars['Int']['output'];
+  /** Number of books that were rate-limited */
+  rateLimited: Scalars['Int']['output'];
+  /** Number of books that were skipped (already have settled suggestions) */
+  skipped: Scalars['Int']['output'];
+  /** Number of books whose suggestions await review */
+  suggested: Scalars['Int']['output'];
+  /** Approximate total token usage reported by the LLM API */
+  tokensUsed: Scalars['Int']['output'];
+  /** Total number of books processed */
+  totalProcessed: Scalars['Int']['output'];
+};
+
+export type LlmTagRetryConfigInput = {
+  /** Restrict draft retries to these libraries. An empty list means all */
+  libraryIds: Array<Scalars['String']['input']>;
+};
+
+export type LlmTagSuggestion = {
+  __typename?: 'LlmTagSuggestion';
+  /** The tag names which were actually applied, if any */
+  appliedTags: Array<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  /** The media item associated with this suggestion, if any */
+  media?: Maybe<Media>;
+  mediaId: Scalars['String']['output'];
+  status: LlmTagSuggestionStatus;
+  /** The suggested tags with their confidence and reasoning */
+  suggestedTags: Array<LlmSuggestedTag>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The status of an LLM tag suggestion for a single book */
+export enum LlmTagSuggestionStatus {
+  /** The suggestions were accepted by a user and applied */
+  Accepted = 'ACCEPTED',
+  /** The suggestions met the auto-apply threshold and were applied */
+  AutoApplied = 'AUTO_APPLIED',
+  /** Suggesting tags for the book failed */
+  Failed = 'FAILED',
+  /** The request was rate limited, eligible for a later retry */
+  RateLimited = 'RATE_LIMITED',
+  /** The suggestions were rejected by a user */
+  Rejected = 'REJECTED',
+  /** Tags have been suggested and await manual (or auto) review */
+  Suggested = 'SUGGESTED'
+}
+
+/**
+ * User-managed configuration for the LLM tagging features. Stored as JSON in
+ * `server_config.llm_tagging_config`.
+ */
+export type LlmTaggingConfig = {
+  __typename?: 'LlmTaggingConfig';
+  /**
+   * When set, books whose suggestions all meet or exceed this confidence
+   * are applied automatically instead of awaiting manual review
+   */
+  autoApplyThreshold?: Maybe<Scalars['Float']['output']>;
+  /** Which books per-book tagging runs should consider */
+  batchScope: LlmTagBatchScope;
+  /** Library analysis batch size (books per LLM request) */
+  batchSize: Scalars['Int']['output'];
+  /** How many LLM requests may be in flight concurrently within a job */
+  concurrency: Scalars['Int']['output'];
+  /**
+   * Maximum number of LLM requests per day before remaining work is
+   * marked as rate limited for a later retry
+   */
+  dailyRequestLimit: Scalars['Int']['output'];
+  /** Master switch consulted by the post-scan auto tagging hook */
+  enabled: Scalars['Boolean']['output'];
+  /**
+   * Book summaries are truncated to this many characters before being
+   * sent to the LLM
+   */
+  maxSummaryChars: Scalars['Int']['output'];
+  /** Rate limit for LLM API requests, in requests per second */
+  requestsPerSecond: Scalars['Float']['output'];
+};
+
 export type Log = {
   __typename?: 'Log';
   context?: Maybe<Scalars['String']['output']>;
@@ -2025,8 +2198,15 @@ export enum MissingEntityType {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Accept all pending LLM tag suggestions, applying every suggested tag */
+  acceptAllLlmSuggestions: Scalars['Int']['output'];
   /** Accept the top-ranked candidate for all pending metadata matches */
   acceptAllPendingMatches: Scalars['Int']['output'];
+  /**
+   * Accept (a subset of) the suggested tags for a book and link them to it.
+   * When `tagNames` is omitted, all suggested tags are applied.
+   */
+  acceptLlmTagSuggestions: Scalars['Boolean']['output'];
   /**
    * a more focused version of `update_media_progress` that splices the history so that
    * any sessions after the ancestor_session_id are deleted in favor of the input
@@ -2044,6 +2224,13 @@ export type Mutation = {
   analyzeLibrary: Scalars['Boolean']['output'];
   analyzeMedia: Scalars['Boolean']['output'];
   analyzeSeries: Scalars['Boolean']['output'];
+  /**
+   * Apply the tag assignments suggested by a library tag analysis draft to
+   * the given books (or all of them when `mediaIds` is omitted). The
+   * default `MERGE_ONLY` strategy only ever adds tags; it never removes
+   * existing ones.
+   */
+  applyLibraryTagSuggestions: Scalars['Int']['output'];
   /** Archive or unarchive a discussion (Moderator+) */
   archiveDiscussion: Scalars['Boolean']['output'];
   cancelJob: Scalars['Boolean']['output'];
@@ -2218,8 +2405,12 @@ export type Mutation = {
   /** Pin or unpin a message (Moderator+) */
   pinMessage: Scalars['Boolean']['output'];
   processLibraryThumbnails: Scalars['Boolean']['output'];
+  /** Reject all pending LLM tag suggestions */
+  rejectAllLlmSuggestions: Scalars['Int']['output'];
   /** Reject all pending metadata matches, setting their status to NoMatch */
   rejectAllPendingMatches: Scalars['Int']['output'];
+  /** Reject the suggested tags for a book */
+  rejectLlmTagSuggestions: Scalars['Boolean']['output'];
   /** Reject the current match candidates for a media item */
   rejectMediaMatch: MetadataFetchRecord;
   /** Reject the current match candidates for a series */
@@ -2240,6 +2431,16 @@ export type Mutation = {
   resetLibraryMetadata: Library;
   resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
+  /**
+   * Start a background job which analyzes the whole library in batches,
+   * building a global tag vocabulary and per-book assignment suggestions
+   */
+  runLlmLibraryTagAnalysis: Scalars['Boolean']['output'];
+  /**
+   * Start a background job which requests tag suggestions from the
+   * configured LLM for the media in this library
+   */
+  runLlmTagging: Scalars['Boolean']['output'];
   /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
    * and update the database accordingly.
@@ -2319,6 +2520,11 @@ export type Mutation = {
    * persisted and is never returned to clients.
    */
   updateLlmConfig: ServerConfigModel;
+  /**
+   * Update the LLM tagging configuration. Missing fields fall back to
+   * their defaults and values are sanitized into safe bounds.
+   */
+  updateLlmTaggingConfig: LlmTaggingConfig;
   updateMediaMetadata: Media;
   updateMediaProgress: ReadingSession;
   /**
@@ -2400,6 +2606,12 @@ export type MutationAcceptAllPendingMatchesArgs = {
 };
 
 
+export type MutationAcceptLlmTagSuggestionsArgs = {
+  mediaId: Scalars['ID']['input'];
+  tagNames?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+
 export type MutationAcceptLocalProgressArgs = {
   ancestorSessionId?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
@@ -2446,6 +2658,13 @@ export type MutationAnalyzeMediaArgs = {
 export type MutationAnalyzeSeriesArgs = {
   forceReanalysis?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationApplyLibraryTagSuggestionsArgs = {
+  draftId: Scalars['Int']['input'];
+  mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  strategy?: InputMaybe<LlmApplyStrategy>;
 };
 
 
@@ -2840,6 +3059,11 @@ export type MutationProcessLibraryThumbnailsArgs = {
 };
 
 
+export type MutationRejectLlmTagSuggestionsArgs = {
+  mediaId: Scalars['ID']['input'];
+};
+
+
 export type MutationRejectMediaMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
   mediaId: Scalars['ID']['input'];
@@ -2895,6 +3119,18 @@ export type MutationResetSeriesMetadataArgs = {
 export type MutationRespondToBookClubInvitationArgs = {
   id: Scalars['ID']['input'];
   input: BookClubInvitationResponseInput;
+};
+
+
+export type MutationRunLlmLibraryTagAnalysisArgs = {
+  forceRefetch?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRunLlmTaggingArgs = {
+  forceRefetch?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3048,6 +3284,11 @@ export type MutationUpdateLlmConfigArgs = {
   apiKey?: InputMaybe<Scalars['String']['input']>;
   modelName?: InputMaybe<Scalars['String']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateLlmTaggingConfigArgs = {
+  config: Scalars['JSON']['input'];
 };
 
 
@@ -3603,6 +3844,12 @@ export type Query = {
   libraryById?: Maybe<Library>;
   libraryMissingEntities: PaginatedMissingEntityResponse;
   listDirectory: PaginatedDirectoryListingResponse;
+  /** Whether a library-wide LLM tag analysis is currently resumable */
+  llmLibraryTagDraftInProgress?: Maybe<LlmLibraryTagDraft>;
+  /** Return the LLM library tag analysis drafts for a library, newest first */
+  llmLibraryTagDrafts: Array<LlmLibraryTagDraft>;
+  /** The LLM tagging configuration for the server */
+  llmTaggingConfig: LlmTaggingConfig;
   /**
    * Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
    * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -3633,6 +3880,8 @@ export type Query = {
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
+  /** Return all LLM tag suggestions that are awaiting user review */
+  pendingLlmTagSuggestions: Array<LlmTagSuggestion>;
   /** Return all metadata fetch records that are awaiting user review. */
   pendingMetadataMatches: Array<MetadataFetchRecord>;
   previousBookClubDiscussions: Array<BookClubDiscussion>;
@@ -3831,6 +4080,16 @@ export type QueryLibraryMissingEntitiesArgs = {
 export type QueryListDirectoryArgs = {
   input?: InputMaybe<DirectoryListingInput>;
   pagination: Pagination;
+};
+
+
+export type QueryLlmLibraryTagDraftInProgressArgs = {
+  libraryId: Scalars['ID']['input'];
+};
+
+
+export type QueryLlmLibraryTagDraftsArgs = {
+  libraryId: Scalars['ID']['input'];
 };
 
 
@@ -4304,13 +4563,19 @@ export type ScheduledJob = {
 
 /** A oneOf input for the schedule config */
 export type ScheduledJobConfigInput =
-  { libraryScan: LibraryScanConfigInput; metadataRetry?: never; }
-  |  { libraryScan?: never; metadataRetry: MetadataRetryConfigInput; };
+  { libraryScan: LibraryScanConfigInput; llmTagRetry?: never; metadataRetry?: never; }
+  |  { libraryScan?: never; llmTagRetry: LlmTagRetryConfigInput; metadataRetry?: never; }
+  |  { libraryScan?: never; llmTagRetry?: never; metadataRetry: MetadataRetryConfigInput; };
 
 /** The kind of a scheduled job, aligned with the config variants */
 export enum ScheduledJobKind {
   /** Scan one or more libraries on a cron schedule */
   LibraryScan = 'LIBRARY_SCAN',
+  /**
+   * Retry LLM tagging work that was rate-limited (per-book suggestions and
+   * library-wide analysis drafts)
+   */
+  LlmTagRetry = 'LLM_TAG_RETRY',
   /** Retry fetching metadata for records that were rate-limited or failed */
   MetadataRetry = 'METADATA_RETRY'
 }
@@ -4586,6 +4851,8 @@ export type ServerConfigModel = {
   id: Scalars['Int']['output'];
   initialWalSetupComplete: Scalars['Boolean']['output'];
   llmModelName?: Maybe<Scalars['String']['output']>;
+  /** JSON-encoded [`crate::shared::llm_tagging::LlmTaggingConfig`] */
+  llmTaggingConfig?: Maybe<Scalars['JSON']['output']>;
   llmUrl?: Maybe<Scalars['String']['output']>;
   publicUrl?: Maybe<Scalars['String']['output']>;
 };
@@ -6170,6 +6437,76 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
+export type LlmLibraryTagDraftsQueryVariables = Exact<{
+  libraryId: Scalars['ID']['input'];
+}>;
+
+
+export type LlmLibraryTagDraftsQuery = { __typename?: 'Query', llmLibraryTagDrafts: Array<{ __typename?: 'LlmLibraryTagDraft', id: number, status: LlmLibraryTagDraftStatus, finalTagList?: any | null, booksAnalyzed: number, completedBatches: number, totalBatches: number, createdAt: any, updatedAt?: any | null, assignments: Array<{ __typename?: 'LlmLibraryTagAssignment', mediaId: string, tags: Array<string> }> }> };
+
+export type RunLlmLibraryTagAnalysisMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  forceRefetch?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type RunLlmLibraryTagAnalysisMutation = { __typename?: 'Mutation', runLlmLibraryTagAnalysis: boolean };
+
+export type ApplyLlmLibraryTagSuggestionsMutationVariables = Exact<{
+  draftId: Scalars['Int']['input'];
+}>;
+
+
+export type ApplyLlmLibraryTagSuggestionsMutation = { __typename?: 'Mutation', applyLibraryTagSuggestions: number };
+
+export type LlmAutoTaggingPendingSuggestionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LlmAutoTaggingPendingSuggestionsQuery = { __typename?: 'Query', pendingLlmTagSuggestions: Array<(
+    { __typename?: 'LlmTagSuggestion', id: number }
+    & { ' $fragmentRefs'?: { 'LlmTagSuggestionFragment': LlmTagSuggestionFragment } }
+  )> };
+
+export type LlmAutoTaggingConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LlmAutoTaggingConfigQuery = { __typename?: 'Query', llmTaggingConfig: { __typename?: 'LlmTaggingConfig', enabled: boolean } };
+
+export type RunLlmTaggingMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  forceRefetch?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type RunLlmTaggingMutation = { __typename?: 'Mutation', runLlmTagging: boolean };
+
+export type LlmTagSuggestionFragment = { __typename?: 'LlmTagSuggestion', id: number, mediaId: string, status: LlmTagSuggestionStatus, createdAt: any, appliedTags: Array<string>, suggestedTags: Array<{ __typename?: 'LlmSuggestedTag', name: string, confidence: number, reason?: string | null }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null } | null } | null } & { ' $fragmentName'?: 'LlmTagSuggestionFragment' };
+
+export type AcceptLlmTagSuggestionsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  tagNames?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+}>;
+
+
+export type AcceptLlmTagSuggestionsMutation = { __typename?: 'Mutation', acceptLlmTagSuggestions: boolean };
+
+export type RejectLlmTagSuggestionsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+}>;
+
+
+export type RejectLlmTagSuggestionsMutation = { __typename?: 'Mutation', rejectLlmTagSuggestions: boolean };
+
+export type AcceptAllLlmSuggestionsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AcceptAllLlmSuggestionsMutation = { __typename?: 'Mutation', acceptAllLlmSuggestions: number };
+
+export type RejectAllLlmSuggestionsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RejectAllLlmSuggestionsMutation = { __typename?: 'Mutation', rejectAllLlmSuggestions: number };
+
 export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6404,7 +6741,7 @@ export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', set
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null, subtitle?: string | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'LlmLibraryTagJobOutput' } | { __typename: 'LlmTagJobOutput' } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null, subtitle?: string | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -6849,7 +7186,7 @@ export type ScanRecordInspectorJobsQueryVariables = Exact<{
 }>;
 
 
-export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
+export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'LlmLibraryTagJobOutput' } | { __typename: 'LlmTagJobOutput' } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
 
 export type DeleteLibraryThumbnailsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7235,6 +7572,10 @@ type JobDataInspector_AnalyzeMediaOutput_Fragment = { __typename: 'AnalyzeMediaO
 
 type JobDataInspector_LibraryScanOutput_Fragment = { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } & { ' $fragmentName'?: 'JobDataInspector_LibraryScanOutput_Fragment' };
 
+type JobDataInspector_LlmLibraryTagJobOutput_Fragment = { __typename: 'LlmLibraryTagJobOutput' } & { ' $fragmentName'?: 'JobDataInspector_LlmLibraryTagJobOutput_Fragment' };
+
+type JobDataInspector_LlmTagJobOutput_Fragment = { __typename: 'LlmTagJobOutput' } & { ' $fragmentName'?: 'JobDataInspector_LlmTagJobOutput_Fragment' };
+
 type JobDataInspector_MetadataFetchJobOutput_Fragment = { __typename: 'MetadataFetchJobOutput' } & { ' $fragmentName'?: 'JobDataInspector_MetadataFetchJobOutput_Fragment' };
 
 type JobDataInspector_PlaceholderGenerationOutput_Fragment = { __typename: 'PlaceholderGenerationOutput' } & { ' $fragmentName'?: 'JobDataInspector_PlaceholderGenerationOutput_Fragment' };
@@ -7243,7 +7584,7 @@ type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutpu
 
 type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
 
-export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_LlmLibraryTagJobOutput_Fragment | JobDataInspector_LlmTagJobOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
 
 export type JobDataInspectorLogsQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -7279,6 +7620,12 @@ export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'Pagina
         { __typename?: 'LibraryScanOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_LibraryScanOutput_Fragment': JobDataInspector_LibraryScanOutput_Fragment } }
       ) | (
+        { __typename?: 'LlmLibraryTagJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_LlmLibraryTagJobOutput_Fragment': JobDataInspector_LlmLibraryTagJobOutput_Fragment } }
+      ) | (
+        { __typename?: 'LlmTagJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_LlmTagJobOutput_Fragment': JobDataInspector_LlmTagJobOutput_Fragment } }
+      ) | (
         { __typename?: 'MetadataFetchJobOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_MetadataFetchJobOutput_Fragment': JobDataInspector_MetadataFetchJobOutput_Fragment } }
       ) | (
@@ -7307,6 +7654,18 @@ export type UpdateLlmConfigMutationVariables = Exact<{
 
 
 export type UpdateLlmConfigMutation = { __typename?: 'Mutation', updateLlmConfig: { __typename?: 'ServerConfigModel', llmUrl?: string | null, llmModelName?: string | null } };
+
+export type LlmTaggingConfigSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LlmTaggingConfigSettingsQuery = { __typename?: 'Query', llmTaggingConfig: { __typename?: 'LlmTaggingConfig', enabled: boolean, autoApplyThreshold?: number | null, requestsPerSecond: number, concurrency: number, dailyRequestLimit: number, batchSize: number, maxSummaryChars: number, batchScope: LlmTagBatchScope } };
+
+export type UpdateLlmTaggingConfigMutationVariables = Exact<{
+  config: Scalars['JSON']['input'];
+}>;
+
+
+export type UpdateLlmTaggingConfigMutation = { __typename?: 'Mutation', updateLlmTaggingConfig: { __typename?: 'LlmTaggingConfig', enabled: boolean, autoApplyThreshold?: number | null, requestsPerSecond: number, concurrency: number, dailyRequestLimit: number, batchSize: number, maxSummaryChars: number, batchScope: LlmTagBatchScope } };
 
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -8627,6 +8986,27 @@ export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
   addedAt
 }
     `, {"fragmentName":"BookClubBookItem"}) as unknown as TypedDocumentString<BookClubBookItemFragment, unknown>;
+export const LlmTagSuggestionFragmentDoc = new TypedDocumentString(`
+    fragment LlmTagSuggestion on LlmTagSuggestion {
+  id
+  mediaId
+  status
+  createdAt
+  suggestedTags {
+    name
+    confidence
+    reason
+  }
+  appliedTags
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+    }
+  }
+}
+    `, {"fragmentName":"LlmTagSuggestion"}) as unknown as TypedDocumentString<LlmTagSuggestionFragment, unknown>;
 export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
     fragment PendingMatchRecord on MetadataFetchRecord {
   id
@@ -11959,6 +12339,92 @@ export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
+export const LlmLibraryTagDraftsDocument = new TypedDocumentString(`
+    query LlmLibraryTagDrafts($libraryId: ID!) {
+  llmLibraryTagDrafts(libraryId: $libraryId) {
+    id
+    status
+    finalTagList
+    assignments {
+      mediaId
+      tags
+    }
+    booksAnalyzed
+    completedBatches
+    totalBatches
+    createdAt
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<LlmLibraryTagDraftsQuery, LlmLibraryTagDraftsQueryVariables>;
+export const RunLlmLibraryTagAnalysisDocument = new TypedDocumentString(`
+    mutation RunLlmLibraryTagAnalysis($id: ID!, $forceRefetch: Boolean) {
+  runLlmLibraryTagAnalysis(id: $id, forceRefetch: $forceRefetch)
+}
+    `) as unknown as TypedDocumentString<RunLlmLibraryTagAnalysisMutation, RunLlmLibraryTagAnalysisMutationVariables>;
+export const ApplyLlmLibraryTagSuggestionsDocument = new TypedDocumentString(`
+    mutation ApplyLlmLibraryTagSuggestions($draftId: Int!) {
+  applyLibraryTagSuggestions(draftId: $draftId)
+}
+    `) as unknown as TypedDocumentString<ApplyLlmLibraryTagSuggestionsMutation, ApplyLlmLibraryTagSuggestionsMutationVariables>;
+export const LlmAutoTaggingPendingSuggestionsDocument = new TypedDocumentString(`
+    query LlmAutoTaggingPendingSuggestions {
+  pendingLlmTagSuggestions {
+    id
+    ...LlmTagSuggestion
+  }
+}
+    fragment LlmTagSuggestion on LlmTagSuggestion {
+  id
+  mediaId
+  status
+  createdAt
+  suggestedTags {
+    name
+    confidence
+    reason
+  }
+  appliedTags
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+    }
+  }
+}`) as unknown as TypedDocumentString<LlmAutoTaggingPendingSuggestionsQuery, LlmAutoTaggingPendingSuggestionsQueryVariables>;
+export const LlmAutoTaggingConfigDocument = new TypedDocumentString(`
+    query LlmAutoTaggingConfig {
+  llmTaggingConfig {
+    enabled
+  }
+}
+    `) as unknown as TypedDocumentString<LlmAutoTaggingConfigQuery, LlmAutoTaggingConfigQueryVariables>;
+export const RunLlmTaggingDocument = new TypedDocumentString(`
+    mutation RunLlmTagging($id: ID!, $forceRefetch: Boolean) {
+  runLlmTagging(id: $id, forceRefetch: $forceRefetch)
+}
+    `) as unknown as TypedDocumentString<RunLlmTaggingMutation, RunLlmTaggingMutationVariables>;
+export const AcceptLlmTagSuggestionsDocument = new TypedDocumentString(`
+    mutation AcceptLlmTagSuggestions($mediaId: ID!, $tagNames: [String!]) {
+  acceptLlmTagSuggestions(mediaId: $mediaId, tagNames: $tagNames)
+}
+    `) as unknown as TypedDocumentString<AcceptLlmTagSuggestionsMutation, AcceptLlmTagSuggestionsMutationVariables>;
+export const RejectLlmTagSuggestionsDocument = new TypedDocumentString(`
+    mutation RejectLlmTagSuggestions($mediaId: ID!) {
+  rejectLlmTagSuggestions(mediaId: $mediaId)
+}
+    `) as unknown as TypedDocumentString<RejectLlmTagSuggestionsMutation, RejectLlmTagSuggestionsMutationVariables>;
+export const AcceptAllLlmSuggestionsDocument = new TypedDocumentString(`
+    mutation AcceptAllLlmSuggestions {
+  acceptAllLlmSuggestions
+}
+    `) as unknown as TypedDocumentString<AcceptAllLlmSuggestionsMutation, AcceptAllLlmSuggestionsMutationVariables>;
+export const RejectAllLlmSuggestionsDocument = new TypedDocumentString(`
+    mutation RejectAllLlmSuggestions {
+  rejectAllLlmSuggestions
+}
+    `) as unknown as TypedDocumentString<RejectAllLlmSuggestionsMutation, RejectAllLlmSuggestionsMutationVariables>;
 export const PendingMetadataMatchesDocument = new TypedDocumentString(`
     query PendingMetadataMatches {
   pendingMetadataMatches {
@@ -14857,6 +15323,34 @@ export const UpdateLlmConfigDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateLlmConfigMutation, UpdateLlmConfigMutationVariables>;
+export const LlmTaggingConfigSettingsDocument = new TypedDocumentString(`
+    query LlmTaggingConfigSettings {
+  llmTaggingConfig {
+    enabled
+    autoApplyThreshold
+    requestsPerSecond
+    concurrency
+    dailyRequestLimit
+    batchSize
+    maxSummaryChars
+    batchScope
+  }
+}
+    `) as unknown as TypedDocumentString<LlmTaggingConfigSettingsQuery, LlmTaggingConfigSettingsQueryVariables>;
+export const UpdateLlmTaggingConfigDocument = new TypedDocumentString(`
+    mutation UpdateLlmTaggingConfig($config: JSON!) {
+  updateLlmTaggingConfig(config: $config) {
+    enabled
+    autoApplyThreshold
+    requestsPerSecond
+    concurrency
+    dailyRequestLimit
+    batchSize
+    maxSummaryChars
+    batchScope
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLlmTaggingConfigMutation, UpdateLlmTaggingConfigMutationVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`
     subscription LiveLogsFeed {
   tailLogFile

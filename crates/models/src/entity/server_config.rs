@@ -26,6 +26,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
 	pub llm_encrypted_api_key: Option<String>,
+	/// JSON-encoded [`crate::shared::llm_tagging::LlmTaggingConfig`]
+	#[sea_orm(column_type = "Json", nullable)]
+	pub llm_tagging_config: Option<serde_json::Value>,
 }
 
 #[derive(FromQueryResult)]

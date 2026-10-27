@@ -13,6 +13,7 @@ mod epub;
 mod filesystem;
 mod job;
 mod library;
+mod llm_tagging;
 mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
@@ -44,6 +45,7 @@ use epub::EpubQuery;
 use filesystem::FilesystemQuery;
 use job::JobQuery;
 use library::LibraryQuery;
+use llm_tagging::LlmTaggingQuery;
 use log::LogQuery;
 use media::MediaQuery;
 use media_metadata_overview::MediaMetadataOverviewQuery;
@@ -96,6 +98,7 @@ struct SystemQueries(
 	ConfigQuery,
 	MetadataProviderQuery,
 	ServerConfigQuery,
+	LlmTaggingQuery,
 	FilesystemQuery,
 );
 

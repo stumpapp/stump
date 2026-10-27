@@ -5025,6 +5025,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "241eaef5fd12c88705a01fc1066c48c4b36e0dd4377dcdc7ec3942cea7a69956"
 
 [[package]]
+name = "llm_integrations"
+version = "0.1.11"
+dependencies = [
+ "governor",
+ "metadata_integrations",
+ "reqwest",
+ "reqwest-middleware",
+ "reqwest-retry",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "local-ip-address"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9209,6 +9225,7 @@ dependencies = [
  "itertools 0.14.0",
  "kmeans_colors",
  "libc",
+ "llm_integrations",
  "md5",
  "merge",
  "metadata_integrations",

@@ -19,6 +19,7 @@ pub mod job_schedule_config;
 pub mod library;
 pub mod library_config;
 pub mod library_scan_record;
+pub mod llm_tagging;
 pub mod log;
 pub mod media;
 pub mod media_annotation;

@@ -11,6 +11,7 @@ mod emailer;
 mod epub;
 mod job;
 mod library;
+mod llm_tagging;
 mod log;
 mod media;
 mod media_metadata;
@@ -44,6 +45,7 @@ use emailer::EmailerMutation;
 use epub::EpubMutation;
 use job::JobMutation;
 use library::LibraryMutation;
+use llm_tagging::LlmTaggingMutation;
 use log::LogMutation;
 use media::MediaMutation;
 use media_metadata::MediaMetadataMutation;
@@ -98,6 +100,7 @@ struct SystemMutations(
 	ServerConfigMutation,
 	ScheduledJobConfigMutation,
 	MetadataProviderMutation,
+	LlmTaggingMutation,
 );
 
 #[derive(async_graphql::MergedObject, Default)]

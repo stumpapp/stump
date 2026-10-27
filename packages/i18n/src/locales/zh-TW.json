@@ -845,6 +845,53 @@
             },
             "fetchButton": "開始背景擷取",
             "fetchError": "無法啟動中繼資料擷取"
+          },
+          "llmTagging": {
+            "heading": "AI 標籤",
+            "description": "讓已設定的 LLM 為此館藏的書籍推薦標籤。所有建議都會先進入審核佇列，確認後才會套用。",
+            "notConfigured": {
+              "title": "尚未設定 LLM",
+              "description": "請先在伺服器設定中設定 LLM 位址、模型名稱與 API Key。"
+            },
+            "runButton": "執行 AI 標籤",
+            "acceptAll": "全部接受",
+            "rejectAll": "全部拒絕",
+            "pendingCount_one": "{{count}} 筆待審核建議",
+            "pendingCount_other": "{{count}} 筆待審核建議",
+            "toasts": {
+              "jobQueued": "AI 標籤工作已加入佇列",
+              "notConfigured": "尚未設定 AI 標籤",
+              "jobFailed": "加入 AI 標籤工作失敗"
+            }
+          },
+          "libraryTagAnalysis": {
+            "heading": "AI 標籤分析",
+            "description": "分批分析整個館藏，建立全域標籤詞表與逐書標籤建議。分析完成後可以審核並套用結果。",
+            "progress": "批次 {{completed}} / {{total}}",
+            "summary": "已分析 {{books}} 本書，詞表共 {{tags}} 個標籤",
+            "applyReady": {
+              "title": "分析結果待審核",
+              "description": "套用建議只會為書籍新增標籤，絕不會移除既有標籤。"
+            },
+            "status": {
+              "IN_PROGRESS": "進行中",
+              "RATE_LIMITED": "被限流",
+              "AWAITING_REVIEW": "待審核",
+              "APPLIED": "已套用",
+              "FAILED": "失敗"
+            },
+            "runButton": "執行分析",
+            "resumeButton": "繼續分析",
+            "restartButton": "重新開始",
+            "applyButton": "套用建議",
+            "toasts": {
+              "jobQueued": "分析工作已加入佇列",
+              "notConfigured": "尚未設定 AI 標籤",
+              "jobFailed": "加入分析工作失敗",
+              "applied_one": "已為 {{count}} 本書套用建議",
+              "applied_other": "已為 {{count}} 本書套用建議",
+              "applyFailed": "套用建議失敗"
+            }
           }
         }
       },
@@ -1464,7 +1511,51 @@
               "description": "例如：gpt-4o、deepseek-chat"
             },
             "updateFailed": "更新 LLM 設定失敗",
-            "updateSuccess": "LLM 設定已更新"
+            "updateSuccess": "LLM 設定已更新",
+            "connection": {
+              "heading": "LLM 連線"
+            }
+          },
+          "tagging": {
+            "heading": "AI 標籤",
+            "description": "設定 Stump 如何使用上方的 LLM 為書籍推薦標籤。高信賴度的建議可自動套用，也可手動審核。",
+            "fields": {
+              "enabled": {
+                "label": "啟用 AI 標籤"
+              },
+              "autoApplyThreshold": {
+                "label": "自動套用門檻",
+                "description": "當所有建議的信賴度都不低於此值（0-1）時自動套用標籤。留空則一律手動審核。"
+              },
+              "requestsPerSecond": {
+                "label": "每秒請求數",
+                "description": "LLM API 請求的速率限制，支援小數，例如 0.5。"
+              },
+              "concurrency": {
+                "label": "並發數",
+                "description": "同時進行的 LLM 請求數量。"
+              },
+              "dailyRequestLimit": {
+                "label": "每日請求上限",
+                "description": "每天最多發送的 LLM 請求數，超出部分由「AI 標籤重試」工作稍後重試。"
+              },
+              "batchSize": {
+                "label": "分析批次大小",
+                "description": "全庫標籤分析時每次請求包含的書籍數量。"
+              },
+              "maxSummaryChars": {
+                "label": "簡介最大長度",
+                "description": "送出給 LLM 前，書籍簡介會被截斷至此字元數。"
+              },
+              "batchScope": {
+                "label": "標籤範圍",
+                "description": "自動標籤時考慮哪些書籍。",
+                "newBooksOnly": "僅新書籍",
+                "allBooks": "所有書籍"
+              }
+            },
+            "updateSuccess": "AI 標籤設定已更新",
+            "updateFailed": "更新 AI 標籤設定失敗"
           }
         }
       },
@@ -2744,7 +2835,40 @@
         "startReview": "開始檢視",
         "nothingToReview": "目前沒有待檢視的中繼資料比對結果"
       },
-      "reviewMatch": "審核匹配"
+      "reviewMatch": "審核匹配",
+      "llmTagging": {
+        "queue": {
+          "columns": {
+            "book": "書籍",
+            "tags": "建議標籤",
+            "actions": "操作"
+          },
+          "review": "審核",
+          "reject": "拒絕",
+          "moreRecords_one": "還有 {{count}} 筆記錄未顯示",
+          "moreRecords_other": "還有 {{count}} 筆記錄未顯示"
+        },
+        "reviewDialog": {
+          "heading": "審核 AI 標籤建議",
+          "previous": "上一筆",
+          "next": "下一筆",
+          "skipAll": "關閉",
+          "reject": "拒絕",
+          "accept": "接受",
+          "acceptSelected_one": "接受 {{count}} 個標籤",
+          "acceptSelected_other": "接受 {{count}} 個標籤"
+        },
+        "toasts": {
+          "accepted": "標籤已套用",
+          "rejected": "已拒絕建議",
+          "acceptedAll_one": "已為 {{count}} 本書套用建議",
+          "acceptedAll_other": "已為 {{count}} 本書套用建議",
+          "rejectedAll_one": "已拒絕 {{count}} 本書建議",
+          "rejectedAll_other": "已拒絕 {{count}} 本書建議",
+          "acceptFailed": "套用建議失敗",
+          "rejectFailed": "拒絕建議失敗"
+        }
+      }
     },
     "seriesHeader": {
       "tabs": {

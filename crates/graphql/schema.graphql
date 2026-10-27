@@ -422,7 +422,7 @@ type ConfidenceFactor {
 "An event that is emitted by the core and consumed by a client"
 union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
 
-union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | MetadataFetchJobOutput | AnalyzeMediaOutput
+union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | MetadataFetchJobOutput | AnalyzeMediaOutput | LlmTagJobOutput | LlmLibraryTagJobOutput
 
 input CreateAnnotationInput {
 	mediaId: String!
@@ -1259,6 +1259,172 @@ enum LibraryType {
 enum LibraryViewMode {
 	SERIES
 	BOOKS
+}
+
+"How suggested tags are applied to books"
+enum LlmApplyStrategy {
+	"""
+	Only add tags which the book does not already have; never remove
+	existing tags
+	"""
+	MERGE_ONLY
+}
+
+"""
+A media -> tags assignment as persisted inside
+`llm_library_tag_drafts.assignments`
+"""
+type LlmLibraryTagAssignment {
+	mediaId: String!
+	tags: [String!]!
+}
+
+type LlmLibraryTagDraft {
+	id: Int!
+	libraryId: String!
+	status: LlmLibraryTagDraftStatus!
+	"JSON array of the final global tag vocabulary produced by the analysis"
+	finalTagList: JSON
+	"The number of books with at least one suggested tag"
+	booksAnalyzed: Int!
+	"Resume cursor: the number of batches already completed"
+	completedBatches: Int!
+	"The total number of batches planned for this run"
+	totalBatches: Int!
+	createdAt: DateTime!
+	updatedAt: DateTime
+	"The per-book tag assignments suggested by the analysis"
+	assignments: [LlmLibraryTagAssignment!]!
+}
+
+"The status of a library-wide LLM tag analysis draft"
+enum LlmLibraryTagDraftStatus {
+	"The analysis is (still) running, used for resuming interrupted runs"
+	IN_PROGRESS
+	"The analysis finished and awaits user review"
+	AWAITING_REVIEW
+	"The suggestions were applied"
+	APPLIED
+	"The analysis failed"
+	FAILED
+	"The analysis was interrupted by rate limiting, eligible for a later retry"
+	RATE_LIMITED
+}
+
+type LlmLibraryTagJobOutput {
+	"Total number of batches planned"
+	totalBatches: Int!
+	"Number of batches completed in this run"
+	completedBatches: Int!
+	"Number of books with at least one suggested tag"
+	booksAnalyzed: Int!
+	"Size of the final tag vocabulary"
+	tagsInVocabulary: Int!
+	"Number of batches that failed"
+	failedBatches: Int!
+	"Number of batches that were rate-limited"
+	rateLimitedBatches: Int!
+	"Approximate total token usage reported by the LLM API"
+	tokensUsed: Int!
+}
+
+"A suggested tag as persisted inside `llm_tag_suggestions.suggested_tags`"
+type LlmSuggestedTag {
+	name: String!
+	confidence: Float!
+	reason: String
+}
+
+"The scope of books an LLM tagging run should consider"
+enum LlmTagBatchScope {
+	"Only tag books which do not have any tags linked yet"
+	NEW_BOOKS_ONLY
+	"Consider all books, regardless of existing tags"
+	ALL_BOOKS
+}
+
+type LlmTagJobOutput {
+	"Total number of books processed"
+	totalProcessed: Int!
+	"Number of books whose suggestions await review"
+	suggested: Int!
+	"Number of books whose suggestions were auto-applied"
+	autoApplied: Int!
+	"Number of books that failed"
+	failed: Int!
+	"Number of books that were rate-limited"
+	rateLimited: Int!
+	"Number of books that were skipped (already have settled suggestions)"
+	skipped: Int!
+	"Approximate total token usage reported by the LLM API"
+	tokensUsed: Int!
+}
+
+input LlmTagRetryConfigInput {
+	"Restrict draft retries to these libraries. An empty list means all"
+	libraryIds: [String!]!
+}
+
+type LlmTagSuggestion {
+	id: Int!
+	mediaId: String!
+	status: LlmTagSuggestionStatus!
+	createdAt: DateTime!
+	updatedAt: DateTime
+	"The suggested tags with their confidence and reasoning"
+	suggestedTags: [LlmSuggestedTag!]!
+	"The tag names which were actually applied, if any"
+	appliedTags: [String!]!
+	"The media item associated with this suggestion, if any"
+	media: Media
+}
+
+"The status of an LLM tag suggestion for a single book"
+enum LlmTagSuggestionStatus {
+	"Tags have been suggested and await manual (or auto) review"
+	SUGGESTED
+	"The suggestions met the auto-apply threshold and were applied"
+	AUTO_APPLIED
+	"The suggestions were accepted by a user and applied"
+	ACCEPTED
+	"The suggestions were rejected by a user"
+	REJECTED
+	"Suggesting tags for the book failed"
+	FAILED
+	"The request was rate limited, eligible for a later retry"
+	RATE_LIMITED
+}
+
+"""
+User-managed configuration for the LLM tagging features. Stored as JSON in
+`server_config.llm_tagging_config`.
+"""
+type LlmTaggingConfig {
+	"Master switch consulted by the post-scan auto tagging hook"
+	enabled: Boolean!
+	"""
+	When set, books whose suggestions all meet or exceed this confidence
+	are applied automatically instead of awaiting manual review
+	"""
+	autoApplyThreshold: Float
+	"Rate limit for LLM API requests, in requests per second"
+	requestsPerSecond: Float!
+	"How many LLM requests may be in flight concurrently within a job"
+	concurrency: Int!
+	"""
+	Maximum number of LLM requests per day before remaining work is
+	marked as rate limited for a later retry
+	"""
+	dailyRequestLimit: Int!
+	"Library analysis batch size (books per LLM request)"
+	batchSize: Int!
+	"""
+	Book summaries are truncated to this many characters before being
+	sent to the LLM
+	"""
+	maxSummaryChars: Int!
+	"Which books per-book tagging runs should consider"
+	batchScope: LlmTagBatchScope!
 }
 
 type Log {
@@ -2180,6 +2346,39 @@ type Mutation {
 	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
 	"Reject all pending metadata matches, setting their status to NoMatch"
 	rejectAllPendingMatches: Int!
+	"""
+	Accept (a subset of) the suggested tags for a book and link them to it.
+	When `tagNames` is omitted, all suggested tags are applied.
+	"""
+	acceptLlmTagSuggestions(mediaId: ID!, tagNames: [String!]): Boolean!
+	"Reject the suggested tags for a book"
+	rejectLlmTagSuggestions(mediaId: ID!): Boolean!
+	"Accept all pending LLM tag suggestions, applying every suggested tag"
+	acceptAllLlmSuggestions: Int!
+	"Reject all pending LLM tag suggestions"
+	rejectAllLlmSuggestions: Int!
+	"""
+	Start a background job which requests tag suggestions from the
+	configured LLM for the media in this library
+	"""
+	runLlmTagging(id: ID!, forceRefetch: Boolean! = false): Boolean!
+	"""
+	Start a background job which analyzes the whole library in batches,
+	building a global tag vocabulary and per-book assignment suggestions
+	"""
+	runLlmLibraryTagAnalysis(id: ID!, forceRefetch: Boolean! = false): Boolean!
+	"""
+	Apply the tag assignments suggested by a library tag analysis draft to
+	the given books (or all of them when `mediaIds` is omitted). The
+	default `MERGE_ONLY` strategy only ever adds tags; it never removes
+	existing ones.
+	"""
+	applyLibraryTagSuggestions(draftId: Int!, mediaIds: [ID!], strategy: LlmApplyStrategy): Int!
+	"""
+	Update the LLM tagging configuration. Missing fields fall back to
+	their defaults and values are sanitized into safe bounds.
+	"""
+	updateLlmTaggingConfig(config: JSON!): LlmTaggingConfig!
 	createSmartList(input: SaveSmartListInput!): SmartList!
 	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
 	deleteSmartList(id: ID!): SmartList!
@@ -2699,6 +2898,14 @@ type Query {
 	"Return all metadata fetch records that are awaiting user review."
 	pendingMetadataMatches: [MetadataFetchRecord!]!
 	serverConfig: ServerConfigModel!
+	"Return all LLM tag suggestions that are awaiting user review"
+	pendingLlmTagSuggestions: [LlmTagSuggestion!]!
+	"Return the LLM library tag analysis drafts for a library, newest first"
+	llmLibraryTagDrafts(libraryId: ID!): [LlmLibraryTagDraft!]!
+	"Whether a library-wide LLM tag analysis is currently resumable"
+	llmLibraryTagDraftInProgress(libraryId: ID!): LlmLibraryTagDraft
+	"The LLM tagging configuration for the server"
+	llmTaggingConfig: LlmTaggingConfig!
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
 	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
 	smartListById(id: ID!): SmartList
@@ -3038,6 +3245,7 @@ type ScheduledJob {
 input ScheduledJobConfigInput @oneOf {
 	libraryScan: LibraryScanConfigInput
 	metadataRetry: MetadataRetryConfigInput
+	llmTagRetry: LlmTagRetryConfigInput
 }
 
 "The kind of a scheduled job, aligned with the config variants"
@@ -3046,6 +3254,11 @@ enum ScheduledJobKind {
 	LIBRARY_SCAN
 	"Retry fetching metadata for records that were rate-limited or failed"
 	METADATA_RETRY
+	"""
+	Retry LLM tagging work that was rate-limited (per-book suggestions and
+	library-wide analysis drafts)
+	"""
+	LLM_TAG_RETRY
 }
 
 type SendAttachmentEmailOutput {
@@ -3299,6 +3512,8 @@ type ServerConfigModel {
 	initialWalSetupComplete: Boolean!
 	llmUrl: String
 	llmModelName: String
+	"JSON-encoded [`crate::shared::llm_tagging::LlmTaggingConfig`]"
+	llmTaggingConfig: JSON
 }
 
 union SessionEvent = Bookmark | MediaAnnotation

@@ -27,6 +27,8 @@ pub mod library_config;
 pub mod library_exclusion;
 pub mod library_scan_record;
 pub mod library_tag;
+pub mod llm_library_tag_draft;
+pub mod llm_tag_suggestion;
 pub mod log;
 pub mod media;
 pub mod media_analysis;

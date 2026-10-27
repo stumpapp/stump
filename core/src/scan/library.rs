@@ -417,6 +417,23 @@ impl JobLifecycle for LibraryScanJob {
 			}
 		}
 
+		// Note: like the metadata fetch above, only new books are relevant
+		if did_create_media
+			&& crate::llm_tagging::is_llm_tagging_enabled(ctx.conn()).await
+		{
+			tracing::trace!("LLM tag job should be enqueued after library scan");
+			if let Err(e) = ctx
+				.enqueue(StumpJob::llm_tag(
+					crate::llm_tagging::LlmTagJobParams::media_in_library(
+						self.id.clone(),
+					),
+				))
+				.await
+			{
+				tracing::error!(?e, "Failed to enqueue LLM tag follow-up");
+			}
+		}
+
 		let library_path = self.path.clone();
 
 		let pending_models = self

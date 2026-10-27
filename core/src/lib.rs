@@ -16,6 +16,7 @@ pub mod fs_utils;
 pub mod image;
 pub mod job;
 pub mod kobo;
+pub mod llm_tagging;
 pub mod media;
 pub mod metadata;
 pub mod opds;

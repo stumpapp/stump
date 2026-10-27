@@ -3,11 +3,19 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use croner::Cron;
-use models::entity::{library, metadata_fetch_record, scheduled_job};
-use models::shared::enums::{MetadataFetchStatus, ScheduledJobKind};
-use sea_orm::{prelude::*, EntityTrait, QueryFilter};
+use models::entity::{
+	library, llm_library_tag_draft, llm_tag_suggestion, metadata_fetch_record,
+	scheduled_job,
+};
+use models::shared::enums::{
+	LlmLibraryTagDraftStatus, LlmTagSuggestionStatus, MetadataFetchStatus,
+	ScheduledJobKind,
+};
+use sea_orm::{prelude::*, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 
+use crate::database::SQLITE_BIND_LIMIT;
 use crate::job::StumpJob;
+use crate::llm_tagging::{LlmLibraryTagJobParams, LlmTagJobParams};
 use crate::metadata::provider::MetadataFetchJobParams;
 use crate::{CoreError, CoreResult, Ctx};
 
@@ -130,6 +138,7 @@ async fn dispatch(job: &scheduled_job::Model, ctx: &Ctx) -> CoreResult<()> {
 	match job.kind {
 		ScheduledJobKind::LibraryScan => dispatch_library_scan(job, ctx).await,
 		ScheduledJobKind::MetadataRetry => dispatch_metadata_retry(job, ctx).await,
+		ScheduledJobKind::LlmTagRetry => dispatch_llm_tag_retry(job, ctx).await,
 	}
 }
 
@@ -217,6 +226,66 @@ async fn dispatch_metadata_retry(
 		);
 		let params = MetadataFetchJobParams::media(media_ids);
 		ctx.enqueue(StumpJob::metadata_fetch(params))
+			.await
+			.map_err(|e| CoreError::InternalError(e.to_string()))?;
+	}
+
+	Ok(())
+}
+
+/// Retries LLM tagging work that was rate-limited: per-book suggestions and
+/// library-wide analysis drafts. Drafts are resumed in place via their
+/// `completed_batches` cursor.
+async fn dispatch_llm_tag_retry(job: &scheduled_job::Model, ctx: &Ctx) -> CoreResult<()> {
+	let config = job.llm_tag_retry_config();
+
+	let rate_limited_media: Vec<String> = llm_tag_suggestion::Entity::find()
+		.select_only()
+		.column(llm_tag_suggestion::Column::MediaId)
+		.filter(
+			llm_tag_suggestion::Column::Status.eq(LlmTagSuggestionStatus::RateLimited),
+		)
+		.into_tuple()
+		.all(ctx.conn.as_ref())
+		.await?;
+
+	for chunk in rate_limited_media.chunks(SQLITE_BIND_LIMIT) {
+		if chunk.is_empty() {
+			continue;
+		}
+		tracing::info!(count = chunk.len(), "Enqueuing LLM tag retry for media");
+		let params = LlmTagJobParams::media(chunk.to_vec());
+		ctx.enqueue(StumpJob::llm_tag(params))
+			.await
+			.map_err(|e| CoreError::InternalError(e.to_string()))?;
+	}
+
+	let mut draft_query = llm_library_tag_draft::Entity::find()
+		.filter(
+			llm_library_tag_draft::Column::Status
+				.eq(LlmLibraryTagDraftStatus::RateLimited),
+		)
+		.order_by_desc(llm_library_tag_draft::Column::Id);
+
+	if let Some(config) = config {
+		if !config.library_ids.is_empty() {
+			draft_query = draft_query.filter(
+				llm_library_tag_draft::Column::LibraryId.is_in(config.library_ids),
+			);
+		}
+	}
+
+	let drafts = draft_query.all(ctx.conn.as_ref()).await?;
+
+	for draft in drafts {
+		tracing::info!(
+			draft_id = draft.id,
+			library_id = %draft.library_id,
+			completed_batches = draft.completed_batches,
+			"Enqueuing LLM library tag analysis retry"
+		);
+		let params = LlmLibraryTagJobParams::new(draft.library_id, false);
+		ctx.enqueue(StumpJob::llm_library_tag(params))
 			.await
 			.map_err(|e| CoreError::InternalError(e.to_string()))?;
 	}

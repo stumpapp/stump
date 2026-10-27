@@ -1140,6 +1140,53 @@
             },
             "fetchButton": "开始后台获取",
             "fetchError": "启动元数据获取失败"
+          },
+          "llmTagging": {
+            "heading": "AI 打标",
+            "description": "让已配置的 LLM 为本库的书籍推荐标签。所有建议都会先进入审核队列，确认后才会应用。",
+            "notConfigured": {
+              "title": "尚未配置 LLM",
+              "description": "请先在服务器设置中配置 LLM 地址、模型名称和 API Key。"
+            },
+            "runButton": "运行 AI 打标",
+            "acceptAll": "全部接受",
+            "rejectAll": "全部拒绝",
+            "pendingCount_one": "{{count}} 条待审核建议",
+            "pendingCount_other": "{{count}} 条待审核建议",
+            "toasts": {
+              "jobQueued": "AI 打标任务已加入队列",
+              "notConfigured": "尚未配置 AI 打标",
+              "jobFailed": "加入 AI 打标任务失败"
+            }
+          },
+          "libraryTagAnalysis": {
+            "heading": "AI 标签分析",
+            "description": "分批分析整个库，生成全局标签词表和逐书标签建议。分析完成后可以审核并应用结果。",
+            "progress": "批次 {{completed}} / {{total}}",
+            "summary": "已分析 {{books}} 本书，词表共 {{tags}} 个标签",
+            "applyReady": {
+              "title": "分析结果待审核",
+              "description": "应用建议只会为书籍新增标签，绝不会删除已有标签。"
+            },
+            "status": {
+              "IN_PROGRESS": "进行中",
+              "RATE_LIMITED": "被限流",
+              "AWAITING_REVIEW": "待审核",
+              "APPLIED": "已应用",
+              "FAILED": "失败"
+            },
+            "runButton": "运行分析",
+            "resumeButton": "继续分析",
+            "restartButton": "重新开始",
+            "applyButton": "应用建议",
+            "toasts": {
+              "jobQueued": "分析任务已加入队列",
+              "notConfigured": "尚未配置 AI 打标",
+              "jobFailed": "加入分析任务失败",
+              "applied_one": "已为 {{count}} 本书应用建议",
+              "applied_other": "已为 {{count}} 本书应用建议",
+              "applyFailed": "应用建议失败"
+            }
           }
         }
       },
@@ -1313,7 +1360,40 @@
         "startReview": "开始审核",
         "nothingToReview": "没有待审核的元数据匹配"
       },
-      "reviewMatch": "审核匹配"
+      "reviewMatch": "审核匹配",
+      "llmTagging": {
+        "queue": {
+          "columns": {
+            "book": "书籍",
+            "tags": "建议标签",
+            "actions": "操作"
+          },
+          "review": "审核",
+          "reject": "拒绝",
+          "moreRecords_one": "还有 {{count}} 条记录未显示",
+          "moreRecords_other": "还有 {{count}} 条记录未显示"
+        },
+        "reviewDialog": {
+          "heading": "审核 AI 标签建议",
+          "previous": "上一条",
+          "next": "下一条",
+          "skipAll": "关闭",
+          "reject": "拒绝",
+          "accept": "接受",
+          "acceptSelected_one": "接受 {{count}} 个标签",
+          "acceptSelected_other": "接受 {{count}} 个标签"
+        },
+        "toasts": {
+          "accepted": "标签已应用",
+          "rejected": "已拒绝建议",
+          "acceptedAll_one": "已为 {{count}} 本书应用建议",
+          "acceptedAll_other": "已为 {{count}} 本书应用建议",
+          "rejectedAll_one": "已拒绝 {{count}} 本书建议",
+          "rejectedAll_other": "已拒绝 {{count}} 本书建议",
+          "acceptFailed": "应用建议失败",
+          "rejectFailed": "拒绝建议失败"
+        }
+      }
     },
     "seriesOverviewScene": {
       "buttons": {
@@ -2266,7 +2346,51 @@
               "description": "例如：gpt-4o、deepseek-chat"
             },
             "updateFailed": "更新 LLM 配置失败",
-            "updateSuccess": "LLM 配置已更新"
+            "updateSuccess": "LLM 配置已更新",
+            "connection": {
+              "heading": "LLM 连接"
+            }
+          },
+          "tagging": {
+            "heading": "AI 打标",
+            "description": "配置 Stump 如何使用上方的 LLM 为书籍推荐标签。高置信度的建议可自动应用，也可手动审核。",
+            "fields": {
+              "enabled": {
+                "label": "启用 AI 打标"
+              },
+              "autoApplyThreshold": {
+                "label": "自动应用阈值",
+                "description": "当所有建议的置信度都不低于该值（0-1）时自动应用标签。留空则始终手动审核。"
+              },
+              "requestsPerSecond": {
+                "label": "每秒请求数",
+                "description": "LLM API 请求的速率限制，支持小数，如 0.5。"
+              },
+              "concurrency": {
+                "label": "并发数",
+                "description": "同时进行的 LLM 请求数量。"
+              },
+              "dailyRequestLimit": {
+                "label": "每日请求上限",
+                "description": "每天最多发起的 LLM 请求数，超出部分由“AI 标签重试”任务稍后重试。"
+              },
+              "batchSize": {
+                "label": "分析批次大小",
+                "description": "全库标签分析时每次请求包含的书籍数量。"
+              },
+              "maxSummaryChars": {
+                "label": "简介最大长度",
+                "description": "发送给 LLM 前，书籍简介会被截断到该字符数。"
+              },
+              "batchScope": {
+                "label": "打标范围",
+                "description": "自动打标时考虑哪些书籍。",
+                "newBooksOnly": "仅新书籍",
+                "allBooks": "所有书籍"
+              }
+            },
+            "updateSuccess": "AI 打标配置已更新",
+            "updateFailed": "更新 AI 打标配置失败"
           }
         }
       },

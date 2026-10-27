@@ -1,15 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
-import { Button, Form, Input, PasswordInput } from '@stump/components'
+import { Button, Form, Heading, Input, PasswordInput, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
+import { Suspense } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
+
+import LlmTaggingConfigCard from './LlmTaggingConfigCard'
 
 const query = graphql(`
 	query ServerConfigLLM {
@@ -117,45 +120,60 @@ export default function LLMSettingsScene() {
 
 			<ContentContainer>
 				<div className="gap-12 flex flex-col">
-					<Form form={form} onSubmit={handleSubmit}>
-						<div className="gap-6 md:max-w-sm flex flex-col">
-							<Input
-								className="w-full"
-								containerClassName="max-w-full md:max-w-sm"
-								label={t(getKey('url.label'))}
-								description={t(getKey('url.description'))}
-								placeholder="https://api.example.com/v1"
-								errorMessage={form.formState.errors.url?.message}
-								{...form.register('url')}
-							/>
+					<div className="gap-6 flex flex-col">
+						<Heading size="sm">{t(getKey('connection.heading'))}</Heading>
+						<Form form={form} onSubmit={handleSubmit}>
+							<div className="gap-6 md:max-w-sm flex flex-col">
+								<Input
+									className="w-full"
+									containerClassName="max-w-full md:max-w-sm"
+									label={t(getKey('url.label'))}
+									description={t(getKey('url.description'))}
+									placeholder="https://api.example.com/v1"
+									errorMessage={form.formState.errors.url?.message}
+									{...form.register('url')}
+								/>
 
-							<PasswordInput
-								className="w-full"
-								containerClassName="max-w-full md:max-w-sm"
-								label={t(getKey('apiKey.label'))}
-								description={t(getKey('apiKey.description'))}
-								autoComplete="new-password"
-								{...form.register('apiKey')}
-							/>
+								<PasswordInput
+									className="w-full"
+									containerClassName="max-w-full md:max-w-sm"
+									label={t(getKey('apiKey.label'))}
+									description={t(getKey('apiKey.description'))}
+									autoComplete="new-password"
+									{...form.register('apiKey')}
+								/>
 
-							<Input
-								className="w-full"
-								containerClassName="max-w-full md:max-w-sm"
-								label={t(getKey('modelName.label'))}
-								description={t(getKey('modelName.description'))}
-								placeholder="gpt-4o"
-								{...form.register('modelName')}
-							/>
+								<Input
+									className="w-full"
+									containerClassName="max-w-full md:max-w-sm"
+									label={t(getKey('modelName.label'))}
+									description={t(getKey('modelName.description'))}
+									placeholder="gpt-4o"
+									{...form.register('modelName')}
+								/>
 
-							<Button
-								type="submit"
-								className="md:w-[unset] w-full"
-								disabled={!hasChanges || isPending}
-							>
-								{t('shared.common.save')}
-							</Button>
+								<Button
+									type="submit"
+									className="md:w-[unset] w-full"
+									disabled={!hasChanges || isPending}
+								>
+									{t('shared.common.save')}
+								</Button>
+							</div>
+						</Form>
+					</div>
+
+					<div className="gap-6 flex flex-col">
+						<div>
+							<Heading size="sm">{t(getKey('tagging.heading'))}</Heading>
+							<Text size="sm" variant="muted">
+								{t(getKey('tagging.description'))}
+							</Text>
 						</div>
-					</Form>
+						<Suspense fallback={null}>
+							<LlmTaggingConfigCard />
+						</Suspense>
+					</div>
 				</div>
 			</ContentContainer>
 		</SceneContainer>

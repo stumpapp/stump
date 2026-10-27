@@ -21,6 +21,7 @@ fn kind_from_config(config: &ScheduledJobConfigInput) -> ScheduledJobKind {
 	match config {
 		ScheduledJobConfigInput::LibraryScan(_) => ScheduledJobKind::LibraryScan,
 		ScheduledJobConfigInput::MetadataRetry(_) => ScheduledJobKind::MetadataRetry,
+		ScheduledJobConfigInput::LlmTagRetry(_) => ScheduledJobKind::LlmTagRetry,
 	}
 }
 

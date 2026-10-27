@@ -18,6 +18,10 @@ use crate::{
 		error::JobError,
 		JobLifecycle, JobProgress, WorkingState,
 	},
+	llm_tagging::{
+		LlmLibraryTagJob, LlmLibraryTagJobOutput, LlmLibraryTagJobParams, LlmTagJob,
+		LlmTagJobOutput, LlmTagJobParams,
+	},
 	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, AnalyzeMediaOutput},
 	metadata::provider::{
 		MetadataFetchJob, MetadataFetchJobOutput, MetadataFetchJobParams,
@@ -39,6 +43,8 @@ pub enum CoreJobOutput {
 	PlaceholderGeneration(PlaceholderGenerationOutput),
 	MetadataFetch(MetadataFetchJobOutput),
 	AnalyzeMedia(AnalyzeMediaOutput),
+	LlmTag(LlmTagJobOutput),
+	LlmLibraryTag(LlmLibraryTagJobOutput),
 }
 
 /// A trait to extend the output type for a job with a common interface. Job output starts
@@ -94,6 +100,12 @@ pub enum StumpJob {
 	AnalyzeMedia {
 		config: AnalysisJobConfig,
 	},
+	LlmTag {
+		params: LlmTagJobParams,
+	},
+	LlmLibraryTag {
+		params: LlmLibraryTagJobParams,
+	},
 }
 
 impl StumpJob {
@@ -106,6 +118,8 @@ impl StumpJob {
 			StumpJob::PlaceholderGeneration { .. } => "placeholder_generation",
 			StumpJob::MetadataFetch { .. } => "metadata_fetch",
 			StumpJob::AnalyzeMedia { .. } => "analyze_media",
+			StumpJob::LlmTag { .. } => "llm_tag",
+			StumpJob::LlmLibraryTag { .. } => "llm_library_tag",
 		}
 	}
 
@@ -126,6 +140,12 @@ impl StumpJob {
 			},
 			StumpJob::AnalyzeMedia { config } => {
 				Some(format!("Analyze media: {:?}", config.scope))
+			},
+			StumpJob::LlmTag { params } => {
+				Some(format!("LLM tagging: {:?}", params.scope))
+			},
+			StumpJob::LlmLibraryTag { params } => {
+				Some(format!("LLM library tag analysis: {}", params.library_id))
 			},
 		}
 	}
@@ -155,6 +175,14 @@ impl StumpJob {
 
 	pub fn analyze_media(config: AnalysisJobConfig) -> Self {
 		StumpJob::AnalyzeMedia { config }
+	}
+
+	pub fn llm_tag(params: LlmTagJobParams) -> Self {
+		StumpJob::LlmTag { params }
+	}
+
+	pub fn llm_library_tag(params: LlmLibraryTagJobParams) -> Self {
+		StumpJob::LlmLibraryTag { params }
 	}
 }
 
@@ -276,6 +304,12 @@ pub async fn dispatch_job(
 		},
 		StumpJob::AnalyzeMedia { config } => {
 			run_job(&job_ctx, &mut AnalyzeMediaJob { config }).await
+		},
+		StumpJob::LlmTag { params } => {
+			run_job(&job_ctx, &mut LlmTagJob::new(params)).await
+		},
+		StumpJob::LlmLibraryTag { params } => {
+			run_job(&job_ctx, &mut LlmLibraryTagJob::new(params)).await
 		},
 	};
 

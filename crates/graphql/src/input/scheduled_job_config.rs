@@ -8,6 +8,7 @@ use serde::Serialize;
 pub enum ScheduledJobConfigInput {
 	LibraryScan(LibraryScanConfigInput),
 	MetadataRetry(MetadataRetryConfigInput),
+	LlmTagRetry(LlmTagRetryConfigInput),
 }
 
 #[derive(InputObject, Serialize)]
@@ -20,6 +21,12 @@ pub struct LibraryScanConfigInput {
 pub struct MetadataRetryConfigInput {
 	/// Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED)
 	pub statuses: Vec<MetadataFetchStatus>,
+}
+
+#[derive(InputObject, Serialize)]
+pub struct LlmTagRetryConfigInput {
+	/// Restrict draft retries to these libraries. An empty list means all
+	pub library_ids: Vec<String>,
 }
 
 #[derive(InputObject)]

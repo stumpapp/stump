@@ -155,6 +155,17 @@ type Documents = {
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LastVisitedLibraryDocument,
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": typeof types.LibraryBooksAlphabetDocument,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": typeof types.LibrarySeriesAlphabetDocument,
+    "\n\tquery LlmLibraryTagDrafts($libraryId: ID!) {\n\t\tllmLibraryTagDrafts(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tstatus\n\t\t\tfinalTagList\n\t\t\tassignments {\n\t\t\t\tmediaId\n\t\t\t\ttags\n\t\t\t}\n\t\t\tbooksAnalyzed\n\t\t\tcompletedBatches\n\t\t\ttotalBatches\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.LlmLibraryTagDraftsDocument,
+    "\n\tmutation RunLlmLibraryTagAnalysis($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmLibraryTagAnalysis(id: $id, forceRefetch: $forceRefetch)\n\t}\n": typeof types.RunLlmLibraryTagAnalysisDocument,
+    "\n\tmutation ApplyLlmLibraryTagSuggestions($draftId: Int!) {\n\t\tapplyLibraryTagSuggestions(draftId: $draftId)\n\t}\n": typeof types.ApplyLlmLibraryTagSuggestionsDocument,
+    "\n\tquery LlmAutoTaggingPendingSuggestions {\n\t\tpendingLlmTagSuggestions {\n\t\t\tid\n\t\t\t...LlmTagSuggestion\n\t\t}\n\t}\n": typeof types.LlmAutoTaggingPendingSuggestionsDocument,
+    "\n\tquery LlmAutoTaggingConfig {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t}\n\t}\n": typeof types.LlmAutoTaggingConfigDocument,
+    "\n\tmutation RunLlmTagging($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmTagging(id: $id, forceRefetch: $forceRefetch)\n\t}\n": typeof types.RunLlmTaggingDocument,
+    "\n\tfragment LlmTagSuggestion on LlmTagSuggestion {\n\t\tid\n\t\tmediaId\n\t\tstatus\n\t\tcreatedAt\n\t\tsuggestedTags {\n\t\t\tname\n\t\t\tconfidence\n\t\t\treason\n\t\t}\n\t\tappliedTags\n\t\tmedia {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\ttitle\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LlmTagSuggestionFragmentDoc,
+    "\n\tmutation AcceptLlmTagSuggestions($mediaId: ID!, $tagNames: [String!]) {\n\t\tacceptLlmTagSuggestions(mediaId: $mediaId, tagNames: $tagNames)\n\t}\n": typeof types.AcceptLlmTagSuggestionsDocument,
+    "\n\tmutation RejectLlmTagSuggestions($mediaId: ID!) {\n\t\trejectLlmTagSuggestions(mediaId: $mediaId)\n\t}\n": typeof types.RejectLlmTagSuggestionsDocument,
+    "\n\tmutation AcceptAllLlmSuggestions {\n\t\tacceptAllLlmSuggestions\n\t}\n": typeof types.AcceptAllLlmSuggestionsDocument,
+    "\n\tmutation RejectAllLlmSuggestions {\n\t\trejectAllLlmSuggestions\n\t}\n": typeof types.RejectAllLlmSuggestionsDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": typeof types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": typeof types.AcceptAllPendingMatchesDocument,
     "\n\tmutation RejectAllPendingMatches {\n\t\trejectAllPendingMatches\n\t}\n": typeof types.RejectAllPendingMatchesDocument,
@@ -314,6 +325,8 @@ type Documents = {
     "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": typeof types.ScheduledJobRowFragmentDoc,
     "\n\tquery ServerConfigLLM {\n\t\tserverConfig {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": typeof types.ServerConfigLlmDocument,
     "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": typeof types.UpdateLlmConfigDocument,
+    "\n\tquery LlmTaggingConfigSettings {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n": typeof types.LlmTaggingConfigSettingsDocument,
+    "\n\tmutation UpdateLlmTaggingConfig($config: JSON!) {\n\t\tupdateLlmTaggingConfig(config: $config) {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n": typeof types.UpdateLlmTaggingConfigDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": typeof types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
@@ -494,6 +507,17 @@ const documents: Documents = {
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LastVisitedLibraryDocument,
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": types.LibraryBooksAlphabetDocument,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": types.LibrarySeriesAlphabetDocument,
+    "\n\tquery LlmLibraryTagDrafts($libraryId: ID!) {\n\t\tllmLibraryTagDrafts(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tstatus\n\t\t\tfinalTagList\n\t\t\tassignments {\n\t\t\t\tmediaId\n\t\t\t\ttags\n\t\t\t}\n\t\t\tbooksAnalyzed\n\t\t\tcompletedBatches\n\t\t\ttotalBatches\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.LlmLibraryTagDraftsDocument,
+    "\n\tmutation RunLlmLibraryTagAnalysis($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmLibraryTagAnalysis(id: $id, forceRefetch: $forceRefetch)\n\t}\n": types.RunLlmLibraryTagAnalysisDocument,
+    "\n\tmutation ApplyLlmLibraryTagSuggestions($draftId: Int!) {\n\t\tapplyLibraryTagSuggestions(draftId: $draftId)\n\t}\n": types.ApplyLlmLibraryTagSuggestionsDocument,
+    "\n\tquery LlmAutoTaggingPendingSuggestions {\n\t\tpendingLlmTagSuggestions {\n\t\t\tid\n\t\t\t...LlmTagSuggestion\n\t\t}\n\t}\n": types.LlmAutoTaggingPendingSuggestionsDocument,
+    "\n\tquery LlmAutoTaggingConfig {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t}\n\t}\n": types.LlmAutoTaggingConfigDocument,
+    "\n\tmutation RunLlmTagging($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmTagging(id: $id, forceRefetch: $forceRefetch)\n\t}\n": types.RunLlmTaggingDocument,
+    "\n\tfragment LlmTagSuggestion on LlmTagSuggestion {\n\t\tid\n\t\tmediaId\n\t\tstatus\n\t\tcreatedAt\n\t\tsuggestedTags {\n\t\t\tname\n\t\t\tconfidence\n\t\t\treason\n\t\t}\n\t\tappliedTags\n\t\tmedia {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\ttitle\n\t\t\t}\n\t\t}\n\t}\n": types.LlmTagSuggestionFragmentDoc,
+    "\n\tmutation AcceptLlmTagSuggestions($mediaId: ID!, $tagNames: [String!]) {\n\t\tacceptLlmTagSuggestions(mediaId: $mediaId, tagNames: $tagNames)\n\t}\n": types.AcceptLlmTagSuggestionsDocument,
+    "\n\tmutation RejectLlmTagSuggestions($mediaId: ID!) {\n\t\trejectLlmTagSuggestions(mediaId: $mediaId)\n\t}\n": types.RejectLlmTagSuggestionsDocument,
+    "\n\tmutation AcceptAllLlmSuggestions {\n\t\tacceptAllLlmSuggestions\n\t}\n": types.AcceptAllLlmSuggestionsDocument,
+    "\n\tmutation RejectAllLlmSuggestions {\n\t\trejectAllLlmSuggestions\n\t}\n": types.RejectAllLlmSuggestionsDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": types.AcceptAllPendingMatchesDocument,
     "\n\tmutation RejectAllPendingMatches {\n\t\trejectAllPendingMatches\n\t}\n": types.RejectAllPendingMatchesDocument,
@@ -653,6 +677,8 @@ const documents: Documents = {
     "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": types.ScheduledJobRowFragmentDoc,
     "\n\tquery ServerConfigLLM {\n\t\tserverConfig {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": types.ServerConfigLlmDocument,
     "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n": types.UpdateLlmConfigDocument,
+    "\n\tquery LlmTaggingConfigSettings {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n": types.LlmTaggingConfigSettingsDocument,
+    "\n\tmutation UpdateLlmTaggingConfig($config: JSON!) {\n\t\tupdateLlmTaggingConfig(config: $config) {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n": types.UpdateLlmTaggingConfigDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
@@ -1253,6 +1279,50 @@ export function graphql(source: "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n"): typeof import('./graphql').LibrarySeriesAlphabetDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LlmLibraryTagDrafts($libraryId: ID!) {\n\t\tllmLibraryTagDrafts(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tstatus\n\t\t\tfinalTagList\n\t\t\tassignments {\n\t\t\t\tmediaId\n\t\t\t\ttags\n\t\t\t}\n\t\t\tbooksAnalyzed\n\t\t\tcompletedBatches\n\t\t\ttotalBatches\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').LlmLibraryTagDraftsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation RunLlmLibraryTagAnalysis($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmLibraryTagAnalysis(id: $id, forceRefetch: $forceRefetch)\n\t}\n"): typeof import('./graphql').RunLlmLibraryTagAnalysisDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation ApplyLlmLibraryTagSuggestions($draftId: Int!) {\n\t\tapplyLibraryTagSuggestions(draftId: $draftId)\n\t}\n"): typeof import('./graphql').ApplyLlmLibraryTagSuggestionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LlmAutoTaggingPendingSuggestions {\n\t\tpendingLlmTagSuggestions {\n\t\t\tid\n\t\t\t...LlmTagSuggestion\n\t\t}\n\t}\n"): typeof import('./graphql').LlmAutoTaggingPendingSuggestionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LlmAutoTaggingConfig {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t}\n\t}\n"): typeof import('./graphql').LlmAutoTaggingConfigDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation RunLlmTagging($id: ID!, $forceRefetch: Boolean) {\n\t\trunLlmTagging(id: $id, forceRefetch: $forceRefetch)\n\t}\n"): typeof import('./graphql').RunLlmTaggingDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment LlmTagSuggestion on LlmTagSuggestion {\n\t\tid\n\t\tmediaId\n\t\tstatus\n\t\tcreatedAt\n\t\tsuggestedTags {\n\t\t\tname\n\t\t\tconfidence\n\t\t\treason\n\t\t}\n\t\tappliedTags\n\t\tmedia {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\ttitle\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LlmTagSuggestionFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation AcceptLlmTagSuggestions($mediaId: ID!, $tagNames: [String!]) {\n\t\tacceptLlmTagSuggestions(mediaId: $mediaId, tagNames: $tagNames)\n\t}\n"): typeof import('./graphql').AcceptLlmTagSuggestionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation RejectLlmTagSuggestions($mediaId: ID!) {\n\t\trejectLlmTagSuggestions(mediaId: $mediaId)\n\t}\n"): typeof import('./graphql').RejectLlmTagSuggestionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation AcceptAllLlmSuggestions {\n\t\tacceptAllLlmSuggestions\n\t}\n"): typeof import('./graphql').AcceptAllLlmSuggestionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation RejectAllLlmSuggestions {\n\t\trejectAllLlmSuggestions\n\t}\n"): typeof import('./graphql').RejectAllLlmSuggestionsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1889,6 +1959,14 @@ export function graphql(source: "\n\tquery ServerConfigLLM {\n\t\tserverConfig {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UpdateLlmConfig($url: String, $modelName: String, $apiKey: String) {\n\t\tupdateLlmConfig(url: $url, modelName: $modelName, apiKey: $apiKey) {\n\t\t\tllmUrl\n\t\t\tllmModelName\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLlmConfigDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LlmTaggingConfigSettings {\n\t\tllmTaggingConfig {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n"): typeof import('./graphql').LlmTaggingConfigSettingsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateLlmTaggingConfig($config: JSON!) {\n\t\tupdateLlmTaggingConfig(config: $config) {\n\t\t\tenabled\n\t\t\tautoApplyThreshold\n\t\t\trequestsPerSecond\n\t\t\tconcurrency\n\t\t\tdailyRequestLimit\n\t\t\tbatchSize\n\t\t\tmaxSummaryChars\n\t\t\tbatchScope\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLlmTaggingConfigDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

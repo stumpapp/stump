@@ -441,6 +441,84 @@ pub enum MetadataFetchStatus {
 	RateLimited,
 }
 
+/// The status of an LLM tag suggestion for a single book
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LlmTagSuggestionStatus {
+	/// Tags have been suggested and await manual (or auto) review
+	#[default]
+	Suggested,
+	/// The suggestions met the auto-apply threshold and were applied
+	AutoApplied,
+	/// The suggestions were accepted by a user and applied
+	Accepted,
+	/// The suggestions were rejected by a user
+	Rejected,
+	/// Suggesting tags for the book failed
+	Failed,
+	/// The request was rate limited, eligible for a later retry
+	RateLimited,
+}
+
+/// The status of a library-wide LLM tag analysis draft
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LlmLibraryTagDraftStatus {
+	/// The analysis is (still) running, used for resuming interrupted runs
+	#[default]
+	InProgress,
+	/// The analysis finished and awaits user review
+	AwaitingReview,
+	/// The suggestions were applied
+	Applied,
+	/// The analysis failed
+	Failed,
+	/// The analysis was interrupted by rate limiting, eligible for a later retry
+	RateLimited,
+}
+
 /// The supported external metadata providers
 #[derive(
 	Eq,
@@ -839,4 +917,7 @@ pub enum ScheduledJobKind {
 	LibraryScan,
 	/// Retry fetching metadata for records that were rate-limited or failed
 	MetadataRetry,
+	/// Retry LLM tagging work that was rate-limited (per-book suggestions and
+	/// library-wide analysis drafts)
+	LlmTagRetry,
 }

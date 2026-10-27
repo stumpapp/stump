@@ -42,6 +42,14 @@ pub struct MetadataRetryConfig {
 	pub statuses: Vec<MetadataFetchStatus>,
 }
 
+/// Configuration for an LLM tag retry scheduled job
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LlmTagRetryConfig {
+	/// Restrict draft retries to these libraries. An empty vec means all
+	pub library_ids: Vec<String>,
+}
+
 impl Model {
 	pub fn library_scan_config(&self) -> Option<LibraryScanConfig> {
 		self.config
@@ -50,6 +58,12 @@ impl Model {
 	}
 
 	pub fn metadata_retry_config(&self) -> Option<MetadataRetryConfig> {
+		self.config
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok())
+	}
+
+	pub fn llm_tag_retry_config(&self) -> Option<LlmTagRetryConfig> {
 		self.config
 			.as_ref()
 			.and_then(|v| serde_json::from_value(v.clone()).ok())

@@ -1208,6 +1208,53 @@
             },
             "fetchButton": "Start Background Fetch",
             "fetchError": "Failed to start metadata fetch"
+          },
+          "llmTagging": {
+            "heading": "AI Tagging",
+            "description": "Ask your configured LLM to suggest tags for books in this library. Suggestions await your review before anything is applied.",
+            "notConfigured": {
+              "title": "LLM is not configured",
+              "description": "Set up an LLM URL, model name, and API key in the server settings to use AI tagging."
+            },
+            "runButton": "Run AI tagging",
+            "acceptAll": "Accept all",
+            "rejectAll": "Reject all",
+            "pendingCount_one": "{{count}} pending suggestion",
+            "pendingCount_other": "{{count}} pending suggestions",
+            "toasts": {
+              "jobQueued": "AI tagging job queued",
+              "notConfigured": "AI tagging is not configured",
+              "jobFailed": "Failed to queue AI tagging job"
+            }
+          },
+          "libraryTagAnalysis": {
+            "heading": "AI Tag Analysis",
+            "description": "Analyze the whole library in batches to build a global tag vocabulary and per-book tag suggestions. Review and apply the result when it finishes.",
+            "progress": "Batch {{completed}} of {{total}}",
+            "summary": "{{books}} book(s) analyzed, {{tags}} tags in vocabulary",
+            "applyReady": {
+              "title": "Analysis ready for review",
+              "description": "Applying the suggestions only ever adds tags to your books; existing tags are never removed."
+            },
+            "status": {
+              "IN_PROGRESS": "In progress",
+              "RATE_LIMITED": "Rate limited",
+              "AWAITING_REVIEW": "Awaiting review",
+              "APPLIED": "Applied",
+              "FAILED": "Failed"
+            },
+            "runButton": "Run analysis",
+            "resumeButton": "Resume analysis",
+            "restartButton": "Restart from scratch",
+            "applyButton": "Apply suggestions",
+            "toasts": {
+              "jobQueued": "Analysis job queued",
+              "notConfigured": "AI tagging is not configured",
+              "jobFailed": "Failed to queue analysis job",
+              "applied_one": "Applied suggestions to {{count}} book",
+              "applied_other": "Applied suggestions to {{count}} books",
+              "applyFailed": "Failed to apply suggestions"
+            }
           }
         }
       },
@@ -1423,7 +1470,40 @@
         "startReview": "Start Review",
         "nothingToReview": "No pending metadata matches to review"
       },
-      "reviewMatch": "Review match"
+      "reviewMatch": "Review match",
+      "llmTagging": {
+        "queue": {
+          "columns": {
+            "book": "Book",
+            "tags": "Suggested tags",
+            "actions": "Actions"
+          },
+          "review": "Review",
+          "reject": "Reject",
+          "moreRecords_one": "{{count}} more record not shown",
+          "moreRecords_other": "{{count}} more records not shown"
+        },
+        "reviewDialog": {
+          "heading": "Review AI tag suggestions",
+          "previous": "Previous",
+          "next": "Next",
+          "skipAll": "Close",
+          "reject": "Reject",
+          "accept": "Accept",
+          "acceptSelected_one": "Accept {{count}} tag",
+          "acceptSelected_other": "Accept {{count}} tags"
+        },
+        "toasts": {
+          "accepted": "Tags applied",
+          "rejected": "Suggestions rejected",
+          "acceptedAll_one": "Applied suggestions for {{count}} book",
+          "acceptedAll_other": "Applied suggestions for {{count}} books",
+          "rejectedAll_one": "Rejected suggestions for {{count}} book",
+          "rejectedAll_other": "Rejected suggestions for {{count}} books",
+          "acceptFailed": "Failed to apply suggestions",
+          "rejectFailed": "Failed to reject suggestions"
+        }
+      }
     },
     "seriesOverviewScene": {
       "buttons": {
@@ -2357,7 +2437,51 @@
               "description": "e.g. gpt-4o, deepseek-chat"
             },
             "updateFailed": "Failed to update LLM configuration",
-            "updateSuccess": "LLM configuration updated"
+            "updateSuccess": "LLM configuration updated",
+            "connection": {
+              "heading": "LLM Connection"
+            }
+          },
+          "tagging": {
+            "heading": "AI Tagging",
+            "description": "Configure how Stump uses the LLM above to suggest tags for your books. Confident suggestions can be applied automatically, or reviewed manually.",
+            "fields": {
+              "enabled": {
+                "label": "Enable AI tagging"
+              },
+              "autoApplyThreshold": {
+                "label": "Auto-apply threshold",
+                "description": "Books whose suggestions all meet or exceed this confidence (0-1) are tagged automatically. Leave empty to always review manually."
+              },
+              "requestsPerSecond": {
+                "label": "Requests per second",
+                "description": "Rate limit for LLM API requests. Supports fractions, e.g. 0.5."
+              },
+              "concurrency": {
+                "label": "Concurrency",
+                "description": "How many LLM requests may run at the same time."
+              },
+              "dailyRequestLimit": {
+                "label": "Daily request limit",
+                "description": "Maximum LLM requests per day. Remaining work is retried later by the LLM tag retry job."
+              },
+              "batchSize": {
+                "label": "Analysis batch size",
+                "description": "Books per request during library-wide tag analysis."
+              },
+              "maxSummaryChars": {
+                "label": "Max summary length",
+                "description": "Book summaries are truncated to this many characters before being sent."
+              },
+              "batchScope": {
+                "label": "Tagging scope",
+                "description": "Which books automatic tagging should consider.",
+                "newBooksOnly": "New books only",
+                "allBooks": "All books"
+              }
+            },
+            "updateSuccess": "AI tagging configuration updated",
+            "updateFailed": "Failed to update AI tagging configuration"
           }
         }
       },

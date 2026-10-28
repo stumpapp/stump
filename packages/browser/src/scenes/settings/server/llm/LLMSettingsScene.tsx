@@ -157,7 +157,7 @@ export default function LLMSettingsScene() {
 									className="md:w-[unset] w-full"
 									disabled={!hasChanges || isPending}
 								>
-									{t('shared.common.save')}
+									{translate('shared.common.save')}
 								</Button>
 							</div>
 						</Form>

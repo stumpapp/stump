@@ -53,7 +53,7 @@ const optionalNumber = (min: number, max: number) =>
 		)
 
 export default function LlmTaggingConfigCard() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const client = useQueryClient()
 
 	const {
@@ -228,7 +228,7 @@ export default function LlmTaggingConfigCard() {
 				</div>
 
 				<Button type="submit" className="md:w-[unset] w-full" disabled={isPending}>
-					{t('shared.common.save')}
+					{translate('shared.common.save')}
 				</Button>
 			</div>
 		</Form>

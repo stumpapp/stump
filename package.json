@@ -35,7 +35,7 @@
 		"format": "lerna run format --stream --parallel",
 		"release": "node scripts/release/bump-version.mjs",
 		"clean": "lerna run clean",
-		"graphql": "lerna run --scope @stump/graphql"
+		"graphql": "yarn workspace @stump/graphql codegen"
 	},
 	"devDependencies": {
 		"@0no-co/graphqlsp": "^1.15.4",

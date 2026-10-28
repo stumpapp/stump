@@ -54,3 +54,6 @@ apps/server/client/*
 #Code coverage
 lcov.info
 tarpaulin-report.html
+
+# PDFium runtime library (downloaded separately)
+vendor/pdfium/

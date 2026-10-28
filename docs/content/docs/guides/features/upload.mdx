@@ -7,9 +7,10 @@ import { Step, Steps } from 'fumadocs-ui/components/steps'
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion'
 
 <Callout type="warn">
-	This functionality allows files to be uploaded to your server, so it should be used with caution.
-	This feature must be manually enabled by the server owner by setting the `enable_upload`
-	configuration variable to `true`.
+	This functionality allows files to be uploaded to your server, so it should be used **at your own
+	risk**. It is **disabled by default** and must be manually enabled by the server owner by setting
+	the `enable_upload` configuration variable to `true`. If you enable it, only grant upload
+	permission to users you would trust with direct write access to your server's filesystem
 </Callout>
 
 ## Enabling upload
@@ -140,7 +141,11 @@ This section provides explanations for possible errors you may encounter when up
 
 ## Security considerations
 
+Uploading is an **opt-in** feature, disabled by default. Users you grant upload permission to can write files to your server. Only enable the feature if you need it, and only grant the permission to users you would trust with direct filesystem access. **You assume the risk of what your users upload.**
+
 Stump attempts to validate uploads in order to protect the host system from misuse of upload functionality, but it should be used with care. The following section describes the validation Stump applies to incoming upload requests.
+
+Stump applies best-effort validation to uploads, described below.
 
 ### Validations
 
@@ -149,10 +154,10 @@ Stump attempts to validate uploads in order to protect the host system from misu
   - Series: Only `.zip` archives can be uploaded.
     - The contents of the archive must also be limited to: `.cbr`, `.cbz`, `.epub`, `.pdf`, `.xml`, `.json` and image file types.
 - Content-Type: The server attempts to validate content-type of uploads to reject anything not matching the files above.
-- Path validation: The server will not allow uploads outside the library for which they are intended, and special path components like `..` will be rejected entirely.
+- Path validation: Uploads are constrained to the library they are intended for. Absolute paths, parent directory components like `..`, and filenames containing path separators are rejected.
 - Overwrite protection: An upload cannot overwrite an existing file.
 
-It may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it and to only allow trusted users permission to upload files.
+This validation is a defensive measure. It may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it and to only allow trusted users permission to upload files.
 
 <Callout type="idea">
 	If you have any questions or encounter issues, please open an

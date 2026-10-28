@@ -85,6 +85,8 @@ impl UploadMutation {
 			validate_book_file(&mut value)?;
 
 			let file_name = value.filename.clone();
+			validate_upload_filename(&file_name)?;
+
 			let file_path = placement_path.join(file_name);
 
 			copy_tempfile_to_location(value, &file_path).await?;
@@ -192,15 +194,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
@@ -285,15 +280,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
@@ -391,15 +379,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		tracing::trace!(
 			?extension,
@@ -700,9 +681,47 @@ fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
 	Ok(())
 }
 
-/// Decode a base64-encoded image string and detect its file extension using magic bytes.
-/// Returns a tuple of (image bytes, extension string).
+/// Decode a base64-encoded image string and detect its file extension using magic bytes
 fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)> {
+	let image_buf = BASE64
+		.decode(image)
+		.map_err(|e| format!("Failed to decode base64 image: {e}"))?;
+
+	let extension = validate_image_bytes(&image_buf, max_size)?;
+
+	Ok((image_buf, extension))
+}
+
+/// Read and validate an uploaded image
+pub(crate) fn read_uploaded_image(
+	mut value: UploadValue,
+	max_size: usize,
+) -> Result<(Vec<u8>, String)> {
+	let size = value
+		.size()
+		.map_err(|e| format!("Failed to get file size: {e}"))?;
+	if size as usize > max_size {
+		return Err(format!(
+			"Image size exceeds maximum upload size of {max_size} bytes"
+		)
+		.into());
+	}
+
+	let mut image_buf = Vec::new();
+	value
+		.content
+		.read_to_end(&mut image_buf)
+		.map_err(|e| format!("Failed to read upload: {e}"))?;
+
+	let extension = validate_image_bytes(&image_buf, max_size)?;
+	// ^ don't trust the named extension
+
+	Ok((image_buf, extension))
+}
+
+/// Validate that the bytes are within the size limit and are an allowed image type,
+/// returning the canonical extension for the detected type
+fn validate_image_bytes(image_buf: &[u8], max_size: usize) -> Result<String> {
 	const ALLOWED_IMAGE_TYPES: &[(&str, &str)] = &[
 		("image/png", "png"),
 		("image/jpeg", "jpg"),
@@ -713,10 +732,6 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 		("image/avif", "avif"),
 	];
 
-	let image_buf = BASE64
-		.decode(image)
-		.map_err(|e| format!("Failed to decode base64 image: {e}"))?;
-
 	if image_buf.len() > max_size {
 		return Err(format!(
 			"Image size exceeds maximum upload size of {max_size} bytes"
@@ -725,11 +740,11 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 	}
 
 	let inferred =
-		infer::get(&image_buf).ok_or("Unable to detect image type from provided data")?;
+		infer::get(image_buf).ok_or("Unable to detect image type from provided data")?;
 
 	let mime_type = inferred.mime_type();
 
-	let extension = ALLOWED_IMAGE_TYPES
+	ALLOWED_IMAGE_TYPES
 		.iter()
 		.find(|(mime, _)| *mime == mime_type)
 		.map(|(_, ext)| (*ext).to_string())
@@ -741,9 +756,8 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 					.map(|(mime, _)| *mime)
 					.collect::<Vec<_>>()
 			)
-		})?;
-
-	Ok((image_buf, extension))
+			.into()
+		})
 }
 
 /// A helper function to copy a tempfile from a multipart to a provided path
@@ -964,6 +978,9 @@ fn validate_series_upload(value: &UploadValue) -> Result<()> {
 ///
 /// This function will reject any paths that include a parent directory component. There is unlikely to be
 /// any circumstance where a client sending one would be appropriate anyhow.
+///
+/// Note: this does **not** reject absolute paths, see [`get_books_path`] and [`get_series_path`] for
+/// where absolute values are handled.
 fn is_subpath_secure(params: &str) -> bool {
 	let path = Path::new(params);
 
@@ -976,23 +993,60 @@ fn is_subpath_secure(params: &str) -> bool {
 	true
 }
 
+/// Validates that a user-provided filename is safe to join onto the placement path:
+///
+/// - Must be a single, normal path component
+/// - Absolute paths, parent directory components, and multi-segment paths are all refused
+///
+/// This is to prevent e.g. an upload like `../../book.epub` or `/tmp/book.epub` from
+/// being allowed (joining an absolute path replaces the base entirely)
+fn validate_upload_filename(file_name: &str) -> Result<()> {
+	let mut components = Path::new(file_name).components();
+	let is_single_normal_component =
+		matches!(components.next(), Some(std::path::Component::Normal(_)))
+			&& components.next().is_none();
+
+	if !is_single_normal_component || file_name.contains('\\') {
+		return Err(format!(
+			"Invalid file name: {file_name}. File names must be a single path component"
+		)
+		.into());
+	}
+
+	Ok(())
+}
+
 /// A helper function to generate the path at which books should be placed
 /// given an input [`UploadBooksRequest`] and library.
 fn get_books_path(place_at: &str, library: &library::Model) -> Result<PathBuf> {
-	// Validate the placement path parameters, error otherwise
-	// This is an important security check.
 	if !is_subpath_secure(place_at) {
 		return Err("Invalid upload path placement parameters".into());
 	}
 
-	// Get path that uploads will be placed at, account for possible full path
-	let placement_path = if place_at.starts_with(&library.path) {
-		PathBuf::from(place_at)
-	} else {
-		Path::new(&library.path).join(place_at)
-	};
+	let placement_path = resolve_placement_path(place_at, library)?;
 
 	Ok(placement_path)
+}
+
+/// Resolves a user-provided placement path against the library path:
+///
+/// - Relative values are joined onto the library path
+/// - Absolute values are only allowed when they resolve inside the library directory
+///
+/// Note: `Path::join` replaces the base path entirely when given an absolute value, so absolute
+/// paths must be validated against the library path
+fn resolve_placement_path(place_at: &str, library: &library::Model) -> Result<PathBuf> {
+	let place_at_path = Path::new(place_at);
+
+	if place_at_path.is_absolute() {
+		if !place_at_path.starts_with(Path::new(&library.path)) {
+			return Err("Upload path must be within the library directory".into());
+		}
+
+		Ok(place_at_path.to_path_buf())
+	} else {
+		Ok(Path::new(&library.path).join(place_at_path))
+	}
 }
 
 /// A helper function to generate the path at which a series zip should be placed
@@ -1006,19 +1060,148 @@ fn get_series_path(
 		return Err("Invalid upload path placement parameters".into());
 	}
 
-	// Validate the series directory name - the same traversal concerns apply here
-	if !is_subpath_secure(series_dir_name) {
+	// Validate the series directory name - the same traversal concerns apply here.
+	// It must also be relative since an absolute value would replace the entire
+	// placement path when joined
+	if !is_subpath_secure(series_dir_name) || Path::new(series_dir_name).is_absolute() {
 		return Err("Invalid series directory name".into());
 	}
 
 	// Get path that the series upload will be placed at, accounting for possible full path
-	let placement_path = if place_at.starts_with(&library.path) {
-		PathBuf::from(place_at).join(series_dir_name)
-	} else {
-		Path::new(&library.path)
-			.join(place_at)
-			.join(series_dir_name)
-	};
+	let placement_path = resolve_placement_path(place_at, library)?;
 
-	Ok(placement_path)
+	Ok(placement_path.join(series_dir_name))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use models::shared::enums::FileStatus;
+
+	fn library_at(path: &str) -> library::Model {
+		library::Model {
+			id: "123".to_string(),
+			name: "A library".to_string(),
+			created_at: chrono::Utc::now().into(),
+			updated_at: Some(chrono::Utc::now().into()),
+			description: None,
+			emoji: None,
+			last_scanned_at: None,
+			config_id: 1,
+			path: path.to_string(),
+			status: FileStatus::Ready,
+			thumbnail_meta: None,
+			thumbnail_path: None,
+		}
+	}
+
+	#[test]
+	fn test_is_subpath_secure() {
+		assert!(is_subpath_secure(""));
+		assert!(is_subpath_secure("."));
+		assert!(is_subpath_secure("subdirectory"));
+		assert!(is_subpath_secure("sub/directory"));
+		assert!(is_subpath_secure("/absolutely/fine"));
+
+		assert!(!is_subpath_secure(".."));
+		assert!(!is_subpath_secure("../"));
+		assert!(!is_subpath_secure("sub/../other"));
+		assert!(!is_subpath_secure("/abs/../path"));
+	}
+
+	#[test]
+	fn test_validate_upload_filename_rejects_traversal() {
+		assert!(validate_upload_filename("../book.epub").is_err());
+		assert!(validate_upload_filename("..\\..\\book.epub").is_err());
+		assert!(validate_upload_filename("../../etc/book.epub").is_err());
+		assert!(validate_upload_filename("sub/book.epub").is_err());
+	}
+
+	#[test]
+	fn test_validate_upload_filename_rejects_absolute_and_special_names() {
+		assert!(validate_upload_filename("/tmp/book.epub").is_err());
+		assert!(validate_upload_filename("/etc/book.epub").is_err());
+		assert!(validate_upload_filename("C:\\book.epub").is_err());
+		assert!(validate_upload_filename("..").is_err());
+		assert!(validate_upload_filename(".").is_err());
+		assert!(validate_upload_filename("").is_err());
+	}
+
+	#[test]
+	fn test_get_books_path_relative_offset() {
+		let library = library_at("/data/library");
+		let path = get_books_path("subdir", &library).expect("should be valid");
+		assert_eq!(path, PathBuf::from("/data/library/subdir"));
+	}
+
+	#[test]
+	fn test_get_books_path_absolute_within_library() {
+		let library = library_at("/data/library");
+		let path =
+			get_books_path("/data/library/subdir", &library).expect("should be valid");
+		assert_eq!(path, PathBuf::from("/data/library/subdir"));
+	}
+
+	#[test]
+	fn test_get_books_path_rejects_traversal() {
+		let library = library_at("/data/library");
+		assert!(get_books_path("../elsewhere", &library).is_err());
+		assert!(get_books_path("sub/../../elsewhere", &library).is_err());
+	}
+
+	#[test]
+	fn test_get_books_path_rejects_absolute_outside_library() {
+		let library = library_at("/data/library");
+		assert!(get_books_path("/tmp", &library).is_err());
+		assert!(get_books_path("/etc", &library).is_err());
+		assert!(get_books_path("/data/library/sub/../../../tmp", &library).is_err());
+	}
+
+	#[test]
+	fn test_get_books_path_rejects_prefix_lookalike() {
+		let library = library_at("/data/library");
+		assert!(get_books_path("/data/library-hahacannotfoolme", &library).is_err());
+		assert!(get_books_path("/data/libraryooglywoogly", &library).is_err());
+	}
+
+	#[test]
+	fn test_get_series_path_relative_offset() {
+		let library = library_at("/data/library");
+		let path =
+			get_series_path("subdir", "My Series", &library).expect("should be valid");
+		assert_eq!(path, PathBuf::from("/data/library/subdir/My Series"));
+	}
+
+	#[test]
+	fn test_get_series_path_absolute_within_library() {
+		let library = library_at("/data/library");
+		let path = get_series_path("/data/library", "My Series", &library)
+			.expect("should be valid");
+		assert_eq!(path, PathBuf::from("/data/library/My Series"));
+	}
+
+	#[test]
+	fn test_get_series_path_rejects_traversal() {
+		let library = library_at("/data/library");
+		assert!(get_series_path("../elsewhere", "My Series", &library).is_err());
+		assert!(get_series_path("subdir", "../My Series", &library).is_err());
+		assert!(get_series_path("subdir", "..", &library).is_err());
+	}
+
+	#[test]
+	fn test_get_series_path_rejects_absolute_outside_library() {
+		let library = library_at("/data/library");
+		assert!(get_series_path("/tmp", "My Series", &library).is_err());
+		assert!(get_series_path("subdir", "/tmp", &library).is_err());
+		assert!(get_series_path("/data/library", "/tmp", &library).is_err());
+	}
+
+	#[test]
+	fn test_get_series_path_rejects_prefix_lookalike() {
+		let library = library_at("/data/library");
+		assert!(
+			get_series_path("/data/library-hahacannotfoolme", "My Series", &library)
+				.is_err()
+		);
+	}
 }

@@ -430,6 +430,9 @@ async fn ensure_unique_username(
 	}
 }
 
+/// Resolve the frontend base URL used for OIDC redirects. Stump will
+/// take a configured `public_url` first and fallback onto the request host
+/// if unavailable
 async fn get_frontend_url(
 	conn: &sea_orm::DatabaseConnection,
 	service: HostDetails,
@@ -437,5 +440,78 @@ async fn get_frontend_url(
 	let config = server_config::Entity::find().one(conn).await?.ok_or(
 		APIError::InternalServerError("Missing server config".to_string()),
 	)?;
-	Ok(config.public_url.unwrap_or_else(|| service.url()))
+
+	Ok(config
+		.public_url
+		.map(|url| url.trim().trim_end_matches('/').to_string())
+		.filter(|url| !url.is_empty())
+		.unwrap_or_else(|| service.url()))
+}
+// ^ the url resolution is opposite to what i do elsewhere, e.g. for epub resource
+// fetching. i _think_ this is correct here tho since the redirects is handled
+// in the ident provider and would have to match
+
+#[cfg(test)]
+mod tests {
+	use ::tests::db::test_database;
+	use sea_orm::ActiveModelTrait;
+
+	use super::*;
+
+	async fn setup_db(public_url: Option<&str>) -> sea_orm::DatabaseConnection {
+		let db = test_database().await;
+
+		server_config::ActiveModel {
+			public_url: Set(public_url.map(str::to_string)),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("Failed to insert server_config row");
+
+		db
+	}
+
+	fn service() -> HostDetails {
+		HostDetails {
+			host: "stump.example.com".to_string(),
+			scheme: "https".to_string(),
+		}
+	}
+
+	#[tokio::test]
+	async fn test_missing_config_errors() {
+		let db = test_database().await;
+
+		assert!(get_frontend_url(&db, service()).await.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_unset_public_url_falls_back_to_request_host() {
+		let db = setup_db(None).await;
+
+		let url = get_frontend_url(&db, service()).await.unwrap();
+		assert_eq!(url, "https://stump.example.com");
+	}
+
+	#[tokio::test]
+	async fn test_blank_public_url_is_treated_as_unset() {
+		for blank in ["", " "] {
+			let db = setup_db(Some(blank)).await;
+
+			let url = get_frontend_url(&db, service()).await.unwrap();
+			assert_eq!(
+				url, "https://stump.example.com",
+				"blank public_url '{blank}' should fall back to the request host"
+			);
+		}
+	}
+
+	#[tokio::test]
+	async fn test_public_url_takes_precedence_and_is_trimmed() {
+		let db = setup_db(Some("https://public.example.com/")).await;
+
+		let url = get_frontend_url(&db, service()).await.unwrap();
+		assert_eq!(url, "https://public.example.com");
+	}
 }

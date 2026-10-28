@@ -47,10 +47,20 @@ impl MigrationTrait for Migration {
 		))
 		.await?;
 
+		txn.execute_raw(Statement::from_string(
+			backend,
+			"ALTER TABLE media ALTER COLUMN library_id SET NOT NULL",
+		))
+		.await?;
+
+		// Note: postgres has the advantage of enforcing a book's series belongs to book's library
+		// via composite fk, but sqlite cannot add one without rebuilding the media table which i
+		// very much would like to avoid. that said, if i ever HAVE to do it, i should definitely
+		// consider this at that point. in the meantime, the smaller and sufficient alt is
+		// the trigger created in the sqlite arm
 		match backend {
 			DbBackend::Postgres => {
 				for sql in [
-					"ALTER TABLE media ALTER COLUMN library_id SET NOT NULL",
 					"CREATE UNIQUE INDEX idx_series_id_library_id ON series(id, library_id)",
 					"ALTER TABLE media ADD CONSTRAINT fk_media_series_library FOREIGN KEY (series_id, library_id) REFERENCES series(id, library_id)",
 				] {
@@ -64,11 +74,10 @@ impl MigrationTrait for Migration {
 					 "AND EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)"),
 				] {
 					txn.execute_raw(Statement::from_string(backend, format!(
-						"CREATE TRIGGER media_library_{name} BEFORE {event} ON media
-						 WHEN NEW.library_id IS NULL OR
-						 (NEW.series_id IS NOT NULL {cascade_guard} AND NOT EXISTS
-						  (SELECT 1 FROM series WHERE id = NEW.series_id AND library_id = NEW.library_id))
-						 BEGIN SELECT RAISE(ABORT, 'Book must belong to a library and its series must belong to that library'); END",
+						 "CREATE TRIGGER media_library_{name} BEFORE {event} ON media
+						 WHEN NEW.series_id IS NOT NULL {cascade_guard} AND NOT EXISTS
+						  (SELECT 1 FROM series WHERE id = NEW.series_id AND library_id = NEW.library_id)
+						 BEGIN SELECT RAISE(ABORT, 'A book''s series must belong to the book''s library'); END",
 					))).await?;
 				}
 				txn.execute_raw(Statement::from_string(

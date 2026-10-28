@@ -9,6 +9,8 @@ use crate::{
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
 };
+
+use super::upload::read_uploaded_image;
 use async_graphql::{Context, Object, Result, Upload, ID};
 use chrono::Utc;
 use models::{
@@ -28,7 +30,7 @@ use sea_orm::{
 	prelude::*, ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel,
 	Set, TransactionTrait, TryIntoModel,
 };
-use std::{io::Read, path::Path};
+
 use stump_core::{
 	config::StumpConfig, image::thumbnail::generate_image_metadata_from_bytes,
 };
@@ -76,42 +78,10 @@ impl UserMutation {
 			None => user.id.clone(),
 		};
 
-		let mut value = upload.value(ctx)?;
+		let value = upload.value(ctx)?;
 
-		let content_type = value
-			.content_type
-			.clone()
-			.as_deref()
-			.and_then(|s| s.parse::<stump_core::fs_utils::ContentType>().ok())
-			.ok_or("Could not verify content type of uploaded file")?;
-
-		if !content_type.is_image() {
-			return Err("Uploaded file is not an image".into());
-		}
-
-		match value.size() {
-			Ok(size) if size as usize > core.config.max_image_upload_size => {
-				return Err(format!(
-					"File size exceeds maximum upload size of {} bytes",
-					core.config.max_image_upload_size
-				)
-				.into());
-			},
-			Err(e) => return Err(format!("Failed to get file size: {e}").into()),
-			_ => {},
-		}
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|e| e.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Uploaded file must have a file extension")?;
-
-		let mut image_bytes = Vec::new();
-		value
-			.content
-			.read_to_end(&mut image_bytes)
-			.map_err(|e| format!("Failed to read upload: {e}"))?;
+		let (image_bytes, extension) =
+			read_uploaded_image(value, core.config.max_image_upload_size)?;
 
 		let avatars_dir = core.config.avatars_directory();
 		if let Ok(mut entries) = tokio::fs::read_dir(&avatars_dir).await {

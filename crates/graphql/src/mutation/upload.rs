@@ -194,15 +194,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
@@ -287,15 +280,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
@@ -393,15 +379,8 @@ impl UploadMutation {
 		enforce_max_size(&value, core.config.max_file_upload_size)?;
 		enforce_valid_content_type(&value)?;
 
-		let mut image_buf = Vec::new();
-		let mut file = value.content;
-		file.read_to_end(&mut image_buf)?;
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Expected file to have an extension")?;
+		let (image_buf, extension) =
+			read_uploaded_image(value, core.config.max_file_upload_size)?;
 
 		tracing::trace!(
 			?extension,
@@ -716,9 +695,47 @@ fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
 	Ok(())
 }
 
-/// Decode a base64-encoded image string and detect its file extension using magic bytes.
-/// Returns a tuple of (image bytes, extension string).
+/// Decode a base64-encoded image string and detect its file extension using magic bytes
 fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)> {
+	let image_buf = BASE64
+		.decode(image)
+		.map_err(|e| format!("Failed to decode base64 image: {e}"))?;
+
+	let extension = validate_image_bytes(&image_buf, max_size)?;
+
+	Ok((image_buf, extension))
+}
+
+/// Read and validate an uploaded image
+pub(crate) fn read_uploaded_image(
+	mut value: UploadValue,
+	max_size: usize,
+) -> Result<(Vec<u8>, String)> {
+	let size = value
+		.size()
+		.map_err(|e| format!("Failed to get file size: {e}"))?;
+	if size as usize > max_size {
+		return Err(format!(
+			"Image size exceeds maximum upload size of {max_size} bytes"
+		)
+		.into());
+	}
+
+	let mut image_buf = Vec::new();
+	value
+		.content
+		.read_to_end(&mut image_buf)
+		.map_err(|e| format!("Failed to read upload: {e}"))?;
+
+	let extension = validate_image_bytes(&image_buf, max_size)?;
+	// ^ don't trust the named extension
+
+	Ok((image_buf, extension))
+}
+
+/// Validate that the bytes are within the size limit and are an allowed image type,
+/// returning the canonical extension for the detected type
+fn validate_image_bytes(image_buf: &[u8], max_size: usize) -> Result<String> {
 	const ALLOWED_IMAGE_TYPES: &[(&str, &str)] = &[
 		("image/png", "png"),
 		("image/jpeg", "jpg"),
@@ -729,10 +746,6 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 		("image/avif", "avif"),
 	];
 
-	let image_buf = BASE64
-		.decode(image)
-		.map_err(|e| format!("Failed to decode base64 image: {e}"))?;
-
 	if image_buf.len() > max_size {
 		return Err(format!(
 			"Image size exceeds maximum upload size of {max_size} bytes"
@@ -741,11 +754,11 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 	}
 
 	let inferred =
-		infer::get(&image_buf).ok_or("Unable to detect image type from provided data")?;
+		infer::get(image_buf).ok_or("Unable to detect image type from provided data")?;
 
 	let mime_type = inferred.mime_type();
 
-	let extension = ALLOWED_IMAGE_TYPES
+	ALLOWED_IMAGE_TYPES
 		.iter()
 		.find(|(mime, _)| *mime == mime_type)
 		.map(|(_, ext)| (*ext).to_string())
@@ -757,9 +770,8 @@ fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)
 					.map(|(mime, _)| *mime)
 					.collect::<Vec<_>>()
 			)
-		})?;
-
-	Ok((image_buf, extension))
+			.into()
+		})
 }
 
 /// A helper function to copy a tempfile from a multipart to a provided path

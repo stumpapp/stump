@@ -3,9 +3,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'
 
+import { displayNameForSuggestion, formatConfidence } from './types'
 import { useLlmTagActions } from './useLlmTagActions'
 import { useLlmTagReviewStore } from './useLlmTagReviewStore'
-import { displayNameForSuggestion, formatConfidence } from './types'
 
 const LOCALE_KEY = 'metadataMatching.llmTagging.reviewDialog'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

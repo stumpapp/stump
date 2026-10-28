@@ -1,4 +1,3 @@
-import { useCheckPermission } from '@/context'
 import { useGraphQL, useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import {
 	Alert,
@@ -14,6 +13,7 @@ import { Info, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { useCheckPermission } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
 

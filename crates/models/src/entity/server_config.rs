@@ -1,5 +1,6 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use async_trait::async_trait;
+use sea_orm::{entity::prelude::*, ActiveValue::Set, FromQueryResult};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -33,4 +34,15 @@ pub struct JwtSecretsSelect {
 	pub jwt_refresh_secret: Option<String>,
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			self.initial_wal_setup_complete = Set(false);
+		}
+		Ok(self)
+	}
+}

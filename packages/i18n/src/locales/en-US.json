@@ -3383,6 +3383,14 @@
       "urlFiltersDescription": "Adjust the filters applied to the current view",
       "configureFilters": "Configure filters"
     },
+    "tagFilter": {
+      "title": "Filter by tags",
+      "searchPlaceholder": "Search tags",
+      "clearFilters": "Clear filters",
+      "applyFilters": "Apply filters",
+      "noMatchingTags": "No matching tags",
+      "emptyLibrary": "This library has no tags yet"
+    },
     "search": {
       "functionalityUnavailable": "This functionality isn't available right now"
     },

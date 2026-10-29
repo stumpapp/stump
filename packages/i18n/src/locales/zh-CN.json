@@ -3335,6 +3335,14 @@
       "urlFiltersDescription": "调整应用于当前视图的筛选器",
       "configureFilters": "配置筛选器"
     },
+    "tagFilter": {
+      "title": "按标签筛选",
+      "searchPlaceholder": "搜索标签",
+      "clearFilters": "清除筛选",
+      "applyFilters": "应用筛选",
+      "noMatchingTags": "没有匹配的标签",
+      "emptyLibrary": "该书库暂无标签"
+    },
     "search": {
       "functionalityUnavailable": "此功能目前不可用"
     },

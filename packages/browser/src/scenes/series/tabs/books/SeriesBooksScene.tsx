@@ -12,6 +12,7 @@ import DynamicCardGrid from '@/components/container/DynamicCardGrid'
 import {
 	FilterContext,
 	FilterHeader,
+	TagFilterDrawer,
 	URLFilterContainer,
 	URLFilterDrawer,
 	URLOrdering,
@@ -290,7 +291,12 @@ function SeriesBooksScene() {
 					isSearching={isLoading}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
-					filterControls={<URLFilterDrawer entity="media" />}
+					filterControls={
+						<>
+							<TagFilterDrawer libraryId={series.library.id} />
+							<URLFilterDrawer entity="media" />
+						</>
+					}
 					navOffset
 				/>
 

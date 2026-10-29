@@ -150,6 +150,7 @@ type Documents = {
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.MediaAtPathDocument,
     "\n\tmutation UploadLibraryBooks($input: UploadBooksInput!) {\n\t\tuploadBooks(input: $input)\n\t}\n": typeof types.UploadLibraryBooksDocument,
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": typeof types.UploadLibrarySeriesDocument,
+    "\n\tquery TagFilterDrawer($libraryId: ID!) {\n\t\tlibraryTags(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tname\n\t\t\tcount\n\t\t}\n\t}\n": typeof types.TagFilterDrawerDocument,
     "\n\tquery MediaFilterForm($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tinkers\n\t\t\tpublishers\n\t\t\teditors\n\t\t\tcharacters\n\t\t}\n\t}\n": typeof types.MediaFilterFormDocument,
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteLibraryDocument,
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LastVisitedLibraryDocument,
@@ -502,6 +503,7 @@ const documents: Documents = {
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.MediaAtPathDocument,
     "\n\tmutation UploadLibraryBooks($input: UploadBooksInput!) {\n\t\tuploadBooks(input: $input)\n\t}\n": types.UploadLibraryBooksDocument,
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": types.UploadLibrarySeriesDocument,
+    "\n\tquery TagFilterDrawer($libraryId: ID!) {\n\t\tlibraryTags(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tname\n\t\t\tcount\n\t\t}\n\t}\n": types.TagFilterDrawerDocument,
     "\n\tquery MediaFilterForm($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tinkers\n\t\t\tpublishers\n\t\t\teditors\n\t\t\tcharacters\n\t\t}\n\t}\n": types.MediaFilterFormDocument,
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteLibraryDocument,
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LastVisitedLibraryDocument,
@@ -1259,6 +1261,10 @@ export function graphql(source: "\n\tmutation UploadLibraryBooks($input: UploadB
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n"): typeof import('./graphql').UploadLibrarySeriesDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery TagFilterDrawer($libraryId: ID!) {\n\t\tlibraryTags(libraryId: $libraryId) {\n\t\t\tid\n\t\t\tname\n\t\t\tcount\n\t\t}\n\t}\n"): typeof import('./graphql').TagFilterDrawerDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -1244,6 +1244,17 @@ type LibraryStats {
 	totalReadingTimeSeconds: Int!
 }
 
+"""
+A tag scoped to a library, along with the number of books in that
+library which have the tag applied
+"""
+type LibraryTag {
+	id: Int!
+	name: String!
+	"The number of books in the library with this tag applied"
+	count: Int!
+}
+
 "The type of content a library contains"
 enum LibraryType {
 	COMIC
@@ -2853,6 +2864,11 @@ type Query {
 	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
 	"Returns a list of all tags."
 	tags: [Tag!]!
+	"""
+	Returns the tags associated with a library, along with the number of
+	books in that library which have each tag applied.
+	"""
+	libraryTags(libraryId: ID!): [LibraryTag!]!
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	"""
 	Finds a reading session by its ID, if it exists. Access control is enforced such that:

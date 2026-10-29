@@ -3378,6 +3378,14 @@
       "urlFiltersDescription": "調整套用於目前檢視的篩選器",
       "configureFilters": "設定篩選器"
     },
+    "tagFilter": {
+      "title": "按標籤篩選",
+      "searchPlaceholder": "搜尋標籤",
+      "clearFilters": "清除篩選",
+      "applyFilters": "套用篩選",
+      "noMatchingTags": "沒有符合的標籤",
+      "emptyLibrary": "該書庫尚無標籤"
+    },
     "search": {
       "functionalityUnavailable": "此功能目前無法使用"
     },

@@ -12,6 +12,7 @@ import { GridSizeSlider } from '@/components/container/GridSizeSlider'
 import {
 	FilterContext,
 	FilterHeader,
+	TagFilterDrawer,
 	URLFilterContainer,
 	URLFilterDrawer,
 	URLOrdering,
@@ -285,7 +286,12 @@ function LibraryBooksScene() {
 					isSearching={isLoading}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
-					filterControls={<URLFilterDrawer entity="media" />}
+					filterControls={
+						<>
+							<TagFilterDrawer libraryId={library.id} />
+							<URLFilterDrawer entity="media" />
+						</>
+					}
 					sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
 					navOffset
 				/>

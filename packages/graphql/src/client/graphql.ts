@@ -1349,6 +1349,18 @@ export type LibraryStats = {
   totalReadingTimeSeconds: Scalars['Int']['output'];
 };
 
+/**
+ * A tag scoped to a library, along with the number of books in that
+ * library which have the tag applied
+ */
+export type LibraryTag = {
+  __typename?: 'LibraryTag';
+  /** The number of books in the library with this tag applied */
+  count: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 /** The type of content a library contains */
 export enum LibraryType {
   Book = 'BOOK',
@@ -3843,6 +3855,11 @@ export type Query = {
   librariesStats: LibraryStats;
   libraryById?: Maybe<Library>;
   libraryMissingEntities: PaginatedMissingEntityResponse;
+  /**
+   * Returns the tags associated with a library, along with the number of
+   * books in that library which have each tag applied.
+   */
+  libraryTags: Array<LibraryTag>;
   listDirectory: PaginatedDirectoryListingResponse;
   /** Whether a library-wide LLM tag analysis is currently resumable */
   llmLibraryTagDraftInProgress?: Maybe<LlmLibraryTagDraft>;
@@ -4074,6 +4091,11 @@ export type QueryLibraryByIdArgs = {
 export type QueryLibraryMissingEntitiesArgs = {
   libraryId: Scalars['ID']['input'];
   pagination?: Pagination;
+};
+
+
+export type QueryLibraryTagsArgs = {
+  libraryId: Scalars['ID']['input'];
 };
 
 
@@ -6403,6 +6425,13 @@ export type UploadLibrarySeriesMutationVariables = Exact<{
 
 
 export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSeries: boolean };
+
+export type TagFilterDrawerQueryVariables = Exact<{
+  libraryId: Scalars['ID']['input'];
+}>;
+
+
+export type TagFilterDrawerQuery = { __typename?: 'Query', libraryTags: Array<{ __typename?: 'LibraryTag', id: number, name: string, count: number }> };
 
 export type MediaFilterFormQueryVariables = Exact<{
   seriesId?: InputMaybe<Scalars['ID']['input']>;
@@ -12292,6 +12321,15 @@ export const UploadLibrarySeriesDocument = new TypedDocumentString(`
   uploadSeries(input: $input)
 }
     `) as unknown as TypedDocumentString<UploadLibrarySeriesMutation, UploadLibrarySeriesMutationVariables>;
+export const TagFilterDrawerDocument = new TypedDocumentString(`
+    query TagFilterDrawer($libraryId: ID!) {
+  libraryTags(libraryId: $libraryId) {
+    id
+    name
+    count
+  }
+}
+    `) as unknown as TypedDocumentString<TagFilterDrawerQuery, TagFilterDrawerQueryVariables>;
 export const MediaFilterFormDocument = new TypedDocumentString(`
     query MediaFilterForm($seriesId: ID) {
   mediaMetadataOverview(seriesId: $seriesId) {

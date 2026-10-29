@@ -52,11 +52,14 @@ export default function ReadingNow({ books }: Props) {
 		(books.length - 1) * 6 + // total gap between dots
 		16 * 2 // container padding
 
+	// Note: we capture len outside the worklet since it would otherwise capture `books` and
+	// copy the entire array which would fail on Date with a `Cannot copy value of type `Date`
+	const totalItems = books.length
+
 	const pan = Gesture.Pan()
 		.activeOffsetX([-3, 3])
 		.failOffsetY([-6, 6])
 		.onUpdate((event) => {
-			const totalItems = books.length
 			const activeAreaWidth = paginationDotsContainerWidth / totalItems
 			const index = Math.min(totalItems - 1, Math.max(0, Math.floor(event.x / activeAreaWidth)))
 

@@ -33,7 +33,6 @@
 		"@miblanchard/react-native-slider": "^2.6.0",
 		"@react-native-async-storage/async-storage": "2.2.0",
 		"@react-native-community/slider": "5.2.0",
-		"@react-native-menu/menu": "^2.0.0",
 		"@react-native-vector-icons/fontawesome6": "^13.1.2",
 		"@react-native-vector-icons/octicons": "^21.1.2",
 		"@rn-primitives/accordion": "^1.2.0",
@@ -105,8 +104,6 @@
 		"react-native-edge-to-edge": "^1.8.1",
 		"react-native-enriched-markdown": "^1.1.1",
 		"react-native-gesture-handler": "~2.32.0",
-		"react-native-ios-context-menu": "^3.2.1",
-		"react-native-ios-utilities": "^5.2.0",
 		"react-native-keyboard-controller": "1.21.9",
 		"react-native-linear-gradient": "^2.8.3",
 		"react-native-mmkv": "^3.3.3",
@@ -134,7 +131,6 @@
 		"to-words": "^5.6.1",
 		"ts-pattern": "^5.6.2",
 		"url-join": "^5.0.0",
-		"zeego": "^3.0.6",
 		"zustand": "^5.0.12"
 	},
 	"devDependencies": {

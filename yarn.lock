@@ -1493,11 +1493,6 @@
   dependencies:
     tslib "^2.0.0"
 
-"@dominicstop/ts-event-emitter@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@dominicstop/ts-event-emitter/-/ts-event-emitter-1.1.0.tgz#1f3d3fa878a1ccab686931280757954719cf88e4"
-  integrity sha512-CcxmJIvUb1vsFheuGGVSQf4KdPZC44XolpUT34+vlal+LyQoBUOn31pjFET5M9ctOxEpt8xa0M3/2M7uUiAoJw==
-
 "@drizzle-team/brocli@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@drizzle-team/brocli/-/brocli-0.10.2.tgz#9757c006a43daaa6f45512e6cf5fabed36fb9da7"
@@ -4303,7 +4298,7 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.5.tgz#883e642c5ec0ba393dd1bf586e7e772985770d87"
   integrity sha512-+48PbAAbq3didjJxa+OaWY2ZwgAKsNiRGyeHKszblZMQ+kcpd9pAaT11cMkGEie0vsOi3QdeTE6d5Fe3Gn61kA==
 
-"@radix-ui/react-context-menu@^2.0.1", "@radix-ui/react-context-menu@^2.1.5", "@radix-ui/react-context-menu@^2.2.15":
+"@radix-ui/react-context-menu@^2.1.5", "@radix-ui/react-context-menu@^2.2.15":
   version "2.2.16"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-context-menu/-/react-context-menu-2.2.16.tgz#e7bf94a457b68af08f24ad696949144530faab50"
   integrity sha512-O8morBEW+HsVG28gYDZPTrT9UUovQUlJue5YO836tiTJhuIWBm/zQHc7j388sHWtdH/xUZurK9olD2+pcqx5ww==
@@ -4482,7 +4477,7 @@
     "@radix-ui/react-use-callback-ref" "1.1.5"
     "@radix-ui/react-use-effect-event" "0.0.5"
 
-"@radix-ui/react-dropdown-menu@^2.0.1", "@radix-ui/react-dropdown-menu@^2.0.6", "@radix-ui/react-dropdown-menu@^2.1.15":
+"@radix-ui/react-dropdown-menu@^2.0.6", "@radix-ui/react-dropdown-menu@^2.1.15":
   version "2.1.16"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-dropdown-menu/-/react-dropdown-menu-2.1.16.tgz#5ee045c62bad8122347981c479d92b1ff24c7254"
   integrity sha512-1PLGQEynI/3OX/ftV54COn+3Sud/Mn8vALg2rWnBLnRaGtJDduNW/22XjlGgPdpcIbiQxjKtb7BkcjP00nqfJw==
@@ -5580,11 +5575,6 @@
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@react-native-masked-view/masked-view/-/masked-view-0.3.2.tgz#7064533a573e3539ec912f59c1f457371bf49dd9"
   integrity sha512-XwuQoW7/GEgWRMovOQtX3A4PrXhyaZm0lVUiY8qJDvdngjLms9Cpdck6SmGAUNqQwcj2EadHC1HwL0bEyoa/SQ==
-
-"@react-native-menu/menu@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native-menu/menu/-/menu-2.0.0.tgz#21d3fcb15687df86386fee7815cc5ff79d26bc9e"
-  integrity sha512-hb8Mirw6aKPGONhgo52IiNpwHtISVrgCT3rMdFX1qS7eOFNzOcQh8d2UDnaH5zVpxN+QuvWtaaiRMGFpIjzdtA==
 
 "@react-native-vector-icons/common@^13.0.1":
   version "13.0.1"
@@ -20941,18 +20931,6 @@ react-native-gesture-handler@~2.32.0:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
 
-react-native-ios-context-menu@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-ios-context-menu/-/react-native-ios-context-menu-3.2.1.tgz#52465fd5cf225e48745c12beee6ebff26b499394"
-  integrity sha512-OBQbb3I/VUx2wQgz4cqN614kt3nJ+qx5wxEdtGN1Aj4nYYL1orp7VLFkV6axof6DgOyv0YD6af2RUTok6a2xDQ==
-  dependencies:
-    "@dominicstop/ts-event-emitter" "^1.1.0"
-
-react-native-ios-utilities@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-5.2.0.tgz#4b321ab8c06a6da6037c6aba4911353a5c23876e"
-  integrity sha512-RTw1Gk8rQhBL43+U80I+Nu8T7mLTNkj5RaG8vTs3ETEDqphS3L0Mrzk79RX0Jmm64HMad70GXHctXFlW1n0V8w==
-
 react-native-is-edge-to-edge@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-native-is-edge-to-edge/-/react-native-is-edge-to-edge-1.2.1.tgz#64e10851abd9d176cbf2b40562f751622bde3358"
@@ -25430,15 +25408,6 @@ yoctocolors@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yoctocolors/-/yoctocolors-2.1.2.tgz#d795f54d173494e7d8db93150cec0ed7f678c83a"
   integrity sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==
-
-zeego@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/zeego/-/zeego-3.0.6.tgz#26610b97ea0e3e7ee76a651264e3b8636a619f10"
-  integrity sha512-vg0GCMPYg6or/J91bwRnUpIYwz7QnhkyeKOdd3FjvICg+Gzq2D5QhD8k5RUSv1B+048LpNmNYdLm8qJVIbBONw==
-  dependencies:
-    "@radix-ui/react-context-menu" "^2.0.1"
-    "@radix-ui/react-dropdown-menu" "^2.0.1"
-    sf-symbols-typescript "^2.0.0"
 
 zod-validation-error@^3.0.3:
   version "3.5.4"

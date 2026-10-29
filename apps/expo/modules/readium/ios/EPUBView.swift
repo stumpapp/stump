@@ -1,6 +1,4 @@
 import ExpoModulesCore
-import ReadiumAdapterGCDWebServer
-import ReadiumInternal
 import ReadiumNavigator
 import ReadiumShared
 import WebKit
@@ -477,9 +475,6 @@ public class EPUBView: ExpoView {
                     readiumCSSRSProperties: CSSRSProperties(
                         maxLineLength: CSSRemLength(200)
                     )
-                ),
-                httpServer: GCDHTTPServer(
-                    assetRetriever: BookService.instance.assetRetriever
                 )
             )
 
@@ -547,7 +542,6 @@ public class EPUBView: ExpoView {
         isInitialized = false
         totalPositions = 0
 
-        // Remove publication from cache
         if let bookId = props?.bookId {
             Task { await BookService.instance.closePublication(for: bookId) }
         }
@@ -581,8 +575,8 @@ public class EPUBView: ExpoView {
                 "chapterTitle": currentLocator.title ?? "",
                 "href": currentLocator.href.string,
                 "title": encodeIfNotNil(currentLocator.title),
-                "locations": encodeIfNotEmpty(currentLocator.locations.json),
-                "text": encodeIfNotEmpty(currentLocator.text.json),
+                "locations": encodeIfNotEmpty(currentLocator.locations.jsonObject),
+                "text": encodeIfNotEmpty(currentLocator.text.jsonObject),
                 "type": encodeIfNotEmpty(currentLocator.mediaType.string),
             ]))
     }
@@ -692,7 +686,7 @@ public class EPUBView: ExpoView {
         }
 
         var result: [String: Any] = [
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
         ]
 
         if let frame = selection.frame {
@@ -849,8 +843,8 @@ extension EPUBView: EPUBNavigatorDelegate {
                     "chapterTitle": locator.title ?? "",
                     "href": locator.href.string,
                     "title": encodeIfNotNil(locator.title),
-                    "locations": encodeIfNotEmpty(locator.locations.json),
-                    "text": encodeIfNotEmpty(locator.text.json),
+                    "locations": encodeIfNotEmpty(locator.locations.jsonObject),
+                    "text": encodeIfNotEmpty(locator.text.jsonObject),
                     "type": encodeIfNotEmpty(locator.mediaType.string),
                 ]))
         }
@@ -893,7 +887,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onHighlightRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 
@@ -908,7 +902,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onNoteRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 

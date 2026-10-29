@@ -15,7 +15,7 @@ buildscript {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
   }
 
-  ext.readium_version = '3.1.1'
+  ext.readium_version = '3.4.0'
 }
 
 project.android {

@@ -158,24 +158,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 			[
-				'./plugins/withPods.ts',
-				{
-					pods: [
-						"source 'https://github.com/readium/podspecs'",
-						"source 'https://cdn.cocoapods.org/'",
-
-						"pod 'Minizip', modular_headers: true",
-						"pod 'ReadiumShared', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumShared.podspec'",
-						"pod 'ReadiumStreamer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumStreamer.podspec'",
-						"pod 'ReadiumNavigator', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumNavigator.podspec'",
-						"pod 'ReadiumAdapterGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumAdapterGCDWebServer.podspec'",
-						"pod 'ReadiumOPDS', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumOPDS.podspec'",
-						"pod 'ReadiumInternal', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumInternal.podspec'",
-						"pod 'ReadiumGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/GCDWebServer/4.0.0/GCDWebServer.podspec', modular_headers: true",
-					],
-				},
-			],
-			[
 				'expo-font',
 				{
 					// TODO: Manually define font-family in config to make access easier
@@ -217,6 +199,30 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					ios: {
 						// Note: For i18next and date-fns intlFormat
 						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
+						deploymentTarget: '16.4',
+						extraPods: [
+							{ name: 'Minizip', modular_headers: true },
+							{
+								name: 'ReadiumShared',
+								version: '~> 3.11.1',
+								source: 'https://github.com/readium/podspecs',
+							},
+							{
+								name: 'ReadiumStreamer',
+								version: '~> 3.11.1',
+								source: 'https://github.com/readium/podspecs',
+							},
+							{
+								name: 'ReadiumNavigator',
+								version: '~> 3.11.1',
+								source: 'https://github.com/readium/podspecs',
+							},
+							{
+								name: 'ReadiumOPDS',
+								version: '~> 3.11.1',
+								source: 'https://github.com/readium/podspecs',
+							},
+						],
 					},
 				},
 			],

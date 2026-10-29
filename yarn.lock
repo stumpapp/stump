@@ -21029,20 +21029,20 @@ react-native-mmkv@^3.3.3:
   resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-3.3.3.tgz#1f0326f6314e23725af8145964343224d074e6cd"
   integrity sha512-GMsfOmNzx0p5+CtrCFRVtpOOMYNJXuksBVARSQrCFaZwjUyHJdQzcN900GGaFFNTxw2fs8s5Xje//RDKj9+PZA==
 
-react-native-nitro-modules@^0.31.10:
-  version "0.31.10"
-  resolved "https://registry.yarnpkg.com/react-native-nitro-modules/-/react-native-nitro-modules-0.31.10.tgz#d21907327200d5761ba6cf328dec36b1516bc270"
-  integrity sha512-hcvjTu9YJE9fMmnAUvhG8CxvYLpOuMQ/2eyi/S6GyrecezF6Rmk/uRQEL6v09BRFWA/xRVZNQVulQPS+2HS3mQ==
+react-native-nitro-modules@^0.37.1:
+  version "0.37.1"
+  resolved "https://registry.yarnpkg.com/react-native-nitro-modules/-/react-native-nitro-modules-0.37.1.tgz#368bda3038ebe796b219d98e0a364f9166e2cc7c"
+  integrity sha512-KpW6EQVQ/bfegpCGxN9Be+ndvsfj56t4IESEvCASu9gWpJa/NDfHpIeIwCOvZQ3eXmLEj6YD4wCLqcC1FJPr2w==
 
 react-native-pager-view@9.0.7:
   version "9.0.7"
   resolved "https://registry.yarnpkg.com/react-native-pager-view/-/react-native-pager-view-9.0.7.tgz#2190e3341e4fcec72139009550bb3ed9687b9493"
   integrity sha512-71kLSrjZy8onJTXkoAWF/0UtInkF+xqmqudiV/axZe8PVGG+CK6jVdh8NYFJLKetQ6UQ9ScPNliagpvLBp1xkQ==
 
-react-native-performance-toolkit@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-performance-toolkit/-/react-native-performance-toolkit-0.2.1.tgz#ba7b88c4e638e3660d40e53a8733eefa2138e556"
-  integrity sha512-8KdDnukJ1LF0GFN8zEWPlLyhn1zH7Ff5QQTjvKmBSmXw8eNnljrlO8iZTUfDRUex1DGOYZcuLkQoEqZHGLrXHA==
+react-native-performance-toolkit@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/react-native-performance-toolkit/-/react-native-performance-toolkit-0.3.1.tgz#b72672f9e8cfeacc8eb516f13fbe84b69b8e0998"
+  integrity sha512-/MQA/fV4u3hj+loT3MR8oVXd2XzfebLURug8XuXWiwhgtG/keJeJE77uhHALao9pw/tBN4cat8cPjMlo/DqdTw==
 
 react-native-reanimated-carousel@^4.0.3:
   version "4.0.3"

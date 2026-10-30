@@ -29,7 +29,7 @@ import { useCacheStore } from '~/stores/cache'
 // isolated stack, thereby stranding the user in the route.
 // see docs.expo.dev/router/advanced/modals/#handle-deep-linked-modals
 export const unstable_settings = {
-	anchor: 'index',
+	anchor: '(tabs)',
 }
 
 export default function Wrapper() {

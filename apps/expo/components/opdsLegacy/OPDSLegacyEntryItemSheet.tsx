@@ -62,19 +62,22 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					ref={ref}
 					detents={[1]}
 					grabber
-					scrollable
+					scrollableRef={animatedScrollRef}
 					backgroundColor={colors.sheet.background}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}
-					style={{
-						paddingBottom: insets.bottom,
-					}}
+					style={{ flex: 1 }}
+					scrollableOptions={{ contentInsetAdjustment: 'never' }}
 					insetAdjustment="automatic"
 					onDidPresent={() => setIsOpen(true)}
 					onDidDismiss={() => setIsOpen(false)}
 				>
-					<Animated.ScrollView ref={animatedScrollRef}>
+					<Animated.ScrollView
+						ref={animatedScrollRef}
+						style={{ flex: 1 }}
+						contentContainerStyle={{ flexGrow: 1 }}
+					>
 						<View className="pb-16 overflow-hidden">
 							{resolvedThumbnailUrl && (
 								<Animated.View
@@ -89,7 +92,11 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 												Authorization: sdk.authorizationHeader || '',
 											},
 										}}
-										style={{ width: '100%', height: '100%' }}
+										style={{
+											flex: 1,
+											width: '100%',
+											height: '100%',
+										}}
 										resizeMode="cover"
 										fadeDuration={2000}
 										resize={60}
@@ -104,14 +111,22 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 										ios: (
 											<TurboImage
 												source={{ uri: iconSource.localUri || iconSource.uri }}
-												style={{ width: 120, height: 120 }}
+												style={{
+													flex: 1,
+													width: 120,
+													height: 120,
+												}}
 											/>
 										),
 										android: (
 											<Image
 												// @ts-expect-error: It's fine
 												source={iconSource}
-												style={{ width: 120, height: 120 }}
+												style={{
+													flex: 1,
+													width: 120,
+													height: 120,
+												}}
 											/>
 										),
 									})}
@@ -136,7 +151,10 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							</View>
 						</View>
 
-						<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] gap-4 px-4 py-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
+						<View
+							className="ios:rounded-[3rem] ios:-mt-[4.5rem] gap-4 px-4 py-6 -mt-[2.5rem] flex-1 rounded-[2.5rem] bg-background"
+							style={{ paddingBottom: insets.bottom + 24 }}
+						>
 							{(pageCount != null || currentPage != null) && (
 								<Card>
 									<Card.StatGroup>

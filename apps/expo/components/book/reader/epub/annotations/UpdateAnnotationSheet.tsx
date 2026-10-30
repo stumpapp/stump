@@ -82,7 +82,6 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 			<SheetWithHeader
 				ref={sheetRef}
 				detents={[0.5, 1]}
-				scrollable
 				backgroundColor={colors.sheet.background}
 				onDidDismiss={handleDismiss}
 				headerLabel="Edit Annotation"

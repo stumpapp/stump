@@ -16,7 +16,7 @@ import omit from 'lodash/omit'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { ILibraryContext } from '@/scenes/library/context'
+import { ILibraryContext } from '@/components/library/context'
 
 type Library = ILibraryContext['library']
 

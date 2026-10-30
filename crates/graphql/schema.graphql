@@ -2042,7 +2042,7 @@ type Mutation {
 	granted users list, so any users not included in the provided list will have
 	their access revoked if they were previously granted access
 	
-	Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
+	The requesting user cannot revoke their own access, so their ID must be included
 	"""
 	updateLibraryAccess(id: ID!, userIds: [String!]!): Library!
 	"update the OIDC groups which have access to a library"

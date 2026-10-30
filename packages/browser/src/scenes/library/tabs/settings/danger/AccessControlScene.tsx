@@ -1,9 +1,7 @@
 import { useOidcConfig } from '@stump/client'
 
-import { useLibraryContext } from '@/scenes/library/context'
-
-import LibraryAccess from './LibraryAccess'
-import { LibraryOidcGroups } from './LibraryOidcGroups'
+import { useLibraryContext } from '@/components/library/context'
+import { LibraryAccess, LibraryOidcGroups } from '@/components/library/settings/accessControl'
 
 // TODO: add a section which shows the users not allowed to access the library from the tags
 // This implies user:read permission

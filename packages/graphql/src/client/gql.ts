@@ -175,6 +175,10 @@ type Documents = {
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": typeof types.LibraryBooksAlphabetDocument,
     "\n\tfragment LibraryWebGridItem on Library {\n\t\tid\n\t\tname\n\t\tseries(take: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tstats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": typeof types.LibraryWebGridItemFragmentDoc,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": typeof types.LibrarySeriesAlphabetDocument,
+    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessUsersQueryDocument,
+    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessQueryDocument,
+    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryAccessDocument,
+    "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n": typeof types.UpdateLibraryOidcGroupsDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": typeof types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": typeof types.AcceptAllPendingMatchesDocument,
     "\n\tmutation RejectAllPendingMatches {\n\t\trejectAllPendingMatches\n\t}\n": typeof types.RejectAllPendingMatchesDocument,
@@ -260,10 +264,6 @@ type Documents = {
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": typeof types.LibrarySettingsRouterScanLibraryMutationDocument,
     "\n\tquery BasicSettingsSceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BasicSettingsSceneExistingLibrariesDocument,
-    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessUsersQueryDocument,
-    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessQueryDocument,
-    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryAccessDocument,
-    "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n": typeof types.UpdateLibraryOidcGroupsDocument,
     "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": typeof types.CleanLibraryDocument,
     "\n\tquery LibraryMissingEntities($libraryId: ID!, $pagination: Pagination!) {\n\t\tlibraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tpath\n\t\t\t\ttype\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t\ttotalItems\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryMissingEntitiesDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeLibrary(id: $id)\n\t}\n": typeof types.AnalyzeLibraryMediaDocument,
@@ -522,6 +522,10 @@ const documents: Documents = {
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": types.LibraryBooksAlphabetDocument,
     "\n\tfragment LibraryWebGridItem on Library {\n\t\tid\n\t\tname\n\t\tseries(take: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tstats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": types.LibraryWebGridItemFragmentDoc,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": types.LibrarySeriesAlphabetDocument,
+    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessUsersQueryDocument,
+    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessQueryDocument,
+    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryAccessDocument,
+    "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n": types.UpdateLibraryOidcGroupsDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": types.AcceptAllPendingMatchesDocument,
     "\n\tmutation RejectAllPendingMatches {\n\t\trejectAllPendingMatches\n\t}\n": types.RejectAllPendingMatchesDocument,
@@ -607,10 +611,6 @@ const documents: Documents = {
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": types.LibrarySettingsRouterScanLibraryMutationDocument,
     "\n\tquery BasicSettingsSceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": types.BasicSettingsSceneExistingLibrariesDocument,
-    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessUsersQueryDocument,
-    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessQueryDocument,
-    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryAccessDocument,
-    "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n": types.UpdateLibraryOidcGroupsDocument,
     "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": types.CleanLibraryDocument,
     "\n\tquery LibraryMissingEntities($libraryId: ID!, $pagination: Pagination!) {\n\t\tlibraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tpath\n\t\t\t\ttype\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t\ttotalItems\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryMissingEntitiesDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeLibrary(id: $id)\n\t}\n": types.AnalyzeLibraryMediaDocument,
@@ -1352,6 +1352,22 @@ export function graphql(source: "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessUsersQueryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessQueryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryAccessDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryOidcGroupsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n"): typeof import('./graphql').PendingMetadataMatchesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -1689,22 +1705,6 @@ export function graphql(source: "\n\tmutation LibrarySettingsRouterScanLibraryMu
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery BasicSettingsSceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BasicSettingsSceneExistingLibrariesDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessUsersQueryDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessQueryDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryAccessDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {\n\t\tupdateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {\n\t\t\tid\n\t\t\toidcGroups\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryOidcGroupsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

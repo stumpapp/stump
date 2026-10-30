@@ -1065,18 +1065,39 @@
         "description": "Control who can access the content in this library",
         "sections": {
           "libraryAccess": {
-            "heading": "Authorize users",
-            "description": "Allow certain users to access this library and its contents",
-            "updated": "Access updated",
-            "failure": "Failed to update access",
-            "selfAccessRevokeConfirmation": {
-              "title": "You revoked your own access",
-              "description": "If you continue, you will lose access to the library. Are you sure you want to continue?"
-            }
+            "heading": "Authorize Users",
+            "description": "Configure which users are allowed to access this library and its contents",
+            "table": {
+              "granted": "Granted",
+              "notGranted": "No Access",
+              "selectHint": "Select users to grant or revoke access",
+              "selectedCount_one": "{{count}} user selected",
+              "selectedCount_other": "{{count}} users selected"
+            },
+            "actions": {
+              "grant": "Grant Access",
+              "revoke": "Revoke Access"
+            },
+            "updated": "Access Updated",
+            "failure": "Failed to Update Access"
           },
           "oidcGroups": {
-            "heading": "OIDC groups",
+            "heading": "OIDC Groups",
             "description": "Allow certain OIDC groups to access this library and its contents",
+            "count_one": "{{count}} group",
+            "count_other": "{{count}} groups",
+            "selectedCount_one": "{{count}} group selected",
+            "selectedCount_other": "{{count}} groups selected",
+            "empty": {
+              "title": "No OIDC groups",
+              "description": "Add groups to grant their members access to this library"
+            },
+            "add": {
+              "trigger": "Add Groups",
+              "title": "Add OIDC Groups",
+              "description": "Enter one or more group names, separated by commas or new lines",
+              "placeholder": "admins, readers"
+            },
             "disclaimer": {
               "title": "This will override manual authorization",
               "description": "When set you will be unable to manually authorize users for this library. Only users in the specified OIDC groups will be able to access this library"
@@ -3178,6 +3199,7 @@
       "refresh": "Refresh",
       "reset": "Reset",
       "select": "Select",
+      "selectAll": "Select All",
       "settings": "Settings",
       "servers": "Servers",
       "size": "Size",

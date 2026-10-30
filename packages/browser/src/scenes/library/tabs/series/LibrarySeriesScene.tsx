@@ -36,7 +36,7 @@ import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 import { getQueryKey, query, usePrefetchLibrarySeries } from './queries'
 
 function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {

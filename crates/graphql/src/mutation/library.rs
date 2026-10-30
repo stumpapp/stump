@@ -900,7 +900,7 @@ impl LibraryMutation {
 	/// granted users list, so any users not included in the provided list will have
 	/// their access revoked if they were previously granted access
 	///
-	/// Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
+	/// The requesting user cannot revoke their own access, so their ID must be included
 	#[graphql(
 		guard = "PermissionGuard::new(&[UserPermission::ManageLibrary, UserPermission::ReadUsers])"
 	)]
@@ -913,8 +913,8 @@ impl LibraryMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		if user_ids.contains(&user.id) {
-			tracing::warn!(username = ?user.username, "You removed access to this library for yourself");
+		if !user_ids.contains(&user.id) {
+			return Err("You cannot revoke your own access to a library".into());
 		}
 
 		let library = library::Entity::find_for_user(user)

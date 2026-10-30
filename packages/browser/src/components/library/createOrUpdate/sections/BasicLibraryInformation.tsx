@@ -5,10 +5,10 @@ import { Folder } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/components/library/context'
 import TagSelect from '@/components/TagSelect'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 import LibraryTypeSelect from './LibraryType'

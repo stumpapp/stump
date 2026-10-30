@@ -2323,7 +2323,7 @@ export type Mutation = {
    * granted users list, so any users not included in the provided list will have
    * their access revoked if they were previously granted access
    *
-   * Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
+   * The requesting user cannot revoke their own access, so their ID must be included
    */
   updateLibraryAccess: Library;
   /** Update the emoji for a library */
@@ -6361,6 +6361,34 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
+export type LibraryAccessUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibraryAccessUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string, avatarUrl?: string | null }> } };
+
+export type LibraryAccessQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryAccessQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
+
+export type UpdateLibraryAccessMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryAccessMutation = { __typename?: 'Mutation', updateLibraryAccess: { __typename?: 'Library', id: string, allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
+
+export type UpdateLibraryOidcGroupsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  oidcGroups: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryOidcGroupsMutation = { __typename?: 'Mutation', updateLibraryOidcGroups: { __typename?: 'Library', id: string, oidcGroups?: Array<string> | null } };
+
 export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6975,34 +7003,6 @@ export type BasicSettingsSceneExistingLibrariesQueryVariables = Exact<{ [key: st
 
 
 export type BasicSettingsSceneExistingLibrariesQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
-
-export type LibraryAccessUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LibraryAccessUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
-
-export type LibraryAccessQueryQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type LibraryAccessQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
-
-export type UpdateLibraryAccessMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
-
-
-export type UpdateLibraryAccessMutation = { __typename?: 'Mutation', updateLibraryAccess: { __typename?: 'Library', id: string, allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
-
-export type UpdateLibraryOidcGroupsMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  oidcGroups: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
-
-
-export type UpdateLibraryOidcGroupsMutation = { __typename?: 'Mutation', updateLibraryOidcGroups: { __typename?: 'Library', id: string, oidcGroups?: Array<string> | null } };
 
 export type CleanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12465,6 +12465,46 @@ export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
+export const LibraryAccessUsersQueryDocument = new TypedDocumentString(`
+    query LibraryAccessUsersQuery {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+      avatarUrl
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryAccessUsersQueryQuery, LibraryAccessUsersQueryQueryVariables>;
+export const LibraryAccessQueryDocument = new TypedDocumentString(`
+    query LibraryAccessQuery($id: ID!) {
+  libraryById(id: $id) {
+    allowedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryAccessQueryQuery, LibraryAccessQueryQueryVariables>;
+export const UpdateLibraryAccessDocument = new TypedDocumentString(`
+    mutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {
+  updateLibraryAccess(id: $id, userIds: $userIds) {
+    id
+    allowedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryAccessMutation, UpdateLibraryAccessMutationVariables>;
+export const UpdateLibraryOidcGroupsDocument = new TypedDocumentString(`
+    mutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {
+  updateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {
+    id
+    oidcGroups
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryOidcGroupsMutation, UpdateLibraryOidcGroupsMutationVariables>;
 export const PendingMetadataMatchesDocument = new TypedDocumentString(`
     query PendingMetadataMatches {
   pendingMetadataMatches {
@@ -14673,45 +14713,6 @@ export const BasicSettingsSceneExistingLibrariesDocument = new TypedDocumentStri
   }
 }
     `) as unknown as TypedDocumentString<BasicSettingsSceneExistingLibrariesQuery, BasicSettingsSceneExistingLibrariesQueryVariables>;
-export const LibraryAccessUsersQueryDocument = new TypedDocumentString(`
-    query LibraryAccessUsersQuery {
-  users(pagination: {none: {unpaginated: true}}) {
-    nodes {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LibraryAccessUsersQueryQuery, LibraryAccessUsersQueryQueryVariables>;
-export const LibraryAccessQueryDocument = new TypedDocumentString(`
-    query LibraryAccessQuery($id: ID!) {
-  libraryById(id: $id) {
-    allowedUsers {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LibraryAccessQueryQuery, LibraryAccessQueryQueryVariables>;
-export const UpdateLibraryAccessDocument = new TypedDocumentString(`
-    mutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {
-  updateLibraryAccess(id: $id, userIds: $userIds) {
-    id
-    allowedUsers {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateLibraryAccessMutation, UpdateLibraryAccessMutationVariables>;
-export const UpdateLibraryOidcGroupsDocument = new TypedDocumentString(`
-    mutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {
-  updateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {
-    id
-    oidcGroups
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateLibraryOidcGroupsMutation, UpdateLibraryOidcGroupsMutationVariables>;
 export const CleanLibraryDocument = new TypedDocumentString(`
     mutation CleanLibrary($id: ID!) {
   cleanLibrary(id: $id) {

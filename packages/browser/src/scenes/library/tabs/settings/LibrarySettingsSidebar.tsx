@@ -3,7 +3,7 @@ import { useRouterContext } from '@/context/RouterContext'
 import { useRouteGroups } from '@/hooks/useRouteGroups'
 import { usePaths } from '@/paths'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSidebar() {

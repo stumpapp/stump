@@ -1,9 +1,9 @@
 import { NewCard, RawSwitch } from '@stump/components'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/components/library/context'
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function ScanAfterPersist() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()

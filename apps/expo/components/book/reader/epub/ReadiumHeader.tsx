@@ -52,7 +52,7 @@ export default function ReadiumHeader() {
 					>
 						<Pressable
 							disabled={!showControls}
-							onPress={router.back}
+							onPress={() => router.back()}
 							className={cn(
 								'h-full w-full items-center justify-center',
 								!IS_IOS_26_PLUS && 'active:opacity-60',

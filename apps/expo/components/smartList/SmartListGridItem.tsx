@@ -4,7 +4,7 @@ import { BlurTargetView, BlurView, BlurViewProps } from 'expo-blur'
 import { Href, useRouter } from 'expo-router'
 import { Book, Library, LucideIcon, Rows3 } from 'lucide-react-native'
 import { useRef } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { type HostInstance, Platform, Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
@@ -101,7 +101,7 @@ export default function SmartListGridItem({ smartList, getLayoutNumber }: Props)
 
 	const { matchedLibraries, matchedSeries, matchedBooks } = data.meta
 
-	const blurTargetRef = useRef<View>(null)
+	const blurTargetRef = useRef<HostInstance>(null)
 
 	return (
 		<View className="w-full items-center">

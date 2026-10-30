@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react-native'
 import { forwardRef } from 'react'
-import { Pressable, View } from 'react-native'
+import { type HostInstance, Pressable, View } from 'react-native'
 
 import { Card } from '../ui'
 
@@ -17,7 +17,7 @@ type Props = {
 // TODO: break up into a few variants, e.g. an internal link to another screen vs a
 // link to website vs action etc
 
-const AppSettingsRow = forwardRef<View, Props>(
+const AppSettingsRow = forwardRef<HostInstance, Props>(
 	(
 		{ icon, iconBackgroundColor, title, description, disabled, children, isLink, ...props },
 		ref,

@@ -68,6 +68,7 @@ export const AddBookOptionsSheet = forwardRef<AddBookOptionsSheetRef, Props>(
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={prefetchAddBookSheet}
+				style={{ flex: 1 }}
 			>
 				<View className="gap-2 p-4 pb-8">
 					<Text className="mb-2 text-lg font-semibold">Add a book</Text>

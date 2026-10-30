@@ -6,7 +6,6 @@ import { forwardRef, useState } from 'react'
 import { Image, Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
 
 import { useColors } from '~/lib/constants'
@@ -15,7 +14,12 @@ import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 import { useResolveURL } from '../../lib/opds/utils'
-import { DescriptionSection, IdentifiersSheet, useOverviewAnimations } from '../book/overview'
+import {
+	DescriptionSection,
+	IdentifiersSheet,
+	OverviewBackground,
+	useOverviewAnimations,
+} from '../book/overview'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { MetadataBadgeSection } from '../overview'
@@ -48,6 +52,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 			(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 		)?.href
 		const resolvedThumbnailUrl = thumbnailUrl ? resolveUrl(thumbnailUrl) : undefined
+		const iconUrl = iconSource.localUri || iconSource.uri
 		const pseLink = entry.links.find(isPseStreamLink)
 		const pageCount = pseLink?.['pse:count']
 		const currentPage = pseLink?.['pse:lastRead']
@@ -55,6 +60,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 		const description = entry.content ? stripHtml(entry.content).result : null
 
 		const [isOpen, setIsOpen] = useState(false)
+		const [mainSectionHeight, setMainSectionHeight] = useState<number>()
 
 		return (
 			<>
@@ -63,7 +69,6 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					detents={[1]}
 					grabber
 					scrollableRef={animatedScrollRef}
-					backgroundColor={colors.sheet.background}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}
@@ -73,44 +78,39 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					onDidPresent={() => setIsOpen(true)}
 					onDidDismiss={() => setIsOpen(false)}
 				>
+					<OverviewBackground
+						source={{
+							uri: resolvedThumbnailUrl || iconUrl,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						parallaxStyle={parallaxStyle}
+						mainSectionHeight={mainSectionHeight}
+					/>
+
 					<Animated.ScrollView
 						ref={animatedScrollRef}
 						style={{ flex: 1 }}
 						contentContainerStyle={{ flexGrow: 1 }}
 					>
-						<View className="pb-16 overflow-hidden">
-							{resolvedThumbnailUrl && (
-								<Animated.View
-									className="-inset-12 absolute opacity-70 dark:opacity-30"
-									style={parallaxStyle}
-								>
-									<TImage
-										source={{
-											uri: resolvedThumbnailUrl,
-											headers: {
-												...sdk.customHeaders,
-												Authorization: sdk.authorizationHeader || '',
-											},
-										}}
-										style={{
-											flex: 1,
-											width: '100%',
-											height: '100%',
-										}}
-										resizeMode="cover"
-										fadeDuration={2000}
-										resize={60}
-										blur={Platform.OS === 'ios' ? 7 : 16}
-									/>
-								</Animated.View>
-							)}
-
+						<View
+							className="pb-16 overflow-hidden"
+							onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}
+						>
 							<View className="gap-4 px-4 pb-8 pt-8 items-center">
+								{/*TODO: i should have left a comment on this split but can't recall why, vaguely remember a
+                  crash on android for icon sources with turbo image, which if the case means the work i
+                  just did for the blur background would need to change
+                  ill revisit before merging and properly test, might jsut be similar to that other
+                  sheet-image-related crash in the oidc login sheet a month or so ago
+                  */}
 								{!thumbnailUrl &&
 									Platform.select({
 										ios: (
 											<TurboImage
-												source={{ uri: iconSource.localUri || iconSource.uri }}
+												source={{ uri: iconUrl }}
 												style={{
 													flex: 1,
 													width: 120,

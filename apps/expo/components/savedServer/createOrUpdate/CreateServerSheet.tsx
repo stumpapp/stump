@@ -88,7 +88,6 @@ export function CreateServerSheet() {
 					name="createServerSheet"
 					ref={sheetRef}
 					detents={[1]}
-					scrollable
 					headerLabel={translate('shared.addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{

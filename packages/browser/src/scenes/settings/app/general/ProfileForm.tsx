@@ -2,13 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useUploadConfig } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle, Button, Form, Input, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { AlertCircle } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useUser } from '@/stores'
 
 import AvatarPicker from './AvatarPicker'
@@ -25,7 +25,7 @@ const mutation = graphql(`
 `)
 
 export default function ProfileForm() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { user, setUser } = useUser()
 	const { checkPermission } = useAppContext()
 	const { uploadConfig } = useUploadConfig({ enabled: checkPermission(UserPermission.UploadFile) })

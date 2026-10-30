@@ -19,6 +19,9 @@ mod media_metadata_overview;
 mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
+mod reading_session;
+mod reading_stats;
+mod reading_timeline;
 mod series;
 mod server_config;
 mod smart_list_view;
@@ -40,6 +43,7 @@ use email_device::EmailDeviceQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
 use filesystem::FilesystemQuery;
+use job::JobQuery;
 use library::LibraryQuery;
 use log::LogQuery;
 use media::MediaQuery;
@@ -47,14 +51,15 @@ use media_metadata_overview::MediaMetadataOverviewQuery;
 use metadata_provider::MetadataProviderQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
+use reading_session::ReadingSessionQuery;
+use reading_stats::ReadingStatsQuery;
+use reading_timeline::ReadingTimelineQuery;
 use series::SeriesQuery;
 use server_config::ServerConfigQuery;
 use smart_list_view::SmartListViewQuery;
 use smart_lists::SmartListsQuery;
 use tag::TagQuery;
 use user::UserQuery;
-
-use crate::query::job::JobQuery;
 
 // Note: I had to split the Query/Mutation root types into chunks to avoid a compiler
 // overflow. It seems like a flat MergedObject creates a really large async block
@@ -78,6 +83,9 @@ struct ContentQueries(
 	EpubQuery,
 	TagQuery,
 	MediaMetadataOverviewQuery,
+	ReadingSessionQuery,
+	ReadingTimelineQuery,
+	ReadingStatsQuery,
 );
 
 #[derive(async_graphql::MergedObject, Default)]

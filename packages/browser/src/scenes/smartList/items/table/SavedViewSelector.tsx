@@ -1,6 +1,7 @@
 import { NativeSelect } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { defaultWorkingView, useSmartListContext } from '../../context'
 import { useSmartListViewStore } from '../../store'
@@ -10,7 +11,7 @@ const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewSelector
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function SavedViewSelector() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		list: { views },
 	} = useSmartListContext()

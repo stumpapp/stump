@@ -1,5 +1,6 @@
 use sea_orm::entity::prelude::*;
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "collections")]
 pub struct Model {
@@ -12,8 +13,5 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub updated_at: String,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

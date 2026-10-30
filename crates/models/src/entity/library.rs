@@ -3,17 +3,21 @@ use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
-	DerivePartialModel, FromQueryResult, QueryOrder,
+	DerivePartialModel,
 };
 
 use crate::shared::{
 	enums::FileStatus,
 	image::ImageMetadata,
-	ordering::{OrderBy, OrderDirection},
+	ordering::{OrderDirection, OrderingField},
 };
 
-use super::{library_access, user::AuthUser};
+use super::{
+	last_library_visit, library_access, library_config, library_scan_record, series,
+	user::AuthUser,
+};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LibraryModel")]
 #[sea_orm(table_name = "libraries")]
@@ -46,6 +50,27 @@ pub struct Model {
 	pub config_id: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_scanned_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub last_library_visit: HasMany<last_library_visit::Entity>,
+	#[sea_orm(has_many, relation_enum = "AccessUsers")]
+	#[graphql(skip)]
+	pub access_records: HasMany<library_access::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "config_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Restrict"
+	)]
+	#[graphql(skip)]
+	pub config: BelongsTo<library_config::Entity>,
+	#[sea_orm(has_many, relation_enum = "LibraryScanRecords")]
+	#[graphql(skip)]
+	pub library_scan_records: HasMany<library_scan_record::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub series: HasMany<series::Entity>,
 }
 
 impl Entity {
@@ -55,7 +80,7 @@ impl Entity {
 	}
 }
 
-#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[derive(Clone, Debug, DerivePartialModel)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryIdentSelect {
 	pub id: String,
@@ -69,7 +94,7 @@ impl LibraryIdentSelect {
 	}
 }
 
-#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[derive(Clone, Debug, DerivePartialModel)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryThumbSelect {
 	pub id: String,
@@ -88,61 +113,6 @@ impl LibraryThumbSelect {
 			Column::ThumbnailPath,
 			Column::ThumbnailMeta,
 		]
-	}
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct LibraryNameCmpSelect {
-	pub name: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::last_library_visit::Entity")]
-	LastLibraryVisit,
-	#[sea_orm(has_many = "super::library_access::Entity")]
-	AccessUsers,
-	#[sea_orm(
-		belongs_to = "super::library_config::Entity",
-		from = "Column::ConfigId",
-		to = "super::library_config::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Restrict"
-	)]
-	LibraryConfig,
-	#[sea_orm(has_many = "super::library_scan_record::Entity")]
-	LibraryScanRecords,
-	#[sea_orm(has_many = "super::series::Entity")]
-	Series,
-}
-
-impl Related<super::last_library_visit::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::LastLibraryVisit.def()
-	}
-}
-
-impl Related<super::library_access::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::AccessUsers.def()
-	}
-}
-
-impl Related<super::library_config::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::LibraryConfig.def()
-	}
-}
-
-impl Related<super::library_scan_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::LibraryScanRecords.def()
-	}
-}
-
-impl Related<super::series::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Series.def()
 	}
 }
 

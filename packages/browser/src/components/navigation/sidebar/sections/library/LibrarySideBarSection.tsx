@@ -1,17 +1,18 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/queries'
 
 import { EntityOptionProps } from '../../../types'
 import useCurrentLibraryId from '../../../useCurrentLibraryId'
+import { CollapsedSidebarSection, useIsSidebarIconMode } from '../../CollapsedSidebarItems'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import { SectionEmptyMessage } from '../SectionEmptyMessage'
 import LibraryEmoji from './LibraryEmoji'
@@ -24,6 +25,8 @@ const query = graphql(`
 				id
 				name
 				emoji
+				...LibraryEmoji
+				...LibraryOptionsMenu
 			}
 		}
 	}
@@ -40,7 +43,7 @@ export default function LibrarySideBarSection({
 	const location = useLocation()
 	const paths = usePaths()
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {
@@ -58,6 +61,44 @@ export default function LibrarySideBarSection({
 		[checkPermission],
 	)
 	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
+	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
+
+	const isIconMode = useIsSidebarIconMode()
+	if (isIconMode) {
+		return (
+			<CollapsedSidebarSection
+				label={translate('shared.common.libraries')}
+				icon={Library}
+				emptyMessage={t('sidebar.buttons.noLibraries')}
+				items={libraries.map((library) => ({
+					key: library.id,
+					label: library.name,
+					to: paths.library(library.id),
+					isActive: currentLibraryId === library.id,
+					icon: library.emoji ? (
+						<span className="w-4 text-center">{library.emoji}</span>
+					) : (
+						<Library />
+					),
+					onMouseEnter: () => prefetchSeries(library.id),
+				}))}
+				actions={[
+					...(showLinkToAll
+						? [{ key: 'all', label: t('sidebar.buttons.seeAll'), to: paths.libraries() }]
+						: []),
+					...(showCreateLink
+						? [
+								{
+									key: 'create',
+									label: t('sidebar.buttons.createLibrary'),
+									to: paths.libraryCreate(),
+								},
+							]
+						: []),
+				]}
+			/>
+		)
+	}
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -78,7 +119,7 @@ export default function LibrarySideBarSection({
 			return (
 				<SideBarButtonLink
 					key={library.id}
-					to={paths.librarySeries(library.id)}
+					to={paths.library(library.id)}
 					isActive={currentLibraryId === library.id}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
@@ -100,10 +141,10 @@ export default function LibrarySideBarSection({
 					asLabel
 					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
 				>
-					{t('sidebar.buttons.libraries')}
+					{translate('shared.common.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
-					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
+					{showLinkToAll && (
 						<SideBarButtonLink
 							to={paths.libraries()}
 							isActive={location.pathname === paths.libraries()}

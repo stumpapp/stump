@@ -9,12 +9,12 @@ import { useTranslate } from '~/lib/hooks'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function DeleteDatabase() {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const onDeletedDatabase = (success: boolean) => {
 		const baseKey = success ? 'success' : 'error'
 		SystemAlert.alert(t(getKey(`${baseKey}.title`)), t(getKey(`${baseKey}.description`)), [
 			{
-				text: t('common.ok'),
+				text: translate('shared.common.ok'),
 			},
 		])
 	}
@@ -39,7 +39,7 @@ export default function DeleteDatabase() {
 					}
 				}}
 			>
-				<Text>{t('common.delete')}</Text>
+				<Text>{translate('shared.common.delete')}</Text>
 			</Button>
 		</AppSettingsRow>
 	)

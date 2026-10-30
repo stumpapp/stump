@@ -1,6 +1,6 @@
 import { formatBytesSeparate, usePrefetchFiles } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
-import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation } from 'react-router'
@@ -8,6 +8,7 @@ import { useLocation } from 'react-router'
 import { DEFAULT_SERIES_ORDER_BY } from '@/components/filters/useFilterScene'
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useLibraryContext } from './context'
@@ -17,7 +18,7 @@ import { usePrefetchLibrarySeries } from './tabs/series/queries'
 
 export default function LibraryHeader() {
 	const location = useLocation()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const {
 		library: { id, name, path, stats, config },
 	} = useLibraryContext()
@@ -79,7 +80,7 @@ export default function LibraryHeader() {
 			? [
 					{
 						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/files(\/.*)?$/),
-						label: t('libraryHeader.tabs.files'),
+						label: translate('shared.common.files'),
 						onHover: () => handlePrefetchFiles(),
 						to: paths.libraryFileExplorer(id),
 					},
@@ -107,15 +108,15 @@ export default function LibraryHeader() {
 					key: 'completedBooks',
 					icon: BookCheck,
 					value: stats.completedBooks,
-					suffix: `/ ${stats.bookCount}`,
+					suffix: ` / ${stats.bookCount}`,
 				},
 				...(formattedTime
 					? [
 							{
 								key: 'totalReadingTimeSeconds',
 								icon: Clock,
-								value: formattedTime.value,
-								suffix: formattedTime.unit,
+								value: formattedTime[0]?.value ?? '??',
+								suffix: formattedTime[0]?.unit ?? undefined,
 							},
 						]
 					: []),
@@ -136,6 +137,7 @@ export default function LibraryHeader() {
 		<>
 			<EntityHeader
 				name={name}
+				parents={[{ label: translate('shared.common.libraries'), to: paths.libraries() }]}
 				tabs={tabs}
 				stats={resolvedStats}
 				settingsLink={paths.libraryManage(id)}

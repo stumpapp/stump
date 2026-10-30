@@ -8,15 +8,18 @@ use models::{
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		ordering::{OrderBy, OrderDirection},
+		ordering::{OrderDirection, OrderingField},
 	},
 };
-use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect, QueryTrait};
+use sea_orm::{
+	prelude::*, ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect, QueryTrait,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	object::{library::Library, missing_entity::MissingEntity, stats::LibraryStats},
+	order::OrderSpec,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
@@ -51,34 +54,39 @@ impl LibraryQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = LibraryModelOrderBy::add_order_by(
-			&order_by,
-			library::Entity::find_for_user(user).apply_if(search, |query, search| {
+		let spec = order_by
+			.iter()
+			.fold(OrderSpec::new(), |spec, o| spec.by(&o.field, o.direction))
+			.then(library::Column::Id, Order::Asc);
+		let query = spec.apply(library::Entity::find_for_user(user).apply_if(
+			search,
+			|query, search| {
 				query.filter(
 					library::Column::Name
 						.contains(search.clone())
 						.or(library::Column::Path.contains(search)),
 				)
-			}),
-		)?;
+			},
+		));
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
-				let mut cursor = query.cursor_by(library::Column::Name);
+				let mut query = query;
 				if let Some(ref id) = info.after {
-					let library = library::Entity::find_for_user(user)
-						.select_only()
-						.column(library::Column::Name)
+					let cursor = library::Entity::find_for_user(user)
 						.filter(library::Column::Id.eq(id.clone()))
-						.into_model::<library::LibraryNameCmpSelect>()
 						.one(conn)
 						.await?
 						.ok_or("Cursor not found")?;
-					cursor.after(library.name);
+					let mut values = order_by
+						.iter()
+						.map(|o| cursor.get(o.field.column()))
+						.collect::<Vec<_>>();
+					values.push(cursor.get(library::Column::Id));
+					query = query.filter(spec.sorts_after(&values));
 				}
-				cursor.first(info.limit);
 
-				let models = cursor.all(conn).await?;
+				let models = query.limit(info.limit).all(conn).await?;
 				let current_cursor =
 					info.after.or_else(|| models.first().map(|l| l.id.clone()));
 				let next_cursor = match models.last().map(|l| l.id.clone()) {
@@ -141,7 +149,7 @@ impl LibraryQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -223,7 +231,7 @@ impl LibraryQuery {
 		};
 
 		let total_count_result = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r"
                 SELECT COUNT(*) as count FROM (
@@ -252,7 +260,7 @@ impl LibraryQuery {
 		let limit = offset_pagination.limit();
 
 		let result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r#"
 				SELECT

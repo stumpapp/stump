@@ -1,8 +1,8 @@
 import { Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import APIKeyTable from './APIKeyTable'
 import CreateAPIKeyModal from './CreateAPIKeyModal'
@@ -12,28 +12,26 @@ import CreateAPIKeyModal from './CreateAPIKeyModal'
 // user account, but might be nice? i guess the todo is to consdier it lol
 
 export default function APIKeySettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
-		<SceneContainer>
-			<ContentContainer>
-				<div className="gap-4 flex flex-col">
-					<div className="flex items-end justify-between">
-						<div>
-							<Heading size="sm">{t(getKey('title'))}</Heading>
-							<Text size="sm" variant="muted" className="mt-1">
-								{t(getKey('description'))}
-							</Text>
-						</div>
-
-						<CreateAPIKeyModal />
+		<SceneContainer variant="settings">
+			<div className="gap-4 flex flex-col">
+				<div className="flex items-end justify-between">
+					<div>
+						<Heading size="sm">{t(getKey('title'))}</Heading>
+						<Text size="sm" variant="muted" className="mt-1">
+							{t(getKey('description'))}
+						</Text>
 					</div>
 
-					<Suspense>
-						<APIKeyTable />
-					</Suspense>
+					<CreateAPIKeyModal />
 				</div>
-			</ContentContainer>
+
+				<Suspense>
+					<APIKeyTable />
+				</Suspense>
+			</div>
 		</SceneContainer>
 	)
 }

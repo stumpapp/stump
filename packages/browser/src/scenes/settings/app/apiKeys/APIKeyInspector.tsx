@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle, Badge, NewCard, Sheet, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { intlFormat, isValid, parseISO } from 'date-fns'
 import { ShieldAlert } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { APIKey } from './APIKeyTable'
 
@@ -14,7 +14,7 @@ type Props = {
 }
 
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { user } = useAppContext()
 
 	const displayedData = useCurrentOrPrevious(apiKey)
@@ -82,11 +82,11 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 					</NewCard.Row>
 
 					<NewCard.Row label={t(getSharedKey('fields.expiration'))} data-testid="expire-meta">
-						<Text size="sm">{expirationFormatted ?? t('common.never')}</Text>
+						<Text size="sm">{expirationFormatted ?? translate('shared.common.never')}</Text>
 					</NewCard.Row>
 
 					<NewCard.Row label={t(getSharedKey('fields.last_used'))} data-testid="last_used-meta">
-						<Text size="sm">{lastUsedAtFormatted ?? t('common.never')}</Text>
+						<Text size="sm">{lastUsedAtFormatted ?? translate('shared.common.never')}</Text>
 					</NewCard.Row>
 
 					{createdAtFormatted && (

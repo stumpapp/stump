@@ -1,13 +1,18 @@
-use super::{book_club, user::AuthUser};
+use super::{
+	book_club, book_club_book_suggestion, book_club_book_suggestion_like,
+	book_club_discussion_message, book_club_discussion_message_reaction,
+	book_club_member_favorite_book, user, user::AuthUser,
+};
 use async_graphql::SimpleObject;
 use sea_orm::{
 	prelude::*,
 	sea_query::{Query, SimpleExpr},
-	ColumnTrait, Condition,
+	ColumnTrait, Condition, ExprTrait,
 };
 
 use crate::shared::{book_club::BookClubMemberRole, enums::UserPermission};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubMemberModel")]
 #[sea_orm(table_name = "book_club_members")]
@@ -18,6 +23,10 @@ pub struct Model {
 	pub display_name: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub bio: Option<String>,
+	// TODO: make opt-in, i.e. "share reading progress"
+	// for simplicity i think it would be all or nothing, i don't want to maintain
+	// something like "only share the percentage and the day" or whatever. if you share,
+	// then members can see the reading sessions and stuff. if not, cool
 	pub hide_progress: bool,
 	pub role: BookClubMemberRole,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
@@ -26,78 +35,39 @@ pub struct Model {
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub book_club_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::book_club_book_suggestion_like::Entity")]
-	BookClubBookSuggestionLike,
-	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
-	BookClubBookSuggestion,
-	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
-	BookClubDiscussionMessageReaction,
-	#[sea_orm(has_many = "super::book_club_discussion_message::Entity")]
-	BookClubDiscussionMessage,
-	#[sea_orm(has_one = "super::book_club_member_favorite_book::Entity")]
-	BookClubMemberFavoriteBook,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub suggestion_likes: HasMany<book_club_book_suggestion_like::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub suggestions: HasMany<book_club_book_suggestion::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub message_reactions: HasMany<book_club_discussion_message_reaction::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub messages: HasMany<book_club_discussion_message::Entity>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub favorite_books: HasOne<book_club_member_favorite_book::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClub,
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::book_club_book_suggestion_like::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBookSuggestionLike.def()
-	}
-}
-
-impl Related<super::book_club_book_suggestion::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBookSuggestion.def()
-	}
-}
-
-impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessageReaction.def()
-	}
-}
-
-impl Related<super::book_club_discussion_message::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessage.def()
-	}
-}
-
-impl Related<super::book_club_member_favorite_book::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMemberFavoriteBook.def()
-	}
-}
-
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

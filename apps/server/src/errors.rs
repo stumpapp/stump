@@ -239,9 +239,9 @@ impl From<ImageProcessorError> for APIError {
 impl From<MediaProcessorError> for APIError {
 	fn from(error: MediaProcessorError) -> APIError {
 		match error {
-			MediaProcessorError::PageNotFound | MediaProcessorError::FileNotFound => {
-				APIError::NotFound(error.to_string())
-			},
+			MediaProcessorError::CoverNotFound
+			| MediaProcessorError::PageNotFound
+			| MediaProcessorError::FileNotFound => APIError::NotFound(error.to_string()),
 			_ => APIError::InternalServerError(error.to_string()),
 		}
 	}
@@ -386,4 +386,22 @@ impl IntoResponse for APIError {
 pub mod api_error_message {
 	pub const LOCKED_ACCOUNT: &str =
 		"Your account is locked. Please contact an administrator to unlock your account.";
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_missing_cover_is_not_found() {
+		let error = APIError::from(MediaProcessorError::CoverNotFound);
+		assert_eq!(error.status_code(), StatusCode::NOT_FOUND);
+	}
+
+	#[test]
+	fn test_epub_read_failure_is_internal_server_error() {
+		let error =
+			APIError::from(MediaProcessorError::EpubRead("broken epub".to_string()));
+		assert_eq!(error.status_code(), StatusCode::INTERNAL_SERVER_ERROR);
+	}
 }

@@ -6,13 +6,12 @@ use models::{
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::{ReadingStatus, UserPermission},
-		ordering::OrderBy,
 	},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
+	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -23,7 +22,7 @@ use crate::{
 		media::Media,
 		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
 	},
-	order::MediaOrderBy,
+	order::{order_spec, MediaOrderBy},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
@@ -117,7 +116,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r"
 			SELECT
@@ -150,34 +149,36 @@ impl MediaQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let mut query = media::ModelWithMetadata::find_for_user(user);
-		query = MediaOrderBy::add_order_by(&order_by, query)?;
-		query = add_sessions_join_for_filter(user, &filter, query)
+		let spec = MediaOrderBy::spec(&order_by);
+		let query = spec.apply(
+			add_sessions_join_for_filter(
+				user,
+				&filter,
+				media::ModelWithMetadata::find_for_user(user),
+			)
 			.filter(filter.into_filter())
-			.filter(media::Column::DeletedAt.is_null());
+			.filter(media::Column::DeletedAt.is_null()),
+		);
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
-				let mut cursor = query.cursor_by(media::Column::Name);
+				let mut query = query;
 				if let Some(ref id) = info.after {
-					let media = media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(
-							media::Column::Id
-								.eq(id.clone())
-								.and(media::Column::DeletedAt.is_null()),
-						)
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
-					cursor.after(media.name);
+					let cursor =
+						media::ModelWithMetadata::find_by_id_for_user(id.clone(), user)
+							.filter(media::Column::DeletedAt.is_null())
+							.into_model::<media::ModelWithMetadata>()
+							.one(conn)
+							.await?
+							.ok_or("Cursor not found")?;
+					query =
+						query.filter(spec.sorts_after(&MediaOrderBy::cursor_values(
+							&order_by, &cursor,
+						)));
 				}
-				// FIXME: Cursor ordering is broken
-				cursor.first(info.limit);
 
-				let models = cursor
+				let models = query
+					.limit(info.limit)
 					.into_model::<media::ModelWithMetadata>()
 					.all(conn)
 					.await?;
@@ -268,7 +269,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -308,129 +309,118 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let user_id = user.id.clone();
-
 		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
-		let query = media::Entity::apply_for_user(user, media::Entity::find())
-			.select_also(reading_session::Entity)
-			.filter(media::Column::DeletedAt.is_null())
-			.join_rev(
-				JoinType::InnerJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
-					.to(media::Column::Id)
-					.on_condition(move |_left, _right| {
-						Condition::all()
-							.add(reading_session::Column::UserId.eq(user_id.clone()))
-							.add(
-								reading_session::Column::Status
-									.eq(ReadingStatus::Reading),
-							)
-							// for each session row, ensure there does not exist a newer session for the same user+media
-							.add(Expr::expr(Expr::exists(newer_exists.clone())).not())
-					})
-					.into(),
-			)
-			.order_by_desc(reading_session::Column::UpdatedAt);
+		let spec = order_spec![
+			(reading_session::Column::UpdatedAt, Order::Desc),
+			(reading_session::Column::Id, Order::Desc),
+		];
+
+		let query = spec.apply(
+			media::Entity::apply_for_user(user, media::Entity::find())
+				.select_also(reading_session::Entity)
+				.filter(media::Column::DeletedAt.is_null())
+				.join_rev(
+					JoinType::InnerJoin,
+					reading_session::Entity::belongs_to(media::Entity)
+						.from(reading_session::Column::MediaId)
+						.to(media::Column::Id)
+						.on_condition(move |_left, _right| {
+							Condition::all()
+								.add(reading_session::Column::UserId.eq(user_id.clone()))
+								.add(
+									reading_session::Column::Status
+										.eq(ReadingStatus::Reading),
+								)
+								// for each session row, ensure there does not exist a newer session for the same user+media
+								.add(Expr::expr(Expr::exists(newer_exists.clone())).not())
+						})
+						.into(),
+				),
+		);
 
 		match pagination.resolve() {
-			Pagination::Cursor(_) => {
-				// FIXME: See https://github.com/SeaQL/sea-orm/issues/2407
-				Err("Cursor pagination not supported for keepReading at this time".into())
-				// let user_id = user.id.clone();
-				// let mut cursor =
-				// 	query.cursor_by_other(reading_session::Column::UpdatedAt);
+			Pagination::Cursor(info) => {
+				let mut query = query;
+				if let Some(ref id) = info.after {
+					let (_, session) = query
+						.clone()
+						.filter(media::Column::Id.eq(id.clone()))
+						.one(conn)
+						.await?
+						.ok_or("Cursor not found")?;
+					let session = session.ok_or("Cursor not found")?;
+					query = query.filter(spec.sorts_after(&[
+						session.get(reading_session::Column::UpdatedAt),
+						session.get(reading_session::Column::Id),
+					]));
+				}
 
-				// if let Some(ref id) = info.after {
-				// 	let id = id.clone(); // Clone for closure on_condition
-				// 	let record = media::Entity::find_for_user(user)
-				// 		.select_only()
-				// 		.column(reading_session::Column::UpdatedAt)
-				// 		.join_rev(
-				// 			JoinType::InnerJoin,
-				// 			reading_session::Entity::belongs_to(media::Entity)
-				// 				.from(reading_session::Column::MediaId)
-				// 				.to(media::Column::Id)
-				// 				.on_condition(move |_left, _right| {
-				// 					Condition::all().add(
-				// 						reading_session::Column::UserId
-				// 							.eq(user_id.clone())
-				// 							.and(
-				// 								reading_session::Column::MediaId
-				// 									.eq(id.clone()),
-				// 							),
-				// 					)
-				// 				})
-				// 				.into(),
-				// 		)
-				// 		.into_model::<media::ReadingSessionUpdatedAtCmpSelect>()
-				// 		.one(conn)
-				// 		.await?
-				// 		.ok_or("Cursor not found")?;
-				// 	cursor.after(record.updated_at);
-				// }
-				// cursor.first(info.limit).desc();
+				let nodes = query
+					// select_also_fake is the 2.0 replacement for select_also, i really
+					// hate the name of it tho
+					.select_also_fake(media_metadata::Entity)
+					.limit(info.limit)
+					.all(conn)
+					.await?
+					.into_iter()
+					.map(|(media, _session, metadata)| {
+						Media::from(media::ModelWithMetadata { media, metadata })
+					})
+					.collect::<Vec<_>>();
 
-				// let models = cursor
-				// 	.group_by(media::Column::Id)
-				// 	.into_model::<media::ModelWithMetadata>()
-				// 	.all(conn)
-				// 	.await?;
-				// let current_cursor = info
-				// 	.after
-				// 	.or_else(|| models.first().map(|m| m.media.id.clone()));
-				// let next_cursor = match models.last().map(|m| m.media.id.clone()) {
-				// 	Some(id) if models.len() == info.limit as usize => Some(id),
-				// 	_ => None,
-				// };
+				let current_cursor = info
+					.after
+					.or_else(|| nodes.first().map(|m| m.model.id.clone()));
+				let next_cursor = match nodes.last().map(|m| m.model.id.clone()) {
+					Some(id) if nodes.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
 
-				// Ok(PaginatedResponse {
-				// 	nodes: models.into_iter().map(Media::from).collect(),
-				// 	page_info: CursorPaginationInfo {
-				// 		current_cursor,
-				// 		next_cursor,
-				// 		limit: info.limit,
-				// 	}
-				// 	.into(),
-				// })
+				Ok(PaginatedResponse {
+					nodes,
+					page_info: CursorPaginationInfo {
+						current_cursor,
+						next_cursor,
+						limit: info.limit,
+					}
+					.into(),
+				})
 			},
 			Pagination::Offset(info) => {
 				let count = query.clone().count(conn).await?;
-
-				let models = query
-					.select_also(media_metadata::Entity)
+				let nodes = query
+					.select_also_fake(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
 					.await?
 					.into_iter()
-					.map(|(media, _session, metadata)| media::ModelWithMetadata {
-						media,
-						metadata,
+					.map(|(media, _session, metadata)| {
+						Media::from(media::ModelWithMetadata { media, metadata })
 					})
 					.collect::<Vec<_>>();
 
 				Ok(PaginatedResponse {
-					nodes: models.into_iter().map(Media::from).collect(),
+					nodes,
 					page_info: OffsetPaginationInfo::new(info, count).into(),
 				})
 			},
 			Pagination::None(_) => {
-				let models = query
-					.select_also(media_metadata::Entity)
+				let nodes = query
+					.select_also_fake(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()
-					.map(|(media, _session, metadata)| media::ModelWithMetadata {
-						media,
-						metadata,
+					.map(|(media, _session, metadata)| {
+						Media::from(media::ModelWithMetadata { media, metadata })
 					})
 					.collect::<Vec<_>>();
 
-				let count = models.len().try_into()?;
+				let count = nodes.len().try_into()?;
 
 				Ok(PaginatedResponse {
-					nodes: models.into_iter().map(Media::from).collect(),
+					nodes,
 					page_info: OffsetPaginationInfo::unpaged(count).into(),
 				})
 			},
@@ -594,7 +584,7 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r#"
 					-- Count total number of on deck items (for pagination)
@@ -780,7 +770,7 @@ impl MediaQuery {
 					Query::select()
 						.column(media::Column::Hash)
 						.from(media::Entity)
-						.add_group_by([Expr::col(media::Column::Hash).into()])
+						.add_group_by([Expr::col(media::Column::Hash)])
 						.and_having(Expr::col(media::Column::Id).count().gt(1))
 						.to_owned(),
 				),
@@ -849,41 +839,5 @@ impl MediaQuery {
 				.map(ReadingSession::from)
 				.collect(),
 		})
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::{order::OrderByField, tests::common::*};
-	use models::{entity::media_metadata, shared::ordering::OrderDirection};
-	use pretty_assertions::assert_eq;
-	use sea_orm::{sea_query::SqliteQueryBuilder, QuerySelect, QueryTrait};
-
-	#[test]
-	fn test_media_query() {
-		let user = get_default_user();
-		let query = media::ModelWithMetadata::find_for_user(&user);
-		let order_by = vec![
-			MediaOrderBy::Media(OrderByField {
-				field: media::MediaModelOrdering::Name,
-				direction: OrderDirection::Asc,
-			}),
-			MediaOrderBy::Metadata(OrderByField {
-				field: media_metadata::MediaMetadataModelOrdering::MediaId,
-				direction: OrderDirection::Desc,
-			}),
-		];
-
-		let query = MediaOrderBy::add_order_by(&order_by, query).unwrap();
-		let query = query
-			.select_only()
-			.into_query()
-			.to_string(SqliteQueryBuilder);
-
-		assert_eq!(
-			query,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') ORDER BY "media"."name" ASC, "media_metadata"."media_id" DESC"#
-		);
 	}
 }

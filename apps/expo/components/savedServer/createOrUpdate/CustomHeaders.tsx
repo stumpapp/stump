@@ -9,11 +9,11 @@ import { cn } from '~/lib/utils'
 
 import { createHeaderSchema, CreateOrUpdateServerData } from './schemas'
 
-const LOCALE_BASE = 'addOrEditServer'
+const LOCALE_BASE = 'shared.addOrEditServer'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 
 export function CustomHeaders() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const form = useFormContext<CreateOrUpdateServerData>()
 
 	const customHeaders = useWatch({ control: form.control, name: 'customHeaders' })
@@ -23,7 +23,7 @@ export function CustomHeaders() {
 	const [newHeaderKey, setNewHeaderKey] = useState('')
 	const [newHeaderValue, setNewHeaderValue] = useState('')
 
-	const headerSchema = createHeaderSchema(t)
+	const headerSchema = createHeaderSchema(translate)
 
 	const addNewHeader = useCallback(() => {
 		const key = newHeaderKey.trim()
@@ -38,11 +38,11 @@ export function CustomHeaders() {
 		} else {
 			console.error(result.error.errors)
 			SystemAlert.alert(
-				t('common.error'),
-				result.error.errors[0]?.message || t(getKey('customHeaders.invalidHeader')),
+				translate('shared.common.error'),
+				result.error.errors[0]?.message || translate(getKey(`customHeaders.invalidHeader`)),
 			)
 		}
-	}, [newHeaderKey, newHeaderValue, form, t, headerSchema])
+	}, [newHeaderKey, newHeaderValue, form, translate, headerSchema])
 
 	const onCancelAddHeader = () => {
 		setNewHeaderKey('')
@@ -59,7 +59,7 @@ export function CustomHeaders() {
 
 	return (
 		<View className="gap-4">
-			<Card label={t(getKey('customHeaders.label'))}>
+			<Card label={translate(getKey(`customHeaders.label`))}>
 				{customHeaders?.map((header, index) => (
 					<Card.Row key={index} label={header.key} className="flex-wrap">
 						<View className="gap-3 flex-row items-center">
@@ -71,7 +71,7 @@ export function CustomHeaders() {
 								onPress={() => onDeleteHeader(index)}
 								className="dark:border-white/5 border-black/5"
 							>
-								<Text>{t('common.delete')}</Text>
+								<Text>{translate('shared.common.delete')}</Text>
 							</Button>
 						</View>
 					</Card.Row>
@@ -86,7 +86,7 @@ export function CustomHeaders() {
 				{isAddingHeader ? (
 					<>
 						<Card.InputRow
-							label={t('common.name')}
+							label={translate('shared.common.name')}
 							autoCorrect={false}
 							autoCapitalize="none"
 							placeholder="X-Biz-Baz"
@@ -94,25 +94,25 @@ export function CustomHeaders() {
 							value={newHeaderKey}
 						/>
 						<Card.InputRow
-							label={t('common.value')}
+							label={translate('shared.common.value')}
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder={t('common.value').toLowerCase()}
+							placeholder={translate('shared.common.value').toLowerCase()}
 							onChangeText={setNewHeaderValue}
 							value={newHeaderValue}
 						/>
 						<Card.Row className="gap-4 flex-row justify-end">
 							<Button variant="outline" size="sm" roundness="full" onPress={onCancelAddHeader}>
-								<Text>{t('common.cancel')}</Text>
+								<Text>{translate('shared.common.cancel')}</Text>
 							</Button>
 							<Button variant="brand" size="sm" roundness="full" onPress={addNewHeader}>
-								<Text>{t('common.save')}</Text>
+								<Text>{translate('shared.common.save')}</Text>
 							</Button>
 						</Card.Row>
 					</>
 				) : (
 					<Button className="w-full" roundness="full" onPress={() => setIsAddingHeader(true)}>
-						<Text>{t(getKey('customHeaders.addHeader'))}</Text>
+						<Text>{translate(getKey(`customHeaders.addHeader`))}</Text>
 					</Button>
 				)}
 			</Card>

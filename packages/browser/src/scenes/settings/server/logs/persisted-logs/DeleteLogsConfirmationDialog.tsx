@@ -1,9 +1,10 @@
 import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, AlertDescription, Button, ConfirmationModal } from '@stump/components'
 import { graphql, PersistedLogsQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation DeleteLogs {
@@ -14,7 +15,7 @@ const mutation = graphql(`
 `)
 
 export default function DeleteLogsConfirmationDialog() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()
@@ -67,7 +68,7 @@ export default function DeleteLogsConfirmationDialog() {
 					{t(getKey('title'))}
 				</Button>
 			}
-			size="md"
+			size="lg"
 		>
 			<Alert variant="warning" className="p-3 text-sm">
 				<AlertDescription>{t(getKey('disclaimer'))} </AlertDescription>

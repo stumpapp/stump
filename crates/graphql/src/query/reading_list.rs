@@ -163,7 +163,7 @@ mod tests {
 		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![maplit::btreemap! {
-				"num_items" => Into::<Value>::into(1),
+				"num_items" => Into::<Value>::into(1i64),
 			}]])
 			.append_query_results(vec![vec![get_test_model()]])
 			.into_connection();
@@ -196,7 +196,7 @@ mod tests {
 		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![maplit::btreemap! {
-				"num_items" => Into::<Value>::into(0),
+				"num_items" => Into::<Value>::into(0i64),
 			}]])
 			.append_query_results::<reading_list::Model, _, _>(vec![vec![]])
 			.into_connection();

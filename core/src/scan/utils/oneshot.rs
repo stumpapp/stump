@@ -10,14 +10,15 @@ use models::{
 	entity::{
 		library_config,
 		media::{self, MediaIdentSelect, MediaIdentWithSeriesId},
-		media_metadata,
+		media_metadata, reading_session,
 		series::{self, SeriesIdentSelect},
 		series_metadata,
 	},
 	shared::enums::FileStatus,
 };
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue, QuerySelect, Set, TransactionTrait,
+	prelude::*, sea_query::Expr, ActiveValue, ExprTrait, QuerySelect, Set,
+	TransactionTrait,
 };
 use uuid::Uuid;
 
@@ -421,8 +422,98 @@ pub(crate) async fn collect_previous_oneshot_entries(
 	Ok(previous_oneshots)
 }
 
+// TODO(soft-delete): this hard deletes media records without explicit user
+// approval, which isn't ideal. in fairness here specifically it is rather
+// safe, duplicates are deleted with preference to those which have read history
+// so most times this happens, which should not even be too common, it should
+// work as intended.
+
+/// Delete duplicate books during the oneshot conversion process which share the same
+/// path, preferring to keep those with actual reading history to ensure the
+/// "correct" record is kept
+async fn dedupe_media_by_path<C: ConnectionTrait>(
+	conn: &C,
+	paths: &[String],
+) -> Result<(HashMap<String, media::Model>, u64), DbErr> {
+	let mut media_by_path = HashMap::<String, Vec<media::Model>>::new();
+	for chunk in paths.chunks(SQLITE_BIND_LIMIT) {
+		let records = media::Entity::find()
+			.filter(media::Column::Path.is_in(chunk.to_vec()))
+			.all(conn)
+			.await?;
+
+		for record in records {
+			media_by_path
+				.entry(record.path.clone())
+				.or_default()
+				.push(record);
+		}
+	}
+
+	// not literally ids that are the same but the ids of books
+	// which share the same path
+	let duplicate_ids: Vec<String> = media_by_path
+		.values()
+		.filter(|rows| rows.len() > 1)
+		.flatten()
+		.map(|row| row.id.clone())
+		.collect();
+	let mut media_ids_with_sessions = HashSet::new();
+
+	for chunk in duplicate_ids.chunks(SQLITE_BIND_LIMIT) {
+		let session_ids = reading_session::Entity::find()
+			.select_only()
+			.column(reading_session::Column::MediaId)
+			.distinct()
+			.filter(reading_session::Column::MediaId.is_in(chunk.to_vec()))
+			.into_tuple::<String>()
+			.all(conn)
+			.await?;
+		media_ids_with_sessions.extend(session_ids);
+	}
+
+	let mut kept = HashMap::with_capacity(media_by_path.len());
+	let mut to_delete = Vec::new();
+
+	for (path, mut rows) in media_by_path {
+		rows.sort_by(|a, b| {
+			media_ids_with_sessions
+				.contains(&b.id)
+				.cmp(&media_ids_with_sessions.contains(&a.id)) // prefer those with history
+				.then(a.created_at.cmp(&b.created_at)) // fallback to oldest, prob the original
+		});
+		let mut rows = rows.into_iter();
+		if let Some(keeper) = rows.next() {
+			to_delete.extend(rows.map(|row| row.id));
+			kept.insert(path, keeper);
+		}
+	}
+
+	let mut deleted = 0;
+	for chunk in to_delete.chunks(SQLITE_BIND_LIMIT) {
+		let deleted_count = media::Entity::delete_many()
+			.filter(media::Column::Id.is_in(chunk.to_vec()))
+			.exec(conn)
+			.await?
+			.rows_affected;
+		deleted += deleted_count;
+	}
+
+	if deleted > 0 {
+		tracing::warn!(deleted, ?to_delete, "Deleted duplicate media rows");
+	}
+
+	Ok((kept, deleted))
+}
+
+fn duplicates_log(deleted: u64) -> JobExecuteLog {
+	JobExecuteLog::warn(&format!(
+		"Removed {deleted} duplicate book record(s) detected during oneshots conversion!"
+	))
+}
+
 /// Converts a normal series into individual oneshot series entries for each book in it.
-/// The old series will be deleted after the conversion.
+/// The old series will be deleted after the conversion, along with any duplicated books
 pub(crate) async fn convert_to_oneshot_series(
 	old_series_id: &str,
 	media_rows: Vec<media::MediaIdentSelect>,
@@ -450,52 +541,73 @@ pub(crate) async fn convert_to_oneshot_series(
 
 	let txn = worker_ctx.conn().begin().await?;
 
-	for (idx, media_row) in media_rows.iter().enumerate() {
-		let new_series_id = Uuid::new_v4().to_string();
-		let FileParts {
-			file_stem: name, ..
-		} = PathBuf::from(&media_row.path).file_parts();
+	let paths = media_rows
+		.iter()
+		.map(|row| row.path.clone())
+		.collect::<HashSet<_>>()
+		.into_iter()
+		.collect::<Vec<_>>();
+	let (books, deleted_duplicates) = dedupe_media_by_path(&txn, &paths).await?;
+	if deleted_duplicates > 0 {
+		output.logs.push(duplicates_log(deleted_duplicates));
+	}
 
-		let media_metadata = media_metadata::Entity::find()
-			.filter(media_metadata::Column::MediaId.eq(&media_row.id))
-			.one(&txn)
+	let mut existing_oneshots = HashMap::<String, Vec<String>>::new();
+	for chunk in paths.chunks(SQLITE_BIND_LIMIT) {
+		let series_idents = series::Entity::find()
+			.select_only()
+			.columns(SeriesIdentSelect::columns())
+			.filter(
+				series::Column::IsOneshot
+					.eq(true)
+					.and(series::Column::LibraryId.eq(library_id))
+					.and(series::Column::Path.is_in(chunk.to_vec())),
+			)
+			.into_model::<SeriesIdentSelect>()
+			.all(&txn)
 			.await?;
-
-		let series_metadata = media_metadata.and_then(|m| m.title).map(|title| {
-			series_metadata::ActiveModel {
-				series_id: Set(new_series_id.clone()),
-				title: Set(Some(title)),
-				..Default::default()
-			}
-		});
-
-		let new_series = series::ActiveModel {
-			id: Set(new_series_id.clone()),
-			path: Set(media_row.path.clone()),
-			name: Set(name),
-			library_id: Set(Some(library_id.to_string())),
-			is_oneshot: Set(true),
-			status: Set(FileStatus::Ready),
-			..Default::default()
-		};
-		new_series.insert(&txn).await?;
-
-		if let Some(meta) = series_metadata {
-			if let Err(error) = meta.insert(&txn).await {
-				tracing::error!(?error, "Failed to insert series metadata for oneshot");
-			}
+		for s in series_idents {
+			existing_oneshots.entry(s.path).or_default().push(s.id);
 		}
+	}
+
+	let total_books = books.len();
+	for (idx, (path, book)) in books.into_iter().enumerate() {
+		let mut existing = existing_oneshots.remove(&path).unwrap_or_default();
+		// prefer the oneshot series the kept book already belongs to, if any
+		existing.sort_by_key(|id| Some(id) != book.series_id.as_ref());
+		let mut existing = existing.into_iter();
+
+		let target_series_id = match existing.next() {
+			Some(id) => id,
+			None => {
+				let id =
+					create_oneshot_series_for(&txn, &path, &book.id, library_id).await?;
+				output.created_series += 1;
+				id
+			},
+		};
 
 		media::Entity::update_many()
-			.filter(media::Column::Id.eq(&media_row.id))
-			.col_expr(media::Column::SeriesId, Expr::value(new_series_id))
+			.filter(media::Column::Id.eq(&book.id))
+			.col_expr(media::Column::SeriesId, Expr::value(target_series_id))
 			.col_expr(media::Column::IsOneshot, Expr::value(true))
 			.exec(&txn)
 			.await?;
 
+		// any other oneshot series at this path lost their media to dedupe and are now empty
+		let extra: Vec<String> = existing.collect();
+		if !extra.is_empty() {
+			tracing::warn!(?extra, "Deleting left over series");
+			series::Entity::delete_many()
+				.filter(series::Column::Id.is_in(extra))
+				.exec(&txn)
+				.await?;
+		}
+
 		worker_ctx.report_progress(JobProgress::subtask_position(
 			(idx + 1) as i32,
-			total as i32,
+			total_books as i32,
 		));
 	}
 
@@ -506,8 +618,6 @@ pub(crate) async fn convert_to_oneshot_series(
 
 	txn.commit().await?;
 
-	output.created_series = total as u64;
-
 	tracing::debug!(
 		created_series = output.created_series,
 		old_series_id,
@@ -515,6 +625,51 @@ pub(crate) async fn convert_to_oneshot_series(
 	);
 
 	Ok(output)
+}
+
+/// Creates a oneshot series for the book at `path`, using the book's metadata title (if
+/// any) for the series metadata, and returns the new series id
+async fn create_oneshot_series_for<C: ConnectionTrait>(
+	conn: &C,
+	path: &str,
+	media_id: &str,
+	library_id: &str,
+) -> Result<String, DbErr> {
+	let id = Uuid::new_v4().to_string();
+	let FileParts {
+		file_stem: name, ..
+	} = PathBuf::from(path).file_parts();
+
+	series::ActiveModel {
+		id: Set(id.clone()),
+		path: Set(path.to_string()),
+		name: Set(name),
+		library_id: Set(Some(library_id.to_string())),
+		is_oneshot: Set(true),
+		status: Set(FileStatus::Ready),
+		..Default::default()
+	}
+	.insert(conn)
+	.await?;
+
+	// TODO(sea-orm): nested active model?
+	let title = media_metadata::Entity::find()
+		.filter(media_metadata::Column::MediaId.eq(media_id))
+		.one(conn)
+		.await?
+		.and_then(|m| m.title);
+	if let Some(title) = title {
+		let meta = series_metadata::ActiveModel {
+			series_id: Set(id.clone()),
+			title: Set(Some(title)),
+			..Default::default()
+		};
+		if let Err(error) = meta.insert(conn).await {
+			tracing::error!(?error, "Failed to insert series metadata for oneshot");
+		}
+	}
+
+	Ok(id)
 }
 
 /// Output of a series-to-oneshot conversion
@@ -546,62 +701,40 @@ pub(crate) async fn convert_previous_oneshot_entries_to_series_media(
 
 	let txn = conn.begin().await?;
 
-	for PreviousOneshotEntry {
-		book_path,
-		old_series_id,
-	} in &entries
-	{
-		let book_path_str = book_path.to_string_lossy().to_string();
+	let paths: Vec<String> = entries
+		.iter()
+		.map(|e| e.book_path.to_string_lossy().to_string())
+		.collect::<HashSet<_>>()
+		.into_iter()
+		.collect();
+	let (books, deleted_duplicates) = dedupe_media_by_path(&txn, &paths).await?;
+	if deleted_duplicates > 0 {
+		output.logs.push(duplicates_log(deleted_duplicates));
+	}
 
-		match media::Entity::update_many()
-			.filter(media::Column::Path.eq(&book_path_str))
+	let book_ids: Vec<String> = books.into_values().map(|book| book.id).collect();
+	for chunk in book_ids.chunks(SQLITE_BIND_LIMIT) {
+		output.updated_media += media::Entity::update_many()
+			.filter(media::Column::Id.is_in(chunk.to_vec()))
 			.col_expr(
 				media::Column::SeriesId,
 				Expr::value(new_series_id.to_string()),
 			)
 			.col_expr(media::Column::IsOneshot, Expr::value(false))
 			.exec(&txn)
-			.await
-		{
-			Ok(result) => {
-				output.updated_media += result.rows_affected;
-			},
-			Err(error) => {
-				tracing::error!(
-					?error,
-					?book_path_str,
-					"Failed to update media during oneshot-to-series conversion"
-				);
-				output.logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to reassign media to series: {}",
-						error
-					))
-					.with_ctx(format!("Path: {book_path_str}")),
-				);
-				continue;
-			},
-		}
+			.await?
+			.rows_affected;
+	}
 
-		if let Err(error) = series::Entity::delete_many()
-			.filter(series::Column::Id.eq(old_series_id))
+	// the old oneshot series are empty now, so deleting them won't cascade to any media
+	let old_series_ids: Vec<String> =
+		entries.into_iter().map(|e| e.old_series_id).collect();
+	for chunk in old_series_ids.chunks(SQLITE_BIND_LIMIT) {
+		output.deleted_series += series::Entity::delete_many()
+			.filter(series::Column::Id.is_in(chunk.to_vec()))
 			.exec(&txn)
-			.await
-		{
-			tracing::error!(
-				?error,
-				old_series_id,
-				"Failed to delete oneshot series during conversion"
-			);
-			output.logs.push(
-				JobExecuteLog::error(format!(
-					"Failed to delete oneshot series entry: {}",
-					error
-				))
-				.with_ctx(format!("Series ID: {old_series_id}")),
-			);
-		}
-		output.deleted_series += 1;
+			.await?
+			.rows_affected;
 	}
 
 	txn.commit().await?;

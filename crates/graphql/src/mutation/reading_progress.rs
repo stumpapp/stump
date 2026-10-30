@@ -15,7 +15,8 @@ use models::{
 };
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
-	IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
+	ExprTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
+	TransactionTrait,
 };
 
 use crate::{
@@ -150,7 +151,7 @@ impl ReadProgressMutation {
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
 				NormalizedProgression {
-					page: None,
+					page: input.locator.page(),
 					locator: Some(input.locator),
 					percentage: input.percentage,
 					elapsed_seconds_delta: input.elapsed_seconds_delta,

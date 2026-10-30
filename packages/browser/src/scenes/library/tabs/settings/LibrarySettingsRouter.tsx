@@ -6,7 +6,6 @@ import {
 	useFragment,
 	UserPermission,
 } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -15,6 +14,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext, LibraryPatchParams } from './context'
@@ -93,7 +93,7 @@ const scanMutation = graphql(`
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
 	const { config } = useFragment(LibrarySettingsConfig, library)

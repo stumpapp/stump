@@ -49,7 +49,7 @@ impl BookVisitResult {
 		match self {
 			BookVisitResult::Built(result) => {
 				match result.media.path.clone().into_value() {
-					Some(sea_orm::Value::String(Some(s))) => *s,
+					Some(sea_orm::Value::String(Some(s))) => s,
 					_ => {
 						tracing::warn!(?result, "Processed media has invalid path?");
 						String::default()

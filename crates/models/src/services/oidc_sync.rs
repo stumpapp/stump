@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, IntoActiveModel, QuerySelect};
+use sea_orm::{
+	prelude::*, ActiveValue, ConnectionTrait, ExprTrait, IntoActiveModel, QuerySelect,
+};
 
 use crate::{
 	domain::oidc_sync::oidc_claims_to_permission_set,
@@ -229,6 +231,8 @@ pub async fn sync_oidc_library_access_for_library(
 #[cfg(test)]
 mod tests {
 	use std::collections::HashMap;
+
+	use sea_orm::ExprTrait;
 
 	use crate::{
 		entity::{library_access, user},

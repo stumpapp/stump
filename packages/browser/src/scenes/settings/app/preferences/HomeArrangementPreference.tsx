@@ -16,11 +16,11 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button, cn, IconButton, NewCard, Sheet, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Eye, EyeOff } from 'lucide-react'
 import { SubmitEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import {
 	defaultHomeSections,
 	getHomeSectionId,
@@ -34,7 +34,7 @@ import {
 const BASE = 'settingsScene.app/preferences.sections.homeArrangement'
 
 export default function HomeArrangementPreference() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const [open, setOpen] = useState(false)
 	const { data } = useHomeArrangement()
 	const { mutateAsync, isPending } = useUpdateHomeArrangement()
@@ -53,7 +53,7 @@ export default function HomeArrangementPreference() {
 					description={t(`${BASE}.hint`)}
 					trigger={
 						<Button size="sm" variant="outline">
-							{t('common.edit')}
+							{translate('shared.common.edit')}
 						</Button>
 					}
 				>
@@ -78,7 +78,7 @@ type FormProps = {
 }
 
 export function HomeArrangementForm({ sections, onSave }: FormProps) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const [draft, setDraft] = useState(sections)
 	const [saving, setSaving] = useState(false)
 	const sensors = useSensors(
@@ -150,7 +150,7 @@ export function HomeArrangementForm({ sections, onSave }: FormProps) {
 							aria-busy={saving}
 							className="h-7"
 						>
-							{t('common.save')}
+							{translate('shared.common.save')}
 						</Button>
 					</div>
 				</header>
@@ -198,9 +198,9 @@ type ItemProps = {
 }
 
 function HomeArrangementItem({ section, disabled, onVisibilityChange }: ItemProps) {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const id = getHomeSectionId(section)!
-	const label = t(`homeScene.${id}.title`)
+	const label = translate(`shared.homeSections.${id}.label`)
 	const {
 		attributes,
 		listeners,

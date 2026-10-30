@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Form } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import pick from 'lodash/pick'
 import { useCallback, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -12,6 +11,7 @@ import {
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
 import { SmartListQueryBuilder } from '@/components/smartList/createOrUpdate/queryBuilder'
+import { useTranslate } from '@/hooks/useTranslate'
 import { compareByKeys } from '@/utils/compare'
 
 import { useSmartListSettings } from '../context'
@@ -19,7 +19,7 @@ import { useSmartListSettings } from '../context'
 type SubSchema = Pick<SmartListFormSchema, 'filters' | 'grouping'>
 
 export default function FiltersSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { list, patch } = useSmartListSettings()
 
 	const listAsForm = useMemo(() => intoForm(list), [list])

@@ -1,13 +1,14 @@
 import { Button, Dialog, NativeSelect, Text } from '@stump/components'
 import { MergeStrategy } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useMatchActions } from '../useMatchActions'
 import { useMatchReviewStore } from '../useMatchReviewStore'
 
 export function ReviewDialogFooter() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { records, currentRecordIndex, strategy, nextRecord, prevRecord, setStrategy } =
 		useMatchReviewStore()
 	const { accept, reject, isPending, hasCandidate } = useMatchActions()

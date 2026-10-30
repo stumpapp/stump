@@ -27,13 +27,12 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 		<ConfirmationModal
 			isOpen={isCreatingServer}
 			onClose={() => setIsCreatingServer(false)}
-			title={t(getKey('title'))}
-			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			title={t('shared.addOrEditServer.createServer')}
+			confirmText={t('shared.addOrEditServer.createServer')}
 			formId={CREATE_OR_UPDATE_SERVER_FORM_ID}
 			trigger={
 				<Button size="sm" onClick={() => setIsCreatingServer(true)}>
-					{t(getKey('trigger'))}
+					{t('shared.addOrEditServer.createServer')}
 				</Button>
 			}
 		>
@@ -44,6 +43,3 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 		</ConfirmationModal>
 	)
 }
-
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.addServer'
-const getKey = (key: string) => `${LOCALE_KEY}.${key}`

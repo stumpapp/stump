@@ -1,6 +1,8 @@
 use crate::common::{
-	book::update_progress, library::setup_library,
-	series::setup_single_series_with_n_books, TestApp,
+	book::{fudge_session_time, update_progress},
+	library::setup_library,
+	series::setup_single_series_with_n_books,
+	TestApp,
 };
 
 use graphql::input::media::{EpubProgressInput, MediaProgressInput, PagedProgressInput};
@@ -8,7 +10,8 @@ use models::{
 	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{prelude::*, ExprTrait, QueryOrder};
+use serde_json::json;
 use tests::fake_data;
 
 async fn setup() -> (TestApp, media::Model) {
@@ -489,4 +492,112 @@ async fn test_detect_finishing_session_for_ebook() {
 		.expect("could not query reading sessions")
 		.expect("no session found");
 	assert!(session.is_finalized());
+}
+
+async fn is_latest(app: &TestApp, id: i32) -> bool {
+	let result = app
+		.execute_gql(
+			r#"
+		query SessionById($sessionId: Int) {
+			readingSessionById(id: $sessionId) {
+				isLatest
+			}
+		}
+		"#,
+			Some(json!({"sessionId": id})),
+		)
+		.await;
+
+	let session_selection = result
+		.get("data")
+		.and_then(|data| data.get("readingSessionById"))
+		.expect("session should exist");
+
+	session_selection
+		.get("isLatest")
+		.expect("isLatest is missing??")
+		.as_bool()
+		.expect("should parse as a bool")
+}
+
+/// the latest active session should have isLatest of true
+#[tokio::test]
+async fn test_latest_reading_session_is_latest() {
+	let app = TestApp::new_with_default_user().await;
+	let db = app.conn();
+
+	let series = fake_data::Series {
+		name: Some("The Wayfarers".to_string()),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let book = fake_data::Media {
+		series_id: series.id.clone(),
+		id: Some("book-1".to_string()),
+		name: Some("A Long Way to a Small Angry Planet".to_string()),
+		created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+		pages: Some(432),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 50,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let first_session = reading_session::Entity::find()
+		.one(db)
+		.await
+		.expect("should have queried correctly")
+		.expect("session should have existed");
+	// latest while active
+	assert!(
+		is_latest(&app, first_session.id).await,
+		"should have been latest"
+	);
+	fudge_session_time(&first_session, db).await;
+	// latest after lapsed
+	assert!(
+		is_latest(&app, first_session.id).await,
+		"should have still been latest"
+	);
+	// ^ mostly sanity checks, lapsed or not should not matter
+
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 100,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	// ^ the subsequent session supplants the first
+
+	let second_session = reading_session::Entity::find()
+		.filter(reading_session::Column::Id.ne(first_session.id))
+		.one(db)
+		.await
+		.expect("should have queried correctly")
+		.expect("should have another session");
+
+	assert!(
+		is_latest(&app, second_session.id).await,
+		"second session should have been latest now"
+	);
+	assert!(
+		!is_latest(&app, first_session.id).await,
+		"first session should have no longer been latest"
+	);
 }

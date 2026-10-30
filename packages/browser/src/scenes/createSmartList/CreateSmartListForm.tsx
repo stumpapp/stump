@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Button, cn, Form } from '@stump/components'
+import { Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
-import { useCallback } from 'react'
+import { ClipboardCheck, Filter, Info } from 'lucide-react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { ContentContainer } from '@/components/container'
-import { useSteppedFormContext } from '@/components/steppedForm'
+import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListQueryBuilder } from '../../components/smartList/createOrUpdate/queryBuilder'
 import { createSchema, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
@@ -29,9 +29,8 @@ const query = graphql(`
 `)
 
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
-	const { currentStep, setStep } = useSteppedFormContext()
 
 	const {
 		data: { smartLists: lists },
@@ -48,93 +47,59 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 		resolver: zodResolver(createSchema(lists?.map(({ name }) => name) ?? [], t)),
 	})
 
-	/**
-	 * A callback to handle changing the form step. This will validate the current step
-	 * before moving to the next step.
-	 */
-	const handleChangeStep = useCallback(
-		async (nextStep: number) => {
-			let isValid = false
-
-			switch (currentStep) {
-				case 1:
-					isValid = await form.trigger(['name', 'description', 'visibility'])
-					break
-				case 2:
-					isValid = await form.trigger(['filters.groups', 'filters.joiner'])
-					break
-				default:
-					break
-			}
-
-			if (isValid) {
-				setStep(nextStep)
-			} else {
-				console.warn('Form validation failed, not changing step')
-			}
-		},
-		[form, currentStep, setStep],
-	)
-
-	/**
-	 * Render the current step of the form
-	 */
-	const renderStep = () => {
-		switch (currentStep) {
-			case 1:
-				return (
+	const steps = useMemo<SteppedFormStep[]>(
+		() => [
+			{
+				key: 'basics',
+				icon: Info,
+				fields: ['name', 'description', 'visibility'],
+				render: () => (
 					<>
 						<BasicDetails />
 						<AccessSettings isCreating />
+					</>
+				),
+			},
+			{
+				key: 'filters',
+				icon: Filter,
+				fields: ['filters.groups', 'filters.joiner'],
+				render: () => <SmartListQueryBuilder />,
+			},
+			{
+				key: 'review',
+				icon: ClipboardCheck,
+				isReview: true,
+				render: () => <SmartListReview />,
+			},
+		],
+		[],
+	)
 
-						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(2)}>
-								Next step
-							</Button>
-						</div>
-					</>
-				)
-			case 2:
-				return (
-					<>
-						<SmartListQueryBuilder />
-
-						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
-							</Button>
-						</div>
-					</>
-				)
-			default:
-				return (
-					<>
-						<SmartListReview />
-					</>
-				)
+	/**
+	 * Prevent a submit event triggering when the enter key is pressed on an input
+	 */
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+			e.preventDefault()
 		}
 	}
 
 	return (
-		<Form form={form} onSubmit={onSubmit} id="createSmartListForm">
-			<ContentContainer className="mt-0">
-				{renderStep()}
-
-				<div
-					className={cn('mt-6 md:max-w-sm flex w-full', {
-						'invisible hidden': currentStep < 3,
-					})}
-				>
-					<Button
-						type="submit"
-						form="createSmartListForm"
-						className="md:w-auto w-full"
-						isLoading={isLoading}
-					>
-						Create list
-					</Button>
-				</div>
-			</ContentContainer>
+		<Form
+			form={form}
+			onSubmit={onSubmit}
+			id="createSmartListForm"
+			className="flex flex-1 flex-col"
+			fieldsetClassName="flex-1"
+			onKeyDown={handleKeyDown}
+		>
+			<SteppedForm
+				localeBase="createSmartListScene"
+				steps={steps}
+				submitLabel={t('createSmartListScene.form.buttons.confirm')}
+				isSubmitting={isLoading}
+			/>
 		</Form>
 	)
 }

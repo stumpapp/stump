@@ -145,7 +145,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 		{
 			label: 'Completed',
 			value: stats.completedBooks,
-			suffix: `/ ${stats.bookCount}`,
+			suffix: ` / ${stats.bookCount}`,
 			icon: BookCheck,
 			colors: STAT_COLORS.completed,
 		},
@@ -157,8 +157,8 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 		},
 		{
 			label: 'Reading Time',
-			value: formattedTime ? formattedTime.value : '??',
-			suffix: formattedTime ? formattedTime.unit : undefined,
+			value: formattedTime[0]?.value ?? '??',
+			suffix: formattedTime[0]?.unit ?? undefined,
 			icon: Clock,
 			colors: STAT_COLORS.readingTime,
 		},

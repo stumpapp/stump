@@ -1,10 +1,11 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Text, useCopyToClipboard } from '@stump/components'
 import { ApikeyInput, graphql, InheritPermissionValue } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import CreateOrUpdateAPIKeyForm, {
 	CREATE_OR_UPDATE_API_KEY_FORM_ID,
@@ -27,7 +28,7 @@ export default function CreateAPIKeyModal() {
 
 	const client = useQueryClient()
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { mutate: createKey, isPending } = useGraphQLMutation(mutation, {
 		onSuccess: ({ createApiKey: { secret } }) => {
@@ -156,7 +157,7 @@ export default function CreateAPIKeyModal() {
 							size="sm"
 							variant="outline"
 						>
-							{t('common.cancel')}
+							{translate('shared.common.cancel')}
 						</Button>
 					)}
 

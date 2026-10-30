@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
 			.to_owned();
 		manager
 			.get_connection()
-			.execute(manager.get_database_backend().build(&update_statement))
+			.execute_raw(manager.get_database_backend().build(&update_statement))
 			.await?;
 
 		manager

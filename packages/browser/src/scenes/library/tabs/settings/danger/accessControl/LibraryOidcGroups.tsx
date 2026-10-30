@@ -10,11 +10,11 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql, LibraryLayoutQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
 
 const mutation = graphql(`
@@ -27,7 +27,7 @@ const mutation = graphql(`
 `)
 
 export function LibraryOidcGroups() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { library } = useLibraryContext()
 
 	const oidcConfig = useOidcConfig()
@@ -93,7 +93,7 @@ export function LibraryOidcGroups() {
 
 			<div>
 				<Button disabled={!isDifferent || isPending} onClick={() => setShowConfirmationModal(true)}>
-					{t('common.saveChanges')}
+					{translate('shared.common.saveChanges')}
 				</Button>
 			</div>
 

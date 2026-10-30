@@ -8,7 +8,7 @@ import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Layout() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
@@ -23,7 +23,7 @@ export default function Layout() {
 				<Stack.Screen
 					name="index"
 					options={{
-						title: t('common.settings'),
+						title: translate('shared.common.settings'),
 						headerShown: true,
 						headerTransparent: Platform.OS === 'ios',
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',

@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Button, Card, Dropdown, Text } from '@stump/components'
 import { graphql, ScanHistoryTableQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,
@@ -15,6 +14,7 @@ import { useMemo, useState } from 'react'
 
 import { TableFooter } from '@/components/table'
 import { getCommonPinningStyles } from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../../../context'
 import ScanRecordInspector from './ScanRecordInspector'
@@ -62,7 +62,7 @@ export default function ScanHistoryTable() {
 	} = useSuspenseGraphQL(query, sdk.cacheKey('scanHistory', [id]), { id })
 	const scanHistory = libraryById?.scanHistory || []
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [inspectingRecord, setInspectingRecord] = useState<LibraryScanRecord | null>(null)
 

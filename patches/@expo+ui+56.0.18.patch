@@ -34,7 +34,7 @@ index 02620bb..6fee321 100644
    val modifiers: ModifierList = emptyList()
  ) : ComposeProps
 diff --git a/node_modules/@expo/ui/build/jetpack-compose/DropdownMenu/index.d.ts b/node_modules/@expo/ui/build/jetpack-compose/DropdownMenu/index.d.ts
-index 6709361..624d7b3 100644
+index 6709361..c687201 100644
 --- a/node_modules/@expo/ui/build/jetpack-compose/DropdownMenu/index.d.ts
 +++ b/node_modules/@expo/ui/build/jetpack-compose/DropdownMenu/index.d.ts
 @@ -23,6 +23,12 @@ export type DropdownMenuProps = {

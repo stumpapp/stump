@@ -119,6 +119,7 @@ pub struct RWPMPositions {
 #[derive(
 	Clone,
 	Debug,
+	Default,
 	SimpleObject,
 	InputObject,
 	Deserialize,
@@ -186,4 +187,10 @@ pub struct ReadiumLocator {
 	#[graphql(default = "application/xhtml+xml", name = "type")]
 	#[serde(default = "default_type")]
 	pub r#type: String,
+}
+
+impl ReadiumLocator {
+	pub fn page(&self) -> Option<i32> {
+		self.locations.as_ref().and_then(|loc| loc.position)
+	}
 }

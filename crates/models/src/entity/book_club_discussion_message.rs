@@ -4,6 +4,12 @@ use sea_orm::{
 	ActiveValue,
 };
 
+use super::{
+	book_club, book_club_discussion, book_club_discussion_message_reaction,
+	book_club_member,
+};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubDiscussionMessageModel")]
 #[sea_orm(table_name = "book_club_discussion_message")]
@@ -29,76 +35,56 @@ pub struct Model {
 	pub member_id: Option<String>,
 	#[sea_orm(column_type = "Text")]
 	pub book_club_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClub,
-	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
-	BookClubDiscussionMessageReaction,
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reactions: HasMany<book_club_discussion_message_reaction::Entity>,
 	#[sea_orm(
-		belongs_to = "Entity",
-		from = "Column::ParentMessageId",
-		to = "Column::Id",
+		self_ref,
+		relation_enum = "SelfRef",
+		from = "parent_message_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "SetNull"
 	)]
-	SelfRef,
+	#[graphql(skip)]
+	pub parent_message: BelongsTo<Option<Entity>>,
 	#[sea_orm(
-		belongs_to = "Entity",
-		from = "Column::ReplyToMessageId",
-		to = "Column::Id",
+		self_ref,
+		relation_enum = "ReplyTo",
+		from = "reply_to_message_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "SetNull"
 	)]
-	ReplyTo,
+	#[graphql(skip)]
+	pub reply_to: BelongsTo<Option<Entity>>,
 	#[sea_orm(
-		belongs_to = "super::book_club_discussion::Entity",
-		from = "Column::DiscussionId",
-		to = "super::book_club_discussion::Column::Id",
+		belongs_to,
+		from = "discussion_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClubDiscussion,
+	#[graphql(skip)]
+	pub discussion: BelongsTo<book_club_discussion::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club_member::Entity",
-		from = "Column::MemberId",
-		to = "super::book_club_member::Column::Id",
+		belongs_to,
+		from = "member_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClubMember,
-}
-
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessageReaction.def()
-	}
-}
-
-impl Related<super::book_club_discussion::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussion.def()
-	}
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMember.def()
-	}
+	#[graphql(skip)]
+	pub member: BelongsTo<Option<book_club_member::Entity>>,
 }
 
 #[async_trait]

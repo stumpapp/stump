@@ -18,6 +18,7 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import {
+	SERIES_POSITION_ORDERING,
 	useMediaURLOrderBy,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
@@ -30,8 +31,8 @@ import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
-import { useSeriesContext } from '../../context'
-import { getQueryKey, query, usePrefetchSeriesBooks } from './queries'
+import { useSeriesContext } from '../../../../components/series/context'
+import { getQueryKey, query, usePrefetchSeriesBooks } from '../../../../components/series/queries'
 
 export default function SeriesBooksSceneContainer() {
 	return (
@@ -62,7 +63,11 @@ function SeriesBooksScene() {
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
+	} = useFilterScene({
+		persistedOrdering,
+		setPersistedOrdering,
+		defaultOrdering: SERIES_POSITION_ORDERING,
+	})
 	const filters = mediaFilters as MediaFilterInput
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)

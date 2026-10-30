@@ -8,6 +8,7 @@ import { Api } from '@stump/sdk'
 import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
+	keepPreviousData,
 	noop,
 	PlaceholderDataFunction,
 	QueryKey,
@@ -535,6 +536,7 @@ export function useInfiniteCursorGraphQL<TResult, TVariables>(
 		initialPageParam,
 		getNextPageParam: (lastPage) => extractCursorInfo(lastPage),
 		...options,
+		placeholderData: keepPreviousData,
 	})
 
 	useEffect(() => {

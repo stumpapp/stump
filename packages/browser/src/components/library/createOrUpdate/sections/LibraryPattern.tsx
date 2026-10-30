@@ -1,19 +1,18 @@
-import { Heading, Link, RadioGroup, Text } from '@stump/components'
+import { NewCard, Select } from '@stump/components'
 import { LibraryPattern } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function LibraryPatternRadioGroup() {
 	const form = useFormContext()
 	const ctx = useLibraryContextSafe()
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
-	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased
 	const isCreating = !ctx?.library
 
 	const handleChange = useCallback(
@@ -25,63 +24,56 @@ export default function LibraryPatternRadioGroup() {
 		[form, isCreating],
 	)
 
-	// Note: if this section ever becomes more than library pattern, restore the section locale keys
+	// TODO: metadata options can live here once implemented, prob
+	// do sm like if organization_mode = metadata, hide filesystem pattern?
+	// otherwise if organization_mode = filesystem then show it?
+	// or maybe disable? idk
+
 	return (
-		<div className="gap-6 flex flex-col">
-			<div>
-				<Heading size="sm">{t(getOptionKey('label'))}</Heading>
-				<Text size="sm" variant="muted">
-					{t(getOptionKey('description'))}
-				</Text>
-			</div>
+		<NewCard label={t(getKey('label'))} description={t(getKey('description'))}>
+			{/*<NewCard.Row
+				label="Mode"
+				// The library will be constructed based on how the files are organized
+				description="The library will be constructed from the metadata of books within it"
+			>
+				<div>
+					<Select value="Metadata" onValueChange={() => {}}>
+						<Select.Trigger size="sm">
+							<Select.Value />
+						</Select.Trigger>
+						<Select.Content>
+							{['Metadata', 'Filesystem'].map((mode) => (
+								<Select.Item key={mode} value={mode}>
+									{mode}
+								</Select.Item>
+							))}
+						</Select.Content>
+					</Select>
+				</div>
+			</NewCard.Row>*/}
 
-			<div className="gap-y-4 flex flex-col">
-				<input type="hidden" {...form.register('libraryPattern')} />
-
-				<RadioGroup
-					value={libraryPattern}
-					onValueChange={handleChange}
-					className="mt-1 sm:flex-row flex flex-col"
-					disabled={!isCreating}
-					title={isCreating ? undefined : t(getKey('section.disabled'))}
-					defaultValue="SERIES_BASED"
-				>
-					<RadioGroup.CardItem
-						label={t(getOptionKey('collectionPriority.label'))}
-						description={t(getOptionKey('collectionPriority.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={isCollectionBasedSelected}
-						value={LibraryPattern.CollectionBased}
-						className="md:w-1/2"
-					/>
-
-					<RadioGroup.CardItem
-						label={t(getOptionKey('seriesPriority.label'))}
-						description={t(getOptionKey('seriesPriority.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={!isCollectionBasedSelected}
-						value="SERIES_BASED"
-						className="md:w-1/2"
-					/>
-				</RadioGroup>
-
-				{isCreating && (
-					<Text size="xs" variant="muted">
-						{t(getKey('section.docs.0'))}{' '}
-						<Link
-							target="_blank"
-							href="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns"
-						>
-							{t(getKey('section.docs.1'))}
-						</Link>{' '}
-						{t(getKey('section.docs.2'))} {<b>{t(getKey('section.docs.3'))}</b>}
-					</Text>
-				)}
-			</div>
-		</div>
+			<NewCard.Row
+				label={t(getKey('filesystemPattern.label'))}
+				description={t(getKey(`filesystemPattern.${libraryPattern}.description`))}
+			>
+				<div>
+					<Select value={libraryPattern} onValueChange={handleChange}>
+						<Select.Trigger size="sm">
+							<Select.Value />
+						</Select.Trigger>
+						<Select.Content>
+							{[LibraryPattern.CollectionBased, LibraryPattern.SeriesBased].map((pattern) => (
+								<Select.Item key={pattern} value={pattern}>
+									{t(getKey(`filesystemPattern.${pattern}.label`))}
+								</Select.Item>
+							))}
+						</Select.Content>
+					</Select>
+				</div>
+			</NewCard.Row>
+		</NewCard>
 	)
 }
 
-const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.libraryPattern'
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.organization'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
-const getOptionKey = (key: string) => getKey(`options.${key}`)

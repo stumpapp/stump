@@ -37,7 +37,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 
 	const accentColor = usePalette('muted')
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { activeItems, cancel } = useDownloadQueue({ serverId })
 
 	const activeDownload = activeItems.find((item) => item.bookId === bookId)
@@ -163,10 +163,10 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 
 	const iconComponent = isCompleted ? Check : isActive ? X : ArrowDown
 	const label = isCompleted
-		? t('common.downloaded')
+		? translate('shared.common.downloaded')
 		: isActive
-			? t('common.cancel')
-			: t('common.download')
+			? translate('shared.common.cancel')
+			: translate('shared.common.download')
 
 	return (
 		<Animated.View exiting={isCompleted ? FadeOut.duration(300) : undefined}>

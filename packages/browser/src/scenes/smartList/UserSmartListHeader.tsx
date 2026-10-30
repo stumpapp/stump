@@ -1,8 +1,8 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Book, Layers, Library } from 'lucide-react'
 import { useLocation } from 'react-router'
 
 import { EntityHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useSmartListContext } from './context'
@@ -12,7 +12,7 @@ const LOCALE_BASE_KEY = 'userSmartListScene.navigation'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function UserSmartListHeader() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const location = useLocation()
 	const paths = usePaths()
 	const {
@@ -53,6 +53,7 @@ export default function UserSmartListHeader() {
 	return (
 		<EntityHeader
 			name={name}
+			parents={[{ label: translate('shared.common.smartLists'), to: paths.smartLists() }]}
 			tabs={tabs}
 			stats={resolvedStats}
 			settingsLink={paths.smartListSettings(id)}

@@ -1,5 +1,4 @@
 import { CheckBox, DatePicker, Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { endOfDay } from 'date-fns'
 import { useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
@@ -13,6 +12,7 @@ import {
 	isNumberField,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 
@@ -27,7 +27,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 	const { errors } = useFormState({ control: form.control })
 

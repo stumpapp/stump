@@ -91,7 +91,7 @@ impl MigrationTrait for Migration {
 
 		manager
 			.get_connection()
-			.execute(manager.get_database_backend().build(&backfill))
+			.execute_raw(manager.get_database_backend().build(&backfill))
 			.await?;
 
 		manager
@@ -189,7 +189,7 @@ impl MigrationTrait for Migration {
 
 		manager
 			.get_connection()
-			.execute(manager.get_database_backend().build(&backfill))
+			.execute_raw(manager.get_database_backend().build(&backfill))
 			.await?;
 
 		manager

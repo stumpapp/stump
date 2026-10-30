@@ -8,13 +8,13 @@ type Props = {
 }
 
 export default function FooterControlsSelect({ variant, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<Picker
 			options={[
-				{ label: t(getKey('images')), value: 'images' },
-				{ label: t(getKey('slider')), value: 'slider' },
+				{ label: translate(getKey('images')), value: 'images' },
+				{ label: translate(getKey('slider')), value: 'slider' },
 			]}
 			value={variant}
 			onValueChange={onChange}
@@ -22,5 +22,5 @@ export default function FooterControlsSelect({ variant, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.footerControls'
+const LOCALE_BASE = 'shared.readerSettings.footerControls'
 const getKey = (variant: FooterControls) => `${LOCALE_BASE}.options.${variant}`

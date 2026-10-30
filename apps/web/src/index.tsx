@@ -10,6 +10,7 @@ function registerServiceWorkerWhenIdle() {
 	const doRegister = () => registerSW()
 
 	if (document.readyState === 'complete') {
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		'requestIdleCallback' in globalThis
 			? globalThis.requestIdleCallback(doRegister)
 			: globalThis.setTimeout(doRegister, 0)
@@ -19,6 +20,7 @@ function registerServiceWorkerWhenIdle() {
 	globalThis.addEventListener(
 		'load',
 		() => {
+			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 			'requestIdleCallback' in globalThis
 				? globalThis.requestIdleCallback(doRegister)
 				: globalThis.setTimeout(doRegister, 0)

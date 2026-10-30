@@ -16,8 +16,14 @@ use crate::{
 	},
 };
 
-use super::{age_restriction, user_preferences};
+use super::{
+	age_restriction, api_key, book_club_invitation, book_club_member, bookmark,
+	emailer_send_record, last_library_visit, library_access, media_annotation,
+	reading_list, reading_session, review, session, smart_list, smart_list_access_rule,
+	user_login_activity, user_preferences,
+};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserModel")]
 #[sea_orm(table_name = "users")]
@@ -54,6 +60,63 @@ pub struct Model {
 	/// a comma-separated list of OIDC groups assigned to this user
 	#[sea_orm(column_type = "Text", nullable)]
 	pub oidc_groups: Option<String>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub age_restriction: HasOne<age_restriction::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub api_keys: HasMany<api_key::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_invitations: HasMany<book_club_invitation::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub book_club_members: HasMany<book_club_member::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub bookmarks: HasMany<bookmark::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub emailer_send_records: HasMany<emailer_send_record::Entity>,
+	#[sea_orm(has_many, relation_enum = "AccessLibraries")]
+	#[graphql(skip)]
+	pub library_access_records: HasMany<library_access::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub last_library_visits: HasMany<last_library_visit::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub media_annotations: HasMany<media_annotation::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reading_lists: HasMany<reading_list::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reading_sessions: HasMany<reading_session::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub reviews: HasMany<review::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub sessions: HasMany<session::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub smart_list_access_rules: HasMany<smart_list_access_rule::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub smart_lists: HasMany<smart_list::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub login_activities: HasMany<user_login_activity::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "user_preferences_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub preferences: BelongsTo<Option<user_preferences::Entity>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -282,152 +345,6 @@ mod tests {
 pub struct UserIdentSelect {
 	pub id: String,
 	pub username: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_one = "super::age_restriction::Entity")]
-	AgeRestriction,
-	#[sea_orm(has_many = "super::api_key::Entity")]
-	ApiKey,
-	#[sea_orm(has_many = "super::book_club_invitation::Entity")]
-	BookClubInvitation,
-	#[sea_orm(has_many = "super::book_club_member::Entity")]
-	BookClubMember,
-	#[sea_orm(has_many = "super::bookmark::Entity")]
-	Bookmark,
-	#[sea_orm(has_many = "super::emailer_send_record::Entity")]
-	EmailerSendRecord,
-	#[sea_orm(has_many = "super::library_access::Entity")]
-	AccessLibraries,
-	#[sea_orm(has_many = "super::last_library_visit::Entity")]
-	LastLibraryVisit,
-	#[sea_orm(has_many = "super::media_annotation::Entity")]
-	MediaAnnotation,
-	#[sea_orm(has_many = "super::reading_list::Entity")]
-	ReadingList,
-	#[sea_orm(has_many = "super::reading_session::Entity")]
-	ReadingSession,
-	#[sea_orm(has_many = "super::review::Entity")]
-	Review,
-	#[sea_orm(has_many = "super::session::Entity")]
-	Session,
-	#[sea_orm(has_many = "super::smart_list_access_rule::Entity")]
-	SmartListAccessRule,
-	#[sea_orm(has_many = "super::smart_list::Entity")]
-	SmartList,
-	#[sea_orm(has_many = "super::user_login_activity::Entity")]
-	UserLoginActivity,
-	#[sea_orm(
-		belongs_to = "super::user_preferences::Entity",
-		from = "Column::UserPreferencesId",
-		to = "super::user_preferences::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	UserPreferences,
-}
-
-impl Related<super::age_restriction::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::AgeRestriction.def()
-	}
-}
-
-impl Related<super::api_key::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ApiKey.def()
-	}
-}
-
-impl Related<super::book_club_invitation::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubInvitation.def()
-	}
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMember.def()
-	}
-}
-
-impl Related<super::bookmark::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Bookmark.def()
-	}
-}
-
-impl Related<super::emailer_send_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::EmailerSendRecord.def()
-	}
-}
-
-impl Related<super::library_access::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::AccessLibraries.def()
-	}
-}
-
-impl Related<super::last_library_visit::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::LastLibraryVisit.def()
-	}
-}
-
-impl Related<super::media_annotation::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MediaAnnotation.def()
-	}
-}
-
-impl Related<super::reading_list::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingList.def()
-	}
-}
-
-impl Related<super::reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingSession.def()
-	}
-}
-
-impl Related<super::review::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Review.def()
-	}
-}
-
-impl Related<super::session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Session.def()
-	}
-}
-
-impl Related<super::smart_list_access_rule::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SmartListAccessRule.def()
-	}
-}
-
-impl Related<super::smart_list::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SmartList.def()
-	}
-}
-
-impl Related<super::user_login_activity::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::UserLoginActivity.def()
-	}
-}
-
-impl Related<super::user_preferences::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::UserPreferences.def()
-	}
 }
 
 #[async_trait]

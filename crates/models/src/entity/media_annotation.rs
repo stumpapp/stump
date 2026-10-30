@@ -3,7 +3,10 @@ use sea_orm::{entity::prelude::*, ActiveValue};
 
 use crate::shared::readium::ReadiumLocator;
 
+use super::{media, reading_session, user};
+
 /// A media annotation represents a highlight and/or note
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "MediaAnnotationModel")]
 #[sea_orm(table_name = "media_annotations")]
@@ -20,38 +23,36 @@ pub struct Model {
 	pub user_id: String,
 	pub created_at: DateTimeUtc,
 	pub updated_at: DateTimeUtc,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
+	/// The ID of the session which this annotation was created in. Realistically, when using a Stump
+	/// reader this should always be set
+	pub session_id: Option<i32>,
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::MediaId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "media_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
+	#[graphql(skip)]
+	pub media: BelongsTo<media::Entity>,
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "session_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "SetNull"
+	)]
+	#[graphql(skip)]
+	pub reading_session: BelongsTo<Option<reading_session::Entity>>,
 }
 
 impl Model {

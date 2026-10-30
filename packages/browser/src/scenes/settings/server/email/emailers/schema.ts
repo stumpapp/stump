@@ -1,4 +1,4 @@
-import { EmailerListItemFragment } from '@stump/graphql'
+import { CreateOrUpdateEmailerFormFragment } from '@stump/graphql'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
@@ -32,7 +32,7 @@ export const createSchema = (
 	})
 export type CreateOrUpdateEmailerSchema = z.infer<ReturnType<typeof createSchema>>
 
-export const formDefaults = (emailer?: EmailerListItemFragment) => ({
+export const formDefaults = (emailer?: CreateOrUpdateEmailerFormFragment | null) => ({
 	isPrimary: emailer?.isPrimary || true,
 	maxAttachmentSizeBytes: emailer?.maxAttachmentSizeBytes ?? null,
 	name: emailer?.name,

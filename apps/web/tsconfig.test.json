@@ -10,8 +10,8 @@
 		"skipLibCheck": true,
 		"types": ["node"],
 		"paths": {
-			"@stump/graphql": ["../../packages/graphql/src/index.ts"],
-		},
+			"@stump/graphql": ["../../packages/graphql/src/index.ts"]
+		}
 	},
-	"include": ["tests/**/*", "playwright.config.ts"],
+	"include": ["tests/**/*", "playwright.config.ts"]
 }

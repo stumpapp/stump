@@ -43,6 +43,7 @@ type RowProps = Omit<ViewProps, 'children'> & {
 	iconBackgroundColor?: string
 	disabled?: boolean
 	renderDivider?: boolean
+	onPress?: () => void
 } & ({ value?: string | number; children?: never } | { children?: ReactNode; value?: never })
 
 type StatGroupProps = ViewProps
@@ -107,6 +108,8 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.BaseRowComponent = BaseRowComponent
+Card.Footer = FooterRow
 Card.InputRow = InputRow
 Card.LongRow = LongRow
 Card.RowDivider = Divider
@@ -158,6 +161,14 @@ function Row({ value, children, ...props }: RowProps) {
 			{value != undefined && (
 				<Text className="text-lg text-foreground-muted flex-1 text-right">{value}</Text>
 			)}
+			{children}
+		</BaseRowComponent>
+	)
+}
+
+function FooterRow({ children, className, ...props }: Omit<RowProps, 'value'>) {
+	return (
+		<BaseRowComponent className={cn('bg-black/5 dark:bg-white/10', className)} {...props}>
 			{children}
 		</BaseRowComponent>
 	)
@@ -334,9 +345,7 @@ function BaseRowComponent({
 	onPress,
 	disabled,
 	...props
-}: RowProps & {
-	onPress?: () => void
-}) {
+}: RowProps) {
 	const Container = onPress ? Pressable : View
 	return (
 		// We shift up by 1px to hide the first divider in a list

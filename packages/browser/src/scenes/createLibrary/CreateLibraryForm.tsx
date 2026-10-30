@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, cn, Form } from '@stump/components'
+import { Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ClipboardCheck, FolderOpen, Image, ScanSearch } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
-import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
 import {
 	buildSchema,
@@ -20,8 +20,9 @@ import {
 	ThumbnailConfig,
 } from '@/components/library/createOrUpdate/sections'
 import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
-import { useSteppedFormContext } from '@/components/steppedForm'
+import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import LibraryReview from './LibraryReview'
 import ScanAfterPersist from './ScanAfterPersist'
@@ -36,8 +37,8 @@ type Props = {
 // in settings right after so not a huge deal, but makes sense to have here eventually
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
-	const { currentStep, setStep } = useSteppedFormContext()
 	const { checkPermission } = useAppContext()
+	const { t } = useTranslate()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -60,101 +61,54 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 	 */
 	const [formPath] = useWatch({ control: form.control, name: ['path'] })
 
-	/**
-	 * A callback to handle changing the form step. This will validate the current step
-	 * before moving to the next step.
-	 */
-	const handleChangeStep = useCallback(
-		async (nextStep: number) => {
-			let isValid = false
-
-			switch (currentStep) {
-				case 1:
-					isValid = await form.trigger(['name', 'description', 'path', 'tags'])
-					break
-				case 2:
-					isValid = await form.trigger([
-						'libraryPattern',
-						'ignoreRules',
-						'convertRarToZip',
-						'hardDeleteConversions',
-						'watch',
-					])
-					break
-				case 3:
-					// TODO: do I need to validate children?
-					isValid = await form.trigger(['thumbnailConfig'])
-					break
-				default:
-					break
-			}
-
-			if (isValid) {
-				setStep(nextStep)
-			}
-		},
-		[form, currentStep, setStep],
-	)
-
-	/**
-	 * Render the current step of the form
-	 */
-	const renderStep = () => {
-		switch (currentStep) {
-			case 1:
-				return (
-					<>
-						<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
-						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button
-								type="button"
-								className="md:w-auto w-full"
-								onClick={() => handleChangeStep(2)}
-							>
-								Next step
-							</Button>
-						</div>
-					</>
-				)
-			case 2:
-				return (
+	const steps = useMemo<SteppedFormStep[]>(
+		() => [
+			{
+				key: 'basics',
+				icon: FolderOpen,
+				fields: ['name', 'description', 'path', 'tags'],
+				render: () => <BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />,
+			},
+			{
+				key: 'scanning',
+				icon: ScanSearch,
+				fields: [
+					'libraryPattern',
+					'ignoreRules',
+					'convertRarToZip',
+					'hardDeleteConversions',
+					'watch',
+				],
+				render: () => (
 					<>
 						<LibraryPatternSection />
 						<DefaultLibraryView />
 						<ScannerOptInFeatures />
 						<FileConversionOptions />
 						<IgnoreRulesConfig />
-						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
-							</Button>
-						</div>
 					</>
-				)
-			case 3:
-				return (
-					<>
-						<ThumbnailConfig />
-						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button
-								className="md:w-auto w-full"
-								onClick={() => handleChangeStep(4)}
-								type="button"
-							>
-								Continue to review
-							</Button>
-						</div>
-					</>
-				)
-			default:
-				return (
+				),
+			},
+			{
+				key: 'thumbnails',
+				icon: Image,
+				fields: ['thumbnailConfig'],
+				render: () => <ThumbnailConfig />,
+			},
+			{
+				key: 'review',
+				icon: ClipboardCheck,
+				isReview: true,
+				render: () => (
 					<>
 						<LibraryReview />
 						<ScanAfterPersist />
 					</>
-				)
-		}
-	}
+				),
+			},
+		],
+		[],
+	)
 
 	/**
 	 * Prevent a submit event triggering when the enter key is pressed on an input
@@ -165,8 +119,6 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		}
 	}
 
-	// Note: The submit button is always rendered because I noticed that conditional rendering
-	// causes the form to trigger a submit event. FYI
 	return (
 		<>
 			{checkPermission(UserPermission.FileExplorer) && (
@@ -181,25 +133,21 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					}}
 				/>
 			)}
-			<Form form={form} onSubmit={onSubmit} id="createLibraryForm" onKeyDown={handleKeyDown}>
-				<ContentContainer className="mt-0">
-					{renderStep()}
 
-					<div
-						className={cn('mt-6 md:max-w-sm flex w-full', {
-							'invisible hidden': currentStep < 4,
-						})}
-					>
-						<Button
-							type="submit"
-							form="createLibraryForm"
-							className="md:w-auto w-full"
-							isLoading={isLoading}
-						>
-							Create library
-						</Button>
-					</div>
-				</ContentContainer>
+			<Form
+				form={form}
+				onSubmit={onSubmit}
+				id="createLibraryForm"
+				className="flex flex-1 flex-col"
+				fieldsetClassName="flex-1"
+				onKeyDown={handleKeyDown}
+			>
+				<SteppedForm
+					localeBase="createLibraryScene"
+					steps={steps}
+					submitLabel={t('createLibraryScene.form.buttons.confirm')}
+					isSubmitting={isLoading}
+				/>
 			</Form>
 		</>
 	)

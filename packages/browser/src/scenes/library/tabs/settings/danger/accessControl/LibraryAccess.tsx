@@ -1,12 +1,12 @@
 import { useGraphQLMutation, useSuspenseGraphQLQueries } from '@stump/client'
 import { Button, ComboBox, ConfirmationModal, Heading, Text, usePrevious } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useLibraryContext } from '../../../../context'
@@ -48,7 +48,7 @@ const mutation = graphql(`
 export default function LibraryAccess() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const [
 		{
@@ -150,7 +150,7 @@ export default function LibraryAccess() {
 
 			<div>
 				<Button disabled={!isDifferentUsers || !isSameLibrary} onClick={onSaveChanges}>
-					{t('common.saveChanges')}
+					{translate('shared.common.saveChanges')}
 				</Button>
 			</div>
 

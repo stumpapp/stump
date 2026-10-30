@@ -7,7 +7,8 @@ use models::{
 	shared::enums::UserPermission,
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, ColumnTrait, QueryFilter, QueryOrder, QuerySelect,
+	prelude::*, sea_query::Query, ColumnTrait, ExprTrait, QueryFilter, QueryOrder,
+	QuerySelect,
 };
 
 use crate::{
@@ -163,7 +164,7 @@ impl BookClubDiscussionQuery {
 			.order_by_desc(book_club_discussion_message::Column::IsPinnedMessage)
 			.order_by_desc(book_club_discussion_message::Column::Timestamp);
 
-		let limit = pagination.limit.min(100);
+		let limit = Ord::min(pagination.limit, 100);
 		// Note: In other areas I do more compelx cursoring but since this is a dual order by
 		// this should be fine for now. TODO: Revisit this in future
 		if let Some(after) = &pagination.after {

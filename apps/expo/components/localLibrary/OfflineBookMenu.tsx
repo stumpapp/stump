@@ -15,7 +15,7 @@ type Props = {
 
 export default function OfflineBookMenu({ downloadedFile }: Props) {
 	const router = useRouter()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	const { deleteBook, markAsComplete, clearProgress } = useDownload({
 		serverId: downloadedFile.serverId,
@@ -50,48 +50,57 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 
 	const handleMarkAsComplete = useCallback(() => {
 		SystemAlert.alert(
-			t('bookActions.markAsRead.label'),
-			t('bookActions.markAsRead.confirmation', {
-				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			translate('shared.bookActions.markAsRead.label'),
+			translate('shared.bookActions.markAsRead.confirmation', {
+				// TODO(translations): don't think this will work for all languages
+				bookTitle: downloadedFile.bookName
+					? `'${downloadedFile.bookName}'`
+					: translate('shared.common.thisBook'),
 			}),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
 				{
-					text: t('bookActions.markAsRead.label'),
+					text: translate('shared.bookActions.markAsRead.label'),
 					onPress: () => markAsComplete(downloadedFile.id, downloadedFile.pages),
 				},
 			],
 		)
-	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName, t])
+	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName, translate])
 
 	const handleClearProgress = useCallback(() => {
 		SystemAlert.alert(
-			t('bookActions.clearProgress.label'),
-			t('bookActions.clearProgress.confirmation', {
-				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			translate('shared.bookActions.clearProgress.label'),
+			translate('shared.bookActions.clearProgress.confirmation', {
+				// TODO(translations): don't think this will work for all languages
+				bookTitle: downloadedFile.bookName
+					? `'${downloadedFile.bookName}'`
+					: translate('shared.common.thisBook'),
 			}),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
 				{
-					text: t('common.clear'),
+					text: translate('shared.common.clear'),
 					style: 'destructive',
 					onPress: () => clearProgress(downloadedFile.id),
 				},
 			],
 		)
-	}, [clearProgress, downloadedFile.id, downloadedFile.bookName, t])
+	}, [clearProgress, downloadedFile.id, downloadedFile.bookName, translate])
 
 	const handleDelete = useCallback(() => {
 		SystemAlert.alert(
-			t('bookActions.deleteBook.label'),
-			t('bookActions.deleteBook.confirmation').replace(
+			translate('shared.bookActions.deleteBook.label'),
+			translate('shared.bookActions.deleteBook.confirmation').replace(
 				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+				// TODO(translations): don't think this will work for all languages
+				downloadedFile.bookName
+					? `'${downloadedFile.bookName}'`
+					: translate('shared.common.thisBook'),
 			),
 			[
-				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: translate('shared.common.cancel'), style: 'cancel' },
 				{
-					text: t('common.delete'),
+					text: translate('shared.common.delete'),
 					style: 'destructive',
 					onPress: () => {
 						deleteBook(downloadedFile.id)
@@ -102,7 +111,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 				},
 			],
 		)
-	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, t, router])
+	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, translate, router])
 
 	return Platform.select({
 		ios: (
@@ -111,19 +120,19 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 					<Stack.Toolbar.Menu inline>
 						{!progression.isCompleted && (
 							<Stack.Toolbar.MenuAction icon="book.closed" onPress={handleMarkAsComplete}>
-								{t('bookActions.markAsRead.label')}
+								{translate('shared.bookActions.markAsRead.label')}
 							</Stack.Toolbar.MenuAction>
 						)}
 
 						{progression.hasProgress && (
 							<Stack.Toolbar.MenuAction icon="minus.circle" onPress={handleClearProgress}>
-								{t('bookActions.clearProgress.label')}
+								{translate('shared.bookActions.clearProgress.label')}
 							</Stack.Toolbar.MenuAction>
 						)}
 					</Stack.Toolbar.Menu>
 
 					<Stack.Toolbar.MenuAction icon="trash" destructive onPress={handleDelete}>
-						{t('bookActions.deleteBook.label')}
+						{translate('shared.bookActions.deleteBook.label')}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 			</Stack.Toolbar>

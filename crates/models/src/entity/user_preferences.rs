@@ -9,6 +9,9 @@ use crate::shared::{
 	},
 };
 
+use super::user;
+
+#[sea_orm::model]
 #[derive(
 	Clone, Debug, PartialEq, DeriveEntityModel, SimpleObject, Serialize, Deserialize,
 )]
@@ -28,16 +31,10 @@ pub struct Model {
 	pub app_theme: String,
 	#[sea_orm(column_type = "Text")]
 	pub app_font: SupportedFont,
-	#[sea_orm(column_type = "Text")]
-	pub primary_navigation_mode: String,
-	pub layout_max_width_px: Option<i32>,
 	pub show_query_indicator: bool,
 	pub enable_live_refetch: bool,
 	pub enable_discord_presence: bool,
-	pub enable_compact_display: bool,
 	pub enable_gradients: bool,
-	pub enable_double_sidebar: bool,
-	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
 	pub enable_fancy_animations: bool,
 	pub prefer_accent_color: bool,
@@ -67,18 +64,10 @@ pub struct Model {
 	pub reading_session_grace_period_secs: i64,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_one = "super::user::Entity")]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	#[serde(skip)]
+	pub user: HasOne<user::Entity>,
 }
 
 impl Model {
@@ -110,15 +99,10 @@ impl ActiveModelBehavior for ActiveModel {
 			self.locale = ActiveValue::Set("en".to_string());
 			self.app_theme = ActiveValue::Set("system".to_string());
 			self.app_font = ActiveValue::Set(SupportedFont::default());
-			self.primary_navigation_mode = ActiveValue::Set("SIDEBAR".to_string());
-			self.layout_max_width_px = ActiveValue::Set(Some(1280));
 			self.show_query_indicator = ActiveValue::Set(false);
 			self.enable_live_refetch = ActiveValue::Set(false);
 			self.enable_discord_presence = ActiveValue::Set(false);
-			self.enable_compact_display = ActiveValue::Set(false);
 			self.enable_gradients = ActiveValue::Set(false);
-			self.enable_double_sidebar = ActiveValue::Set(true);
-			self.enable_replace_primary_sidebar = ActiveValue::Set(false);
 			self.enable_hide_scrollbar = ActiveValue::Set(false);
 			self.enable_fancy_animations = ActiveValue::Set(false);
 			self.prefer_accent_color = ActiveValue::Set(false);

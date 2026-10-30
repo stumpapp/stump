@@ -11,7 +11,7 @@ The API is constantly being developed, and while it is generally stable at this 
 
 ### Sessions
 
-Stump uses server-side sessions to authenticate users. These sessions are stored in the database, and are automatically cleaned up within 60 seconds of expiring. You can change the expiry cleanup check interval by setting the `SESSION_EXPIRY_CLEANUP_INTERVAL` environment variable. See the [configuration guide](/docs/guides/configuration/server-config) for more information.
+Stump uses server-side sessions to authenticate users. These sessions are stored in the database, and expired sessions are cleaned up periodically (every 24 hours by default). You can change the cleanup interval via the `expired_session_cleanup_interval` setting or the `STUMP_EXPIRED_SESSION_CLEANUP_INTERVAL` environment variable. See the [configuration guide](/docs/guides/configuration/server-config) for more information.
 
 ### Basic Authentication
 
@@ -56,4 +56,4 @@ If you're new to GraphQL, I would recommend giving the [GraphQL documentation](h
 
 ### Disabling GraphQL Playground
 
-If you don't want to expose the GraphQL Playground, you can disable it by setting the `ENABLE_GRAPHQL_PLAYGROUND` environment variable to `false`. See the [configuration guide](/docs/guides/configuration/server-config) for more information.
+If you don't want to expose the GraphQL Playground, you can disable it by setting the `STUMP_ENABLE_PLAYGROUND` environment variable to `false`. See the [configuration guide](/docs/guides/configuration/server-config) for more information.

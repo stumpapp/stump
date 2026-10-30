@@ -623,6 +623,7 @@ mod tests {
 			media_annotation, reading_session, refresh_token, review, series, session,
 			user, user_login_activity, user_preferences,
 		},
+		services::user::create_user_with_preferences,
 		shared::{
 			api_key::APIKeyPermissions,
 			enums::{
@@ -671,30 +672,9 @@ mod tests {
 		) -> user::Model {
 			let model = user.unwrap_or_else(Self::active_model);
 
-			let user = model.insert(db).await.expect("could not insert user");
-			let user_preferences = user_preferences::ActiveModel {
-				user_id: Set(Some(user.id.clone())),
-				..Default::default()
-			}
-			.insert(db)
-			.await
-			.expect("could not insert user preferences");
-
-			user::Entity::update_many()
-				.col_expr(
-					user::Column::UserPreferencesId,
-					sea_orm::sea_query::Expr::value(Some(user_preferences.id)),
-				)
-				.filter(user::Column::Id.eq(user.id.clone()))
-				.exec(db)
+			create_user_with_preferences(db, model, None)
 				.await
-				.expect("could not update user with preferences id");
-
-			user::Entity::find_by_id(user.id)
-				.one(db)
-				.await
-				.expect("could not find updated user")
-				.expect("user should exist after update")
+				.expect("could not create user with preferences")
 		}
 	}
 

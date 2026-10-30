@@ -1,9 +1,9 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import { forwardRef } from 'react'
+import { forwardRef, Fragment } from 'react'
 
-import { ToolTipContentProps, ToolTipPrimitive, ToolTipProvider } from './primitives'
+import { ToolTipContentProps, TooltipPortal, ToolTipPrimitive, ToolTipProvider } from './primitives'
 
-const toolTipVariants = cva(undefined, {
+const toolTipVariants = cva('bg-popover text-popover-foreground dark:border dark:border-white/5', {
 	defaultVariants: {
 		size: 'sm',
 	},
@@ -22,19 +22,30 @@ export type ToolTipProps = {
 	children: React.ReactNode
 	content: string | React.ReactNode
 	isDisabled?: boolean
+	/**
+	 * whether to render the content in a portal
+	 */
+	portal?: boolean
 } & BaseProps
 
 export const ToolTip = forwardRef<HTMLButtonElement, ToolTipProps>(
-	({ children, content, align, side, size, isDisabled }, ref) => {
+	({ children, content, align, side, size, isDisabled, portal = true }, ref) => {
+		const Container = portal ? TooltipPortal : Fragment
 		return (
 			<ToolTipProvider>
 				<ToolTipPrimitive>
 					<ToolTipPrimitive.Trigger asChild disabled={isDisabled} ref={ref}>
 						{children}
 					</ToolTipPrimitive.Trigger>
-					<ToolTipPrimitive.Content align={align} side={side} className={toolTipVariants({ size })}>
-						{content}
-					</ToolTipPrimitive.Content>
+					<Container>
+						<ToolTipPrimitive.Content
+							align={align}
+							side={side}
+							className={toolTipVariants({ size })}
+						>
+							{content}
+						</ToolTipPrimitive.Content>
+					</Container>
 				</ToolTipPrimitive>
 			</ToolTipProvider>
 		)

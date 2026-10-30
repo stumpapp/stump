@@ -11,7 +11,9 @@ use models::{
 	entity::{media, series, smart_list, smart_list_access_rule, smart_list_view},
 	shared::{enums::AccessRole, image::ImageRef},
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, TransactionTrait};
+use sea_orm::{
+	ColumnTrait, EntityTrait, ExprTrait, QueryFilter, QuerySelect, TransactionTrait,
+};
 use std::collections::HashSet;
 
 #[derive(Debug, SimpleObject)]

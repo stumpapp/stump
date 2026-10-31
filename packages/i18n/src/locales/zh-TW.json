@@ -1514,48 +1514,89 @@
             "updateSuccess": "LLM 設定已更新",
             "connection": {
               "heading": "LLM 連線"
+            },
+            "tagging": {
+              "heading": "自動打標",
+              "description": "啟用並配置基於 LLM 的書庫自動打標",
+              "updateFailed": "更新自動打標配置失敗",
+              "updateSuccess": "自動打標配置已更新",
+              "fields": {
+                "enabled": {
+                  "label": "啟用自動打標"
+                },
+                "autoApplyThreshold": {
+                  "label": "自動套用閾值",
+                  "description": "達到該置信度的建議將自動套用（0 為停用）"
+                },
+                "requestsPerSecond": {
+                  "label": "每秒請求數",
+                  "description": "LLM API 呼叫速率限制"
+                },
+                "concurrency": {
+                  "label": "並發請求數",
+                  "description": "同時發起的 LLM API 呼叫數量"
+                },
+                "dailyRequestLimit": {
+                  "label": "每日請求上限",
+                  "description": "每天最多發起的 LLM 請求數，超出的任務稍後重試"
+                },
+                "batchSize": {
+                  "label": "批大小",
+                  "description": "全庫分析時每次請求包含的書籍數量"
+                },
+                "maxSummaryChars": {
+                  "label": "摘要截斷長度",
+                  "description": "傳送給 LLM 的書籍摘要最大字元數"
+                },
+                "batchScope": {
+                  "label": "處理範圍",
+                  "description": "打標時分析哪些書籍"
+                },
+                "allBooks": "全部書籍",
+                "newBooksOnly": "僅新增書籍"
+              }
             }
           },
           "tagging": {
-            "heading": "AI 標籤",
-            "description": "設定 Stump 如何使用上方的 LLM 為書籍推薦標籤。高信賴度的建議可自動套用，也可手動審核。",
+            "heading": "自動打標",
+            "description": "啟用並配置基於 LLM 的書庫自動打標",
+            "updateFailed": "更新自動打標配置失敗",
+            "updateSuccess": "自動打標配置已更新",
             "fields": {
               "enabled": {
-                "label": "啟用 AI 標籤"
+                "label": "啟用自動打標"
               },
               "autoApplyThreshold": {
-                "label": "自動套用門檻",
-                "description": "當所有建議的信賴度都不低於此值（0-1）時自動套用標籤。留空則一律手動審核。"
+                "label": "自動套用閾值",
+                "description": "達到該置信度的建議將自動套用（0 為停用）"
               },
               "requestsPerSecond": {
                 "label": "每秒請求數",
-                "description": "LLM API 請求的速率限制，支援小數，例如 0.5。"
+                "description": "LLM API 呼叫速率限制"
               },
               "concurrency": {
-                "label": "並發數",
-                "description": "同時進行的 LLM 請求數量。"
+                "label": "並發請求數",
+                "description": "同時發起的 LLM API 呼叫數量"
               },
               "dailyRequestLimit": {
                 "label": "每日請求上限",
-                "description": "每天最多發送的 LLM 請求數，超出部分由「AI 標籤重試」工作稍後重試。"
+                "description": "每天最多發起的 LLM 請求數，超出的任務稍後重試"
               },
               "batchSize": {
-                "label": "分析批次大小",
-                "description": "全庫標籤分析時每次請求包含的書籍數量。"
+                "label": "批大小",
+                "description": "全庫分析時每次請求包含的書籍數量"
               },
               "maxSummaryChars": {
-                "label": "簡介最大長度",
-                "description": "送出給 LLM 前，書籍簡介會被截斷至此字元數。"
+                "label": "摘要截斷長度",
+                "description": "傳送給 LLM 的書籍摘要最大字元數"
               },
               "batchScope": {
-                "label": "標籤範圍",
-                "description": "自動標籤時考慮哪些書籍。",
-                "newBooksOnly": "僅新書籍",
-                "allBooks": "所有書籍"
-              }
-            },
-            "updateSuccess": "AI 標籤設定已更新",
-            "updateFailed": "更新 AI 標籤設定失敗"
+                "label": "處理範圍",
+                "description": "打標時分析哪些書籍"
+              },
+              "allBooks": "全部書籍",
+              "newBooksOnly": "僅新增書籍"
+            }
           }
         }
       },

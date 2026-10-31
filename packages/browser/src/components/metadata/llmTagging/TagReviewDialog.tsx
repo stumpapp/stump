@@ -12,7 +12,7 @@ const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
 export default function TagReviewDialog() {
 	const { t } = useTranslate()
-	const { isOpen, records, currentRecordIndex, selectedTags, close, prevRecord, toggleTag } =
+	const { isOpen, records, currentRecordIndex, selectedTags, close, prevRecord, nextRecord, toggleTag } =
 		useLlmTagReviewStore()
 	const { acceptSelected, rejectCurrent, isPending, hasSelection, selectedCount } =
 		useLlmTagActions()
@@ -93,7 +93,7 @@ export default function TagReviewDialog() {
 								variant="ghost"
 								size="sm"
 								disabled={!hasNext || isPending}
-								onClick={() => (hasNext ? undefined : close())}
+								onClick={() => (hasNext ? nextRecord() : close())}
 							>
 								{t(getKey('next'))}
 								<ChevronRight data-icon="inline-end" />

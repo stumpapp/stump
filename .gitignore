@@ -57,3 +57,6 @@ tarpaulin-report.html
 
 # PDFium runtime library (downloaded separately)
 vendor/pdfium/
+
+# Local dev launch script (machine-specific VS paths)
+/start-server.ps1

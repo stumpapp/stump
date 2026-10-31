@@ -2349,48 +2349,89 @@
             "updateSuccess": "LLM 配置已更新",
             "connection": {
               "heading": "LLM 连接"
+            },
+            "tagging": {
+              "heading": "自动打标",
+              "description": "启用并配置基于 LLM 的书库自动打标",
+              "updateFailed": "更新自动打标配置失败",
+              "updateSuccess": "自动打标配置已更新",
+              "fields": {
+                "enabled": {
+                  "label": "启用自动打标"
+                },
+                "autoApplyThreshold": {
+                  "label": "自动应用阈值",
+                  "description": "达到该置信度的建议将自动应用（0 为禁用）"
+                },
+                "requestsPerSecond": {
+                  "label": "每秒请求数",
+                  "description": "LLM API 调用速率限制"
+                },
+                "concurrency": {
+                  "label": "并发请求数",
+                  "description": "同时发起的 LLM API 调用数量"
+                },
+                "dailyRequestLimit": {
+                  "label": "每日请求上限",
+                  "description": "每天最多发起的 LLM 请求数，超出的任务稍后重试"
+                },
+                "batchSize": {
+                  "label": "批大小",
+                  "description": "全库分析时每次请求包含的书籍数量"
+                },
+                "maxSummaryChars": {
+                  "label": "摘要截断长度",
+                  "description": "发送给 LLM 的书籍摘要最大字符数"
+                },
+                "batchScope": {
+                  "label": "处理范围",
+                  "description": "打标时分析哪些书籍"
+                },
+                "allBooks": "全部书籍",
+                "newBooksOnly": "仅新增书籍"
+              }
             }
           },
           "tagging": {
-            "heading": "AI 打标",
-            "description": "配置 Stump 如何使用上方的 LLM 为书籍推荐标签。高置信度的建议可自动应用，也可手动审核。",
+            "heading": "自动打标",
+            "description": "启用并配置基于 LLM 的书库自动打标",
+            "updateFailed": "更新自动打标配置失败",
+            "updateSuccess": "自动打标配置已更新",
             "fields": {
               "enabled": {
-                "label": "启用 AI 打标"
+                "label": "启用自动打标"
               },
               "autoApplyThreshold": {
                 "label": "自动应用阈值",
-                "description": "当所有建议的置信度都不低于该值（0-1）时自动应用标签。留空则始终手动审核。"
+                "description": "达到该置信度的建议将自动应用（0 为禁用）"
               },
               "requestsPerSecond": {
                 "label": "每秒请求数",
-                "description": "LLM API 请求的速率限制，支持小数，如 0.5。"
+                "description": "LLM API 调用速率限制"
               },
               "concurrency": {
-                "label": "并发数",
-                "description": "同时进行的 LLM 请求数量。"
+                "label": "并发请求数",
+                "description": "同时发起的 LLM API 调用数量"
               },
               "dailyRequestLimit": {
                 "label": "每日请求上限",
-                "description": "每天最多发起的 LLM 请求数，超出部分由“AI 标签重试”任务稍后重试。"
+                "description": "每天最多发起的 LLM 请求数，超出的任务稍后重试"
               },
               "batchSize": {
-                "label": "分析批次大小",
-                "description": "全库标签分析时每次请求包含的书籍数量。"
+                "label": "批大小",
+                "description": "全库分析时每次请求包含的书籍数量"
               },
               "maxSummaryChars": {
-                "label": "简介最大长度",
-                "description": "发送给 LLM 前，书籍简介会被截断到该字符数。"
+                "label": "摘要截断长度",
+                "description": "发送给 LLM 的书籍摘要最大字符数"
               },
               "batchScope": {
-                "label": "打标范围",
-                "description": "自动打标时考虑哪些书籍。",
-                "newBooksOnly": "仅新书籍",
-                "allBooks": "所有书籍"
-              }
-            },
-            "updateSuccess": "AI 打标配置已更新",
-            "updateFailed": "更新 AI 打标配置失败"
+                "label": "处理范围",
+                "description": "打标时分析哪些书籍"
+              },
+              "allBooks": "全部书籍",
+              "newBooksOnly": "仅新增书籍"
+            }
           }
         }
       },

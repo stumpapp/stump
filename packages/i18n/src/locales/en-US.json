@@ -2440,48 +2440,89 @@
             "updateSuccess": "LLM configuration updated",
             "connection": {
               "heading": "LLM Connection"
+            },
+            "tagging": {
+              "heading": "Automatic tagging",
+              "description": "Enable and configure LLM-powered tagging for books in your libraries",
+              "updateFailed": "Failed to update automatic tagging configuration",
+              "updateSuccess": "Automatic tagging configuration updated",
+              "fields": {
+                "enabled": {
+                  "label": "Enable automatic tagging"
+                },
+                "autoApplyThreshold": {
+                  "label": "Auto-apply threshold",
+                  "description": "Automatically apply suggestions whose confidence meets this threshold (0 to disable)"
+                },
+                "requestsPerSecond": {
+                  "label": "Requests per second",
+                  "description": "Rate limit for LLM API calls"
+                },
+                "concurrency": {
+                  "label": "Concurrent requests",
+                  "description": "Number of parallel LLM API calls"
+                },
+                "dailyRequestLimit": {
+                  "label": "Daily request limit",
+                  "description": "Max LLM requests per day; excess tasks are retried later"
+                },
+                "batchSize": {
+                  "label": "Batch size",
+                  "description": "Number of books per LLM request in library analysis"
+                },
+                "maxSummaryChars": {
+                  "label": "Summary truncation length",
+                  "description": "Max characters of book summary sent to the LLM"
+                },
+                "batchScope": {
+                  "label": "Scope",
+                  "description": "Which books to analyze when tagging"
+                },
+                "allBooks": "All books",
+                "newBooksOnly": "New books only"
+              }
             }
           },
           "tagging": {
-            "heading": "AI Tagging",
-            "description": "Configure how Stump uses the LLM above to suggest tags for your books. Confident suggestions can be applied automatically, or reviewed manually.",
+            "heading": "Automatic tagging",
+            "description": "Enable and configure LLM-powered tagging for books in your libraries",
+            "updateFailed": "Failed to update automatic tagging configuration",
+            "updateSuccess": "Automatic tagging configuration updated",
             "fields": {
               "enabled": {
-                "label": "Enable AI tagging"
+                "label": "Enable automatic tagging"
               },
               "autoApplyThreshold": {
                 "label": "Auto-apply threshold",
-                "description": "Books whose suggestions all meet or exceed this confidence (0-1) are tagged automatically. Leave empty to always review manually."
+                "description": "Automatically apply suggestions whose confidence meets this threshold (0 to disable)"
               },
               "requestsPerSecond": {
                 "label": "Requests per second",
-                "description": "Rate limit for LLM API requests. Supports fractions, e.g. 0.5."
+                "description": "Rate limit for LLM API calls"
               },
               "concurrency": {
-                "label": "Concurrency",
-                "description": "How many LLM requests may run at the same time."
+                "label": "Concurrent requests",
+                "description": "Number of parallel LLM API calls"
               },
               "dailyRequestLimit": {
                 "label": "Daily request limit",
-                "description": "Maximum LLM requests per day. Remaining work is retried later by the LLM tag retry job."
+                "description": "Max LLM requests per day; excess tasks are retried later"
               },
               "batchSize": {
-                "label": "Analysis batch size",
-                "description": "Books per request during library-wide tag analysis."
+                "label": "Batch size",
+                "description": "Number of books per LLM request in library analysis"
               },
               "maxSummaryChars": {
-                "label": "Max summary length",
-                "description": "Book summaries are truncated to this many characters before being sent."
+                "label": "Summary truncation length",
+                "description": "Max characters of book summary sent to the LLM"
               },
               "batchScope": {
-                "label": "Tagging scope",
-                "description": "Which books automatic tagging should consider.",
-                "newBooksOnly": "New books only",
-                "allBooks": "All books"
-              }
-            },
-            "updateSuccess": "AI tagging configuration updated",
-            "updateFailed": "Failed to update AI tagging configuration"
+                "label": "Scope",
+                "description": "Which books to analyze when tagging"
+              },
+              "allBooks": "All books",
+              "newBooksOnly": "New books only"
+            }
           }
         }
       },

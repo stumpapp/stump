@@ -1549,6 +1549,10 @@
                   "description": "傳送給 LLM 的書籍摘要最大字元數"
                 },
                 "batchScope": {
+                  "newBooksOnly": "僅新增書籍",
+                  "allBooks": "全部書籍",
+                  "NewBooksOnly": "僅新增書籍",
+                  "AllBooks": "全部書籍",
                   "label": "處理範圍",
                   "description": "打標時分析哪些書籍"
                 },
@@ -1591,6 +1595,10 @@
                 "description": "傳送給 LLM 的書籍摘要最大字元數"
               },
               "batchScope": {
+                "newBooksOnly": "僅新增書籍",
+                "allBooks": "全部書籍",
+                "NewBooksOnly": "僅新增書籍",
+                "AllBooks": "全部書籍",
                 "label": "處理範圍",
                 "description": "打標時分析哪些書籍"
               },

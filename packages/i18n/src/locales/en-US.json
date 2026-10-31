@@ -2475,6 +2475,10 @@
                   "description": "Max characters of book summary sent to the LLM"
                 },
                 "batchScope": {
+                  "newBooksOnly": "New books only",
+                  "allBooks": "All books",
+                  "NewBooksOnly": "New books only",
+                  "AllBooks": "All books",
                   "label": "Scope",
                   "description": "Which books to analyze when tagging"
                 },
@@ -2517,6 +2521,10 @@
                 "description": "Max characters of book summary sent to the LLM"
               },
               "batchScope": {
+                "newBooksOnly": "New books only",
+                "allBooks": "All books",
+                "NewBooksOnly": "New books only",
+                "AllBooks": "All books",
                 "label": "Scope",
                 "description": "Which books to analyze when tagging"
               },

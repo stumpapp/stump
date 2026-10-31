@@ -2384,6 +2384,10 @@
                   "description": "发送给 LLM 的书籍摘要最大字符数"
                 },
                 "batchScope": {
+                  "newBooksOnly": "仅新增书籍",
+                  "allBooks": "全部书籍",
+                  "NewBooksOnly": "仅新增书籍",
+                  "AllBooks": "全部书籍",
                   "label": "处理范围",
                   "description": "打标时分析哪些书籍"
                 },
@@ -2426,6 +2430,10 @@
                 "description": "发送给 LLM 的书籍摘要最大字符数"
               },
               "batchScope": {
+                "newBooksOnly": "仅新增书籍",
+                "allBooks": "全部书籍",
+                "NewBooksOnly": "仅新增书籍",
+                "AllBooks": "全部书籍",
                 "label": "处理范围",
                 "description": "打标时分析哪些书籍"
               },

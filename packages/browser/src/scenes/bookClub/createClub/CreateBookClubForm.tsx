@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+﻿import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 // import { useBookClubsQuery } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
@@ -75,7 +75,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	const renderNextButton = (nextStep: number) => (
 		<div className="mt-6 md:max-w-sm flex w-full">
 			<Button className="md:w-auto w-full" onClick={() => handleChangeStep(nextStep)}>
-				Next step
+				{t('shared.common.nextStep')}
 			</Button>
 		</div>
 	)
@@ -121,9 +121,9 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 						'invisible hidden': currentStep < 4,
 					})}
 				>
-					<Button type="submit" className="md:w-auto w-full">
-						Create club
-					</Button>
+				<Button type="submit" className="md:w-auto w-full">
+					{t('createBookClubScene.form.createClub')}
+				</Button>
 				</div>
 			</ContentContainer>
 		</Form>

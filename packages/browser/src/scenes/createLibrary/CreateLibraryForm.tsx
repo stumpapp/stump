@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+﻿import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,6 +22,7 @@ import {
 import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
 import { useSteppedFormContext } from '@/components/steppedForm'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import LibraryReview from './LibraryReview'
 import ScanAfterPersist from './ScanAfterPersist'
@@ -35,6 +36,7 @@ type Props = {
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
 	const { checkPermission } = useAppContext()
+	const { t } = useTranslate()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -108,7 +110,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 								className="md:w-auto w-full"
 								onClick={() => handleChangeStep(2)}
 							>
-								Next step
+								{t('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -123,7 +125,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<IgnoreRulesConfig />
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
+								{t('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -193,7 +195,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 							className="md:w-auto w-full"
 							isLoading={isLoading}
 						>
-							Create library
+							{t('createLibraryScene.form.createLibrary')}
 						</Button>
 					</div>
 				</ContentContainer>

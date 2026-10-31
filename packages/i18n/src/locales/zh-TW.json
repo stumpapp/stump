@@ -442,7 +442,9 @@
         "incognitoMode": "隱身模式",
         "nativePdfViewer": "原生 PDF 檢視器",
         "manage": "管理",
-        "email": "郵件"
+        "email": "郵件",
+        "read": "閱讀",
+        "readAgain": "重新閱讀"
       },
       "toasts": {
         "failedToUpdateCompletion": "更新書籍完成狀態失敗",
@@ -550,7 +552,8 @@
             "name": "名稱",
             "description": "描述"
           }
-        }
+        },
+        "createClub": "建立讀書會"
       },
       "subtitle": "你可以建立僅限少數成員加入的私人讀書會，也可以建立伺服器上的公開讀書會，讓所有人都能加入"
     },
@@ -611,7 +614,8 @@
             "exact": "精確大小",
             "scaleDimension": "按維度縮放"
           }
-        }
+        },
+        "createLibrary": "建立書庫"
       },
       "subtitle": "書庫可用來整理書籍。若想了解書庫的運作方式，請參閱",
       "errors": {
@@ -1990,7 +1994,8 @@
                 },
                 "emptySubtitle": "此郵件服務的歷史為空。它要麼未被使用，要麼歷史已被清除",
                 "notFound": "找不到"
-              }
+              },
+              "createEmailer": "建立郵件發送器"
             },
             "title": "SMTP 郵件服務",
             "description": "你設定用來從 Stump 伺服器寄送電子郵件的郵件服務",
@@ -2242,7 +2247,8 @@
         "deleteDialog": {
           "title": "刪除提供者",
           "description": "確定要刪除 {{providerName}} 嗎？此操作不可撤銷。"
-        }
+        },
+        "description": "配置用於擷取和補充書籍元資料的元資料提供方"
       },
       "server/tags": {
         "helmet": "標籤管理",
@@ -3088,6 +3094,31 @@
       "rawFilters": {
         "show": "顯示 JSON",
         "description": "檢視篩選器的原始 JSON 表示"
+      },
+      "operator": {
+        "placeholder": "操作符",
+        "groups": {
+          "match": "匹配",
+          "equality": "相等比較",
+          "list": "清單"
+        },
+        "ops": {
+          "is": "是",
+          "isNot": "不是",
+          "isAnyOf": "是其中之一",
+          "isNoneOf": "不是其中任何一個",
+          "contains": "包含字串",
+          "excludes": "不包含字串",
+          "eq": "等於",
+          "neq": "不等於",
+          "gt": "大於",
+          "gte": "大於或等於",
+          "lt": "小於",
+          "lte": "小於或等於",
+          "range": "在範圍內",
+          "anyOf": "匹配清單中任意一項",
+          "noneOf": "不匹配清單中任何一項"
+        }
       }
     },
     "createSmartListScene": {
@@ -3125,7 +3156,8 @@
         },
         "buttons": {
           "confirm": "建立清單"
-        }
+        },
+        "createList": "建立清單"
       }
     },
     "createOrUpdateApiKey": {
@@ -3510,6 +3542,12 @@
         "showPastBooks": "顯示以往的書籍",
         "hidePastBooks": "隱藏以往的書籍",
         "createSchedule": "建立閱讀計畫"
+      },
+      "nav": {
+        "home": "主頁",
+        "discussion": "討論",
+        "members": "成員",
+        "settings": "設定"
       }
     },
     "pdfViewer": {
@@ -3642,7 +3680,11 @@
       "files": "檔案",
       "search": "搜尋",
       "preferences": "偏好設定",
-      "global": "全域"
+      "global": "全域",
+      "invalidUrl": "無效的網址",
+      "rename": "重新命名",
+      "xBooks": "{{count}} 本書",
+      "nextStep": "下一步"
     },
     "libraryType": {
       "BOOK": "書籍",

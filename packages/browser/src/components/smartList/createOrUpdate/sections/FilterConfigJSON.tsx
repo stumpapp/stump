@@ -35,7 +35,9 @@ export default function FilterConfigJSON() {
 					</div>
 				</Accordion.Trigger>
 				<Accordion.Content>
-					<Preformatted content={apiFilters} />
+					<div className="max-h-[50vh] overflow-y-auto overflow-x-auto rounded-md border border-border bg-muted/30 p-2">
+						<Preformatted content={apiFilters} />
+					</div>
 				</Accordion.Content>
 			</Accordion.Item>
 		</Accordion>

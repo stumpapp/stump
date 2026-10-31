@@ -3,6 +3,7 @@ import { ButtonOrLink } from '@stump/components'
 import { BookCardFragment } from '@stump/graphql'
 import { useMemo } from 'react'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 import { isEbookReadProgress } from '@/utils/readingProgress'
 
@@ -12,6 +13,7 @@ type Props = {
 
 export default function BookReaderLink({ book }: Props) {
 	const paths = usePaths()
+	const { t } = useTranslate()
 
 	const isReadAgain = useMemo(() => isReadAgainPrompt(book), [book])
 
@@ -19,13 +21,13 @@ export default function BookReaderLink({ book }: Props) {
 	const currentPage = book.readProgress?.page ?? -1
 	const title = useMemo(() => {
 		if (isReadAgain) {
-			return 'Read again'
+			return t('bookOverviewScene.actions.readAgain')
 		} else if (currentPage > 0 || hasEbookProgress) {
-			return 'Continue reading'
+			return t('bookOverviewScene.actions.continueReading')
 		} else {
-			return 'Read'
+			return t('bookOverviewScene.actions.read')
 		}
-	}, [isReadAgain, currentPage, hasEbookProgress])
+	}, [isReadAgain, currentPage, hasEbookProgress, t])
 
 	const readUrl = useMemo(() => {
 		const { id, readProgress, extension } = book

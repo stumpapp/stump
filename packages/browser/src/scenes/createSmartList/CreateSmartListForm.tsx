@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+﻿import { zodResolver } from '@hookform/resolvers/zod'
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
@@ -88,9 +88,9 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 						<AccessSettings isCreating />
 
 						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(2)}>
-								Next step
-							</Button>
+						<Button className="md:w-auto w-full" onClick={() => handleChangeStep(2)}>
+							{t('shared.common.nextStep')}
+						</Button>
 						</div>
 					</>
 				)
@@ -101,7 +101,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
+								{t('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -131,7 +131,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 						className="md:w-auto w-full"
 						isLoading={isLoading}
 					>
-						Create list
+						{t('createSmartListScene.form.createList')}
 					</Button>
 				</div>
 			</ContentContainer>

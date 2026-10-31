@@ -487,7 +487,9 @@
         "incognitoMode": "Incognito mode",
         "nativePdfViewer": "Native PDF viewer",
         "manage": "Manage",
-        "email": "Email"
+        "email": "Email",
+        "read": "Read",
+        "readAgain": "Read again"
       },
       "toasts": {
         "failedToUpdateCompletion": "Failed to update book completion status",
@@ -596,7 +598,8 @@
             "description": "Description"
           }
         },
-        "submit": "Create Book Club"
+        "submit": "Create Book Club",
+        "createClub": "Create club"
       }
     },
     "bookClubSettingsScene": {
@@ -975,7 +978,8 @@
         },
         "buttons": {
           "confirm": "Create Library"
-        }
+        },
+        "createLibrary": "Create library"
       },
       "errors": {
         "createFailed": "Failed to create library"
@@ -1683,6 +1687,31 @@
       "rawFilters": {
         "show": "Show JSON",
         "description": "View the raw JSON representation of the filters"
+      },
+      "operator": {
+        "placeholder": "Operator",
+        "groups": {
+          "match": "Match",
+          "equality": "Equality",
+          "list": "List"
+        },
+        "ops": {
+          "is": "is",
+          "isNot": "is not",
+          "isAnyOf": "is any of",
+          "isNoneOf": "is none of",
+          "contains": "contains string",
+          "excludes": "excludes string",
+          "eq": "equal to",
+          "neq": "not equal to",
+          "gt": "greater than",
+          "gte": "greater than or equal to",
+          "lt": "less than",
+          "lte": "less than or equal to",
+          "range": "in range",
+          "anyOf": "any in list",
+          "noneOf": "none in list"
+        }
       }
     },
     "createSmartListScene": {
@@ -1720,7 +1749,8 @@
         },
         "buttons": {
           "confirm": "Create List"
-        }
+        },
+        "createList": "Create list"
       }
     },
     "createOrUpdateApiKey": {
@@ -2922,7 +2952,8 @@
                 "emptyHeading": "No History",
                 "emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared",
                 "notFound": "Not Found"
-              }
+              },
+              "createEmailer": "Create an emailer"
             }
           },
           "devices": {
@@ -3107,7 +3138,8 @@
         "deleteDialog": {
           "title": "Delete Provider",
           "description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
-        }
+        },
+        "description": "Configure metadata providers used to fetch and enrich book metadata for your libraries"
       },
       "server/tags": {
         "helmet": "Tag Management",
@@ -3515,6 +3547,12 @@
         "showPastBooks": "Show past books",
         "hidePastBooks": "Hide past books",
         "createSchedule": "Create a schedule"
+      },
+      "nav": {
+        "home": "Home",
+        "discussion": "Discussion",
+        "members": "Members",
+        "settings": "Settings"
       }
     },
     "pdfViewer": {
@@ -3672,7 +3710,8 @@
         "day": "Day",
         "dateAndTime": "Date and Time",
         "month": "Month"
-      }
+      },
+      "nextStep": "Next step"
     },
     "libraryType": {
       "BOOK": "Books",

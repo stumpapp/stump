@@ -419,7 +419,9 @@
         "incognitoMode": "隐身模式",
         "nativePdfViewer": "原生 PDF 查看器",
         "manage": "管理",
-        "email": "邮件"
+        "email": "邮件",
+        "read": "阅读",
+        "readAgain": "重新阅读"
       },
       "toasts": {
         "failedToUpdateCompletion": "更新书籍完成状态失败",
@@ -528,7 +530,8 @@
             "description": "描述"
           }
         },
-        "submit": "创建读书俱乐部"
+        "submit": "创建读书俱乐部",
+        "createClub": "创建读书会"
       }
     },
     "bookClubSettingsScene": {
@@ -907,7 +910,8 @@
         },
         "buttons": {
           "confirm": "新建书库"
-        }
+        },
+        "createLibrary": "创建书库"
       },
       "errors": {
         "createFailed": "创建书库失败"
@@ -1573,6 +1577,31 @@
       "rawFilters": {
         "show": "显示 JSON",
         "description": "查看筛选器的原始 JSON 表示"
+      },
+      "operator": {
+        "placeholder": "操作符",
+        "groups": {
+          "match": "匹配",
+          "equality": "相等比较",
+          "list": "列表"
+        },
+        "ops": {
+          "is": "是",
+          "isNot": "不是",
+          "isAnyOf": "是其中之一",
+          "isNoneOf": "不是其中任何一个",
+          "contains": "包含字符串",
+          "excludes": "不包含字符串",
+          "eq": "等于",
+          "neq": "不等于",
+          "gt": "大于",
+          "gte": "大于或等于",
+          "lt": "小于",
+          "lte": "小于或等于",
+          "range": "在范围内",
+          "anyOf": "匹配列表中任意一项",
+          "noneOf": "不匹配列表中任何一项"
+        }
       }
     },
     "createSmartListScene": {
@@ -1610,7 +1639,8 @@
         },
         "buttons": {
           "confirm": "创建列表"
-        }
+        },
+        "createList": "创建列表"
       }
     },
     "createOrUpdateApiKey": {
@@ -2832,7 +2862,8 @@
                 "emptyHeading": "无历史记录",
                 "emptySubtitle": "此邮件发送器的历史为空。它要么未被使用，要么历史已被清除",
                 "notFound": "未找到"
-              }
+              },
+              "createEmailer": "创建邮件发送器"
             }
           },
           "devices": {
@@ -3017,7 +3048,8 @@
         "deleteDialog": {
           "title": "删除提供方",
           "description": "确定要删除 {{providerName}} 吗？此操作不可撤销。"
-        }
+        },
+        "description": "配置用于抓取和补充书籍元数据的元数据提供方"
       },
       "server/tags": {
         "helmet": "标签管理",
@@ -3467,6 +3499,12 @@
         "showPastBooks": "显示以往的书籍",
         "hidePastBooks": "隐藏以往的书籍",
         "createSchedule": "创建阅读计划"
+      },
+      "nav": {
+        "home": "主页",
+        "discussion": "讨论",
+        "members": "成员",
+        "settings": "设置"
       }
     },
     "pdfViewer": {
@@ -3588,7 +3626,16 @@
       "libraries": "书库",
       "smartLists": "智能列表",
       "files": "文件",
-      "search": "搜索"
+      "search": "搜索",
+      "copy": "复制",
+      "invalidUrl": "无效的网址",
+      "open": "打开",
+      "rename": "重命名",
+      "seeMore": "查看更多",
+      "view": "查看",
+      "xBooks": "{{count}} 本书",
+      "xBooks_other": "{{count}} 本书",
+      "nextStep": "下一步"
     },
     "libraryType": {
       "BOOK": "书籍",
@@ -4039,21 +4086,20 @@
       "serverInfo": {
         "title": "服务器信息",
         "description": "Stump 服务器实例的基本详细信息",
-        "build": {
-          "label": "构建",
-          "description": "关于版本和构建的细节",
-          "version": {
-            "semver": "版本",
-            "commitHash": "确切提交",
-            "date": "编译日期"
-          }
-        },
+        "build": "构建",
         "nonStableChannel": {
           "title": "您正在运行一个不稳定的 Stump 构建",
           "description": [
             "看起来您正在运行",
             "构建频道"
           ]
+        },
+        "version": "版本",
+        "exactCommit": "精确提交哈希",
+        "debugInfo": {
+          "label": "调试信息",
+          "description": "在 GitHub 报告问题时请复制并粘贴这些信息",
+          "copyDebugInfoFailed": "复制调试信息失败"
         }
       },
       "helpfulLinks": {
@@ -4063,6 +4109,11 @@
           "documentation": "文档",
           "changelog": "更改日志"
         }
+      },
+      "changelog": {
+        "label": "更新日志",
+        "description": "查看 Stump 最新版本的变化",
+        "fetchFailed": "获取更新日志失败"
       }
     }
   }

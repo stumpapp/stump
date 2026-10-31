@@ -5,11 +5,13 @@ import { useLocation } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 // TODO(book-clubs): Implement
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {
 	const location = useLocation()
+	const { t } = useTranslate()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
@@ -21,7 +23,7 @@ export default function BookClubNavigation() {
 		const base = [
 			{
 				isActive: location.pathname.match(/\/clubs\/[^/]+\/?(home)?$/),
-				label: 'Home',
+				label: t('bookClub.nav.home'),
 				to: '.',
 			},
 		]
@@ -34,22 +36,22 @@ export default function BookClubNavigation() {
 			...base,
 			{
 				isActive: location.pathname.match(/\/clubs\/[^/]+\/discussion(\/.*)?$/),
-				label: 'Discussion',
+				label: t('bookClub.nav.discussion'),
 				onHover: () => prefetch(),
 				to: 'discussion',
 			},
 			{
 				isActive: location.pathname.match(/\/clubs\/[^/]+\/members(\/.*)?$/),
-				label: 'Members',
+				label: t('bookClub.nav.members'),
 				to: 'members',
 			},
 			{
 				isActive: location.pathname.match(/\/clubs\/[^/]+\/settings(\/.*)?$/),
-				label: 'Settings',
+				label: t('bookClub.nav.settings'),
 				to: 'settings',
 			},
 		]
-	}, [location, viewerIsMember, prefetch])
+	}, [location, viewerIsMember, prefetch, t])
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 

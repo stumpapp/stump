@@ -2,7 +2,7 @@
 
 **TL;DR**: a reading-experience and feature combo — ① hardcoded text in ~60+ components migrated to i18n (all three locales in sync); ② the EPUB reader TOC / Bookmarks / Annotations panel changed from a centered modal to a left-side drawer; ③ new LLM server settings (OpenAI-compatible endpoint, encrypted API key); ④ LLM auto-tagging (single-book + library-wide batches, manual review + confidence threshold + merge-only strategy); ⑤ filter books by tag on library/series pages.
 
-This branch is forked from `v0.1.11` (`d0f51c8e`) on the `nightly` history. No related existing issues or PRs were found; if a discussion is preferred first, I'm happy to convert this into an issue or discussion.
+This branch is forked from `v0.1.11` (`d0f51c8e`) on the `nightly` history and has been merged with upstream `nightly` (`76fd4531`, including the `#1488` Simplified Chinese translation updates). No related existing issues or PRs were found; if a discussion is preferred first, I'm happy to convert this into an issue or discussion.
 
 > LLM-assistance disclosure: LLM tools were used to assist with the code and this PR description, with manual review and quality checks on my end (tsc typecheck, cargo clippy, manual feature verification). Commits are not signed with any LLM tool.
 
@@ -12,7 +12,7 @@ Details per area below.
 
   1. **Expanded i18n coverage**
      - Previously hardcoded page text in ~60+ components migrated to `react-i18next` automatic translation, covering: settings (users / server / API keys / jobs / logs), books & series (overview, management, thumbnails, tag editors), book clubs, smart lists, explorer & upload, tables & filters, query builder, readers (EPUB / PDF / image-based), and confirmation dialogs
-     - Locale files expanded in sync: `en-US.json` +729 lines, `zh-CN.json` +800 lines, `zh-TW.json` +718 lines
+     - Locale files expanded in sync: `en-US.json` +729 lines, `zh-CN.json` +800 lines, `zh-TW.json` +718 lines; after merging `nightly`, its existing translations are preserved and newly added keys are filled in for all three locales
      - Migration scope and gap-check records in `plans/i18n-hardcoded-strings-plan.md` and `plans/i18n-hardcoded-strings-report.md`
 
   2. **EPUB reader panel rework**
@@ -50,6 +50,13 @@ Details per area below.
      - Responsive: `xl`-width Sheet on mobile, `default` side drawer on desktop
      - Backend `query/tag.rs` / `object/tag.rs` extended with tag counts and related queries; wired into `LibraryBooksScene`, `SeriesBooksScene`, `MediaFilterForm`, `SeriesFilterForm`
 
+  6. **Upstream `nightly` merge and regression fixes**
+     - Merged upstream `nightly` (`76fd4531`), resolved all conflicts, and confirmed the five feature areas above are fully preserved
+     - Regenerated the GraphQL client (`packages/graphql/src/client`) to fix missing document types after the merge, which had caused repo-wide type errors
+     - `LLMSettingsScene` now uses `SceneContainer` to match upstream's removal of `ContentContainer`; installed upstream's new `@radix-ui/react-alert-dialog` dependency
+     - Restored i18n that had been overwritten during conflict resolution: `EntityHeader` Info / Settings labels and the Metadata section of the series settings page
+     - Filled in translations added or missed after the merge: job history status column, library details/folders labels, thumbnail generation description, library path validation messages, list page-size label, add-provider dialog title, and the generate-random-password button
+
 - **Design rationale / reasons for changes**
   - i18n: hardcoded text is hard to maintain and localize; after migrating to translation keys, adding a language only requires new locale files, no component changes
   - EPUB drawer: the centered modal obscured the middle of the reading area and interrupted reading; a left-side drawer matches mainstream reader interactions and leaves the reading layout untouched
@@ -57,12 +64,12 @@ Details per area below.
   - Browse by tag: reuses the existing filters system and GraphQL queries, no new state management
 
 - **Additional background**
-  - Scale: 12 commits ahead of the `dev/translate` baseline, touching 181 files (+10373 / -628)
+  - Scale: 15 commits and 163 files ahead of upstream `nightly` (`76fd4531`) (+21739 / -11451); the merge commit itself touches 498 files (+28621 / -25409)
   - New documentation: `docs/docker-deployment-faq.md` (Docker deployment FAQ)
   - Design documents in `plans/`: `llm-auto-tagging-plan.md`, `llm-library-tag-recommendation-plan.md`, `server-llm-settings-plan.md`, `sidebar-tags-feature-plan.md`, `i18n-hardcoded-strings-plan.md` / `i18n-hardcoded-strings-report.md`
-  - Verification: `tsc -b` typecheck passes; Rust `cargo` build / clippy pass; manually verified the EPUB drawer interaction, LLM settings save + tagging job trigger, suggestion review & apply, and the tag filter behavior
+  - Verification: after the merge, `tsc -b packages/browser`, ESLint, the relevant Vitest suites, and a `vite build` of `apps/web` all pass; Rust `cargo` build / clippy pass; manually verified the EPUB drawer interaction, LLM settings save + tagging job trigger, suggestion review & apply, and the tag filter behavior
   - Formatting: code is formatted per the repo configs (Prettier `prettier.config.js` and Rustfmt `rustfmt.toml`)
-  - Merge note: `nightly` is 26 commits ahead of this branch's fork point (including `#1488` Simplified Chinese translation updates), so a rebase before merge is recommended; `packages/i18n` locale files (zh-CN / en-US / zh-TW) and `crates/graphql/schema.graphql` may conflict — on conflict, keep this branch's structured translation keys and new schema fields while preserving `nightly`'s existing translations
+  - Merge note: upstream `nightly` (`76fd4531`) has been merged and conflicts resolved; for locale files, this branch's structured translation keys and new keys take precedence while preserving `nightly`'s existing translations; for `crates/graphql/schema.graphql`, this branch's new fields take precedence
 
 Contributing guide: https://github.com/stumpapp/stump/blob/main/.github/CONTRIBUTING.md
 
@@ -76,10 +83,10 @@ This PR includes UI changes (EPUB reader left drawer, LLM settings page, tag fil
 
 Please read each item below and check:
 
-- [ ] I have read the [contributing guide](https://github.com/stumpapp/stump/blob/main/.github/CONTRIBUTING.md)
-- [ ] I searched for existing issues or PRs related to this change
-- [ ] This PR targets the `nightly` branch, not `main`
-- [ ] If applicable, I have added tests and/or documentation for my changes
+- [x] I have read the [contributing guide](https://github.com/stumpapp/stump/blob/main/.github/CONTRIBUTING.md)
+- [x] I searched for existing issues or PRs related to this change
+- [x] This PR targets the `nightly` branch, not `main`
+- [x] If applicable, I have added tests and/or documentation for my changes
 - [x] If applicable, I have disclosed whether LLM tools were used in developing this PR
 
 ## Stump Contributor License Agreement

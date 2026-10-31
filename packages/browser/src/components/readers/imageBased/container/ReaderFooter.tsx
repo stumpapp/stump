@@ -1,4 +1,3 @@
-/* eslint-disable react-compiler/react-compiler */
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'

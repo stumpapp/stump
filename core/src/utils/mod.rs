@@ -1,3 +1,5 @@
+//! A collection of miscellaneous utilities shared throughout the core
+
 pub mod encryption;
 pub mod serde;
 

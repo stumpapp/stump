@@ -20,7 +20,7 @@
 		"postinstall": "patch-package",
 		"setup": "yarn && yarn web build",
 		"lint": "lerna run lint --stream --parallel && yarn check-types",
-		"check-types": "lerna run check-types  --stream --parallel --ignore @stump/expo",
+		"check-types": "lerna run check-types --stream --parallel",
 		"test": "lerna run test",
 		"client": "lerna run --scope @stump/client",
 		"desktop": "lerna run --scope @stump/desktop",
@@ -30,8 +30,8 @@
 		"docs": "lerna run --scope @stump/docs",
 		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn web dev\"",
-		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn web dev\"",
+		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn expo dev\"",
 		"format": "lerna run format --stream --parallel",
 		"release": "node scripts/release/bump-version.mjs",
 		"clean": "lerna run clean",
@@ -51,10 +51,8 @@
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-plugin-react": "^7.37.5",
-		"eslint-plugin-react-compiler": "^19.1.0-rc.2",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
-		"eslint-plugin-sort-keys-fix": "^1.1.2",
 		"execa": "^9.6.1",
 		"gitmoji-changelog": "^2.3.0",
 		"globals": "^16.5.0",
@@ -82,13 +80,11 @@
 		"linkify-it": "=5.0.2"
 	},
 	"lint-staged": {
-		"*.{js,jsx,ts,tsx,md,json}": [
-			"prettier --config prettier.config.js --check"
+		"*.{js,jsx,ts,tsx,mjs,cjs,mts,md,json}": [
+			"prettier --config prettier.config.js --write"
 		],
 		"*.rs": [
-			"cargo fmt --check --manifest-path=core/Cargo.toml --",
-			"cargo fmt --check --manifest-path=apps/server/Cargo.toml --",
-			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
+			"cargo fmt --all --"
 		]
 	},
 	"engines": {

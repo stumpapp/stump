@@ -5,7 +5,7 @@ export type Any = any
 // TODO: Rename all the `primitives.tsx` files to `base-js.tsx` or similar for obv reasons against using that language
 
 export { Accordion } from './accordion'
-export { Alert, AlertDescription, AlertTitle } from './alert'
+export { Alert, AlertDescription, AlertTitle, dismissAlert } from './alert'
 export { Badge, type BadgeProps } from './badge'
 export {
 	Breadcrumb,
@@ -45,7 +45,7 @@ export {
 	type TypeToConfirmModalProps,
 } from './dialog'
 export { Drawer } from './drawer'
-export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
+export { Dropdown, type DropdownItemGroup, DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { EmojiPicker } from './emoji'
 export { Form, type FormProps, Label, type LabelProps } from './form'
 export * from './hooks'

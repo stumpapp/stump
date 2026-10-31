@@ -1,3 +1,7 @@
+//! The background job system for Stump, built on top of Apalis. It handles job
+//! scheduling, dispatch, and progress tracking via channels which report back
+//! to corresponding listeners in the GraphQL layer
+
 // https://github.com/rust-lang/rust-clippy/issues/12281
 // ^ There is a bug in clippy after updating the toolchain. I am subscribed to the issue,
 // and will remove this once it is resolved.

@@ -254,6 +254,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		owner: 'stumpapp',
 		experiments: {
 			typedRoutes: true,
+			// https://docs.expo.dev/guides/react-compiler/
+			reactCompiler: true,
 		},
 		extra: {
 			eas: {

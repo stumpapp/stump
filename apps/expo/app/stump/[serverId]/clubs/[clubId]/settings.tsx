@@ -1,3 +1,6 @@
+/*  eslint-disable @typescript-eslint/no-unused-vars */
+// TODO: ^ obv remove once i build out clubs
+
 import { useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'

@@ -1,4 +1,4 @@
-import { forwardRef, LegacyRef } from 'react'
+import { forwardRef } from 'react'
 import { RefreshControl as RNRefreshControl, RefreshControlProps } from 'react-native'
 
 // TODO: customize better
@@ -9,5 +9,6 @@ const RefreshControl = forwardRef<RNRefreshControl, RefreshControlProps>(
 		)
 	},
 )
+RefreshControl.displayName = 'RefreshControl'
 
 export default RefreshControl

@@ -788,7 +788,14 @@ fn parse_opf_xml(
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
-	let mut adjusted_path = path.clone();
+	// EPUB resources are stored in the zip archive with `/` separators, but callers
+	// may hand us Windows-style `\` separators on any platform (e.g. a path joined by
+	// `PathBuf` on Windows and later round-tripped as a string). On non-Windows
+	// platforms `\` is not a separator, so without this conversion the entire string
+	// would be a single component and `starts_with(root)` below would never match.
+	// (epub-rs's `convert_path_seps` performs the same normalization.)
+	let path_str = path.to_string_lossy().replace('\\', "/");
+	let mut adjusted_path = PathBuf::from(path_str);
 
 	if !adjusted_path.starts_with(root) {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
@@ -809,6 +816,14 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 			},
 			_ => {},
 		}
+	}
+
+	// EPUB resources are stored in the zip archive with `/` separators. On Windows,
+	// `PathBuf::join` produces `\` separators, which breaks exact-name lookup in the
+	// archive (epub-rs's `convert_path_seps` performs the same normalization). Convert
+	// Windows separators to `/` so resource paths match archive entry names.
+	if cfg!(windows) {
+		normalized = PathBuf::from(normalized.to_string_lossy().replace('\\', "/"));
 	}
 
 	normalized
@@ -1066,6 +1081,22 @@ mod tests {
 		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		// Windows-style separators (as produced by `PathBuf::join` on Windows) must be
+		// normalized to POSIX separators, since zip archive entry names always use `/`.
+		let path = PathBuf::from(r"OEBPS\Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
+
+		let path = PathBuf::from(r"Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
 	}
 
 	#[test]

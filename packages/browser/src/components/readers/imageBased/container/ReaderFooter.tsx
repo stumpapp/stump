@@ -1,4 +1,3 @@
-/* eslint-disable react-compiler/react-compiler */
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
@@ -132,7 +131,7 @@ export default function ReaderFooter() {
 						))}
 					</div>
 					{!isCurrentSet && (
-						<Text size="sm" className="text-gray-45 shrink-0 text-center">
+						<Text size="sm" className="shrink-0 text-center text-gray-450">
 							{[...indexes]
 								.sort((a, b) => a - b)
 								.map((i) => i + 1)

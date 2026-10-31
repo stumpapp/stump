@@ -1,6 +1,6 @@
 import { useGraphQLMutation, usePrefetchFiles } from '@stump/client'
 import { formatBytesSeparate } from '@stump/client'
-import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
+import { DropdownItemGroup } from '@stump/components'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'

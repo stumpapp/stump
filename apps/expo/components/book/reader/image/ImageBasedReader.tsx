@@ -66,7 +66,6 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				flashListRef?.current?.scrollToIndex({ index: scrollTo, animated: false })
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[deviceOrientationChanged, doublePageBehaviorChanged],
 	)
@@ -92,22 +91,27 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 	// Note: This does not work for Android so we need an alternative solution
 	const didCallEndReached = useRef(false)
-	const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-		if (didCallEndReached.current) return
+	const handleScroll = useCallback(
+		(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+			if (didCallEndReached.current) return
 
-		const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
+			const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
 
-		const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
+			const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
 
-		// invertion transform accounts for RTL already
-		const isPastEnd = contentOffset.x + layoutMeasurement.width > contentSize.width
-		const isTargetPastEnd = targetContentOffset.x + layoutMeasurement.width > contentSize.width
+			// invertion transform accounts for RTL already
+			const isPastEnd = contentOffset.x + layoutMeasurement.width > contentSize.width
+			const isTargetPastEnd = targetContentOffset.x + layoutMeasurement.width > contentSize.width
 
-		if (isPastEnd && isTargetPastEnd) {
-			didCallEndReached.current = true
-			onPastEndReached?.()
-		}
-	}, [])
+			if (isPastEnd && isTargetPastEnd) {
+				// eslint-disable-next-line react-hooks/immutability
+				didCallEndReached.current = true
+				onPastEndReached?.()
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	const isRtl = readingDirection === ReadingDirection.Rtl
 	const isVertical = readingMode === ReadingMode.ContinuousVertical

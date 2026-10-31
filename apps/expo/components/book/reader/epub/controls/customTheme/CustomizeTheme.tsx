@@ -77,7 +77,6 @@ export default function CustomizeTheme({
 			setCustomTheme(currentTheme)
 			setName(currentName)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[themeToEdit, mode],
 	)

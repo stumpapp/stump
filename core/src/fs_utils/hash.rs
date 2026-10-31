@@ -111,12 +111,11 @@ mod tests {
 	use super::*;
 
 	fn epub_path() -> PathBuf {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/leaves.epub")
+		::tests::fixtures::test_data_dir().join("leaves.epub")
 	}
 
 	fn pdf_path() -> PathBuf {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("integration-tests/data/tall.pdf")
+		::tests::fixtures::test_data_dir().join("tall.pdf")
 	}
 
 	// https://github.com/koreader/koreader/blob/master/spec/unit/util_spec.lua#L339-L341

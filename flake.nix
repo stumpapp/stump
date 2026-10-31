@@ -46,7 +46,6 @@
           cargo-deny
           cargo-edit
           cargo-watch
-          bacon
 
           # Tauri deps
           curl

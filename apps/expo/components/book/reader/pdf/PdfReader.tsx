@@ -188,7 +188,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				setLocalUri(null)
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -197,7 +196,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		() => {
 			store.storeBook(book)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.id],
 	)

@@ -4,10 +4,9 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"types": ["vitest/globals"],
-		"baseUrl": ".",
 		"resolveJsonModule": true,
 		"paths": {
-			"~/*": ["*"],
+			"~/*": ["./*"],
 			"@stump/sdk": ["../../packages/sdk/src/index.ts"],
 			"@stump/sdk/*": ["../../packages/sdk/src/*"],
 			"@stump/client": ["../../packages/client/src/index.ts"],

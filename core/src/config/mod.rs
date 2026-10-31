@@ -1,3 +1,6 @@
+//! Application configuration for Stump, including the primary [`StumpConfig`],
+//! OIDC provider settings, and logging setup
+
 pub mod logging;
 pub mod oidc_config;
 mod stump_config;

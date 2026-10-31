@@ -5,6 +5,8 @@
 	"license": "GPL-3.0-only",
 	"scripts": {
 		"dev": "expo start -c --ios",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint .",
 		"dev:web": "expo start -c --web",
 		"dev:android": "expo start -c --android",
 		"android": "expo run:android -d",
@@ -19,8 +21,7 @@
 		"ios:format": "swiftformat ./modules",
 		"ts:format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"format": "yarn ts:format && yarn ios:format && yarn android:format",
-		"clean": "rimraf .expo node_modules ios android",
-		"check-types": "tsc -b tsconfig.json"
+		"clean": "rimraf .expo node_modules ios android"
 	},
 	"dependencies": {
 		"@codeherence/react-native-header": "^0.14.0",

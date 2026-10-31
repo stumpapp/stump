@@ -8,9 +8,9 @@
 		"./tailwind/preset.css": "./tailwind/preset.css"
 	},
 	"scripts": {
-		"check-types": "tsc -b tsconfig.json",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint .",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
-		"build": "tsc",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"clean": "rimraf node_modules"

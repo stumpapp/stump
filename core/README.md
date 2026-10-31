@@ -1,8 +1,10 @@
-# Core 🏭
+# Core
 
 The `core` crate contains Stump's core functionalities
 
-## Structure 📦
+## Structure
+
+<!--TODO: edited a lil to add to diff so i remember to update this before merge -->
 
 The `src` directory contains the following modules:
 

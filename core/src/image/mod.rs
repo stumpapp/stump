@@ -47,38 +47,35 @@ pub async fn resize_image(
 
 #[cfg(test)]
 pub(crate) mod tests {
-	use std::path::PathBuf;
 
 	pub fn get_test_webp_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.webp")
+		::tests::fixtures::test_data_dir()
+			.join("example.webp")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_jpg_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.jpeg")
+		::tests::fixtures::test_data_dir()
+			.join("example.jpeg")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_png_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.png")
+		::tests::fixtures::test_data_dir()
+			.join("example.png")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	// pub fn get_test_avif_path() -> String {
-	// 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-	// 		.join("integration-tests/data/example.avif")
+	// 	::tests::fixtures::test_data_dir().join("example.avif")
 	// 		.to_string_lossy()
 	// 		.to_string()
 	// }
 
 	// TODO(339): Avif + Jxl support
 	// pub fn get_test_jxl_path() -> String {
-	// 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-	// 		.join("integration-tests/data/example.jxl")
+	// 	::tests::fixtures::test_data_dir().join("example.jxl")
 }

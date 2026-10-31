@@ -1,16 +1,18 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Button, Card, Dropdown, Text } from '@stump/components'
+import { Button, Card, Dropdown, NativeSelect, Text } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
 import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getPaginationRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
 import { Ellipsis, Slash, Tag as TagIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
+import TablePagination from '@/components/table/Pagination'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteTagConfirmModal from './DeleteTagConfirmModal'
@@ -41,6 +43,7 @@ export default function TagTable() {
 
 	const [deletingTag, setDeletingTag] = useState<Tag | null>(null)
 	const [renamingTag, setRenamingTag] = useState<Tag | null>(null)
+	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
 
 	const columns = useMemo(
 		() => [
@@ -87,9 +90,12 @@ export default function TagTable() {
 		columns,
 		data: sortedTags,
 		getCoreRowModel: getCoreRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
 		state: {
 			columnPinning: { right: ['actions'] },
+			pagination,
 		},
+		onPaginationChange: setPagination,
 	})
 	const { rows } = table.getRowModel()
 
@@ -167,6 +173,31 @@ export default function TagTable() {
 						))}
 					</tbody>
 				</table>
+
+				<div className="h-12 px-3 flex items-center justify-between border-t border-border">
+					<NativeSelect
+						size="xs"
+						className="w-36"
+						options={[10, 20, 30, 50, 100].map((pageSize) => ({
+							label: t('common.showRowsPerPage', { pageSize }),
+							// FIXME: don't cast once my select can consume numbers :nomnom:
+							value: pageSize.toString(),
+						}))}
+						value={pagination.pageSize.toString()}
+						onChange={(e) => {
+							const parsed = parseInt(e.target.value, 10)
+							if (!isNaN(parsed) && parsed > 0) {
+								setPagination({ pageIndex: 0, pageSize: parsed })
+							}
+						}}
+					/>
+
+					<TablePagination
+						currentPage={pagination.pageIndex + 1}
+						pages={table.getPageCount()}
+						onChangePage={(page) => table.setPageIndex(page - 1)}
+					/>
+				</div>
 			</Card>
 		</>
 	)

@@ -311,7 +311,8 @@
       "or": "或",
       "selectAThumbnail": "选择缩略图",
       "tags": "标签",
-      "clickHere": "点击此处"
+      "clickHere": "点击此处",
+      "showRowsPerPage": "显示 {{pageSize}} 行"
     },
     "underConstruction": {
       "heading": "这很尴尬",
@@ -383,7 +384,16 @@
         }
       },
       "analysis": "分析",
-      "thumbnail": "缩略图"
+      "thumbnail": "缩略图",
+      "heading": "管理",
+      "description": "修改此书籍的信息",
+      "underDevelopment": "书籍管理目前仍在开发中，功能非常有限",
+      "analysisDescription": "重新分析此书籍，以从其文件中更新元数据",
+      "analyzeButton": "分析书籍",
+      "analyzeTooltip": "分析此书籍",
+      "analysisInProgress": "分析正在进行中",
+      "thumbnailDescription": "更改此书籍的封面图片",
+      "tagsDescription": "为该书籍分配标签"
     },
     "bookOverviewScene": {
       "fileInformation": {
@@ -985,7 +995,8 @@
         "description": "该书库的详细信息，包括名称、路径和描述",
         "form": {
           "submit": "更新书库"
-        }
+        },
+        "updateLibrary": "更新书库"
       },
       "options/reading": {
         "title": "阅读",
@@ -1242,7 +1253,8 @@
             "description": [
               "永久删除该书库及其全部内容。",
               "此操作不可撤销"
-            ]
+            ],
+            "deleteButton": "删除书库"
           }
         }
       }
@@ -2354,6 +2366,12 @@
               "description": "服务器对外的公开访问地址",
               "updateFailed": "更新公开 URL 失败"
             }
+          },
+          "stats": {
+            "libraries": "书库数",
+            "series": "系列数",
+            "books": "书籍数",
+            "diskUsage": "磁盘占用"
           }
         }
       },
@@ -2485,7 +2503,8 @@
               "columns": {
                 "level": "级别",
                 "message": "消息",
-                "timestamp": "时间戳"
+                "timestamp": "时间戳",
+                "jobId": "任务 ID"
               },
               "emptyHeading": "没有可显示的日志",
               "emptySubtitle": "您的服务器非常健康或很不健康"
@@ -2613,6 +2632,14 @@
               "associatedLogs": "相关日志"
             }
           }
+        },
+        "status": {
+          "COMPLETED": "已完成",
+          "CANCELLED": "已取消",
+          "FAILED": "失败",
+          "RUNNING": "运行中",
+          "QUEUED": "排队中",
+          "PAUSED": "已暂停"
         }
       },
       "server/users": {
@@ -2808,6 +2835,15 @@
           "empty": {
             "heading": "暂无登录活动",
             "description": "是你清空的吧？"
+          },
+          "columns": {
+            "user": "用户",
+            "timestamp": "时间戳",
+            "ipAddress": "IP 地址",
+            "userAgent": "用户代理",
+            "authResult": "验证结果",
+            "success": "成功",
+            "failure": "失败"
           }
         },
         "userStats": {
@@ -2833,7 +2869,27 @@
             "json": "JSON"
           },
           "sessions": "会话数",
-          "sessionsTooltip": "此用户未过期的登录会话数量"
+          "sessionsTooltip": "此用户未过期的登录会话数量",
+          "table": {
+            "user": "用户",
+            "role": "角色",
+            "createdAt": "创建时间",
+            "lastLogin": "最后登录",
+            "status": "状态",
+            "serverOwner": "服务器所有者",
+            "member": "成员",
+            "never": "从不",
+            "locked": "已锁定",
+            "active": "活跃"
+          },
+          "actions": {
+            "inspect": "查看",
+            "clearSessions": "清除会话",
+            "edit": "编辑",
+            "delete": "删除",
+            "lockAccount": "锁定账户",
+            "unlockAccount": "解锁账户"
+          }
         }
       },
       "server/email": {
@@ -3385,7 +3441,14 @@
       "analysis": "分析",
       "thumbnail": "缩略图",
       "metadata": "元数据",
-      "metadataDescription": "关于此系列的额外信息"
+      "metadataDescription": "关于此系列的额外信息",
+      "underDevelopment": "系列管理目前仍在开发中，功能非常有限",
+      "analysisDescription": "重新分析此系列，以从其文件中更新元数据",
+      "analyzeButton": "分析系列",
+      "analyzeTooltip": "分析此系列",
+      "analysisInProgress": "分析正在进行中",
+      "thumbnailDescription": "更改此系列的封面图片",
+      "tagsDescription": "为该系列分配标签"
     },
     "directoryPicker": {
       "description": "指定您的书库所在的目录。"

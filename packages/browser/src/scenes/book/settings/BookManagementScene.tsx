@@ -103,18 +103,18 @@ export default function BookManagementScene() {
 				<div className="gap-y-1.5 flex flex-col">
 					<Breadcrumbs segments={breadcrumbs} trailingSlash />
 					<Heading size="lg" className="font-bold">
-						Manage
+						{t('bookManagementScene.heading')}
 					</Heading>
 
 					<Text size="sm" variant="muted">
-						Make changes to this book
+						{t('bookManagementScene.description')}
 					</Text>
 				</div>
 
 				<Alert variant="warning">
 					<Construction />
 					<AlertDescription>
-						Book management is currently under development and has very limited functionality
+						{t('bookManagementScene.underDevelopment')}
 					</AlertDescription>
 				</Alert>
 
@@ -123,18 +123,22 @@ export default function BookManagementScene() {
 						<div>
 							<Heading size="sm">{t('bookManagementScene.analysis')}</Heading>
 							<Text size="sm" variant="muted">
-								Re-analyze this book to update metadata from its file
+								{t('bookManagementScene.analysisDescription')}
 							</Text>
 						</div>
 
 						<div>
 							<Button
-								title={data ? 'Analysis already in progress' : 'Analyze this book'}
+								title={
+									data
+										? t('bookManagementScene.analysisInProgress')
+										: t('bookManagementScene.analyzeTooltip')
+								}
 								size="default"
 								onClick={handleAnalyze}
 								disabled={!!data || isPending}
 							>
-								Analyze Media
+								{t('bookManagementScene.analyzeButton')}
 							</Button>
 						</div>
 					</div>
@@ -176,7 +180,7 @@ export default function BookManagementScene() {
 						<div>
 							<Heading size="sm">{t('bookManagementScene.thumbnail')}</Heading>
 							<Text size="sm" variant="muted">
-								Change the cover image for this book
+								{t('bookManagementScene.thumbnailDescription')}
 							</Text>
 						</div>
 

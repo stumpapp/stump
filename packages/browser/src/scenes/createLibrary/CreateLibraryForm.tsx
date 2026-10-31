@@ -36,7 +36,7 @@ type Props = {
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
 	const { checkPermission } = useAppContext()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -110,7 +110,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 								className="md:w-auto w-full"
 								onClick={() => handleChangeStep(2)}
 							>
-								{t('shared.common.nextStep')}
+								{translate('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -125,7 +125,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<IgnoreRulesConfig />
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								{t('shared.common.nextStep')}
+								{translate('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>

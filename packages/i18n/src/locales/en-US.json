@@ -379,7 +379,8 @@
       "or": "Or",
       "selectAThumbnail": "Select thumbnail",
       "tags": "Tags",
-      "clickHere": "Click here"
+      "clickHere": "Click here",
+      "showRowsPerPage": "Show {{pageSize}} rows"
     },
     "underConstruction": {
       "heading": "This is Awkward",
@@ -451,7 +452,16 @@
         }
       },
       "analysis": "Analysis",
-      "thumbnail": "Thumbnail"
+      "thumbnail": "Thumbnail",
+      "heading": "Manage",
+      "description": "Make changes to this book",
+      "underDevelopment": "Book management is currently under development and has very limited functionality",
+      "analysisDescription": "Re-analyze this book to update metadata from its file",
+      "analyzeButton": "Analyze Media",
+      "analyzeTooltip": "Analyze this book",
+      "analysisInProgress": "Analysis already in progress",
+      "thumbnailDescription": "Change the cover image for this book",
+      "tagsDescription": "Assign tags to this book"
     },
     "bookOverviewScene": {
       "fileInformation": {
@@ -1053,7 +1063,8 @@
         "description": "The details of this library, including its name, path, and description",
         "form": {
           "submit": "Update Library"
-        }
+        },
+        "updateLibrary": "Update library"
       },
       "options/reading": {
         "title": "Reading",
@@ -1310,7 +1321,8 @@
             "description": [
               "Permanently delete this library and all its contents.",
               "This action cannot be undone"
-            ]
+            ],
+            "deleteButton": "Delete library"
           }
         }
       }
@@ -2445,6 +2457,12 @@
             "uploadError": "Failed to upload emoji",
             "renameError": "Failed to rename emoji",
             "deleteError": "Failed to delete emoji"
+          },
+          "stats": {
+            "libraries": "Libraries",
+            "series": "Series",
+            "books": "Books",
+            "diskUsage": "Disk usage"
           }
         }
       },
@@ -2576,7 +2594,8 @@
               "columns": {
                 "level": "Level",
                 "message": "Message",
-                "timestamp": "Timestamp"
+                "timestamp": "Timestamp",
+                "jobId": "Job ID"
               },
               "emptyHeading": "No Logs to Display",
               "emptySubtitle": "Your server is either very healthy or very unhealthy"
@@ -2703,6 +2722,14 @@
               "emptyState": "No Jobs to Clear"
             }
           }
+        },
+        "status": {
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled",
+          "FAILED": "Failed",
+          "RUNNING": "Running",
+          "QUEUED": "Queued",
+          "PAUSED": "Paused"
         }
       },
       "server/users": {
@@ -2904,6 +2931,15 @@
           "empty": {
             "heading": "No login activity",
             "description": "You cleared this, didn't you?"
+          },
+          "columns": {
+            "user": "User",
+            "timestamp": "Timestamp",
+            "ipAddress": "IP address",
+            "userAgent": "User-agent",
+            "authResult": "Auth result",
+            "success": "Success",
+            "failure": "Failure"
           }
         },
         "userTable": {
@@ -2923,7 +2959,27 @@
             "json": "JSON"
           },
           "sessions": "Sessions",
-          "sessionsTooltip": "The number of non-expired login sessions for this user"
+          "sessionsTooltip": "The number of non-expired login sessions for this user",
+          "table": {
+            "user": "User",
+            "role": "Role",
+            "createdAt": "Created at",
+            "lastLogin": "Last login",
+            "status": "Status",
+            "serverOwner": "Server Owner",
+            "member": "Member",
+            "never": "Never",
+            "locked": "Locked",
+            "active": "Active"
+          },
+          "actions": {
+            "inspect": "Inspect",
+            "clearSessions": "Clear sessions",
+            "edit": "Edit",
+            "delete": "Delete",
+            "lockAccount": "Lock account",
+            "unlockAccount": "Unlock account"
+          }
         }
       },
       "server/email": {
@@ -3433,7 +3489,14 @@
       "analysis": "Analysis",
       "thumbnail": "Thumbnail",
       "metadata": "Metadata",
-      "metadataDescription": "Extra information about your series"
+      "metadataDescription": "Extra information about your series",
+      "underDevelopment": "Series management is currently under development and has very limited functionality",
+      "analysisDescription": "Re-analyze this series to update metadata from its files",
+      "analyzeButton": "Analyze series",
+      "analyzeTooltip": "Analyze this series",
+      "analysisInProgress": "Analysis already in progress",
+      "thumbnailDescription": "Change the cover image for this series",
+      "tagsDescription": "Assign tags to this series"
     },
     "directoryPicker": {
       "description": "Specify the directory where your library is located."

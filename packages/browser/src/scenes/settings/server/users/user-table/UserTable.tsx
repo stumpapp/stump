@@ -155,15 +155,21 @@ const columnHelper = createColumnHelper<User>()
 const buildBaseColumns = (t: (key: string) => string) => [
 	columnHelper.accessor('username', {
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
-		header: 'User',
+		header: t('settingsScene.server/users.userTable.table.user'),
 	}),
 	columnHelper.display({
 		cell: ({
 			row: {
 				original: { isServerOwner },
 			},
-		}) => <Text size="sm">{isServerOwner ? 'Server Owner' : 'Member'}</Text>,
-		header: 'Role',
+		}) => (
+			<Text size="sm">
+				{isServerOwner
+					? t('settingsScene.server/users.userTable.table.serverOwner')
+					: t('settingsScene.server/users.userTable.table.member')}
+			</Text>
+		),
+		header: t('settingsScene.server/users.userTable.table.role'),
 		id: 'isServerOwner',
 	}),
 	columnHelper.accessor('createdAt', {
@@ -176,7 +182,7 @@ const buildBaseColumns = (t: (key: string) => string) => [
 				{intlFormat(new Date(createdAt), { month: 'long', day: 'numeric', year: 'numeric' })}
 			</Text>
 		),
-		header: 'Created at',
+		header: t('settingsScene.server/users.userTable.table.createdAt'),
 	}),
 	columnHelper.accessor('lastLogin', {
 		cell: ({
@@ -187,10 +193,10 @@ const buildBaseColumns = (t: (key: string) => string) => [
 			<Text size="sm" variant="muted">
 				{lastLogin
 					? intlFormat(new Date(lastLogin), { month: 'long', day: 'numeric', year: 'numeric' })
-					: 'Never'}
+					: t('settingsScene.server/users.userTable.table.never')}
 			</Text>
 		),
-		header: 'Last login',
+		header: t('settingsScene.server/users.userTable.table.lastLogin'),
 	}),
 	columnHelper.display({
 		cell: ({ row: { original } }) => (
@@ -212,10 +218,12 @@ const buildBaseColumns = (t: (key: string) => string) => [
 	columnHelper.display({
 		cell: ({ row: { original } }) => (
 			<Badge size="xs" variant={original.isLocked ? 'error' : 'success'}>
-				{original.isLocked ? 'Locked' : 'Active'}
+				{original.isLocked
+					? t('settingsScene.server/users.userTable.table.locked')
+					: t('settingsScene.server/users.userTable.table.active')}
 			</Badge>
 		),
-		header: 'Status',
+		header: t('settingsScene.server/users.userTable.table.status'),
 		id: 'isLocked',
 		size: 100,
 	}),

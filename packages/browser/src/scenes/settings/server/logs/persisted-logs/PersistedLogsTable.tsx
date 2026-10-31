@@ -102,7 +102,7 @@ export default function PersistedLogsTable() {
 		<Card className="overflow-hidden">
 			<Table
 				sortable
-				columns={columns}
+				columns={getColumns(t)}
 				options={{
 					manualPagination: true,
 					manualSorting: true,
@@ -137,7 +137,8 @@ export default function PersistedLogsTable() {
 const LOCALE_BASE = 'settingsScene.server/logs.sections.persistedLogs.table'
 
 const columnHelper = createColumnHelper<PersistedLog>()
-export const columns = [
+
+export const getColumns = (t: (key: string) => string) => [
 	columnHelper.accessor('timestamp', {
 		id: LogModelOrdering.Timestamp,
 		cell: ({
@@ -157,7 +158,7 @@ export const columns = [
 			</Text>
 		),
 		enableSorting: true,
-		header: 'Time',
+		header: t(`${LOCALE_BASE}.columns.timestamp`),
 		sortingFn: ({ original: a }, { original: b }) => {
 			return isBefore(new Date(a.timestamp), new Date(b.timestamp)) ? -1 : 1
 		},
@@ -170,7 +171,7 @@ export const columns = [
 			},
 		}) => <LogLevelBadge level={level} />,
 		enableSorting: true,
-		header: 'Level',
+		header: t(`${LOCALE_BASE}.columns.level`),
 		size: 75,
 		sortingFn: ({ original: a }, { original: b }) => {
 			const levels = ['error', 'warn', 'info', 'debug']
@@ -184,7 +185,7 @@ export const columns = [
 				original: { message },
 			},
 		}) => <Text size="xs">{message}</Text>,
-		header: 'Message',
+		header: t(`${LOCALE_BASE}.columns.message`),
 		size: 300,
 	}),
 	columnHelper.accessor('jobId', {
@@ -201,7 +202,7 @@ export const columns = [
 					</Text>
 				</ToolTip>
 			) : null,
-		header: 'Job ID',
+		header: t(`${LOCALE_BASE}.columns.jobId`),
 		size: 150,
 	}),
 ]

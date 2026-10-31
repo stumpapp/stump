@@ -34,7 +34,7 @@ type Props = {
 
 export default function CreateBookClubForm({ onSubmit }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { currentStep, setStep } = useSteppedFormContext()
 
 	const {
@@ -75,7 +75,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	const renderNextButton = (nextStep: number) => (
 		<div className="mt-6 md:max-w-sm flex w-full">
 			<Button className="md:w-auto w-full" onClick={() => handleChangeStep(nextStep)}>
-				{t('shared.common.nextStep')}
+				{translate('shared.common.nextStep')}
 			</Button>
 		</div>
 	)

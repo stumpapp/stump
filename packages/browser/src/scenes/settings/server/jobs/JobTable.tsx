@@ -207,14 +207,21 @@ export default function JobTable() {
 
 						const job = row.original
 
-						return (
-							<Badge variant={getBadgeVariant(job.status)} size="xs">
-								{job.status.charAt(0).toUpperCase() + job.status.slice(1).toLowerCase()}
-							</Badge>
-						)
-					},
-					header: 'Status',
-					id: 'status',
+					const getStatusLabel = (status: JobStatus) => {
+						const label = t(`${LOCALE_BASE.replace('.table', '')}.status.${status}`, {
+							defaultValue: status.charAt(0).toUpperCase() + status.slice(1).toLowerCase(),
+						})
+						return label
+					}
+
+					return (
+						<Badge variant={getBadgeVariant(job.status)} size="xs">
+							{getStatusLabel(job.status)}
+						</Badge>
+					)
+				},
+				header: t(`${LOCALE_BASE}.columns.status`),
+				id: 'status',
 				}),
 				columnHelper.display({
 					cell: ({ row: { original: job } }) => {

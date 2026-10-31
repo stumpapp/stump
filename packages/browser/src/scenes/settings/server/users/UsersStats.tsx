@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+﻿import { useSuspenseGraphQL } from '@stump/client'
 import { STAT_COLORS, StatCard, StatCardProps } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { Api } from '@stump/sdk'
@@ -39,19 +39,19 @@ export default function UsersStats() {
 
 	const stats: StatCardProps[] = [
 		{
-			label: 'Users',
+			label: t(getKey('users')),
 			value: data.userCount,
 			colors: STAT_COLORS.system,
 			countUp: true,
 		},
 		{
-			label: 'Books completed',
+			label: t(getKey('booksCompleted')),
 			value: data.finishedReadingSessionCount,
 			colors: STAT_COLORS.completed,
 			countUp: true,
 		},
 		{
-			label: 'Books in progress',
+			label: t(getKey('booksInProgress')),
 			value: data.activeReadingSessionCount,
 			colors: STAT_COLORS.inProgress,
 			countUp: true,

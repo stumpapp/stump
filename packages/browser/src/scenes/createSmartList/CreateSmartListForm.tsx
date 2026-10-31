@@ -29,7 +29,7 @@ const query = graphql(`
 `)
 
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 	const { currentStep, setStep } = useSteppedFormContext()
 
@@ -89,7 +89,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 						<div className="mt-6 md:max-w-sm flex w-full">
 						<Button className="md:w-auto w-full" onClick={() => handleChangeStep(2)}>
-							{t('shared.common.nextStep')}
+							{translate('shared.common.nextStep')}
 						</Button>
 						</div>
 					</>
@@ -101,7 +101,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								{t('shared.common.nextStep')}
+								{translate('shared.common.nextStep')}
 							</Button>
 						</div>
 					</>

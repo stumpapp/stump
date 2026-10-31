@@ -66,7 +66,7 @@ export default function BookTagEditor({ mediaId, tags }: Props) {
 			<div>
 				<Heading size="sm">{t('common.tags')}</Heading>
 				<Text size="sm" variant="muted">
-					Assign tags to this book
+					{t('bookManagementScene.tagsDescription')}
 				</Text>
 			</div>
 

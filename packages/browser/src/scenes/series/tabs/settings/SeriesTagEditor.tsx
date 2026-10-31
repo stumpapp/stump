@@ -64,7 +64,7 @@ export default function SeriesTagEditor({ seriesId, tags }: Props) {
 			<div>
 				<Heading size="sm">{t('common.tags')}</Heading>
 				<Text size="sm" variant="muted">
-					Assign tags to this series
+					{t('seriesSettingsScene.tagsDescription')}
 				</Text>
 			</div>
 

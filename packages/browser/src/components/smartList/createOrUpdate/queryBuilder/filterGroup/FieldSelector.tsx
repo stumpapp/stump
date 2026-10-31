@@ -132,11 +132,17 @@ export function FieldSelector({ idx }: Props) {
 
 	const renderSelected = () => {
 		if (fieldDef?.field) {
-			// return fieldDef.field
-			return source
-				? // ? `${t(getSourceKey(source, 'label'))}.${t(getAttributeKey(source, fieldDef.field))}`
-					`${source}.${fieldDef.field}`
-				: fieldDef.field
+			if (!source) {
+				return fieldDef.field
+			}
+			// Show the translated attribute label; fall back to the raw value when
+			// the key is not translated for the current locale.
+			const sharedKey = getSharedBookMetadataKey(source, fieldDef.field)
+			const fallback = `${source}.${fieldDef.field}`
+			if (sharedKey) {
+				return translate(`shared.bookMetadata.${sharedKey}`, { defaultValue: fallback })
+			}
+			return t(getAttributeKey(source, fieldDef.field), { defaultValue: fallback })
 		} else {
 			return <span className="text-muted-foreground">{t(getKey('placeholder'))}</span>
 		}

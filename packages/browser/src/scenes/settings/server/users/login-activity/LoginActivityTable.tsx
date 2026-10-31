@@ -85,7 +85,7 @@ export default function LoginActivityTable() {
 		<Card>
 			<Table
 				data={loginActivity || []}
-				columns={baseColumns}
+				columns={baseColumns(t)}
 				fullWidth
 				options={{
 					defaultColumn: {
@@ -105,9 +105,10 @@ export default function LoginActivityTable() {
 	)
 }
 
+const LOCALE_BASE = 'settingsScene.server/users.loginActivity'
 const columnHelper = createColumnHelper<LoginActivity>()
 
-const baseColumns = [
+const baseColumns = (t: (key: string) => string) => [
 	columnHelper.display({
 		cell: ({
 			row: {
@@ -119,7 +120,7 @@ const baseColumns = [
 			}
 			return <UsernameRow {...user} />
 		},
-		header: 'User',
+		header: t(`${LOCALE_BASE}.columns.user`),
 		id: 'user',
 		size: 100,
 	}),
@@ -138,7 +139,7 @@ const baseColumns = [
 				</Text>
 			)
 		},
-		header: 'Timestamp',
+		header: t(`${LOCALE_BASE}.columns.timestamp`),
 		size: 100,
 	}),
 	columnHelper.accessor('ipAddress', {
@@ -147,7 +148,7 @@ const baseColumns = [
 				{activity.ipAddress}
 			</Text>
 		),
-		header: 'IP address',
+		header: t(`${LOCALE_BASE}.columns.ipAddress`),
 		size: 100,
 	}),
 	columnHelper.accessor('userAgent', {
@@ -161,15 +162,17 @@ const baseColumns = [
 				{activity.userAgent}
 			</Text>
 		),
-		header: 'User-agent',
+		header: t(`${LOCALE_BASE}.columns.userAgent`),
 	}),
 	columnHelper.display({
 		cell: ({ row: { original: activity } }) => (
 			<Badge variant={activity.authenticationSuccessful ? 'success' : 'error'} size="xs">
-				{activity.authenticationSuccessful ? 'Success' : 'Failure'}
+				{activity.authenticationSuccessful
+					? t(`${LOCALE_BASE}.columns.success`)
+					: t(`${LOCALE_BASE}.columns.failure`)}
 			</Badge>
 		),
-		header: 'Auth result',
+		header: t(`${LOCALE_BASE}.columns.authResult`),
 		id: 'authenticationSuccessful',
 	}),
 ] as ColumnDef<LoginActivity>[]

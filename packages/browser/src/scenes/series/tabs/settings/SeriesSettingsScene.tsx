@@ -85,7 +85,7 @@ export default function SeriesSettingsScene() {
 				<Alert variant="warning">
 					<Construction />
 					<AlertDescription>
-						Series management is currently under development and has very limited functionality
+						{t('seriesSettingsScene.underDevelopment')}
 					</AlertDescription>
 				</Alert>
 
@@ -93,17 +93,21 @@ export default function SeriesSettingsScene() {
 					<div>
 						<Heading size="sm">{t('seriesSettingsScene.analysis')}</Heading>
 						<Text size="sm" variant="muted">
-							Re-analyze this series to update metadata from its files
+							{t('seriesSettingsScene.analysisDescription')}
 						</Text>
 					</div>
 
 					<div>
 						<Button
-							title={data ? 'Analysis already in progress' : 'Analyze this series'}
+							title={
+								data
+									? t('seriesSettingsScene.analysisInProgress')
+									: t('seriesSettingsScene.analyzeTooltip')
+							}
 							onClick={handleAnalyze}
 							disabled={!!data || isPending}
 						>
-							Analyze series
+							{t('seriesSettingsScene.analyzeButton')}
 						</Button>
 					</div>
 				</div>
@@ -118,7 +122,7 @@ export default function SeriesSettingsScene() {
 					<div>
 						<Heading size="sm">{t('seriesSettingsScene.thumbnail')}</Heading>
 						<Text size="sm" variant="muted">
-							Change the cover image for this series
+							{t('seriesSettingsScene.thumbnailDescription')}
 						</Text>
 					</div>
 

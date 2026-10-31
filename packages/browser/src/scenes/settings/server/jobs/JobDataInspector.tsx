@@ -7,7 +7,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { Table } from '@/components/table'
 import { useTranslate } from '@/hooks/useTranslate'
 
-import { columns } from '../logs/persisted-logs/PersistedLogsTable'
+import { getColumns } from '../logs/persisted-logs/PersistedLogsTable'
 
 const fragment = graphql(`
 	fragment JobDataInspector on CoreJobOutput {
@@ -105,7 +105,7 @@ export default function JobDataInspector({ job, onClose }: Props) {
 						<Card className="overflow-hidden">
 							<Table
 								sortable
-								columns={columns.slice(0, -1)} //  we don't need job id
+								columns={getColumns(t).slice(0, -1)} //  we don't need job id
 								data={jobLogs}
 								fullWidth
 								isZeroBasedPagination

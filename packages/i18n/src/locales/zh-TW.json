@@ -363,7 +363,8 @@
       "or": "或",
       "selectAThumbnail": "選擇縮圖",
       "tags": "標籤",
-      "clickHere": "點擊此處"
+      "clickHere": "點擊此處",
+      "showRowsPerPage": "顯示 {{pageSize}} 行"
     },
     "underConstruction": {
       "heading": "有點尷尬",
@@ -752,7 +753,8 @@
             "description": [
               "永久刪除該書庫及其全部內容。",
               "此操作不可撤銷"
-            ]
+            ],
+            "deleteButton": "刪除書庫"
           }
         }
       },
@@ -762,7 +764,8 @@
         "description": "該書庫的詳細資訊，包括名稱、路徑和描述",
         "form": {
           "submit": "更新書庫"
-        }
+        },
+        "updateLibrary": "更新書庫"
       },
       "options/reading": {
         "title": "閱讀",
@@ -1493,6 +1496,12 @@
             "uploadError": "Emoji 上傳失敗",
             "renameError": "重新命名 Emoji 失敗",
             "deleteError": "刪除 Emoji 失敗"
+          },
+          "stats": {
+            "libraries": "書庫數",
+            "series": "系列數",
+            "books": "書籍數",
+            "diskUsage": "磁碟用量"
           }
         }
       },
@@ -1624,7 +1633,8 @@
               "columns": {
                 "level": "級別",
                 "message": "訊息",
-                "timestamp": "時間戳"
+                "timestamp": "時間戳",
+                "jobId": "任務 ID"
               },
               "emptyHeading": "沒有可顯示的日誌",
               "emptySubtitle": "你的伺服器非常健康或很不健康"
@@ -1751,6 +1761,14 @@
               "emptyState": "沒有要清除的任務"
             }
           }
+        },
+        "status": {
+          "COMPLETED": "已完成",
+          "CANCELLED": "已取消",
+          "FAILED": "失敗",
+          "RUNNING": "執行中",
+          "QUEUED": "排隊中",
+          "PAUSED": "已暫停"
         }
       },
       "server/users": {
@@ -1952,6 +1970,15 @@
           "empty": {
             "heading": "目前沒有登入活動",
             "description": "是你清空的吧？"
+          },
+          "columns": {
+            "user": "使用者",
+            "timestamp": "時間戳",
+            "ipAddress": "IP 位址",
+            "userAgent": "使用者代理",
+            "authResult": "驗證結果",
+            "success": "成功",
+            "failure": "失敗"
           }
         },
         "userTable": {
@@ -1971,7 +1998,27 @@
             "json": "JSON"
           },
           "sessions": "工作階段數",
-          "sessionsTooltip": "此使用者未過期的登入工作階段數量"
+          "sessionsTooltip": "此使用者未過期的登入工作階段數量",
+          "table": {
+            "user": "使用者",
+            "role": "角色",
+            "createdAt": "建立時間",
+            "lastLogin": "上次登入",
+            "status": "狀態",
+            "serverOwner": "伺服器擁有者",
+            "member": "成員",
+            "never": "從不",
+            "locked": "已鎖定",
+            "active": "活躍"
+          },
+          "actions": {
+            "inspect": "檢視",
+            "clearSessions": "清除工作階段",
+            "edit": "編輯",
+            "delete": "刪除",
+            "lockAccount": "鎖定帳戶",
+            "unlockAccount": "解鎖帳戶"
+          }
         }
       },
       "server/email": {
@@ -2389,7 +2436,16 @@
         }
       },
       "analysis": "分析",
-      "thumbnail": "縮圖"
+      "thumbnail": "縮圖",
+      "heading": "管理",
+      "description": "修改此書籍的資訊",
+      "underDevelopment": "書籍管理目前仍在開發中，功能非常有限",
+      "analysisDescription": "重新分析此書籍，以從其檔案中更新元資料",
+      "analyzeButton": "分析書籍",
+      "analyzeTooltip": "分析此書籍",
+      "analysisInProgress": "分析進行中",
+      "thumbnailDescription": "變更此書籍的封面圖片",
+      "tagsDescription": "為該書籍分配標籤"
     },
     "bookClubSettingsScene": {
       "sidebar": {
@@ -3428,7 +3484,14 @@
       "analysis": "分析",
       "thumbnail": "縮圖",
       "metadata": "元資料",
-      "metadataDescription": "關於此系列的額外資訊"
+      "metadataDescription": "關於此系列的額外資訊",
+      "underDevelopment": "系列管理目前仍在開發中，功能非常有限",
+      "analysisDescription": "重新分析此系列，以從其檔案中更新元資料",
+      "analyzeButton": "分析系列",
+      "analyzeTooltip": "分析此系列",
+      "analysisInProgress": "分析進行中",
+      "thumbnailDescription": "變更此系列的封面圖片",
+      "tagsDescription": "為該系列分配標籤"
     },
     "directoryPicker": {
       "description": "指定你的書庫所在的目錄。"

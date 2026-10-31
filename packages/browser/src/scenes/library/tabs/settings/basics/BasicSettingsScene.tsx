@@ -15,6 +15,7 @@ import {
 } from '@/components/library/createOrUpdate'
 import { BasicLibraryInformation } from '@/components/library/createOrUpdate/sections'
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../context'
 
@@ -32,6 +33,7 @@ const query = graphql(`
 
 export default function BasicSettingsScene() {
 	const { library, patch } = useLibraryManagement()
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		data: {
@@ -107,9 +109,12 @@ export default function BasicSettingsScene() {
 
 			<div>
 				<Button type="submit" disabled={!hasChanges}>
-					Update library
+					{t(getKey('updateLibrary'))}
 				</Button>
 			</div>
 		</Form>
 	)
 }
+
+const LOCALE_KEY = 'librarySettingsScene.basics'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

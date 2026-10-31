@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { User } from './UserTable'
@@ -36,6 +37,7 @@ type Props = {
 export default function UserActionMenu({ user, onSelectForInspect, onSelectForDeletion }: Props) {
 	const paths = usePaths()
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 	const { isServerOwner, user: byUser, checkPermission } = useAppContext()
 
 	const client = useQueryClient()
@@ -80,13 +82,13 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 			{
 				items: [
 					{
-						label: 'Inspect',
+						label: t('settingsScene.server/users.userTable.actions.inspect'),
 						leftIcon: <Search className="mr-2 h-4 w-4" />,
 						onClick: () => onSelectForInspect(user),
 					},
 					{
 						disabled: user.loginSessionsCount === 0,
-						label: 'Clear sessions',
+						label: t('settingsScene.server/users.userTable.actions.clearSessions'),
 						isDestructive: true,
 						leftIcon: <Database className="mr-2 h-4 w-4" />,
 						onClick: handleClearUserSessions,
@@ -98,21 +100,23 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 						{
 							items: [
 								{
-									label: 'Edit',
+									label: t('settingsScene.server/users.userTable.actions.edit'),
 									disabled: isSelf,
 									leftIcon: <Pencil className="mr-2 h-4 w-4" />,
 									onClick: () => navigate(paths.updateUser(user.id)),
 								} as const,
 								{
 									disabled: isSelf,
-									label: 'Delete',
+									label: t('settingsScene.server/users.userTable.actions.delete'),
 									isDestructive: true,
 									leftIcon: <Trash className="mr-2 h-4 w-4" />,
 									onClick: () => onSelectForDeletion(user),
 								} as const,
 								{
 									disabled: isSelf || user.isServerOwner,
-									label: `${user.isLocked ? 'Unlock' : 'Lock'} account`,
+									label: user.isLocked
+										? t('settingsScene.server/users.userTable.actions.unlockAccount')
+										: t('settingsScene.server/users.userTable.actions.lockAccount'),
 									leftIcon: user.isLocked ? (
 										<Unlock className="mr-2 h-4 w-4" />
 									) : (
@@ -136,6 +140,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 			onSelectForDeletion,
 			canManageUsers,
 			paths,
+			t,
 		],
 	)
 

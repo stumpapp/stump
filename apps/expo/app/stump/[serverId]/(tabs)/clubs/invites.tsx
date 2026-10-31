@@ -1,3 +1,6 @@
+/*  eslint-disable @typescript-eslint/no-unused-vars */
+// TODO: ^ obv remove once i build out clubs
+
 import { useGraphQLMutation, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { BookClubInvitesScreenQuery, graphql } from '@stump/graphql'
 import { SafeAreaView } from 'react-native-safe-area-context'

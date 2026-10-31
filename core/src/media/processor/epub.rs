@@ -821,10 +821,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_svg_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -834,10 +831,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book_image_cover.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -851,10 +845,8 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover_last_chapter() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover_last_chapter.epub");
+		let epub_path =
+			::tests::fixtures::test_data_dir().join("book_image_cover_last_chapter.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -1105,10 +1097,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre.opf test file");
@@ -1207,10 +1196,8 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_html_description_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-html-descriptions.opf");
+		let opf_path =
+			::tests::fixtures::test_data_dir().join("calibre-html-descriptions.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-html-descriptions.opf test file");
@@ -1255,10 +1242,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_3_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-2.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre-2.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-2.opf test file");

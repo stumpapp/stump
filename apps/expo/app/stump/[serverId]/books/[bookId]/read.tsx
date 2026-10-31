@@ -632,7 +632,6 @@ export default function Screen() {
 		},
 		// this should be fine, but in practice we will see. i'd prefer to avoid needless pushes
 		// if we can, and spamming the navigation bar visibility
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[bookId],
 	)

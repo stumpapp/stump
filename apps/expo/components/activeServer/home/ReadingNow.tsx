@@ -99,17 +99,20 @@ export default function ReadingNow({ books }: Props) {
 	const pan = Gesture.Pan()
 		.activeOffsetX([-3, 3])
 		.failOffsetY([-6, 6])
-		.onUpdate((event) => {
-			const totalItems = books.length
-			const activeAreaWidth = paginationDotsContainerWidth / totalItems
-			const index = Math.min(totalItems - 1, Math.max(0, Math.floor(event.x / activeAreaWidth)))
+		.onUpdate(
+			// eslint-disable-next-line react-hooks/refs
+			(event) => {
+				const totalItems = books.length
+				const activeAreaWidth = paginationDotsContainerWidth / totalItems
+				const index = Math.min(totalItems - 1, Math.max(0, Math.floor(event.x / activeAreaWidth)))
 
-			// only update onPressPagination when the index actually changes (not when same number due to tiny movements)
-			if (activeDotIndex.value !== index) {
-				activeDotIndex.value = index
-				scheduleOnRN(onPressPagination, index)
-			}
-		})
+				// only update onPressPagination when the index actually changes (not when same number due to tiny movements)
+				if (activeDotIndex.value !== index) {
+					activeDotIndex.value = index
+					scheduleOnRN(onPressPagination, index)
+				}
+			},
+		)
 		.onEnd(() => {
 			activeDotIndex.value = -1
 		})

@@ -1,22 +1,7 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"module": "ES2022",
-		"moduleResolution": "Node",
-		"composite": true,
-		"skipLibCheck": true,
-		"emitDeclarationOnly": true,
-		"outDir": "dist",
-		"types": ["node", "vitest/globals"],
-		"paths": {
-			"@stump/graphql": ["../graphql/src/index.ts"]
-		}
+		"types": ["node", "vitest/globals"]
 	},
-	"include": ["src"],
-	"exclude": ["node_modules"],
-	"references": [
-		{
-			"path": "../graphql"
-		}
-	]
+	"include": ["src"]
 }

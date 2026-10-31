@@ -1,4 +1,4 @@
-import { Dialog, Tabs, Text } from '@stump/components'
+import { SheetPrimitive, Tabs, Text } from '@stump/components'
 import { List } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
@@ -44,14 +44,14 @@ export default function LocationManager() {
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
-			<Dialog.Trigger asChild>
+		<SheetPrimitive open={isOpen} onOpenChange={handleOpenChange}>
+			<SheetPrimitive.Trigger asChild>
 				<ControlButton title={translate('shared.epubReader.locationManager')}>
 					<List className="h-4 w-4" />
 				</ControlButton>
-			</Dialog.Trigger>
-			<Dialog.Content size="md">
-				<Dialog.Header>
+			</SheetPrimitive.Trigger>
+			<SheetPrimitive.Content position="left" size="sm" closeIcon>
+				<SheetPrimitive.Header className="px-4">
 					<Tabs value={activeTab} variant="primary" activeOnHover>
 						<Tabs.List className="border-none">
 							<Tabs.Trigger value="contents" asChild onClick={() => handleTabChange('contents')}>
@@ -77,11 +77,11 @@ export default function LocationManager() {
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>
-
-					<Dialog.Close onClick={handleClose} />
-				</Dialog.Header>
-				<div className="scrollbar-hide h-[300px] overflow-y-auto">{renderTabContent()}</div>
-			</Dialog.Content>
-		</Dialog>
+				</SheetPrimitive.Header>
+				<div className="scrollbar-hide flex-1 overflow-y-auto px-4 pb-4">
+					{renderTabContent()}
+				</div>
+			</SheetPrimitive.Content>
+		</SheetPrimitive>
 	)
 }

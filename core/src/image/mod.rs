@@ -1,3 +1,9 @@
+//! Image processing utilities, including resizing, format conversion, and
+//! thumbnail generation.
+//!
+//! The [`processor`] module is where the bulk of image loading and manipulation (resizing, etc)
+//! is handled and feeds into [`thumbnail`] for the actual thumbnail operations
+
 mod error;
 mod process;
 mod processor;
@@ -68,14 +74,4 @@ pub(crate) mod tests {
 			.to_string_lossy()
 			.to_string()
 	}
-
-	// pub fn get_test_avif_path() -> String {
-	// 	::tests::fixtures::test_data_dir().join("example.avif")
-	// 		.to_string_lossy()
-	// 		.to_string()
-	// }
-
-	// TODO(339): Avif + Jxl support
-	// pub fn get_test_jxl_path() -> String {
-	// 	::tests::fixtures::test_data_dir().join("example.jxl")
 }

@@ -1,18 +1,3 @@
 # Core
 
-The `core` crate contains Stump's core functionalities
-
-## Structure
-
-<!--TODO: edited a lil to add to diff so i remember to update this before merge -->
-
-The `src` directory contains the following modules:
-
-- `config`: Configuration for the any apps consuming the core, including environment variables and tracing
-- `db`: Database client, models, and utilities
-- `filesystem`: Anything related to the filesystem and handling of files
-  - `image`: Image processing and utilities
-  - `media`: Media processing and utilities
-  - `scanner`: The bulk of the indexing and scanning logic
-- `job`: Background job processing and execution lifecycle helpers, Apalis-backed system
-- `opds`: OPDS feed generation and XML utilities
+The `core` crate contains Stump's core functionalities. Each major module should have documentation at its root `mod.rs` file, but of course please reach out if you find gaps or have questions about contributing

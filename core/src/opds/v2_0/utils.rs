@@ -74,7 +74,7 @@ impl OPDSV2QueryExt for DatabaseConnection {
 		values.extend(book_ids.into_iter().map(Value::from));
 
 		let result: Vec<QueryResult> = self
-			.query_all(sea_orm::Statement::from_sql_and_values(
+			.query_all_raw(sea_orm::Statement::from_sql_and_values(
 				backend, sql, values,
 			))
 			.await?;

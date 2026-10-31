@@ -19,9 +19,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
+import { useSeriesContextSafe } from '@/components/series/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useSeriesContextSafe } from '@/scenes/series'
 
 import { useFileExplorerContext } from '../context'
 import UploadMenu from './UploadMenu'

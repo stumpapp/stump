@@ -83,14 +83,14 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 				items: [
 					{
 						label: t('settingsScene.server/users.userTable.actions.inspect'),
-						leftIcon: <Search className="mr-2 h-4 w-4" />,
+						leftIcon: <Search />,
 						onClick: () => onSelectForInspect(user),
 					},
 					{
 						disabled: user.loginSessionsCount === 0,
 						label: t('settingsScene.server/users.userTable.actions.clearSessions'),
 						isDestructive: true,
-						leftIcon: <Database className="mr-2 h-4 w-4" />,
+						leftIcon: <Database />,
 						onClick: handleClearUserSessions,
 					},
 				],
@@ -102,14 +102,14 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 								{
 									label: t('settingsScene.server/users.userTable.actions.edit'),
 									disabled: isSelf,
-									leftIcon: <Pencil className="mr-2 h-4 w-4" />,
+									leftIcon: <Pencil />,
 									onClick: () => navigate(paths.updateUser(user.id)),
 								} as const,
 								{
 									disabled: isSelf,
 									label: t('settingsScene.server/users.userTable.actions.delete'),
 									isDestructive: true,
-									leftIcon: <Trash className="mr-2 h-4 w-4" />,
+									leftIcon: <Trash />,
 									onClick: () => onSelectForDeletion(user),
 								} as const,
 								{

@@ -28,16 +28,28 @@ impl From<(ContentType, Vec<u8>)> for ImageResponse {
 
 impl IntoResponse for ImageResponse {
 	fn into_response(self) -> Response {
+		let content_type = if self.content_type.is_image() {
+			self.content_type.to_string()
+		} else {
+			tracing::warn!(
+				content_type = ?self.content_type,
+				"Refusing to serve non-image content type in image response!"
+			);
+			"application/octet-stream".to_string()
+		};
+
 		let mut base_response = self.data.into_response();
 
 		base_response.headers_mut().insert(
 			header::CONTENT_TYPE,
-			HeaderValue::from_str(self.content_type.to_string().as_str()).unwrap_or_else(
-				|err| {
-					error!(?err, "Failed to derive explicit content type");
-					HeaderValue::from_static("image/jpeg")
-				},
-			),
+			HeaderValue::from_str(&content_type).unwrap_or_else(|err| {
+				error!(?err, "Failed to derive explicit content type");
+				HeaderValue::from_static("image/jpeg")
+			}),
+		);
+		base_response.headers_mut().insert(
+			header::X_CONTENT_TYPE_OPTIONS,
+			HeaderValue::from_static("nosniff"),
 		);
 		base_response.headers_mut().insert(
 			header::CACHE_CONTROL,
@@ -162,6 +174,25 @@ mod tests {
 			axum_response.headers().get(header::CONTENT_TYPE),
 			Some(&HeaderValue::from_static("image/jpeg"))
 		);
+	}
+
+	#[test]
+	fn test_image_response_never_serves_active_content() {
+		for content_type in [ContentType::HTML, ContentType::XHTML, ContentType::XML] {
+			let response =
+				ImageResponse::new(content_type, b"<script></script>".to_vec());
+			let axum_response = response.into_response();
+
+			assert_eq!(
+				axum_response.headers().get(header::CONTENT_TYPE),
+				Some(&HeaderValue::from_static("application/octet-stream")),
+				"{content_type:?} must not be served as-is"
+			);
+			assert_eq!(
+				axum_response.headers().get(header::X_CONTENT_TYPE_OPTIONS),
+				Some(&HeaderValue::from_static("nosniff"))
+			);
+		}
 	}
 
 	#[test]

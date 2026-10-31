@@ -1,7 +1,13 @@
 import type { OnDecorationActivatedEvent } from '@readium/navigator'
 import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator } from '@readium/shared'
-import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import {
+	parseGraphQLDecimal,
+	queryClient,
+	useGraphQLMutation,
+	useSDK,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import {
 	Bookmark,
 	EpubProgressInput,
@@ -228,9 +234,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	const [openState, setOpenState] = useState<LoadState>({ status: 'loading' })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)
 	const [localProgress, setLocalProgress] = useState<number | null>(
-		ebook.media?.readProgress?.percentageCompleted != null
-			? Number(ebook.media.readProgress.percentageCompleted)
-			: null,
+		parseGraphQLDecimal(ebook.media?.readProgress?.percentageCompleted),
 	)
 
 	// Intentionally does not invalidate `['readiumWebReader', id]` on every success — progress
@@ -276,9 +280,9 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				const opened = await openStumpPublication(sdk, id, abort.signal)
 				if (abort.signal.aborted) return
 
-				const percentageCompleted = ebook.media?.readProgress?.percentageCompleted
-					? Number(ebook.media.readProgress.percentageCompleted)
-					: null
+				const percentageCompleted = parseGraphQLDecimal(
+					ebook.media?.readProgress?.percentageCompleted,
+				)
 
 				const initialLocator = isIncognito
 					? undefined

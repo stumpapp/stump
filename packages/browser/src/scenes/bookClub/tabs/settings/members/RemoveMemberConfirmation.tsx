@@ -19,7 +19,6 @@ export default function RemoveMemberConfirmation({ isOpen, onClose }: Props) {
 			description={t('bookClubSettingsScene.members.removeConfirmation.description')}
 			confirmText={translate('shared.common.confirm')}
 			confirmVariant="destructive"
-			size="sm"
 		/>
 	)
 }

@@ -205,6 +205,7 @@ impl StumpConfig {
 			config_dir: get_default_config_dir(),
 			enable_koreader_sync: true,
 			enable_kobo_sync: true,
+			enable_upload: true,
 			..Default::default()
 		}
 	}

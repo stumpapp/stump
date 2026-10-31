@@ -23,7 +23,7 @@ use models::{
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use reqwest::Method;
-use sea_orm::{prelude::*, Condition, DatabaseConnection};
+use sea_orm::{prelude::*, Condition, DatabaseConnection, ExprTrait};
 use serde::Deserialize;
 use stump_core::opds::v2_0::{
 	authentication::{

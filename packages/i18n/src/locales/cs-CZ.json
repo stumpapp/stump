@@ -152,9 +152,6 @@
           }
         ],
         "review": {
-          "yes": "Ano",
-          "no": "Ne",
-          "none": "Nic",
           "labels": {
             "name": "Název",
             "description": "Popis"
@@ -274,13 +271,10 @@
             "label": "Zapnuto",
             "description": "Generovat náhledové obrázky pro tuto knihovnu"
           },
-          "format": {
-            "label": "Formát obrázku",
-            "description": "Formát vygenerovaných obrázků náhledů"
-          },
-          "quality": {
-            "label": "Kvalita",
-            "description": "Kvalita vygenerovaných obrázků náhledů mezi 0 a 1.0"
+          "output": {
+            "description": "Formát vygenerovaných obrázků náhledů",
+            "format": "Formát obrázku",
+            "quality": "Kvalita"
           }
         },
         "ignoreRules": {
@@ -351,27 +345,14 @@
             "description": "Pokud používáte KoReader, vygenerujte další hash ve formátu, který očekává"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organizace",
-            "description": "Určete, který vzor nejvíce odpovídá organizaci vaší knihovny",
-            "docs": [
-              "Nejste si jisti, co vybrat? Klikněte",
-              "zde",
-              "pro více informací.",
-              "Toto nastavení nelze později změnit"
-            ],
-            "disabled": "Toto nastavení nemůžete změnit"
-          },
-          "options": {
+        "organization": {
+          "label": "Organizace",
+          "filesystemPattern": {
             "label": "Vzor knihovny",
-            "description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
-            "collectionPriority": {
-              "label": "Priorita sbírky",
+            "COLLECTION_BASED": {
               "description": "Každá složka na nejvyšší úrovni kořene knihovny je jedna série"
             },
-            "seriesPriority": {
-              "label": "Priorita série",
+            "SERIES_BASED": {
               "description": "Každá složka na libovolné úrovni rekurzivně je jedna série"
             }
           }
@@ -387,7 +368,6 @@
     },
     "createLibraryScene": {
       "heading": "Vytvořit novou knihovnu",
-      "subtitleLink": "příslušná dokumentace",
       "form": {
         "stepLabel": "Krok",
         "steps": [
@@ -413,9 +393,6 @@
           }
         ],
         "review": {
-          "yes": "Ano",
-          "no": "Ne",
-          "none": "Žádné",
           "labels": {
             "generateThumbnails": "Generovat náhledy",
             "mode": "Režim",
@@ -562,13 +539,7 @@
       },
       "options/thumbnails": {
         "title": "Náhledy",
-        "description": "Možnosti nastavení a správy náhledů v této knihovně",
-        "sections": {
-          "management": {
-            "heading": "Správa",
-            "description": "Spravovat existující náhledy pro tuto knihovnu"
-          }
-        }
+        "description": "Možnosti nastavení a správy náhledů v této knihovně"
       },
       "integrations/analysis": {
         "title": "Analýza",
@@ -810,9 +781,6 @@
           }
         ],
         "review": {
-          "yes": "Ano",
-          "no": "Ne",
-          "none": "Nic",
           "labels": {
             "name": "Název",
             "description": "Popis",
@@ -1040,17 +1008,6 @@
             "buttons": {
               "confirm": "Uložit změny"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "Jazyk"
-            },
-            "heading": "Jazyk a lokalizace",
-            "subtitle": [
-              "Stump podporuje více jazyků a místních jazykových mutací, nastavte si je níže. Prosím, zvažte pomoc při zlepšování kvality",
-              "Přeložte Stump",
-              "pokud můžete!"
-            ]
           }
         }
       },
@@ -1079,9 +1036,6 @@
           },
           "thumbnailPlaceholder": {
             "description": "The type of placeholder to show for thumbnails that haven't loaded yet"
-          },
-          "primaryNavigation": {
-            "description": "The primary navigation method for the app"
           },
           "navigationArrangement": {
             "label": "Uspořádání navigace",
@@ -1240,7 +1194,6 @@
           },
           "optionalFeatures": {
             "label": "Volitelné funkce",
-            "description": "Správa volitelných funkcí unikátních pro desktopovou aplikaci",
             "bundledServer": {
               "description": "Spustit připojený server na pozadí, zatímco je spuštěna desktopová aplikace (vyžaduje restart)"
             },
@@ -1255,13 +1208,7 @@
       "server/general": {
         "helmet": "Obecné nastavení serveru",
         "title": "Obecná nastavení",
-        "description": "Obecná nastavení týkající se instance serveru Stump",
-        "sections": {
-          "serverPublicUrl": {
-            "label": "Veřejná adresa URL",
-            "description": "URL, kterou je váš server přístupný mimo vaši síť, pokud je to možné. Tímto povolíte odkazy na pozvánky a další funkce"
-          }
-        }
+        "description": "Obecná nastavení týkající se instance serveru Stump"
       },
       "server/logs": {
         "helmet": "Logy",
@@ -1621,7 +1568,6 @@
     },
     "noLibraries": {
       "heading": "Zde není nic k zobrazení",
-      "messagePrefix": "Nemůžete vidět, co nemáte",
       "message": {
         "create": "Vytvořte knihovnu pro začátek",
         "wait": "Jakmile budou knihovny vytvořeny, zobrazí se zde"
@@ -1653,7 +1599,6 @@
         "seeAll": "Zobrazit vše"
       },
       "libraryOptions": {
-        "scanLibrary": "Skenovat",
         "manageLibrary": "Manage",
         "deleteLibrary": "Smazat"
       }
@@ -1669,13 +1614,11 @@
       "placeholder": "Vyberte nebo vytvořte štítek",
       "placeholderNoTags": "Nejsou k dispozici žádné štítky"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Upravit náhled",
-      "options": {
-        "selectFromBooks": "Vybrat z knih",
-        "uploadImage": "Nahrát obrázek"
-      },
-      "uploadImage": {
+      "chooseFromBooks": "Vybrat z knih",
+      "uploadImage": "Nahrát obrázek",
+      "uploadDialog": {
         "emptyState": "Zde se zobrazí náhled vašeho obrázku",
         "prompt": "Přetáhněte obrázek sem nebo klikněte pro výběr",
         "remove": "Odstranit obrázek"
@@ -1707,12 +1650,15 @@
       "notReady": "Tato funkce není připravena",
       "notUsedYet": "Zatím nepoužito",
       "never": "Nikdy",
+      "none": "Žádné",
       "scan": "Skenovat",
+      "no": "Ne",
       "home": "Domů",
       "libraries": "Knihovny",
       "smartLists": "Chytré seznamy",
       "files": "Soubory",
-      "search": "Hledat"
+      "search": "Hledat",
+      "yes": "Ano"
     },
     "bookMetadata": {
       "ageRating": "Věkové hodnocení",
@@ -1758,6 +1704,9 @@
         "emptyMessage": "Zde se zobrazí všechny naposledy přidané knihy"
       }
     },
+    "libraryActions": {
+      "scan": "Skenovat"
+    },
     "epubSettings": {
       "fontSize": {
         "label": "Velikost písma",
@@ -1776,7 +1725,6 @@
         "nameForbidden": "Toto jméno nelze použít",
         "urlExists": "Server s touto URL již existuje"
       },
-      "primaryUrlDescription": "URL serveru Stump",
       "name": {
         "description": "Přátelské jméno pro identifikaci tohoto serveru"
       }
@@ -1795,16 +1743,7 @@
       },
       "serverInfo": {
         "title": "Informace o serveru",
-        "description": "Základní podrobnosti o instanci serveru Stump",
-        "build": {
-          "label": "Sestavení",
-          "description": "Podrobnosti o verzi a sestavení",
-          "version": {
-            "semver": "Verze",
-            "commitHash": "Přesná revize",
-            "date": "Datum sestavení"
-          }
-        }
+        "description": "Základní podrobnosti o instanci serveru Stump"
       }
     }
   }

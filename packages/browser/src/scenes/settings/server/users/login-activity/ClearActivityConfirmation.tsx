@@ -66,7 +66,6 @@ export default function ClearLoginActivityConfirmation() {
 					{t(getKey('title'))}
 				</Button>
 			}
-			size="sm"
 		/>
 	)
 }

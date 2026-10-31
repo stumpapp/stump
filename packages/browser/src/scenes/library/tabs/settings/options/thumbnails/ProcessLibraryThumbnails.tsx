@@ -1,5 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Button, DropdownMenu, Label, Text } from '@stump/components'
+import { Button, DropdownMenu, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import { useCallback } from 'react'
@@ -13,14 +13,9 @@ const mutation = graphql(`
 	}
 `)
 
-const LOCALE_KEY =
-	'librarySettingsScene.options/thumbnails.sections.management.processThumbnailColors'
-const getKey = (key: string) => `${LOCALE_KEY}.${key}`
-
 export default function ProcessLibraryThumbnails() {
 	const { library } = useLibraryContext()
-	const { t } = useTranslate()
-
+	const { t, translate } = useTranslate()
 	const { mutate } = useGraphQLMutation(mutation)
 
 	const process = useCallback(
@@ -31,42 +26,36 @@ export default function ProcessLibraryThumbnails() {
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Label>{t(getKey('heading'))}</Label>
-				<Text size="sm" variant="muted">
-					{t(getKey('description'))}
-				</Text>
-			</div>
-
-			<div>
-				<DropdownMenu
-					trigger={
-						<Button variant="outline">
-							{t(getKey('trigger'))}
-							<ChevronDown className="ml-2 h-4 w-4" />
-						</Button>
-					}
-					groups={[
-						{
-							items: [
-								{
-									label: t(getKey('missingOnly')),
-									leftIcon: <ImagePlus className={iconStyle} />,
-									onClick: () => process(false),
-								},
-								{
-									label: t(getKey('reprocessAll')),
-									isDestructive: true,
-									leftIcon: <AlertTriangle className={iconStyle} />,
-									onClick: () => process(true),
-								},
-							],
-						},
-					]}
-					align="start"
-				/>
-			</div>
-		</div>
+		<NewCard.Row
+			label={t('thumbnailManagement.processColors.label')}
+			description={t('thumbnailManagement.processColors.description')}
+		>
+			<DropdownMenu
+				trigger={
+					<Button variant="outline">
+						{translate('shared.common.extract')}
+						<ChevronDown className="ml-2 h-4 w-4" />
+					</Button>
+				}
+				groups={[
+					{
+						items: [
+							{
+								label: t('thumbnailManagement.missingOnly'),
+								leftIcon: <ImagePlus className={iconStyle} />,
+								onClick: () => process(false),
+							},
+							{
+								label: t('thumbnailManagement.everything'),
+								variant: 'destructive',
+								leftIcon: <AlertTriangle className={iconStyle} />,
+								onClick: () => process(true),
+							},
+						],
+					},
+				]}
+				align="start"
+			/>
+		</NewCard.Row>
 	)
 }

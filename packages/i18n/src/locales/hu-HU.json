@@ -152,9 +152,6 @@
           }
         ],
         "review": {
-          "yes": "Igen",
-          "no": "Nem",
-          "none": "Nincs",
           "labels": {
             "name": "Név",
             "description": "Leírás"
@@ -274,13 +271,10 @@
             "label": "Engedélyezve",
             "description": "Bélyegképek generálása ehhez a könyvtárhoz"
           },
-          "format": {
-            "label": "Képformátum",
-            "description": "A generált bélyegképek formátuma"
-          },
-          "quality": {
-            "label": "Minőség",
-            "description": "A generált bélyegképek minősége, 0 és 1,0 között"
+          "output": {
+            "description": "A generált bélyegképek formátuma",
+            "format": "Képformátum",
+            "quality": "Minőség"
           }
         },
         "ignoreRules": {
@@ -346,21 +340,10 @@
             "description": "Ha KoReader-t használsz, generálj további hash-eket az általa elvárt formátumban"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Felépítés",
-            "description": "Határozd meg, hogy melyik minta illeszkedik legjobban a könyvtárad felépítéséhez",
-            "docs": [
-              "Nem tudod, melyiket válaszd? Kattints",
-              "ide",
-              "több információért.",
-              "Ezt a beállítást később nem lehet megváltoztatni"
-            ],
-            "disabled": "Ezt a beállítást nem lehet megváltoztatni"
-          },
-          "options": {
-            "label": "Könyvtári minta",
-            "description": "Az a beállítás, amely meghatározza, hogy a Stump hogyan építse fel a könyvtáradat"
+        "organization": {
+          "label": "Felépítés",
+          "filesystemPattern": {
+            "label": "Könyvtári minta"
           }
         }
       },
@@ -374,7 +357,6 @@
     },
     "createLibraryScene": {
       "heading": "Create New Library",
-      "subtitleLink": "vonatkozó dokumentáció",
       "form": {
         "stepLabel": "Lépés",
         "steps": [
@@ -400,9 +382,6 @@
           }
         ],
         "review": {
-          "yes": "Igen",
-          "no": "Nem",
-          "none": "Nincs",
           "labels": {
             "generateThumbnails": "Generáljon bélyegképeket",
             "mode": "Mód",
@@ -463,13 +442,6 @@
       },
       "options/scanning": {
         "description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
-      },
-      "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "Management"
-          }
-        }
       },
       "integrations/analysis": {
         "sections": {
@@ -758,11 +730,10 @@
         "createSmartlist": "Okoslista létrehozása"
       },
       "libraryOptions": {
-        "scanLibrary": "Szkennelés",
         "manageLibrary": "Manage"
       }
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Bélyegkép kiválasztása"
     }
   },
@@ -787,8 +758,14 @@
         "emptyMessage": "Minden újonnan hozzáadott könyv itt fog megjelenni"
       }
     },
+    "libraryActions": {
+      "scan": "Szkennelés"
+    },
     "common": {
-      "smartLists": "Okoslisták"
+      "none": "Nincs",
+      "no": "Nem",
+      "smartLists": "Okoslisták",
+      "yes": "Igen"
     }
   }
 }

@@ -6,16 +6,19 @@ import { toast } from 'sonner'
 
 import { useTranslate } from '@/hooks/useTranslate'
 
-const LOCALE_BASE_KEY = 'thumbnailDropdown.uploadImage'
+const LOCALE_BASE_KEY = 'thumbnailSelector.uploadDialog'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 type Props = {
 	isOpen: boolean
 	onClose: () => void
 	onUploadImage: (file: File) => Promise<void>
+	maxSize: number
 }
 
-export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Props) {
+// TODO(ui): make this a bit prettier
+
+export default function UploadImageModal({ isOpen, onClose, onUploadImage, maxSize }: Props) {
 	const { t, translate } = useTranslate()
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -50,8 +53,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 		accept: {
 			'image/*': [],
 		},
-		// TODO: support custom max size for server
-		maxSize: 20 * 1024 * 1024, // 20MB
+		maxSize,
 		onDrop,
 	})
 

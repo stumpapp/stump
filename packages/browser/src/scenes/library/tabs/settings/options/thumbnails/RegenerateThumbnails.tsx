@@ -1,5 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Button, DropdownMenu, Label, Text } from '@stump/components'
+import { Button, DropdownMenu, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import { useCallback } from 'react'
@@ -13,14 +13,9 @@ const mutation = graphql(`
 	}
 `)
 
-const LOCALE_KEY =
-	'librarySettingsScene.options/thumbnails.sections.management.regenerateThumbnails'
-const getKey = (key: string) => `${LOCALE_KEY}.${key}`
-
 export default function RegenerateThumbnails() {
 	const { library } = useLibraryContext()
 	const { t } = useTranslate()
-
 	const { mutate } = useGraphQLMutation(mutation)
 
 	const regenerate = useCallback(
@@ -31,19 +26,15 @@ export default function RegenerateThumbnails() {
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Label>{t(getKey('heading'))}</Label>
-				<Text size="sm" variant="muted">
-					{t(getKey('description'))}
-				</Text>
-			</div>
-
+		<NewCard.Row
+			label={t('thumbnailManagement.regenerateThumbnails.label')}
+			description={t('thumbnailManagement.regenerateThumbnails.description')}
+		>
 			<div>
 				<DropdownMenu
 					trigger={
 						<Button variant="outline">
-							{t(getKey('trigger'))}
+							{t('thumbnailManagement.generate')}
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}
@@ -51,13 +42,13 @@ export default function RegenerateThumbnails() {
 						{
 							items: [
 								{
-									label: t(getKey('missingOnly')),
+									label: t('thumbnailManagement.missingOnly'),
 									leftIcon: <ImagePlus className={iconStyle} />,
 									onClick: () => regenerate(false),
 								},
 								{
-									label: t(getKey('forceRecreateAll')),
-									isDestructive: true,
+									label: t('thumbnailManagement.everything'),
+									variant: 'destructive',
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),
 								},
@@ -67,6 +58,6 @@ export default function RegenerateThumbnails() {
 					align="start"
 				/>
 			</div>
-		</div>
+		</NewCard.Row>
 	)
 }

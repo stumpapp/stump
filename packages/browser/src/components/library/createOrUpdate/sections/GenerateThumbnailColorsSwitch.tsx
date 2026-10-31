@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -8,6 +8,7 @@ import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function GenerateThumbnailColorsSwitch() {
 	const { t } = useTranslate()
+
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
 	const [thumbnailsEnabled, processThumbnailColorsEvenWithoutConfig] = useWatch({
@@ -22,10 +23,13 @@ export default function GenerateThumbnailColorsSwitch() {
 	)
 
 	return (
-		<div className="py-4">
-			<WideSwitch
-				label={t('createOrUpdateLibraryForm.fields.thumbnailConfig.colors.label')}
-				description={t('createOrUpdateLibraryForm.fields.thumbnailConfig.colors.description')}
+		<NewCard.Row
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
+			disabled={thumbnailsEnabled}
+			title={thumbnailsEnabled ? t(getKey('requiredWhenGenerationOn')) : undefined}
+		>
+			<RawSwitch
 				checked={enabled}
 				disabled={thumbnailsEnabled}
 				onCheckedChange={() =>
@@ -35,6 +39,9 @@ export default function GenerateThumbnailColorsSwitch() {
 					)
 				}
 			/>
-		</div>
+		</NewCard.Row>
 	)
 }
+
+const getKey = (key: string) =>
+	`createOrUpdateLibraryForm.fields.thumbnailConfig.thumbnailColors.${key}`

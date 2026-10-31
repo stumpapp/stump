@@ -7,6 +7,7 @@ import {
 	cn,
 	Link,
 	NewCard,
+	TemplatedTranslationText,
 	Text,
 	TEXT_VARIANTS,
 } from '@stump/components'
@@ -161,11 +162,18 @@ export default function ServerInfoSection() {
 						{translate('shared.serverSettings.serverInfo.nonStableChannel.title')}
 					</AlertTitle>
 					<AlertDescription className="flex">
-						{translate('shared.serverSettings.serverInfo.nonStableChannel.description.0')}{' '}
-						<span className="font-semibold">
-							{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
-						</span>{' '}
-						{translate('shared.serverSettings.serverInfo.nonStableChannel.description.1')}
+						<TemplatedTranslationText
+							className="text-foreground-muted"
+							fakeTranslation={translate(
+								'shared.serverSettings.serverInfo.nonStableChannel.description',
+								{
+									channelName: 'CHANNEL_NAME',
+								},
+							)}
+							values={{
+								CHANNEL_NAME: toUpper(buildChannel.charAt(0)) + buildChannel.slice(1),
+							}}
+						/>
 					</AlertDescription>
 				</Alert>
 			)}

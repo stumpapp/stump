@@ -9,7 +9,8 @@ const BookOverviewScene = lazy(() => import('./BookOverviewScene.tsx'))
 const BookReaderScene = lazy(() => import('./reader/BookReaderScene.tsx'))
 const EpubReaderScene = lazy(() => import('./reader/EpubReaderScene.tsx'))
 const PDFReaderScene = lazy(() => import('./reader/PDFReaderScene.tsx'))
-const BookManagementScene = lazy(() => import('./settings/BookManagementScene.tsx'))
+const BookSettingsScene = lazy(() => import('./settings/BookSettingsScene.tsx'))
+const BookReadingTimelineScene = lazy(() => import('./BookReadingTimelineScene.tsx'))
 
 export default function BookRouter() {
 	return (
@@ -17,6 +18,7 @@ export default function BookRouter() {
 			<Routes>
 				<Route path="/" element={<BookSearchScene />} />
 				<Route path=":id" element={<BookOverviewScene />} />
+				<Route path=":id/reading-timeline" element={<BookReadingTimelineScene />} />
 				<Route
 					path=":id/manage"
 					element={
@@ -30,7 +32,7 @@ export default function BookRouter() {
 						/>
 					}
 				>
-					<Route path="" element={<BookManagementScene />} />
+					<Route path="" element={<BookSettingsScene />} />
 				</Route>
 				<Route path=":id/epub-reader" element={<EpubReaderScene />} />
 				<Route path=":id/pdf-reader" element={<PDFReaderScene />} />

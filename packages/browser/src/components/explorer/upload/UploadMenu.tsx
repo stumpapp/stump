@@ -2,7 +2,7 @@ import { Dropdown, IconButton, ToolTip } from '@stump/components'
 import { BookPlus, FolderPlus, Upload } from 'lucide-react'
 
 import { useTranslate } from '@/hooks/useTranslate'
-import { useSeriesContextSafe } from '@/scenes/series/context'
+import { useSeriesContextSafe } from '@/components/series/context'
 
 type Props = {
 	onSelect: (type: 'books' | 'series') => void
@@ -25,13 +25,13 @@ export default function UploadMenu({ onSelect }: Props) {
 			<Dropdown.Content align="end">
 				<Dropdown.Group>
 					<Dropdown.Item onClick={() => onSelect('books')}>
-						<BookPlus className="mr-2 h-4 w-4" />
+						<BookPlus className="h-4 w-4" />
 						<span>{t('common.addBooks')}</span>
 					</Dropdown.Item>
 
 					{enableSeries && (
 						<Dropdown.Item onClick={() => onSelect('series')}>
-							<FolderPlus className="mr-2 h-4 w-4" />
+							<FolderPlus className="h-4 w-4" />
 							<span>{t('common.addSeries')}</span>
 						</Dropdown.Item>
 					)}

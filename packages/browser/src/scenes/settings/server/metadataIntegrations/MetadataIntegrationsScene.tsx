@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import { ExperimentalFeatureDisclaimer } from '@/components/ExperimentalFeatureDisclaimer'
 import { PendingMatchesSection } from '@/components/metadata/metadataMatching'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -11,18 +11,17 @@ export default function GeneralServerSettingsScene() {
 	const { t } = useTranslate()
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/metadataIntegrations.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<ExperimentalFeatureDisclaimer />
-				<div className="gap-12 flex flex-col">
-					<ProvidersSection />
-					<PendingMatchesSection />
-				</div>
-			</ContentContainer>
+			<ExperimentalFeatureDisclaimer />
+
+			<div className="gap-12 flex flex-col">
+				<ProvidersSection />
+				<PendingMatchesSection />
+			</div>
 		</SceneContainer>
 	)
 }

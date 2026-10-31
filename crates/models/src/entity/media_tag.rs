@@ -1,5 +1,8 @@
 use sea_orm::entity::prelude::*;
 
+use super::{media, tag};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "media_tags")]
 pub struct Model {
@@ -8,38 +11,22 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub media_id: String,
 	pub tag_id: i32,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::MediaId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "media_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
+	pub media: BelongsTo<media::Entity>,
 	#[sea_orm(
-		belongs_to = "super::tag::Entity",
-		from = "Column::TagId",
-		to = "super::tag::Column::Id",
+		belongs_to,
+		from = "tag_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Tag,
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
-}
-
-impl Related<super::tag::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Tag.def()
-	}
+	pub tag: BelongsTo<tag::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

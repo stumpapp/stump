@@ -80,7 +80,6 @@
     },
     "createLibraryScene": {
       "heading": "Criar nova biblioteca",
-      "subtitleLink": "documentação relevante",
       "form": {
         "buttons": {
           "confirm": "Criar Biblioteca"
@@ -93,13 +92,6 @@
       "sidebar": {
         "configuration": {
           "label": "Options"
-        }
-      },
-      "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "Management"
-          }
         }
       },
       "integrations/analysis": {
@@ -239,7 +231,7 @@
     "tagSelect": {
       "placeholderNoTags": "Não há tags disponíveis"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edit thumbnail"
     }
   },

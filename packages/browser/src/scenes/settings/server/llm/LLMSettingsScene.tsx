@@ -9,7 +9,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import LlmTaggingConfigCard from './LlmTaggingConfigCard'
@@ -113,13 +113,12 @@ export default function LLMSettingsScene() {
 	}
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/llm.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<div className="gap-12 flex flex-col">
+			<div className="gap-12 flex flex-col">
 					<div className="gap-6 flex flex-col">
 						<Heading size="sm">{t(getKey('connection.heading'))}</Heading>
 						<Form form={form} onSubmit={handleSubmit}>
@@ -173,9 +172,8 @@ export default function LLMSettingsScene() {
 						<Suspense fallback={null}>
 							<LlmTaggingConfigCard />
 						</Suspense>
-					</div>
 				</div>
-			</ContentContainer>
+			</div>
 		</SceneContainer>
 	)
 }

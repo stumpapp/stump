@@ -105,11 +105,6 @@
         "label": "Leyendo",
         "disableDismissGesture": "Desactivar gesto de descarte"
       },
-      "textCase": {
-        "options": {
-          "lowerCase": "Minúsculas"
-        }
-      },
       "tintListBackground": "Teñir el fondo de las listas",
       "management": {
         "dataUsage": {
@@ -398,13 +393,10 @@
           }
         ],
         "review": {
-          "yes": "Si",
-          "none": "Ninguno",
           "labels": {
             "name": "Nombre",
             "description": "Descripción"
-          },
-          "no": "No"
+          }
         },
         "submit": "Crear Club de Libros"
       }
@@ -496,28 +488,6 @@
           "label": "Contenido de la librería",
           "description": "Tipo de contenido presente en la librería"
         },
-        "defaultLibraryView": {
-          "label": "Vista por defecto de la biblioteca",
-          "description": "Configurar cuál pestaña se muestra por defecto al abrir esta biblioteca",
-          "hideSeriesView": {
-            "label": "Ocultar pestaña de series",
-            "description": "Ocultar la pestaña de series de la navegación de la biblioteca"
-          },
-          "options": {
-            "series": {
-              "description": "Mostrar por defecto la pestaña de series",
-              "label": "Series"
-            },
-            "books": {
-              "label": "Libros",
-              "description": "Mostrar por defecto la pestaña de libros"
-            }
-          },
-          "skipBookOverview": {
-            "description": "Abrir lector directamente al seleccionar libros en esta librería",
-            "label": "Omitir vista general del libro"
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "Opciones de lectura",
@@ -558,10 +528,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Escala de la vista en miniatura por un factor del tamaño original. Por ejemplo, 0.65 resultará en una vista en miniatura que es 65% del tamaño original",
-            "factor": {
-              "label": "Factor de escala"
-            }
+            "label": "Factor de escala",
+            "description": "Escala de la vista en miniatura por un factor del tamaño original. Por ejemplo, 0.65 resultará en una vista en miniatura que es 65% del tamaño original"
           },
           "exact": {
             "description": "Redimensionar la vista en miniatura a un tamaño exacto en píxeles",
@@ -581,18 +549,12 @@
                 "height": "Alto"
               }
             },
-            "size": {
-              "label": "Tamaño"
-            },
             "label": "Autoescalado"
           },
-          "format": {
-            "label": "Formato de imagen",
-            "description": "El formato de las imágenes de vista en miniatura generadas"
-          },
-          "quality": {
-            "label": "Calidad",
-            "description": "La calidad de las imágenes de vista en miniatura generadas, entre 1 y 100"
+          "output": {
+            "description": "El formato de las imágenes de vista en miniatura generadas",
+            "format": "Formato de imagen",
+            "quality": "Calidad"
           }
         },
         "ignoreRules": {
@@ -663,29 +625,34 @@
             "description": "Genera hash que KoReader pueda interpretar"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organización",
-            "description": "Identificar cuál patrón coincide de manera cercana la organización de tu biblioteca",
-            "docs": [
-              "¿No estás seguro de qué elegir? Haz clic",
-              "aquí",
-              "para más información.",
-              "No puedes cambiar esta configuración más tarde"
-            ],
-            "disabled": "No puedes cambiar esta configuración"
-          },
-          "options": {
+        "organization": {
+          "label": "Organización",
+          "filesystemPattern": {
             "label": "Patrón de biblioteca",
-            "description": "La opción que determina como Stump organizará tu biblioteca",
-            "collectionPriority": {
-              "label": "Priorizar colección",
+            "COLLECTION_BASED": {
               "description": "Cada carpeta en el nivel superior de la raíz de la biblioteca es una sola serie"
             },
-            "seriesPriority": {
-              "label": "Priorizar serie",
+            "SERIES_BASED": {
               "description": "Cada carpeta en cualquier nivel recursivamente es una sola serie"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Vista por defecto de la biblioteca",
+            "description": "Configurar cuál pestaña se muestra por defecto al abrir esta biblioteca",
+            "options": {
+              "BOOKS": "Libros",
+              "SERIES": "Series"
+            }
+          },
+          "hideSeries": {
+            "label": "Ocultar pestaña de series",
+            "description": "Ocultar la pestaña de series de la navegación de la biblioteca"
+          },
+          "skipBookOverview": {
+            "label": "Omitir vista general del libro",
+            "description": "Abrir lector directamente al seleccionar libros en esta librería"
           }
         },
         "oneshotsDirectory": {
@@ -708,7 +675,6 @@
     "createLibraryScene": {
       "heading": "Crear nueva biblioteca",
       "subtitle": "Las bibliotecas se utilizan para agrupar tus libros. Si deseas refrescar como estas funcionan, revisa el",
-      "subtitleLink": "documentación relevante",
       "form": {
         "stepLabel": "Etapa",
         "steps": [
@@ -734,9 +700,6 @@
           }
         ],
         "review": {
-          "yes": "Si",
-          "no": " No",
-          "none": "Nada",
           "labels": {
             "generateThumbnails": "Generar miniaturas",
             "processThumbnailColors": "Procesar colores de las vistas en miniatura",
@@ -901,12 +864,6 @@
         }
       },
       "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "Management",
-            "description": "Gestionar las miniaturas existentes de esta librería"
-          }
-        },
         "title": "Miniaturas",
         "description": "Ajustes y opciones de gestión para las miniaturas de esta librería"
       },
@@ -1420,17 +1377,6 @@
               "removeFailed": "Falló al remover el avatar"
             }
           },
-          "locale": {
-            "localeSelector": {
-              "label": "Idioma"
-            },
-            "heading": "Idioma y localización",
-            "subtitle": [
-              "Stump soporta varios idiomas, establece tus preferencias a continuación. Por favor, considera ayudar a mejorar la calidad de",
-              "las traducciones de Stump",
-              "si puedes!"
-            ]
-          },
           "language": {
             "label": "Idioma",
             "contributeIfAble": "¡Por favor considera contribuir a la traducción de Stump si puedes hacerlo!",
@@ -1503,18 +1449,6 @@
           "navigation": {
             "title": "Navegación",
             "description": "Personalizar los elementos de navegación de la aplicación"
-          },
-          "doubleSidebar": {
-            "description": "Habilita la navegación lateral para las páginas de configuración",
-            "label": "Ajustes en la barra lateral"
-          },
-          "replacePrimarySidebar": {
-            "description": "Cualquier instancia de una barra lateral secundaria reemplazará a la primaria en lugar de apilarlas",
-            "label": "Reemplazar la barra principal",
-            "tooltips": {
-              "doubleSidebar": "Este ajuste requiere que la barra lateral esté habilitada",
-              "topbar": "Este ajuste actualmente no está soportado cuando la barra superior es la navegación primaria"
-            }
           },
           "navigationArrangement": {
             "description": "Reorganizar o ajustar los elementos de navegación de tu navegación principal",
@@ -1597,15 +1531,6 @@
           "layoutAndArrangement": {
             "label": "Disposición y arreglo",
             "description": "Personaliza el cómo Sump muestra información y organiza su contenido"
-          },
-          "primaryNavigation": {
-            "label": "Navegación primaria",
-            "description": "Elige entre una barra lateral simple o una barra de navegación superior",
-            "options": {
-              "sidebar": "Lateral",
-              "topbar": "Superior"
-            },
-            "disclaimer": "* Ajustes para las opciones no seleccionadas serán deshabilidadas u ocultas"
           },
           "displaySpacing": {
             "label": "Espaciado de visualización",
@@ -1751,7 +1676,6 @@
           },
           "optionalFeatures": {
             "label": "Funciones opcionales",
-            "description": "Gestiona las funciones opcionales únicas a la aplicación de escritorio",
             "bundledServer": {
               "label": "Servidor local",
               "description": "Ejecuta el servidor local en segundo plano mientras la aplicación de escritorio se ejecuta (requiere reiniciar)"
@@ -1773,10 +1697,6 @@
         "title": "Ajustes generales",
         "description": "Ajustes generales relacionados con tu instancia de servidor Stump",
         "sections": {
-          "serverPublicUrl": {
-            "label": "URL pública",
-            "description": "La URL desde la que tu servidor es accesible fuera de tu red, si procede. Esto habilitará los enlaces de invitación y otras características"
-          },
           "customEmojis": {
             "title": "Emojis personalizados",
             "description": "Carga y gestiona un emoji personalizado para tu servidor",
@@ -1792,10 +1712,7 @@
             "noCustomEmojis": "No se ha añadido ningún emoji personalizado aún",
             "invalidName": "Por favor, ingresa un nombre válido para tu emoji",
             "uploadError": "Falló al cargar emoji",
-            "uploadSuccess": "Emoji cargado",
-            "renameSuccess": "Emoji renombrado",
             "renameError": "Falló al renombrar emoji",
-            "deleteSuccess": "Emoji eliminado",
             "deleteError": "Falló al eliminar emoji"
           },
           "serverConfig": {
@@ -1849,7 +1766,6 @@
             "description": "Algunas tareas pueden ser programadas. Los cambios a esta configuración surtirán efecto después de reiniciar el servidor",
             "restartRequiredTitle": "Reinicio requerido",
             "restartRequired": "Los cambios a esta configuración tendrán efecto después de reiniciar el servidor",
-            "newScheduledJob": "Nueva tarea programada",
             "deleteScheduledJob": {
               "title": "Eliminar tarea programada",
               "description": "¿Seguro de que quieres eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
@@ -2405,7 +2321,6 @@
     },
     "noLibraries": {
       "heading": "Nada que ver aquí",
-      "messagePrefix": "No puedes ver lo que no tienes",
       "message": {
         "create": "Crea una biblioteca para empezar"
       },
@@ -2435,7 +2350,6 @@
         "seeAll": "Ver todo"
       },
       "libraryOptions": {
-        "scanLibrary": "Escanear",
         "manageLibrary": "Administrar",
         "deleteLibrary": "Eliminar"
       }
@@ -2450,20 +2364,6 @@
     "tagSelect": {
       "placeholder": "Seleccionar o crear etiqueta",
       "placeholderNoTags": "No hay etiquetas disponibles"
-    },
-    "thumbnailDropdown": {
-      "options": {
-        "selectFromBooks": "Seleccionar desde los libros",
-        "uploadImage": "Subir una imagen"
-      },
-      "uploadImage": {
-        "emptyState": "Una vista previa de tu imagen aparecerá aquí",
-        "prompt": "Suelta la imagen aquí o haz clic para seleccionar",
-        "remove": "Quitar imagen",
-        "fileTooLarge": "Archivo demasiado grande",
-        "onlyOneFile": "Solo se permite un archivo",
-        "noFile": "No se proveyó ningún archivo"
-      }
     },
     "userPermissions": {
       "ACCESS_KOBO_SYNC": {
@@ -2590,9 +2490,6 @@
           }
         ],
         "review": {
-          "yes": "Si",
-          "no": "No",
-          "none": "Ninguno",
           "labels": {
             "name": "Nombre",
             "description": "Descripción",
@@ -2693,10 +2590,20 @@
       }
     },
     "thumbnailSelector": {
+      "chooseFromBooks": "Seleccionar desde los libros",
+      "uploadImage": "Subir una imagen",
       "title": "Elige una miniatura",
       "descriptions": {
         "chooseBookPage": "Escoge una página de este libro para usar como la nueva miniatura",
         "chooseSeriesBook": "Elegir un libro de la serie"
+      },
+      "uploadDialog": {
+        "emptyState": "Una vista previa de tu imagen aparecerá aquí",
+        "prompt": "Suelta la imagen aquí o haz clic para seleccionar",
+        "remove": "Quitar imagen",
+        "fileTooLarge": "Archivo demasiado grande",
+        "onlyOneFile": "Solo se permite un archivo",
+        "noFile": "No se proveyó ningún archivo"
       },
       "actions": {
         "confirmSelection": "Confirmar selección"
@@ -2787,6 +2694,7 @@
       },
       "copy": "Copiar",
       "open": "Abrir",
+      "none": "Nada",
       "series": "Series",
       "notConfigured": "No configurado",
       "completed": "Completado",
@@ -2800,6 +2708,7 @@
       "grid": "Cuadrícula",
       "list": "Lista",
       "lastCompleted": "Último completado",
+      "no": " No",
       "notAvailable": "No Disponible",
       "pageXOfY": "Página {{current}} de {{total}}",
       "publication": "Publicación",
@@ -2818,6 +2727,7 @@
       "version": "Versión",
       "settings": "Ajustes",
       "servers": "Servidores",
+      "size": "Tamaño",
       "thisBook": "este libro",
       "thisServer": "este servidor",
       "username": "Nombre de usuario",
@@ -2826,7 +2736,8 @@
       "libraries": "Librerías",
       "smartLists": "Listas inteligentes",
       "files": "Archivos",
-      "search": "Buscar"
+      "search": "Buscar",
+      "yes": "Si"
     },
     "libraryType": {
       "BOOK": "Libros",
@@ -3098,6 +3009,9 @@
       "seeDetails": "Ver detalles",
       "goToLibrary": "Ir a Librería"
     },
+    "libraryActions": {
+      "scan": "Escanear"
+    },
     "sorting": {
       "labelEllipsis": "Ordenar por...",
       "sortField": {
@@ -3160,6 +3074,11 @@
       },
       "showCurrentChapter": "Mostrar capítulo actual"
     },
+    "textCase": {
+      "options": {
+        "lowerCase": "Minúsculas"
+      }
+    },
     "addOrEditServer": {
       "auth": {
         "token": {
@@ -3188,8 +3107,6 @@
         "nameForbidden": "Este nombre está reservado",
         "urlExists": "Ya existe un servidor con esta URL"
       },
-      "primaryUrlDescription": "la URL del servidor de Stump",
-      "primaryUrlPlaceholder": "https://stump.example.com",
       "name": {
         "description": "Un nombre fácil para identificar este servidor",
         "placeholder": "Mi Servidor"
@@ -3216,11 +3133,7 @@
         "description": "Detalles básicos sobre tu instancia de Stump",
         "build": "Build",
         "nonStableChannel": {
-          "title": "Estás ejecutando una compilación no estable de Stump",
-          "description": [
-            "Parece que estás ejecutando",
-            "canal de distribución"
-          ]
+          "title": "Estás ejecutando una compilación no estable de Stump"
         },
         "exactCommit": "Commit exacto",
         "debugInfo": {

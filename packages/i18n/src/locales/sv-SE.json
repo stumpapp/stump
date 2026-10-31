@@ -180,9 +180,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nej",
-          "none": "Ingen",
           "labels": {
             "name": "Namn",
             "description": "Beskrivning"
@@ -275,27 +272,6 @@
           "label": "Taggar",
           "description": "Används för att kategorisera ditt bibliotek eller sköta åtkomstregler"
         },
-        "defaultLibraryView": {
-          "label": "Standardvy för biblioteket",
-          "description": "Konfigurera vilken flik som visas som standard när du öppnar det här biblioteket",
-          "hideSeriesView": {
-            "label": "Dölj flik för serie",
-            "description": "Dölj fliken serier från bibliotekets navigering"
-          },
-          "skipBookOverview": {
-            "description": "Öppna läsaren direkt när böcker väljs i det här biblioteket"
-          },
-          "options": {
-            "series": {
-              "label": "Serier",
-              "description": "Visa fliken serier som standard"
-            },
-            "books": {
-              "label": "Böcker",
-              "description": "Visa fliken böcker som standard"
-            }
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "Läsinställningar",
@@ -336,10 +312,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken",
-            "factor": {
-              "label": "Skalfaktor"
-            }
+            "label": "Skalfaktor",
+            "description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken"
           },
           "exact": {
             "description": "Ändra storlek på miniatyrbilden till en exakt storlek i pixlar",
@@ -359,18 +333,12 @@
                 "width": "Bredd",
                 "height": "Höjd"
               }
-            },
-            "size": {
-              "label": "Storlek"
             }
           },
-          "format": {
-            "label": "Bildformat",
-            "description": "Formatet av de genererade miniatyrbilderna"
-          },
-          "quality": {
-            "label": "Kvalitet",
-            "description": "Kvaliteten på de genererade miniatyrbilderna, mellan 1 och 100"
+          "output": {
+            "description": "Formatet av de genererade miniatyrbilderna",
+            "format": "Bildformat",
+            "quality": "Kvalitet"
           }
         },
         "ignoreRules": {
@@ -441,29 +409,33 @@
             "description": "Om du använder KoReader, generera ytterligare hashar i det format som den förväntar sig"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organisering",
-            "description": "Identifiera vilket mönster som bäst passar ditt biblioteks organisering",
-            "docs": [
-              "Inte säker på vilken? Tryck",
-              "här",
-              "för mer information.",
-              "Du kan inte ändra denna inställning senare"
-            ],
-            "disabled": "Du kan inte ändra denna inställning"
-          },
-          "options": {
+        "organization": {
+          "label": "Organisering",
+          "filesystemPattern": {
             "label": "Biblioteksmönster",
-            "description": "Den inställning som avgör hur Stump kommer att organisera ditt bibliotek",
-            "collectionPriority": {
-              "label": "Samlingsprioritet",
+            "COLLECTION_BASED": {
               "description": "Varje mapp på översta nivån av bibliotekets rot är en enda serie"
             },
-            "seriesPriority": {
-              "label": "Serieprioritet",
+            "SERIES_BASED": {
               "description": "Varje mapp på vilken nivå som helst rekursivt är en enda serie"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Standardvy för biblioteket",
+            "description": "Konfigurera vilken flik som visas som standard när du öppnar det här biblioteket",
+            "options": {
+              "BOOKS": "Böcker",
+              "SERIES": "Serier"
+            }
+          },
+          "hideSeries": {
+            "label": "Dölj flik för serie",
+            "description": "Dölj fliken serier från bibliotekets navigering"
+          },
+          "skipBookOverview": {
+            "description": "Öppna läsaren direkt när böcker väljs i det här biblioteket"
           }
         }
       },
@@ -482,7 +454,6 @@
     "createLibraryScene": {
       "heading": "Skapa bibliotek",
       "subtitle": "Bibliotek används för att gruppera dina böcker. Om du vill fräscha upp minnet om hur de fungerar kan du läsa",
-      "subtitleLink": "relevant dokumentation",
       "form": {
         "stepLabel": "Steg",
         "steps": [
@@ -508,9 +479,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nej",
-          "none": "Ingen",
           "labels": {
             "generateThumbnails": "Generera miniatyrbilder",
             "processThumbnailColors": "Bearbeta miniatyrfärger",
@@ -671,13 +639,7 @@
       },
       "options/thumbnails": {
         "title": "Miniatyrbilder",
-        "description": "Inställningar och hanteringsalternativ för miniatyrbilder i detta bibliotek",
-        "sections": {
-          "management": {
-            "heading": "Hantering",
-            "description": "Hantera befintliga miniatyrbilder för detta bibliotek"
-          }
-        }
+        "description": "Inställningar och hanteringsalternativ för miniatyrbilder i detta bibliotek"
       },
       "integrations/analysis": {
         "title": "Analys",
@@ -986,9 +948,6 @@
           }
         ],
         "review": {
-          "yes": "Ja",
-          "no": "Nej",
-          "none": "Ingen",
           "labels": {
             "name": "Namn",
             "description": "Beskrivning",
@@ -1237,17 +1196,6 @@
             "buttons": {
               "confirm": "Spara ändringar"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "Språk"
-            },
-            "heading": "Språk och lokalisering",
-            "subtitle": [
-              "Stump stöder flera språk och lokaliseringar, ange dina inställningar nedan. Överväg att hjälpa till att förbättra kvaliteten på",
-              "Stumps översättningar",
-              "om du kan göra det!"
-            ]
           }
         }
       },
@@ -1447,7 +1395,6 @@
           },
           "optionalFeatures": {
             "label": "Valfria funktioner",
-            "description": "Hantera de valfria funktioner som är unika för skrivbordsprogrammet",
             "bundledServer": {
               "label": "Paketerad server",
               "description": "Kör den medföljande servern i bakgrunden medan skrivbordsprogrammet körs (kräver omstart)"
@@ -1465,10 +1412,6 @@
         "title": "Allmänna inställningar",
         "description": "Allmänna inställningar relaterade till din Stump-serverinstans",
         "sections": {
-          "serverPublicUrl": {
-            "label": "Offentlig URL",
-            "description": "Webbadressen som din server är tillgänglig från utanför nätverket, om det är möjligt. Detta kommer att aktivera inbjudningslänkar och andra funktioner"
-          },
           "customEmojis": {
             "title": "Anpassade emojier"
           }
@@ -1853,7 +1796,6 @@
     },
     "noLibraries": {
       "heading": "Inget att se här",
-      "messagePrefix": "Du kan inte se vad du inte har",
       "message": {
         "create": "Skapa ett bibliotek för att komma igång",
         "wait": "När biblioteken har skapats kommer de visas här"
@@ -1885,7 +1827,6 @@
         "seeAll": "Se alla"
       },
       "libraryOptions": {
-        "scanLibrary": "Skanna",
         "manageLibrary": "Manage",
         "deleteLibrary": "Radera"
       }
@@ -1901,13 +1842,11 @@
       "placeholder": "Välj eller skapa tagg",
       "placeholderNoTags": "Inga taggar tillgängliga"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edit thumbnail",
-      "options": {
-        "selectFromBooks": "Välj från böcker",
-        "uploadImage": "Ladda upp bild"
-      },
-      "uploadImage": {
+      "chooseFromBooks": "Välj från böcker",
+      "uploadImage": "Ladda upp bild",
+      "uploadDialog": {
         "emptyState": "En förhandsvisning av din bild visas här",
         "prompt": "Släpp bilden här eller klicka för att välja",
         "remove": "Ta bort bilden"
@@ -2016,14 +1955,18 @@
       "notReady": "Den här funktionen är inte redo",
       "notUsedYet": "Inte använd än",
       "never": "Aldrig",
+      "none": "Ingen",
       "scan": "Skanna",
       "somethingWentWrong": "Någonting gick fel",
       "series": "Serier",
+      "no": "Nej",
+      "size": "Storlek",
       "home": "Hem",
       "libraries": "Bibliotek",
       "smartLists": "Smarta listor",
       "files": "Filer",
-      "search": "Sök"
+      "search": "Sök",
+      "yes": "Ja"
     },
     "libraryType": {
       "BOOK": "Böcker"
@@ -2093,6 +2036,9 @@
         "emptyMessage": "De senaste böckerna du lägger till kommer att visas här"
       }
     },
+    "libraryActions": {
+      "scan": "Skanna"
+    },
     "epubReader": {
       "tableOfContents": "Innehållsförteckning",
       "bookmarksAndAnnotations": "Bokmärken & anteckningar"
@@ -2123,9 +2069,6 @@
       "seeDocumentation": "Se dokumentationen"
     },
     "addOrEditServer": {
-      "addServer": {
-        "title": "Lägg till server"
-      },
       "customHeaders": {
         "label": "Anpassade huvuden"
       },
@@ -2133,8 +2076,6 @@
         "nameForbidden": "Detta namn är reserverat",
         "urlExists": "En server med denna URL finns redan"
       },
-      "primaryUrlDescription": "Webbadressen till Stump-servern",
-      "primaryUrlPlaceholder": "https://stump.exempel.se",
       "name": {
         "description": "Ett trevligt namn för att identifiera denna server"
       }
@@ -2154,20 +2095,8 @@
       "serverInfo": {
         "title": "Serverinformation",
         "description": "Grundläggande information om din Stump-serverinstans",
-        "build": {
-          "label": "Bygge",
-          "description": "Detaljer om versionen och bygget",
-          "version": {
-            "commitHash": "Exakt commit",
-            "date": "Byggdatum"
-          }
-        },
         "nonStableChannel": {
-          "title": "Du kör en icke-stabil version av Stump",
-          "description": [
-            "Det ser ut som du kör",
-            "byggversionen"
-          ]
+          "title": "Du kör en icke-stabil version av Stump"
         }
       },
       "helpfulLinks": {

@@ -7,7 +7,12 @@ export type Any = any
 export { Accordion } from './accordion'
 export { Alert, AlertDescription, AlertTitle } from './alert'
 export { Badge, type BadgeProps } from './badge'
-export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
+export {
+	Breadcrumb,
+	Breadcrumbs,
+	type BreadcrumbSegment,
+	type BreadcrumbsProps,
+} from './breadcrumbs'
 export {
 	Button,
 	ButtonOrLink,
@@ -32,6 +37,7 @@ export { Command, type CommandProps } from './command'
 export { Divider, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export {
+	AlertDialog,
 	ConfirmationModal,
 	type ConfirmationModalProps,
 	Dialog,
@@ -92,6 +98,7 @@ export {
 	type StatisticItemProps,
 	type StatisticProps,
 	type StatisticSize,
+	TemplatedTranslationText,
 	Text,
 	TEXT_VARIANTS,
 	type TextProps,

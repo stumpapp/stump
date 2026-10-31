@@ -7,7 +7,6 @@ import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
-import { ContentContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
@@ -151,7 +150,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 
 	return (
 		<Form id="create-user-form" form={form} onSubmit={handleSubmit}>
-			<ContentContainer>
+			<div className="gap-8 md:gap-12 max-w-4xl flex flex-col">
 				{renderErrors()}
 
 				<div className="gap-6 flex flex-col">
@@ -184,7 +183,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 						)}
 					</Button>
 				</div>
-			</ContentContainer>
+			</div>
 		</Form>
 	)
 }

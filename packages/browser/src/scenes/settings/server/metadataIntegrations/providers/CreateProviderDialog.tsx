@@ -90,7 +90,9 @@ export function CreateProviderDialog() {
 	}
 
 	const dialogTitle =
-		step === 0 ? 'Choose provider' : (PROVIDER_LABELS[selectedProvider || ''] ?? 'Provider')
+		step === 0
+			? t('settingsScene.server/metadataIntegrations.chooseProvider')
+			: (PROVIDER_LABELS[selectedProvider || ''] ?? 'Provider')
 
 	return (
 		<>

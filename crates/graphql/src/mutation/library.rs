@@ -17,7 +17,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, OnConflict, Query},
-	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
+	Condition, ExprTrait, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::{
 	image::{
@@ -826,17 +826,13 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let page = input.params.page();
-
 		let book = media::Entity::find_for_user(user)
 			.filter(media::Column::Id.eq(input.media_id))
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Book not found")?;
 
-		if book.extension == "epub" && page > 1 {
-			return Err("Cannot set thumbnail from EPUB chapter".into());
-		}
+		let page = input.params.page_for(&book.extension)?;
 
 		let image_options = config
 			.ok_or("Library config not found")?
@@ -1360,6 +1356,30 @@ impl LibraryMutation {
 		Ok(result.rows_affected)
 	}
 
+	/// Enqueue a scan job for every library which the authenticated user has access to
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
+	async fn scan_all_libraries(&self, ctx: &Context<'_>) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let libraries = library::Entity::find_for_user(user)
+			.into_model::<library::LibraryIdentSelect>()
+			.all(core.conn.as_ref())
+			.await?;
+
+		for library in libraries {
+			core.enqueue(StumpJob::library_scan(
+				library.id.clone(),
+				library.path,
+				None,
+			))
+			.await?;
+			tracing::debug!(library_id = ?library.id, "Enqueued library scan job");
+		}
+
+		Ok(true)
+	}
+
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	/// and update the database accordingly.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
@@ -1503,7 +1523,7 @@ async fn enforce_valid_library_path(
 	};
 
 	let parent_libraries_count: i64 = conn
-		.query_one(db_statement(conn, parent_sql, parent_values))
+		.query_one_raw(db_statement(conn, parent_sql, parent_values))
 		.await?
 		.ok_or("Failed to count parent libraries")?
 		.try_get("", "count")?;

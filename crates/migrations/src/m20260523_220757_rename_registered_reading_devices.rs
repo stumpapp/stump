@@ -9,7 +9,7 @@ impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		let conn = manager.get_connection();
 
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			conn.get_database_backend(),
 			"ALTER TABLE registered_reading_devices RENAME TO reading_devices"
 				.to_string(),
@@ -43,7 +43,7 @@ impl MigrationTrait for Migration {
 			.await?;
 
 		// rename the table back to registered_reading_devices
-		conn.execute(Statement::from_string(
+		conn.execute_raw(Statement::from_string(
 			conn.get_database_backend(),
 			"ALTER TABLE reading_devices RENAME TO registered_reading_devices"
 				.to_string(),

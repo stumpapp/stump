@@ -17,7 +17,8 @@ use models::{
 	shared::enums::FileStatus,
 };
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue, QuerySelect, Set, TransactionTrait,
+	prelude::*, sea_query::Expr, ActiveValue, ExprTrait, QuerySelect, Set,
+	TransactionTrait,
 };
 use uuid::Uuid;
 

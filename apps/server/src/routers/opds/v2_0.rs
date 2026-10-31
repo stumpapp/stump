@@ -1,4 +1,4 @@
-use std::{ops::Deref, path::PathBuf};
+use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, Query, State},
@@ -21,8 +21,8 @@ use models::{
 	shared::enums::ReadingStatus,
 };
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
-	QueryTrait, TransactionTrait,
+	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, ExprTrait, Order,
+	QueryOrder, QueryTrait, TransactionTrait,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -920,7 +920,7 @@ where
 {
 	let take = pagination.limit();
 
-	let order_by_entity = order.0.entity_name().deref().to_string();
+	let order_by_entity = order.0.entity_name().to_string();
 	let for_user_id = for_user.id.clone();
 	let books = OPDSPublicationEntity::find_for_user(for_user)
 		.apply_if(condition.clone(), |query, condition| {

@@ -1,8 +1,8 @@
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
-import { BookCardFragment } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
+import type { BookSearchSelection } from '@/components/book/BookSearch'
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
 import { EntityImage } from '@/components/entity'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -17,7 +17,7 @@ type Props = {
 
 export default function AddBookCard({ index }: Props) {
 	const { t, translate } = useTranslate()
-	const [selectedBook, setSelectedBook] = useState<BookCardFragment | null>(null)
+	const [selectedBook, setSelectedBook] = useState<BookSearchSelection | null>(null)
 
 	const form = useFormContext<Schema>()
 
@@ -48,7 +48,7 @@ export default function AddBookCard({ index }: Props) {
 	}, [isEntityBook, selectedBook, form, index])
 
 	const handleSelectBook = useCallback(
-		(book: BookCardFragment) => {
+		(book: BookSearchSelection) => {
 			form.setValue(`books.${index}.book.id`, book.id)
 			setSelectedBook(book)
 		},

@@ -1,6 +1,6 @@
 import { useInfiniteGraphQL } from '@stump/client'
 import { Input } from '@stump/components'
-import { BookCardFragment, graphql } from '@stump/graphql'
+import { BookSearchSelectionFragment, graphql, useFragment } from '@stump/graphql'
 import { useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
@@ -10,8 +10,20 @@ import { VirtualizedCardGrid } from '../container/DynamicCardGrid'
 import Spinner from '../Spinner'
 import BookCard from './BookCard'
 
+const selectionFragment = graphql(`
+	fragment BookSearchSelection on Media {
+		id
+		resolvedName
+		thumbnail {
+			url
+		}
+	}
+`)
+
+export type BookSearchSelection = BookSearchSelectionFragment
+
 type Props = {
-	onBookSelect?: (book: BookCardFragment) => void
+	onBookSelect?: (book: BookSearchSelection) => void
 }
 
 // TODO(bookclub): Refactor this component
@@ -22,6 +34,7 @@ const query = graphql(`
 			nodes {
 				id
 				...BookCard
+				...BookSearchSelection
 			}
 			pageInfo {
 				__typename
@@ -70,6 +83,7 @@ export default function BookSearch({ onBookSelect }: Props) {
 	)
 
 	const books = data?.pages.flatMap((page) => page.media.nodes) || []
+	const selections = useFragment(selectionFragment, books)
 
 	return (
 		<div className="gap-y-4 flex flex-1 flex-col">
@@ -91,7 +105,7 @@ export default function BookSearch({ onBookSelect }: Props) {
 					<BookCard
 						key={books[index]!.id}
 						fragment={books[index]!}
-						onSelect={() => onBookSelect?.(books[index]! as BookCardFragment)}
+						onSelect={() => onBookSelect?.(selections[index]!)}
 					/>
 				)}
 				onEndReached={fetchNextPage}

@@ -13,7 +13,7 @@ import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
 import { useTranslate } from '@/hooks/useTranslate'
-import { useSeriesContextSafe } from '@/scenes/series/context'
+import { useSeriesContextSafe } from '@/components/series/context'
 
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'

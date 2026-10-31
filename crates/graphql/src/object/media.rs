@@ -11,7 +11,8 @@ use models::{
 };
 use num_traits::cast::ToPrimitive;
 use sea_orm::{
-	prelude::*, sea_query::Query, FromQueryResult, Order, QueryOrder, QuerySelect,
+	prelude::*, sea_query::Query, ExprTrait, FromQueryResult, Order, QueryOrder,
+	QuerySelect,
 };
 
 use crate::{

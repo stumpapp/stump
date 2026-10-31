@@ -1,16 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-	Button,
-	CheckBox,
-	Form,
-	Heading,
-	Input,
-	Label,
-	NativeSelect,
-	PasswordInput,
-	Text,
-} from '@stump/components'
-import { EmailerListItemFragment } from '@stump/graphql'
+import { Button, Form, NativeSelect, NewCard, PasswordInput } from '@stump/components'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 
@@ -20,14 +10,33 @@ import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schem
 import TestEmailerButton from './TestEmailerButton'
 import { commonHosts, getCommonHost } from './utils'
 
+export const CreateOrUpdateEmailerFormFragment = graphql(`
+	fragment CreateOrUpdateEmailerForm on Emailer {
+		name
+		isPrimary
+		smtpHost
+		smtpPort
+		maxAttachmentSizeBytes
+		senderDisplayName
+		senderEmail
+		tlsEnabled
+		username
+	}
+`)
+
 type Props = {
-	emailer?: EmailerListItemFragment
+	emailer?: FragmentType<typeof CreateOrUpdateEmailerFormFragment>
 	existingNames: string[]
 	onSubmit: (values: CreateOrUpdateEmailerSchema) => void
 }
 
 // TODO: Some of the descriptions are LONG. Use tooltips where necessary, instead of inline descriptions.
-export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSubmit }: Props) {
+export default function CreateOrUpdateEmailerForm({
+	emailer: fragment,
+	existingNames,
+	onSubmit,
+}: Props) {
+	const emailer = useFragment(CreateOrUpdateEmailerFormFragment, fragment)
 	const { t } = useTranslate()
 
 	const schema = useMemo(
@@ -85,29 +94,10 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 			onSubmit={onSubmit}
 			fieldsetClassName="space-y-8"
 		>
-			<Input
-				id="name"
-				label={t(`${LOCALE_BASE}.name.label`)}
-				description={t(`${LOCALE_BASE}.name.description`)}
-				{...form.register('name')}
-				errorMessage={errors.name?.message}
-				ignoreFill
-			/>
-
-			<div className="space-y-4 flex flex-col">
-				<div>
-					<Heading size="sm" className="font-semibold">
-						{t(`${LOCALE_BASE}.smtpSettings.heading`)}
-					</Heading>
-
-					<Text variant="muted" size="sm">
-						{t(`${LOCALE_BASE}.smtpSettings.description`)}
-					</Text>
-				</div>
-
-				{/* FIXME: A little buggy */}
-				<div className="space-y-1 md:max-w-sm flex flex-col">
-					<Label>{t(`${LOCALE_BASE}.smtpProvider.label`)}</Label>
+			<NewCard
+				label={t(`${LOCALE_BASE}.smtpSettings.heading`)}
+				description={t(`${LOCALE_BASE}.smtpSettings.description`)}
+				actions={
 					<NativeSelect
 						emptyOption={{ label: 'Custom', value: undefined }}
 						options={[
@@ -125,51 +115,48 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 								}
 							}
 						}}
+						size="sm"
 					/>
-					<Text variant="muted" size="sm">
-						{t(`${LOCALE_BASE}.smtpProvider.description`)}
-					</Text>
-				</div>
+				}
+			>
+				<NewCard.InputRow
+					id="smtpHost"
+					label={t(`${LOCALE_BASE}.smtpHost.label`)}
+					description={t(`${LOCALE_BASE}.smtpHost.description`)}
+					{...form.register('smtpHost')}
+					errorMessage={errors.smtpHost?.message}
+				/>
 
-				<div className="gap-4 md:flex-row md:items-start flex flex-col">
-					<Input
-						id="smtpHost"
-						label={t(`${LOCALE_BASE}.smtpHost.label`)}
-						description={t(`${LOCALE_BASE}.smtpHost.description`)}
-						fullWidth
-						{...form.register('smtpHost')}
-						errorMessage={errors.smtpHost?.message}
-					/>
+				<NewCard.InputRow
+					id="smtpPort"
+					label={t(`${LOCALE_BASE}.smtpPort.label`)}
+					description={t(`${LOCALE_BASE}.smtpPort.description`)}
+					className="max-w-46.25 lg:ml-auto"
+					{...numericRegister('smtpPort')}
+					errorMessage={errors.smtpPort?.message}
+				/>
 
-					<Input
-						id="smtpPort"
-						label={t(`${LOCALE_BASE}.smtpPort.label`)}
-						description={t(`${LOCALE_BASE}.smtpPort.description`)}
-						className="max-w-46.25"
-						{...numericRegister('smtpPort')}
-						errorMessage={errors.smtpPort?.message}
-					/>
-				</div>
+				<NewCard.InputRow
+					id="username"
+					label={t(`${LOCALE_BASE}.username.label`)}
+					description={t(`${LOCALE_BASE}.username.description`)}
+					{...form.register('username')}
+					errorMessage={errors.username?.message}
+				/>
 
-				<div className="gap-4 lg:flex-row lg:items-start flex flex-col">
-					<Input
-						id="username"
-						label={t(`${LOCALE_BASE}.username.label`)}
-						description={t(`${LOCALE_BASE}.username.description`)}
-						{...form.register('username')}
-						errorMessage={errors.username?.message}
-					/>
-
+				<NewCard.Row
+					label={t(`${LOCALE_BASE}.password.label`)}
+					description={t(`${LOCALE_BASE}.password.description`)}
+				>
 					<PasswordInput
 						id="password"
-						label={t(`${LOCALE_BASE}.password.label`)}
-						description={t(`${LOCALE_BASE}.password.description`)}
 						{...form.register('password')}
 						errorMessage={errors.password?.message}
+						containerClassName="lg:max-w-1/2 max-w-full"
 					/>
-				</div>
+				</NewCard.Row>
 
-				<CheckBox
+				<NewCard.CheckboxRow
 					id="tlsEnabled"
 					label={t(`${LOCALE_BASE}.tlsEnabled.label`)}
 					description={t(`${LOCALE_BASE}.tlsEnabled.description`)}
@@ -177,19 +164,13 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					checked={tlsEnabled}
 					onClick={() => form.setValue('tlsEnabled', !tlsEnabled)}
 				/>
-			</div>
+			</NewCard>
 
-			<div className="space-y-4 flex flex-col">
-				<div>
-					<Heading size="sm" className="font-semibold">
-						{t(`${LOCALE_BASE}.senderSettings.heading`)}
-					</Heading>
-
-					<Text variant="muted" size="sm">
-						{t(`${LOCALE_BASE}.senderSettings.description`)}
-					</Text>
-				</div>
-				<Input
+			<NewCard
+				label={t(`${LOCALE_BASE}.senderSettings.heading`)}
+				description={t(`${LOCALE_BASE}.senderSettings.description`)}
+			>
+				<NewCard.InputRow
 					id="senderDisplayName"
 					label={t(`${LOCALE_BASE}.senderDisplayName.label`)}
 					description={t(`${LOCALE_BASE}.senderDisplayName.description`)}
@@ -197,38 +178,40 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					errorMessage={errors.senderDisplayName?.message}
 				/>
 
-				<Input
+				<NewCard.InputRow
 					id="senderEmail"
 					label={t(`${LOCALE_BASE}.senderEmail.label`)}
 					description={t(`${LOCALE_BASE}.senderEmail.description`)}
 					{...form.register('senderEmail')}
 					errorMessage={errors.senderEmail?.message}
 				/>
-			</div>
+			</NewCard>
 
-			<div className="space-y-4 flex flex-col">
-				<div>
-					<Heading size="sm" className="font-semibold">
-						{t(`${LOCALE_BASE}.additionalSettings.heading`)}
-					</Heading>
+			<NewCard
+				label={t(`${LOCALE_BASE}.additionalSettings.heading`)}
+				description={t(`${LOCALE_BASE}.additionalSettings.description`)}
+			>
+				<NewCard.InputRow
+					id="name"
+					label={t(`${LOCALE_BASE}.name.label`)}
+					description={t(`${LOCALE_BASE}.name.description`)}
+					{...form.register('name')}
+					errorMessage={errors.name?.message}
+					ignoreFill
+				/>
 
-					<Text variant="muted" size="sm">
-						{t(`${LOCALE_BASE}.additionalSettings.description`)}
-					</Text>
-				</div>
-
-				<Input
+				<NewCard.InputRow
 					id="maxAttachmentSizeBytes"
 					label={t(`${LOCALE_BASE}.maxAttachmentSize.label`)}
 					description={t(`${LOCALE_BASE}.maxAttachmentSize.description`)}
 					{...numericRegister('maxAttachmentSizeBytes')}
 					errorMessage={errors.maxAttachmentSizeBytes?.message}
 				/>
-			</div>
+			</NewCard>
 
 			<TestEmailerButton />
 
-			<div>
+			<div className="flex justify-end">
 				<Button type="submit">{t(`${LOCALE_BASE}.submit.${emailer ? 'update' : 'create'}`)}</Button>
 			</div>
 		</Form>

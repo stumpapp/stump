@@ -1,6 +1,7 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
+import { ListFilter } from 'lucide-react'
 import { useLocation } from 'react-router'
 
 import { useTranslate } from '@/hooks/useTranslate'
@@ -8,6 +9,7 @@ import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
 import { EntityOptionProps } from '../../../types'
+import { CollapsedSidebarSection, useIsSidebarIconMode } from '../../CollapsedSidebarItems'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import { SectionEmptyMessage } from '../SectionEmptyMessage'
 
@@ -37,6 +39,38 @@ export default function SmartListSideBarSection({
 	const { prefetch } = usePrefetchSmartList()
 
 	const isCurrentList = (id: string) => location.pathname.startsWith(paths.smartList(id))
+
+	const isIconMode = useIsSidebarIconMode()
+	if (isIconMode) {
+		return (
+			<CollapsedSidebarSection
+				label={translate('shared.common.smartLists')}
+				icon={ListFilter}
+				emptyMessage={t('sidebar.buttons.noSmartlists')}
+				items={(lists ?? []).map(({ id, name }) => ({
+					key: id,
+					label: name,
+					to: paths.smartList(id),
+					isActive: isCurrentList(id),
+					onMouseEnter: () => prefetch({ id }),
+				}))}
+				actions={[
+					...(links.includes(FilterableArrangementEntityLink.ShowAll)
+						? [{ key: 'all', label: t('sidebar.buttons.seeAll'), to: paths.smartLists() }]
+						: []),
+					...(links.includes(FilterableArrangementEntityLink.Create)
+						? [
+								{
+									key: 'create',
+									label: t('sidebar.buttons.createSmartlist'),
+									to: paths.smartListCreate(),
+								},
+							]
+						: []),
+				]}
+			/>
+		)
+	}
 
 	const renderLists = () => {
 		if (!lists || !lists.length) {

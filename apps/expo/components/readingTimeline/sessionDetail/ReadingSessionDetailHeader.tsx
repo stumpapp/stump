@@ -1,4 +1,4 @@
-import { parseGraphQLPercentageDecimal } from '@stump/client'
+import { parseGraphQLPercentageDecimal, useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
@@ -59,7 +59,7 @@ type Props = {
 
 export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 	const { t } = useTranslate()
-
+	const { sdk } = useSDK()
 	const data = useFragment(fragment, fragmentRef)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
@@ -126,6 +126,10 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 						<ThumbnailImage
 							source={{
 								uri: data.media.thumbnail?.url,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
 							}}
 							size={{ height: 175, width: 175 * thumbnailRatio }}
 							placeholderData={data.media.thumbnail.metadata}

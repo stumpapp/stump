@@ -3,7 +3,7 @@ title: Emailing
 ---
 
 <Callout title="Permission required">
-	Sending emails is gated behind the `email:send` user permission at a minumum. To learn more about
+	Sending emails is gated behind the `EMAIL_SEND` user permission at a minumum. To learn more about
 	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
@@ -50,16 +50,18 @@ A device alias may also be "inverted" to create a forbidden email address. This 
 
 The following table lists perissions which can be assigned to users to control access to email functionality:
 
-| Permission       | Description                                    | Notes / Inherited Permissions |
-| ---------------- | ---------------------------------------------- | ----------------------------- |
-| `emailer:read`   | Allows the user to view registered emailers    |                               |
-| `emailer:create` | Allows the user to create new emailers         | `emailer:read`                |
-| `emailer:manage` | Allows the user to manage existing emailers    | `emailer:read`                |
-| `email:send`     | Allows the user to send emails from the server | `emailer:read`                |
+| Permission       | Description                                    | Notes / Inherited Permissions    |
+| ---------------- | ---------------------------------------------- | -------------------------------- |
+| `EMAILER_READ`   | Allows the user to view registered emailers    | `EMAIL_SEND`                     |
+| `EMAILER_CREATE` | Allows the user to create new emailers         | `EMAILER_READ`                   |
+| `EMAILER_MANAGE` | Allows the user to manage existing emailers    | `EMAILER_READ`, `EMAILER_CREATE` |
+| `EMAIL_SEND`     | Allows the user to send emails from the server |                                  |
+
+The inherited permissions listed above are granted implicitly by the row's permission, e.g. having `EMAILER_READ` also grants `EMAIL_SEND`. The reverse is not true: having `EMAIL_SEND` does not grant `EMAILER_READ`.
 
 ## Audit Logs
 
-Stump will log each email sent, however the logs are not currently exposed in the UI. This is a planned feature, but for now you can view the logs directly in the database with your preferred SQL client.
+Stump will log each email sent. Each emailer has a viewable send history in the UI (under Email settings, in the emailer list), in addition to the raw `emailer_send_records` database table which you can view directly with your preferred SQL client.
 
 The following fields are logged for each record:
 

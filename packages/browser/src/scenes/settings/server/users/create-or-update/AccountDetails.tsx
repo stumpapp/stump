@@ -8,7 +8,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 import { CreateOrUpdateUserSchema } from './schema'
 
 export default function AccountDetails() {
-	const { translate } = useTranslate()
+	const { t, translate } = useTranslate()
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 	const { errors } = useFormState({ control: form.control })
 
@@ -67,7 +67,10 @@ export default function AccountDetails() {
 					onClick={() => form.setValue('password', generateRandomPassword())}
 					data-testid="generatePassword"
 				>
-					<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
+					<Shield className="mr-1.5 h-4 w-4" />{' '}
+					{t(
+						'settingsScene.server/users.createOrUpdateForm.accountDetails.generatePassword',
+					)}
 				</Button>
 			</div>
 		</div>

@@ -11,6 +11,7 @@ import {
 	ScaledDimensionResize,
 	SupportedImageFormat,
 } from '@stump/graphql'
+import { i18n } from '@stump/i18n'
 import isValidGlob from 'is-valid-glob'
 import omit from 'lodash/omit'
 import { match } from 'ts-pattern'
@@ -19,6 +20,11 @@ import { z } from 'zod'
 import { ILibraryContext } from '@/scenes/library/context'
 
 type Library = ILibraryContext['library']
+
+const VALIDATION_BASE = 'webApp.createOrUpdateLibraryForm.validation'
+
+const validationMessage = (key: string, options?: Record<string, unknown>) =>
+	String(i18n.t(`${VALIDATION_BASE}.${key}`, { ns: i18n.language || 'en-US', ...options }))
 
 /**
  * A type guard to check if the input is a valid {@link LibraryPattern}
@@ -75,7 +81,7 @@ const exactResize = z.object({
 const scaledEventlyByFactor = z.object({
 	mode: z.literal('scaleEvenlyByFactor'),
 	factor: z.number().refine((value) => value > 0 && value <= 1, {
-		message: 'Factor must be between 0 and 1',
+		message: validationMessage('factorRange'),
 	}),
 })
 
@@ -97,7 +103,7 @@ const thumbnailConfig = z.object({
 		.refine(
 			(value) => value == undefined || (value > 0 && value <= 100),
 			() => ({
-				message: 'Thumbnail quality must be between 0 and 100',
+				message: validationMessage('qualityRange'),
 			}),
 		),
 	resizeMethod: resizeOptionsSchema.nullish(),
@@ -129,7 +135,7 @@ export const buildSchema = (
 		ignoreRules: z
 			.array(
 				z.object({
-					glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
+					glob: z.string().refine(isValidGlob, { message: validationMessage('invalidGlob') }),
 					ignore_parents: z.boolean().default(false),
 					ignore_subdirs: z.boolean().default(false),
 				}),
@@ -142,7 +148,7 @@ export const buildSchema = (
 		skipBookOverview: z.boolean().default(false),
 		name: z
 			.string()
-			.min(1, { message: 'Library name is required' })
+			.min(1, { message: validationMessage('missingName') })
 			.refine(
 				// return falsy value to indicate failure.
 				// If the library name is already taken -> fail
@@ -153,12 +159,12 @@ export const buildSchema = (
 					return !isTaken || isUnchanged
 				},
 				(val) => ({
-					message: `You already have a library named ${val}.`,
+					message: validationMessage('nameTaken', { name: val }),
 				}),
 			),
 		path: z
 			.string()
-			.min(1, { message: 'Library path is required' })
+			.min(1, { message: validationMessage('missingPath') })
 			.transform((val) => normalizePath(val))
 			.superRefine((val, ctx) => {
 				// If the path is unchanged -> pass
@@ -170,7 +176,7 @@ export const buildSchema = (
 
 				const isTaken = existingLibraries.some((l) => l.path === val)
 				if (isTaken) {
-					ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })
+					ctx.addIssue({ code: 'custom', message: validationMessage('pathTaken') })
 					return
 				}
 
@@ -180,7 +186,7 @@ export const buildSchema = (
 				if (isParent) {
 					ctx.addIssue({
 						code: 'custom',
-						message: 'This path is a parent directory of an existing library',
+						message: validationMessage('pathParent'),
 					})
 					return
 				}
@@ -189,7 +195,7 @@ export const buildSchema = (
 				if (isChild) {
 					ctx.addIssue({
 						code: 'custom',
-						message: 'This path is a sub-directory of an existing library',
+						message: validationMessage('pathChild'),
 					})
 					return
 				}

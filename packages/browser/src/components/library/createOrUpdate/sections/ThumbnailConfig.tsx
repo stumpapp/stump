@@ -1,17 +1,6 @@
-import {
-	Button,
-	Card,
-	cx,
-	Heading,
-	Input,
-	Label,
-	NativeSelect,
-	Text,
-	WideSwitch,
-} from '@stump/components'
+import { Button, cx, Input, Label, NativeSelect, NewCard, RawSwitch } from '@stump/components'
 import { SupportedImageFormat } from '@stump/graphql'
-import { Check } from 'lucide-react'
-import { useCallback } from 'react'
+import { Fragment, useCallback } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
@@ -41,11 +30,12 @@ export default function ThumbnailConfigForm() {
 		control: form.control,
 		name: ['thumbnailConfig.resizeMethod', 'thumbnailConfig.enabled'],
 	})
-	const isCreating = !ctx?.library
 
 	const {
 		errors: { thumbnailConfig: configErrors },
 	} = useFormState({ control: form.control })
+
+	const isCreating = !ctx?.library
 
 	const handleEnabledChange = useCallback(
 		(checked: boolean) => {
@@ -116,41 +106,21 @@ export default function ThumbnailConfigForm() {
 	)
 
 	return (
-		<div className="gap-6 flex grow flex-col">
-			<div>
-				<Heading size="sm">
-					{t(getKey(`section.heading.${isCreating ? 'create' : 'update'}`))}
-				</Heading>
-				<Text size="sm" variant="muted">
-					{t(getKey('section.description'))}
-				</Text>
-			</div>
+		<NewCard
+			label={t(getKey(`section.heading.${isCreating ? 'create' : 'update'}`))}
+			description={t(getKey('section.description'))}
+		>
+			<NewCard.Row
+				label={translate('shared.common.enabled')}
+				description={t(getKey('enableSwitch.generateDescription'))}
+			>
+				<RawSwitch checked={enabled} onCheckedChange={() => handleEnabledChange(!enabled)} />
+			</NewCard.Row>
 
-			<div className="max-w-2xl gap-4 flex flex-col">
-				<WideSwitch
-					description={t(getKey('enableSwitch.description'))}
-					label={t(getKey('enableSwitch.label'))}
-					checked={enabled}
-					onCheckedChange={() => handleEnabledChange(!enabled)}
-				/>
-
-				{!enabled && (
-					<div key="no-thumbnail-config">
-						<Card className="gap-y-4 p-6 flex flex-col items-center border-dashed">
-							<span className="p-1 rounded-full border border-primary/30 bg-primary">
-								<Check className="text-foreground" />
-							</span>
-							<Text size="sm" variant="muted">
-								{t(getKey('section.disabled'))}
-							</Text>
-						</Card>
-					</div>
-				)}
-
-				{enabled && (
-					<div key="thumbnail-config" className="gap-4 flex flex-col">
-						<div className="gap-1.5 lg:max-w-sm grid w-full items-center">
-							<Label>{t(getKey('resizeMethod.label'))}</Label>
+			{enabled && (
+				<Fragment key="thumbnail-config">
+					<NewCard.Row label={t(getKey('resizeMethod.label'))}>
+						<div>
 							<NativeSelect
 								options={[
 									{
@@ -168,31 +138,32 @@ export default function ThumbnailConfigForm() {
 								onChange={(e) => handleResizeMethodChange(e.target.value as Option)}
 							/>
 						</div>
+					</NewCard.Row>
 
-						{resizeMethod?.mode === 'scaleEvenlyByFactor' && (
-							<>
-								<Text size="xs" variant="muted">
-									{t(getKey('scaleEvenlyByFactor.description'))}
-								</Text>
-								<div className="gap-2 flex flex-col">
-									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
-									<Input
-										placeholder="0.65"
-										{...form.register('thumbnailConfig.resizeMethod.factor', {
-											valueAsNumber: true,
-										})}
-										// @ts-expect-error: This does exist...
-										errorMessage={configErrors?.resizeMethod?.factor?.message}
-									/>
-								</div>
-							</>
-						)}
+					{resizeMethod?.mode === 'scaleEvenlyByFactor' && (
+						<NewCard.Row
+							label={t(getKey('scaleEvenlyByFactor.label'))}
+							description={t(getKey('scaleEvenlyByFactor.description'))}
+						>
+							<div>
+								<Input
+									placeholder="0.65"
+									{...form.register('thumbnailConfig.resizeMethod.factor', {
+										valueAsNumber: true,
+									})}
+									// @ts-expect-error: This does exist...
+									errorMessage={configErrors?.resizeMethod?.factor?.message}
+								/>
+							</div>
+						</NewCard.Row>
+					)}
 
-						{resizeMethod?.mode === 'exact' && (
-							<>
-								<Text size="xs" variant="muted">
-									{t(getKey('exact.description'))}
-								</Text>
+					{resizeMethod?.mode === 'exact' && (
+						<NewCard.Row
+							label={translate('shared.common.size')}
+							description={t(getKey('exact.description'))}
+						>
+							<div className="gap-2 flex flex-row items-center">
 								<Input
 									label={t(getKey('exact.width.label'))}
 									placeholder="200"
@@ -211,15 +182,16 @@ export default function ThumbnailConfigForm() {
 									// @ts-expect-error: This does exist...
 									errorMessage={configErrors?.resizeMethod?.height?.message}
 								/>
-							</>
-						)}
+							</div>
+						</NewCard.Row>
+					)}
 
-						{resizeMethod?.mode === 'scaleDimension' && (
-							<>
-								<Text size="xs" variant="muted">
-									{t(getKey('scaleDimension.description'))}
-								</Text>
-
+					{resizeMethod?.mode === 'scaleDimension' && (
+						<NewCard.Row
+							label={t(getKey('scaleDimension.label'))}
+							description={t(getKey('scaleDimension.description'))}
+						>
+							<div className="gap-2 flex flex-row items-center">
 								<div className="gap-2 lg:max-w-xs grid w-full items-center">
 									<Label>{t(getKey('scaleDimension.dimension.label'))}</Label>
 									<NativeSelect
@@ -237,9 +209,8 @@ export default function ThumbnailConfigForm() {
 										defaultValue="WIDTH"
 									/>
 								</div>
-
 								<Input
-									label={t(getKey('scaleDimension.size.label'))}
+									label={translate('shared.common.size')}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.size', {
 										valueAsNumber: true,
@@ -247,65 +218,48 @@ export default function ThumbnailConfigForm() {
 									// @ts-expect-error: This does exist...
 									errorMessage={configErrors?.resizeMethod?.size?.message}
 								/>
-							</>
-						)}
-					</div>
-				)}
+							</div>
+						</NewCard.Row>
+					)}
 
-				{enabled && (
-					<>
-						<div className="gap-2 lg:max-w-sm grid w-full items-center">
-							<Label className={cx({ 'cursor-not-allowed opacity-50': !resizeMethod })}>
-								{t(getKey('format.label'))}
-							</Label>
-							<NativeSelect
-								options={formatOptions}
+					<NewCard.Row
+						label={translate('shared.common.output')}
+						description={t(getKey('output.description'))}
+					>
+						<div className="gap-4 flex flex-row items-center">
+							<div className="gap-1.5 grid w-full items-center">
+								<Label className={cx({ 'cursor-not-allowed opacity-50': !resizeMethod })}>
+									{t(getKey('output.format'))}
+								</Label>
+								<NativeSelect
+									options={formatOptions}
+									disabled={!enabled}
+									{...form.register('thumbnailConfig.format')}
+									// errorMessage={form.formState.errors.thumbnailConfig?.format?.message}
+								/>
+							</div>
+
+							<Input
+								label={t(getKey('output.quality'))}
 								disabled={!enabled}
-								{...form.register('thumbnailConfig.format')}
-								// errorMessage={form.formState.errors.thumbnailConfig?.format?.message}
+								descriptionProps={{ className: 'text-xs' }}
+								errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
+								placeholder="75"
+								{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
 							/>
-							<Text
-								size="xs"
-								variant="muted"
-								className={cx({ 'cursor-not-allowed opacity-50': !enabled })}
-							>
-								{t(getKey('format.description'))}
-							</Text>
 						</div>
+					</NewCard.Row>
+				</Fragment>
+			)}
 
-						<Input
-							label={t(getKey('quality.label'))}
-							disabled={!enabled}
-							descriptionProps={{ className: 'text-xs' }}
-							description={t(getKey('quality.description'))}
-							errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
-							placeholder="75"
-							{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
-						/>
-						{/*
-						{resizeOptionsError && resizeMethod?.mode === 'Scaled' && (
-							<Text className="mt-2" size="xs" variant="danger">
-								{resizeOptionsError}
-							</Text>
-						)} */}
-					</>
-				)}
+			<GenerateThumbnailColorsSwitch />
 
-				<GenerateThumbnailColorsSwitch />
-
-				{!!ctx?.library && (
-					<div className="mt-4">
-						<Button
-							// title={isDifferent ? undefined : t('common.noChanges')}
-							type="submit"
-							// disabled={!isDifferent}
-						>
-							{translate('shared.common.saveChanges')}
-						</Button>
-					</div>
-				)}
-			</div>
-		</div>
+			{!!ctx?.library && (
+				<NewCard.Footer className="justify-end">
+					<Button type="submit">{translate('shared.common.saveChanges')}</Button>
+				</NewCard.Footer>
+			)}
+		</NewCard>
 	)
 }
 

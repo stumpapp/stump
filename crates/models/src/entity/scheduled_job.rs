@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::shared::enums::{MetadataFetchStatus, ScheduledJobKind};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "scheduled_jobs")]
 pub struct Model {
@@ -20,9 +21,6 @@ pub struct Model {
 	pub created_at: DateTimeUtc,
 	pub last_run_at: Option<DateTimeUtc>,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 

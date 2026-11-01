@@ -17,13 +17,10 @@ export const API_URL = process.env.STUMP_BASE_URL ?? 'http://localhost:10801'
  * for more ephemeral users, you can create users more dynamically via the factory.ts exports
  */
 export const personas = {
-	// TODO(permissions): this will be the server owner but once improved permissioning is merged
-	// it will just be controled via permissions
 	admin: {
 		username: 'oromei',
 		password: 'oromei',
-		// TODO(permissions): give permissions
-		permissions: [],
+		permissions: [UserPermission.ManageServer],
 	},
 } satisfies Record<string, Persona>
 

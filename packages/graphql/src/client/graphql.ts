@@ -530,6 +530,7 @@ export type CreateOrUpdateLibraryInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   emoji?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  oidcGroups?: InputMaybe<Array<Scalars['String']['input']>>;
   path: Scalars['String']['input'];
   scanAfterPersist?: Scalars['Boolean']['input'];
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -1170,13 +1171,13 @@ export type JournalEntryModel = {
 
 export type Library = {
   __typename?: 'Library';
+  allowedUsers: Array<User>;
   authors: Array<Author>;
   config: LibraryConfig;
   configId: Scalars['Int']['output'];
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   emoji?: Maybe<Scalars['String']['output']>;
-  excludedUsers: Array<User>;
   genres: Array<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isFavorite: Scalars['Boolean']['output'];
@@ -1187,6 +1188,7 @@ export type Library = {
   media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
+  oidcGroups?: Maybe<Array<Scalars['String']['output']>>;
   path: Scalars['String']['output'];
   publishers: Array<Scalars['String']['output']>;
   /** Get the full history of scan jobs for this library. */
@@ -1304,6 +1306,7 @@ export enum LibraryModelOrdering {
   Id = 'ID',
   LastScannedAt = 'LAST_SCANNED_AT',
   Name = 'NAME',
+  OidcGroups = 'OIDC_GROUPS',
   Path = 'PATH',
   Status = 'STATUS',
   ThumbnailMeta = 'THUMBNAIL_META',
@@ -2315,17 +2318,18 @@ export type Mutation = {
    * @deprecated Use `patchLibrary` instead
    */
   updateLibrary: Library;
+  /**
+   * Grant users access to a library. This operates as a full replacement of the
+   * granted users list, so any users not included in the provided list will have
+   * their access revoked if they were previously granted access
+   *
+   * The requesting user cannot revoke their own access, so their ID must be included
+   */
+  updateLibraryAccess: Library;
   /** Update the emoji for a library */
   updateLibraryEmoji: Library;
-  /**
-   * Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
-   * full replacement of the excluded users list, so any users not included in the provided list will be
-   * removed from the exclusion list if they were previously excluded.
-   *
-   * The server owner cannot be excluded from a library, nor can the user performing the action exclude
-   * themselves.
-   */
-  updateLibraryExcludedUsers: Library;
+  /** update the OIDC groups which have access to a library */
+  updateLibraryOidcGroups: Library;
   /**
    * Update the thumbnail for a library. This will replace the existing thumbnail with the the one
    * associated with the provided input (book). If the book does not have a thumbnail, one
@@ -2388,10 +2392,7 @@ export type Mutation = {
    * implement multipart uploads for
    */
   uploadSeriesThumbnailBase64: Series;
-  /**
-   * Upload an avatar image for either the authenticated viewer or for any user if
-   * called by a server owner
-   */
+  /** Upload an avatar image for either the authenticated viewer or for any user (if authorized by permissions) */
   uploadUserAvatar: User;
   /** Upserts a reading device for the authenticated user */
   upsertReadingDevice: ReadingDeviceModel;
@@ -3039,15 +3040,21 @@ export type MutationUpdateLibraryArgs = {
 };
 
 
+export type MutationUpdateLibraryAccessArgs = {
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationUpdateLibraryEmojiArgs = {
   emoji?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
 };
 
 
-export type MutationUpdateLibraryExcludedUsersArgs = {
+export type MutationUpdateLibraryOidcGroupsArgs = {
   id: Scalars['ID']['input'];
-  userIds: Array<Scalars['String']['input']>;
+  oidcGroups: Array<Scalars['String']['input']>;
 };
 
 
@@ -4673,6 +4680,8 @@ export type SmartList = {
   meta: SmartListMeta;
   name: Scalars['String']['output'];
   thumbnail: ImageRef;
+  /** Get the role of the viewer for this smart list */
+  viewerRole: AccessRole;
   views: Array<SmartListView>;
   visibility: EntityVisibility;
 };
@@ -5092,11 +5101,12 @@ export type User = {
   finishedReadingSessionsCount: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   isLocked: Scalars['Boolean']['output'];
-  isServerOwner: Scalars['Boolean']['output'];
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
   loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
   oidcEmail?: Maybe<Scalars['String']['output']>;
+  /** a comma-separated list of OIDC groups assigned to this user */
+  oidcGroups?: Maybe<Scalars['String']['output']>;
   permissions: Array<UserPermission>;
   preferences: UserPreferences;
   username: Scalars['String']['output'];
@@ -5127,6 +5137,8 @@ export enum UserPermission {
    * Grant access to the book club feature
    */
   AccessBookClub = 'ACCESS_BOOK_CLUB',
+  /** Grant access to the GraphQL playground interface */
+  AccessGraphQlPlayground = 'ACCESS_GRAPH_QL_PLAYGROUND',
   /** Grant access to the kobo sync feature */
   AccessKoboSync = 'ACCESS_KOBO_SYNC',
   /** Grant access to the koreader sync feature */
@@ -5145,10 +5157,14 @@ export enum UserPermission {
   CreateLibrary = 'CREATE_LIBRARY',
   /** Grant access to create a notifier */
   CreateNotifier = 'CREATE_NOTIFIER',
+  /** Grant access to create managed user accounts */
+  CreateUser = 'CREATE_USER',
   /** Grant access to delete the library (manage library) */
   DeleteLibrary = 'DELETE_LIBRARY',
   /** Grant access to delete a notifier */
   DeleteNotifier = 'DELETE_NOTIFIER',
+  /** Grant access to delete another user */
+  DeleteUser = 'DELETE_USER',
   /** Grant access to download files from a library */
   DownloadFile = 'DOWNLOAD_FILE',
   /** Grant access to edit basic details about the library */
@@ -5172,16 +5188,27 @@ export enum UserPermission {
   EmailSend = 'EMAIL_SEND',
   /** Grant access to access the file explorer */
   FileExplorer = 'FILE_EXPLORER',
-  /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
-  ManageJobs = 'MANAGE_JOBS',
+  /** Grant access to lock another user, preventing them from logging in until an admin unlocks them */
+  LockUser = 'LOCK_USER',
+  /** Grant access to manage background jobs (cancel, delete history/logs) */
+  ManageBackgroundJobs = 'MANAGE_BACKGROUND_JOBS',
+  /**
+   * Grant admin-level powers across all book clubs (everything ModerateBookClubs
+   * grants, plus suggestion administration)
+   */
+  ManageBookClubs = 'MANAGE_BOOK_CLUBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
   ManageNotifier = 'MANAGE_NOTIFIER',
-  /** Grant access to manage the server. This is effectively a step below server owner */
+  /** Grant access to manage scheduled background job configuration (create, update, delete) */
+  ManageScheduledBackgroundJobs = 'MANAGE_SCHEDULED_BACKGROUND_JOBS',
+  /** Grant access to manage the server. This is effectively full access and encompasses all other permissions */
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
+  /** Grant access to view and manage active sessions and auth tokens for other users */
+  ManageUserSessions = 'MANAGE_USER_SESSIONS',
   /** Grant access to manage metadata fetch statuses (accept matches, etc) */
   MetadataFetchRecordManage = 'METADATA_FETCH_RECORD_MANAGE',
   /** Grant access to read metadata fetch statuses */
@@ -5190,12 +5217,21 @@ export enum UserPermission {
   MetadataProviderManage = 'METADATA_PROVIDER_MANAGE',
   /** Grant access to read metadata provider configurations */
   MetadataProviderRead = 'METADATA_PROVIDER_READ',
-  /** Grant access to read jobs */
-  ReadJobs = 'READ_JOBS',
+  /**
+   * Grant moderator-level powers across all book clubs (edit/delete any message,
+   * lock/pin/create/archive discussions, see private clubs they're not a member of)
+   */
+  ModerateBookClubs = 'MODERATE_BOOK_CLUBS',
+  /** Grant access to read background job history and status */
+  ReadBackgroundJobs = 'READ_BACKGROUND_JOBS',
+  /** Grant access to read/subscribe to server-side events (job progress, media updates, etc.) */
+  ReadEvents = 'READ_EVENTS',
   /** Grant access to read notifiers */
   ReadNotifier = 'READ_NOTIFIER',
   /** Grant access to read application-level logs, e.g. job logs */
   ReadPersistedLogs = 'READ_PERSISTED_LOGS',
+  /** Grant access to read scheduled background job configuration */
+  ReadScheduledBackgroundJobs = 'READ_SCHEDULED_BACKGROUND_JOBS',
   /** Grant access to read system logs */
   ReadSystemLogs = 'READ_SYSTEM_LOGS',
   /**
@@ -5207,8 +5243,12 @@ export enum UserPermission {
   ReadUsers = 'READ_USERS',
   /** Grant access to scan the library for new files */
   ScanLibrary = 'SCAN_LIBRARY',
+  /** Grant access to update another user account, excluding preferences */
+  UpdateUser = 'UPDATE_USER',
   /** Grant access to upload files to a library */
   UploadFile = 'UPLOAD_FILE',
+  /** Grant access to view all smart lists, even those they don't have explicit access to */
+  ViewAllSmartLists = 'VIEW_ALL_SMART_LISTS',
   /**
    * Grants access to write back the database-level metadata for media/series.
    * This should be treated with caution, as technically it would allow for
@@ -6321,6 +6361,34 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
+export type LibraryAccessUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibraryAccessUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string, avatarUrl?: string | null }> } };
+
+export type LibraryAccessQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryAccessQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
+
+export type UpdateLibraryAccessMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryAccessMutation = { __typename?: 'Mutation', updateLibraryAccess: { __typename?: 'Library', id: string, allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
+
+export type UpdateLibraryOidcGroupsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  oidcGroups: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryOidcGroupsMutation = { __typename?: 'Mutation', updateLibraryOidcGroups: { __typename?: 'Library', id: string, oidcGroups?: Array<string> | null } };
+
 export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6873,7 +6941,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, oidcGroups?: Array<string> | null, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6935,26 +7003,6 @@ export type BasicSettingsSceneExistingLibrariesQueryVariables = Exact<{ [key: st
 
 
 export type BasicSettingsSceneExistingLibrariesQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
-
-export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
-
-export type LibraryExclusionsQueryQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type LibraryExclusionsQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
-
-export type UpdateLibraryExclusionsMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
-
-
-export type UpdateLibraryExclusionsMutation = { __typename?: 'Mutation', updateLibraryExcludedUsers: { __typename?: 'Library', id: string, excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
 
 export type CleanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7497,7 +7545,7 @@ export type UpdateUserSceneQueryVariables = Exact<{
 }>;
 
 
-export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, isServerOwner: boolean, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
 
 export type ClearLoginActivityConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7537,7 +7585,7 @@ export type UserTableQueryVariables = Exact<{
 }>;
 
 
-export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type SmartListWebGridItemFragment = { __typename?: 'SmartList', id: string, name: string, books: Array<{ __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, meta: { __typename?: 'SmartListMeta', matchedBooks: number, matchedSeries: number, matchedLibraries: number } } & { ' $fragmentName'?: 'SmartListWebGridItemFragment' };
 
@@ -7556,7 +7604,7 @@ export type SmartListByIdQueryVariables = Exact<{
 }>;
 
 
-export type SmartListByIdQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility, views: Array<{ __typename?: 'SmartListView', id: number, listId: string, name: string, search?: string | null, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> }> } | null };
+export type SmartListByIdQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility, viewerRole: AccessRole, views: Array<{ __typename?: 'SmartListView', id: number, listId: string, name: string, search?: string | null, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> }> } | null };
 
 export type SmartListMetaQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12417,6 +12465,46 @@ export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
+export const LibraryAccessUsersQueryDocument = new TypedDocumentString(`
+    query LibraryAccessUsersQuery {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+      avatarUrl
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryAccessUsersQueryQuery, LibraryAccessUsersQueryQueryVariables>;
+export const LibraryAccessQueryDocument = new TypedDocumentString(`
+    query LibraryAccessQuery($id: ID!) {
+  libraryById(id: $id) {
+    allowedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryAccessQueryQuery, LibraryAccessQueryQueryVariables>;
+export const UpdateLibraryAccessDocument = new TypedDocumentString(`
+    mutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {
+  updateLibraryAccess(id: $id, userIds: $userIds) {
+    id
+    allowedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryAccessMutation, UpdateLibraryAccessMutationVariables>;
+export const UpdateLibraryOidcGroupsDocument = new TypedDocumentString(`
+    mutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {
+  updateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {
+    id
+    oidcGroups
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryOidcGroupsMutation, UpdateLibraryOidcGroupsMutationVariables>;
 export const PendingMetadataMatchesDocument = new TypedDocumentString(`
     query PendingMetadataMatches {
   pendingMetadataMatches {
@@ -14369,6 +14457,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     name
     description
     path
+    oidcGroups
     stats {
       seriesCount
       bookCount
@@ -14624,37 +14713,6 @@ export const BasicSettingsSceneExistingLibrariesDocument = new TypedDocumentStri
   }
 }
     `) as unknown as TypedDocumentString<BasicSettingsSceneExistingLibrariesQuery, BasicSettingsSceneExistingLibrariesQueryVariables>;
-export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
-    query LibraryExclusionsUsersQuery {
-  users(pagination: {none: {unpaginated: true}}) {
-    nodes {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LibraryExclusionsUsersQueryQuery, LibraryExclusionsUsersQueryQueryVariables>;
-export const LibraryExclusionsQueryDocument = new TypedDocumentString(`
-    query LibraryExclusionsQuery($id: ID!) {
-  libraryById(id: $id) {
-    excludedUsers {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LibraryExclusionsQueryQuery, LibraryExclusionsQueryQueryVariables>;
-export const UpdateLibraryExclusionsDocument = new TypedDocumentString(`
-    mutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {
-  updateLibraryExcludedUsers(id: $id, userIds: $userIds) {
-    id
-    excludedUsers {
-      id
-      username
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateLibraryExclusionsMutation, UpdateLibraryExclusionsMutationVariables>;
 export const CleanLibraryDocument = new TypedDocumentString(`
     mutation CleanLibrary($id: ID!) {
   cleanLibrary(id: $id) {
@@ -15467,7 +15525,6 @@ export const UpdateUserSceneDocument = new TypedDocumentString(`
     }
     permissions
     maxSessionsAllowed
-    isServerOwner
   }
   users(pagination: {none: {unpaginated: true}}) @skip(if: $skip) {
     nodes {
@@ -15524,7 +15581,6 @@ export const UserTableDocument = new TypedDocumentString(`
       id
       avatarUrl
       username
-      isServerOwner
       isLocked
       createdAt
       lastLogin
@@ -15583,6 +15639,7 @@ export const SmartListByIdDocument = new TypedDocumentString(`
     joiner
     name
     visibility
+    viewerRole
     views {
       id
       listId

@@ -3,6 +3,8 @@ use graphql::input::user::AgeRestrictionInput;
 use models::shared::enums::UserPermission;
 use serde_json::json;
 
+// TODO: split this into multiple files? if gets closer to 1k, i guess. for now is fine
+
 const UPDATE_VIEWER: &str = r#"
 mutation UpdateViewer($input: UpdateUserInput!) {
     updateViewer(input: $input) {
@@ -27,17 +29,20 @@ mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
 }
 "#;
 
+const CREATE_USER: &str = r#"
+mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+        id
+        username
+        permissions
+    }
+}
+"#;
+
 fn assert_no_errors(response: &serde_json::Value) {
 	assert!(
 		response.get("errors").is_none(),
 		"should not have had errors: {response:#}"
-	);
-}
-
-fn assert_has_error(response: &serde_json::Value) {
-	assert!(
-		response.get("errors").is_some(),
-		"should have had errors: {response:#}"
 	);
 }
 
@@ -191,110 +196,9 @@ async fn test_regular_user_cannot_change_own_max_sessions_allowed() {
 	);
 }
 
-// TODO(permissions): server owner going away
+/// a user with ManageUsers can grant permissions they effectively have via association
 #[tokio::test]
-async fn test_server_owner_can_set_permissions_on_another_user() {
-	let app = TestApp::new_with_default_user().await;
-	let target = CreateTestUser {
-		username: "owner-perm-target".to_string(),
-		..Default::default()
-	}
-	.insert(&app)
-	.await;
-
-	let response = app
-		.execute_gql(
-			UPDATE_USER,
-			Some(json!({
-				"id": target.id,
-				"input": {
-					"username": &target.username,
-					"permissions": ["DOWNLOAD_FILE"],
-					"maxSessionsAllowed": null,
-					"ageRestriction": null
-				}
-			})),
-		)
-		.await;
-
-	assert_no_errors(&response);
-	let perms = permissions_from(&response, "updateUser");
-	assert!(
-		perms.iter().any(|p| p == "DOWNLOAD_FILE"),
-		"DOWNLOAD_FILE should be present, got: {perms:?}"
-	);
-}
-
-// TODO(permissions): server owner going away
-#[tokio::test]
-async fn test_server_owner_can_set_age_restriction_on_another_user() {
-	let app = TestApp::new_with_default_user().await;
-	let target = CreateTestUser {
-		username: "owner-ar-target".to_string(),
-		..Default::default()
-	}
-	.insert(&app)
-	.await;
-
-	let response = app
-		.execute_gql(
-			UPDATE_USER,
-			Some(json!({
-				"id": target.id,
-				"input": {
-					"username": &target.username,
-					"permissions": [],
-					"maxSessionsAllowed": null,
-					"ageRestriction": { "age": 16, "restrictOnUnset": true }
-				}
-			})),
-		)
-		.await;
-
-	assert_no_errors(&response);
-	let ar = &response["data"]["updateUser"]["ageRestriction"];
-	assert!(!ar.is_null(), "ageRestriction should have been set");
-	assert_eq!(ar["age"], json!(16));
-	assert_eq!(ar["restrictOnUnset"], json!(true));
-}
-
-// TODO(permissions): server owner going away
-#[tokio::test]
-async fn test_server_owner_can_set_max_sessions_allowed_on_another_user() {
-	let app = TestApp::new_with_default_user().await;
-	let target = CreateTestUser {
-		username: "owner-sessions-target".to_string(),
-		..Default::default()
-	}
-	.insert(&app)
-	.await;
-
-	let response = app
-		.execute_gql(
-			UPDATE_USER,
-			Some(json!({
-				"id": target.id,
-				"input": {
-					"username": &target.username,
-					"permissions": [],
-					"maxSessionsAllowed": 3,
-					"ageRestriction": null
-				}
-			})),
-		)
-		.await;
-
-	assert_no_errors(&response);
-	assert_eq!(
-		response["data"]["updateUser"]["maxSessionsAllowed"],
-		json!(3),
-		"maxSessionsAllowed should be 3"
-	);
-}
-
-/// a user with ManageUsers can set another user's permissions
-#[tokio::test]
-async fn test_manage_users_can_set_permissions_on_another_user() {
+async fn test_manage_users_can_set_inherited_permissions_on_another_user() {
 	let app = TestApp::new_with_default_user().await;
 
 	let manager = CreateTestUser {
@@ -319,7 +223,7 @@ async fn test_manage_users_can_set_permissions_on_another_user() {
 				"id": target.id,
 				"input": {
 					"username": target.username,
-					"permissions": ["DOWNLOAD_FILE"],
+					"permissions": ["CREATE_USER"], // via ManageUsers
 					"maxSessionsAllowed": null,
 					"ageRestriction": null
 				}
@@ -331,8 +235,54 @@ async fn test_manage_users_can_set_permissions_on_another_user() {
 	assert_no_errors(&response);
 	let perms = permissions_from(&response, "updateUser");
 	assert!(
-		perms.iter().any(|p| p == "DOWNLOAD_FILE"),
-		"DOWNLOAD_FILE should be present after manager update, got: {perms:?}"
+		perms.iter().any(|p| p == "CREATE_USER"),
+		"CREATE_USER should be present after manager update, got: {perms:?}"
+	);
+}
+
+/// a user with ManageUsers cannot grant permissions they do not effectively have when creating a user
+#[tokio::test]
+async fn test_manage_users_create_user_filters_ungrantable_permissions() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "manager-creates-user".to_string(),
+		permissions: vec![UserPermission::ManageUsers],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			CREATE_USER,
+			Some(json!({
+				"input": {
+					"username": "created-by-manager",
+					"password": "password",
+					"permissions": ["CREATE_USER", "DOWNLOAD_FILE", "MANAGE_SERVER"],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+	// ^ do not have DownloadFile nor ManageServer
+
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "createUser");
+	assert!(
+		perms.iter().any(|p| p == "CREATE_USER"),
+		"CREATE_USER should be present after manager create, got: {perms:?}"
+	);
+	assert!(
+		!perms.iter().any(|p| p == "DOWNLOAD_FILE"),
+		"DOWNLOAD_FILE should have been filtered out, got: {perms:?}"
+	);
+	assert!(
+		!perms.iter().any(|p| p == "MANAGE_SERVER"),
+		"MANAGE_SERVER should have been filtered out, got: {perms:?}"
 	);
 }
 
@@ -381,34 +331,122 @@ async fn test_manage_users_can_set_age_restriction_on_another_user() {
 	assert_eq!(ar["age"], json!(18));
 }
 
-// TODO(permissions): server owner going away
-/// a user with ManageUsers permission cannot edit the server owner's account
+/// a user with ManageUsers cannot grant ManageServer to another user
 #[tokio::test]
-async fn test_manage_users_cannot_edit_server_owner() {
+async fn test_manage_users_cannot_grant_manage_server() {
 	let app = TestApp::new_with_default_user().await;
 
 	let manager = CreateTestUser {
-		username: "manager-vs-owner".to_string(),
+		username: "manager-no-escalate".to_string(),
 		permissions: vec![UserPermission::ManageUsers],
 		..Default::default()
 	}
 	.insert(&app)
 	.await;
 
-	let me = app.execute_gql("query { me { id } }", None).await;
-	assert_no_errors(&me);
-	let owner_id = me["data"]["me"]["id"]
-		.as_str()
-		.expect("server owner should have id")
-		.to_string();
+	let target = CreateTestUser {
+		username: "escalation-target".to_string(),
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
 
 	let response = app
 		.execute_gql_with_token(
 			UPDATE_USER,
 			Some(json!({
-				"id": owner_id,
+				"id": target.id,
 				"input": {
-					"username": &manager.username,
+					"username": &target.username,
+					"permissions": ["MANAGE_SERVER"],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+
+	let perms = permissions_from(&response, "updateUser");
+	assert!(
+		!perms.iter().any(|p| p == "MANAGE_SERVER"),
+		"should not have worked, got: {perms:?}"
+	);
+}
+
+/// a user cannot strip a permission they don't have from another user
+#[tokio::test]
+async fn test_user_cannot_strip_permissions_they_dont_have() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "user-who-cannot-remove".to_string(),
+		permissions: vec![UserPermission::ManageUsers],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let target = CreateTestUser {
+		username: "user-to-be-stripped".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": target.id,
+				"input": {
+					"username": &target.username,
+					"permissions": [], // i.e., empty to attempt strip
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "updateUser");
+	assert!(
+		perms.iter().any(|p| p == "MANAGE_SERVER"),
+		"should not have worked, got: {perms:?}"
+	);
+}
+
+/// a user can strip permissions if they themselves have them
+#[tokio::test]
+async fn test_user_can_strip_permissions_they_have() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "user-who-can-remove".to_string(),
+		permissions: vec![UserPermission::ManageUsers, UserPermission::DownloadFile],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let target = CreateTestUser {
+		username: "user-to-be-stripped".to_string(),
+		permissions: vec![UserPermission::DownloadFile],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": target.id,
+				"input": {
+					"username": &target.username,
 					"permissions": [],
 					"maxSessionsAllowed": null,
 					"ageRestriction": null
@@ -418,7 +456,12 @@ async fn test_manage_users_cannot_edit_server_owner() {
 		)
 		.await;
 
-	assert_has_error(&response);
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "updateUser");
+	assert!(
+		!perms.iter().any(|p| p == "DOWNLOAD_FILE"),
+		"should have been stripped, got: {perms:?}"
+	);
 }
 
 /// a user with ManageUsers permission cannot update their own permissions via `updateUser`

@@ -797,6 +797,10 @@
             "label": "Skip Book Overview",
             "description": "Open the reader directly when selecting books in this library"
           }
+        },
+        "oidcGroups": {
+          "label": "OIDC groups",
+          "description": "Allow certain OIDC groups to access this library and its contents"
         }
       },
       "scan": {
@@ -1060,13 +1064,48 @@
         "title": "Access Control",
         "description": "Control who can access the content in this library",
         "sections": {
-          "libraryExclusions": {
-            "heading": "Exclude Users",
-            "description": "Prevent certain users from accessing this library or its contents",
-            "noUsersTitle": "No Users to Exclude",
-            "noUsers": "There are no other registered users to exclude from this library",
-            "updated": "Exclusions Updated",
-            "failure": "Failed to update exclusions"
+          "libraryAccess": {
+            "heading": "Authorize Users",
+            "description": "Configure which users are allowed to access this library and its contents",
+            "table": {
+              "granted": "Granted",
+              "notGranted": "No Access",
+              "selectHint": "Select users to grant or revoke access",
+              "selectedCount_one": "{{count}} user selected",
+              "selectedCount_other": "{{count}} users selected"
+            },
+            "actions": {
+              "grant": "Grant Access",
+              "revoke": "Revoke Access"
+            },
+            "updated": "Access Updated",
+            "failure": "Failed to Update Access"
+          },
+          "oidcGroups": {
+            "heading": "OIDC Groups",
+            "description": "Allow certain OIDC groups to access this library and its contents",
+            "count_one": "{{count}} group",
+            "count_other": "{{count}} groups",
+            "selectedCount_one": "{{count}} group selected",
+            "selectedCount_other": "{{count}} groups selected",
+            "empty": {
+              "title": "No OIDC groups",
+              "description": "Add groups to grant their members access to this library"
+            },
+            "add": {
+              "trigger": "Add Groups",
+              "title": "Add OIDC Groups",
+              "description": "Enter one or more group names, separated by commas or new lines",
+              "placeholder": "admins, readers"
+            },
+            "disclaimer": {
+              "title": "This will override manual authorization",
+              "description": "When set you will be unable to manually authorize users for this library. Only users in the specified OIDC groups will be able to access this library"
+            },
+            "confirmationModal": {
+              "title": "Update OIDC groups",
+              "description": "Are you sure you want to update the OIDC groups for this library? The changes will take effect immediately and revoke access for any OIDC user not in the specified groups"
+            }
           }
         }
       },
@@ -2953,6 +2992,62 @@
       "METADATA_FETCH_RECORD_MANAGE": {
         "label": "Manage Metadata Matches",
         "description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+      },
+      "READ_BACKGROUND_JOBS": {
+        "label": "Read background jobs",
+        "description": "Allows the user to view background job history and status"
+      },
+      "MANAGE_BACKGROUND_JOBS": {
+        "label": "Manage background jobs",
+        "description": "Allows the user to cancel, delete, and manage background jobs"
+      },
+      "READ_SCHEDULED_BACKGROUND_JOBS": {
+        "label": "Read scheduled background jobs",
+        "description": "Allows the user to view scheduled background job configuration"
+      },
+      "MANAGE_SCHEDULED_BACKGROUND_JOBS": {
+        "label": "Manage scheduled background jobs",
+        "description": "Allows the user to create, update, and delete scheduled background job configuration"
+      },
+      "READ_EVENTS": {
+        "label": "Read events",
+        "description": "Allows the user to subscribe to server-side events such as job progress and media updates"
+      },
+      "ACCESS_GRAPH_QL_PLAYGROUND": {
+        "label": "GraphQL playground",
+        "description": "Allows the user to access the GraphQL playground interface"
+      },
+      "MODERATE_BOOK_CLUBS": {
+        "label": "Moderate book clubs",
+        "description": "Allows the user to moderate any book club activity"
+      },
+      "MANAGE_BOOK_CLUBS": {
+        "label": "Manage book clubs",
+        "description": "Allows the user to manage all book clubs"
+      },
+      "CREATE_USER": {
+        "label": "Create users",
+        "description": "Allows the user to create new user accounts"
+      },
+      "UPDATE_USER": {
+        "label": "Update users",
+        "description": "Allows the user to update existing user accounts"
+      },
+      "DELETE_USER": {
+        "label": "Delete users",
+        "description": "Allows the user to delete user accounts"
+      },
+      "LOCK_USER": {
+        "label": "Lock users",
+        "description": "Allows the user to lock and unlock user accounts"
+      },
+      "MANAGE_USER_SESSIONS": {
+        "label": "Manage user sessions",
+        "description": "Allows the user to view and invalidate user sessions"
+      },
+      "VIEW_ALL_SMART_LISTS": {
+        "label": "View all smart lists",
+        "description": "Allows the user to view smart lists created by other users"
       }
     }
   },
@@ -3106,6 +3201,7 @@
       "refresh": "Refresh",
       "reset": "Reset",
       "select": "Select",
+      "selectAll": "Select All",
       "settings": "Settings",
       "servers": "Servers",
       "size": "Size",

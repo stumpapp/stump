@@ -5,7 +5,7 @@ import { Info } from 'lucide-react'
 import { useCallback } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContext } from '@/scenes/library/context'
+import { useLibraryContext } from '@/components/library/context'
 
 const mutation = graphql(`
 	mutation AnalyzeLibraryMedia($id: ID!) {

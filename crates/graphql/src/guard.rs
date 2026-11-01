@@ -1,6 +1,6 @@
 use async_graphql::{Context, Guard, Result};
 use models::{
-	entity::book_club_member,
+	entity::{book_club_member, user::AuthUser},
 	shared::{book_club::BookClubMemberRole, enums::UserPermission},
 };
 
@@ -8,21 +8,6 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	error_message,
 };
-
-/// Guard that checks if the user is the owner of the server.
-pub struct ServerOwnerGuard;
-
-impl Guard for ServerOwnerGuard {
-	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-
-		if user.is_server_owner {
-			Ok(())
-		} else {
-			Err(error_message::FORBIDDEN_ACTION.into())
-		}
-	}
-}
 
 /// Guard that checks if the user is themselves. This is dependent on the user ID
 /// provided and compared with the ID of the current user. So be sure to provide
@@ -69,23 +54,17 @@ impl PermissionGuard {
 			permissions: vec![permission],
 		}
 	}
+
+	fn is_authorized(&self, user: &AuthUser) -> bool {
+		!user.is_locked && self.permissions.iter().any(|p| user.has_permission(*p))
+	}
 }
 
 impl Guard for PermissionGuard {
 	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
-		if user.is_server_owner {
-			return Ok(());
-		}
-
-		let authorized = self
-			.permissions
-			.iter()
-			.any(|p| user.permissions.contains(p));
-		let permitted = authorized && !user.is_locked;
-
-		if permitted {
+		if self.is_authorized(user) {
 			Ok(())
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())
@@ -148,7 +127,12 @@ impl Guard for BookClubRoleGuard {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		if user.is_server_owner {
+		let system_override = if self.role >= BookClubMemberRole::Admin {
+			UserPermission::ManageBookClubs
+		} else {
+			UserPermission::ModerateBookClubs
+		};
+		if user.has_permission(system_override) {
 			return Ok(());
 		}
 
@@ -167,5 +151,47 @@ impl Guard for BookClubRoleGuard {
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::get_default_user;
+
+	#[test]
+	fn test_permission_guard_consults_associations() {
+		// User holds ManageUsers but not CreateUser explicitly. ManageUsers
+		// associates to CreateUser, so the guard for CreateUser should pass.
+		let user = AuthUser {
+			permissions: vec![UserPermission::ManageUsers],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(guard.is_authorized(&user));
+	}
+
+	#[test]
+	fn test_permission_guard_denies_locked_user() {
+		let user = AuthUser {
+			is_locked: true,
+			permissions: vec![UserPermission::CreateUser],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(!guard.is_authorized(&user));
+	}
+
+	#[test]
+	fn test_permission_guard_denies_user_without_permission() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ReadUsers],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(!guard.is_authorized(&user));
 	}
 }

@@ -16,7 +16,7 @@ use sea_orm::{prelude::*, ActiveValue, ExprTrait, QueryOrder};
 
 use crate::{
 	data::{CoreContext, ServiceContext},
-	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
+	guard::{PermissionGuard, SelfGuard},
 	pagination::{PaginatedResponse, Pagination, PaginationValidator},
 	query::media::MediaQuery,
 };
@@ -36,6 +36,7 @@ impl From<user::Model> for User {
 	}
 }
 
+// TODO(permissions): i've effectively put an implicit permission here for accessing user reading data as part of ManageUsers. is this fine?
 #[ComplexObject]
 impl User {
 	#[graphql(
@@ -79,7 +80,7 @@ impl User {
 	}
 
 	#[graphql(
-		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers)).or(ServerOwnerGuard)"
+		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers))"
 	)]
 	async fn age_restriction(
 		&self,
@@ -95,7 +96,9 @@ impl User {
 		Ok(age_restriction)
 	}
 
-	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
+	#[graphql(
+		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers))"
+	)]
 	async fn continue_reading(
 		&self,
 		ctx: &Context<'_>,
@@ -113,7 +116,9 @@ impl User {
 			.resolve_into_vec()
 	}
 
-	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
+	#[graphql(
+		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers))"
+	)]
 	async fn preferences(&self, ctx: &Context<'_>) -> Result<UserPreferences> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

@@ -41,7 +41,6 @@ const createMutation = graphql(`
 
 interface ExistingUser extends UpdateUserInput {
 	id: string
-	isServerOwner: boolean
 }
 
 type Props = {
@@ -164,13 +163,9 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 					<AccountDetails />
 				</div>
 
-				{!user?.isServerOwner && (
-					<>
-						<UserPermissionsTable />
-						<UserRestrictionsForm />
-						<MaxSessionsAllowed />
-					</>
-				)}
+				<UserPermissionsTable />
+				<UserRestrictionsForm />
+				<MaxSessionsAllowed />
 
 				<div className="mt-6 md:max-w-sm flex w-full">
 					<Button type="submit" className="md:max-w-sm w-full">

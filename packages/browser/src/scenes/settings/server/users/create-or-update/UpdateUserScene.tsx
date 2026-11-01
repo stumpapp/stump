@@ -26,7 +26,6 @@ const query = graphql(`
 			}
 			permissions
 			maxSessionsAllowed
-			isServerOwner
 		}
 		users(pagination: { none: { unpaginated: true } }) @skip(if: $skip) {
 			nodes {

@@ -35,7 +35,7 @@ impl SmartListsQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_all = input.all.unwrap_or(false);
-		if query_all && !user.is_server_owner {
+		if query_all && !user.has_permission(UserPermission::ViewAllSmartLists) {
 			return Err(
 				"Cannot query all smart lists unless you are a server owner".into()
 			);

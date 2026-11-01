@@ -16,7 +16,7 @@ import omit from 'lodash/omit'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { ILibraryContext } from '@/scenes/library/context'
+import { ILibraryContext } from '@/components/library/context'
 
 type Library = ILibraryContext['library']
 
@@ -206,6 +206,7 @@ export const buildSchema = (
 			)
 			.optional(),
 		thumbnailConfig,
+		oidcGroups: z.array(z.string()).nullish(),
 		processThumbnailColorsEvenWithoutConfig: z.boolean().default(false),
 	})
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
@@ -242,6 +243,7 @@ export const formDefaults = (
 	thumbnailConfig: intoFormThumbnailConfig(library?.config.thumbnailConfig),
 	processThumbnailColorsEvenWithoutConfig:
 		library?.config.processThumbnailColorsEvenWithoutConfig ?? false,
+	oidcGroups: library?.oidcGroups || [],
 })
 
 // TODO: Investigate https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-validation-schema

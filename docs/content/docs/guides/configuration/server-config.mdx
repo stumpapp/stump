@@ -193,6 +193,32 @@ The time (_in seconds_) between each session expiry cleanup check. The check wil
 | ------- | ------------- | ---------------------------------- |
 | Integer | `60`          | `expired_session_cleanup_interval` |
 
+### STUMP_ACCESS_TOKEN_TTL
+
+The time-to-live for access tokens. This is the amount of time in seconds that a JWT access token will be valid for. The default value is `3600`, or 1 hour.
+
+| Type    | Default Value | TOML Key           |
+| ------- | ------------- | ------------------ |
+| Integer | `3600`        | `access_token_ttl` |
+
+### STUMP_REFRESH_TOKEN_TTL
+
+The time-to-live for refresh tokens. This is the amount of time in seconds that a JWT refresh token will be valid for. The default value is `604800`, or 7 days.
+
+| Type    | Default Value | TOML Key            |
+| ------- | ------------- | ------------------- |
+| Integer | `604800`      | `refresh_token_ttl` |
+
+<Callout title="What are access and refresh tokens?" type="idea">
+    An access token is a short-lived token that is used to authenticate requests to your Stump server. It is not stored in the database, and is given to a user after they successfully log in (if the request asked for a token, rather than a session cookie). The access token is then sent with each request to the server, and the server will verify that the token is valid and has not expired.
+
+    A refresh token is a long-lived token that is used to obtain a new access token when the current access token expires. It is stored in the database, and is given to a user under the same conditions as an access token. Refreshing an access token will give a new token pair, and the old refresh token will be invalidated.
+
+
+    If you'd like more information on authentication in general, see the [Authentication](/docs/developer/api#authentication) guide.
+
+</Callout>
+
 ## OpenID Connect (OIDC)
 
 <Callout>

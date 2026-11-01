@@ -1,7 +1,7 @@
 import { CreateOrUpdateLibraryInput, LibrarySettingsConfigFragment } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
-import { ILibraryContext } from '../../context'
+import { ILibraryContext } from '../../../../components/library/context'
 import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
 
 export type LibraryPatchParams = Omit<Partial<CreateOrUpdateLibraryInput>, 'config'> & {

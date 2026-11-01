@@ -13,7 +13,7 @@ use crate::shared::{
 };
 
 use super::{
-	last_library_visit, library_config, library_exclusion, library_scan_record, series,
+	last_library_visit, library_access, library_config, library_scan_record, series,
 	user::AuthUser,
 };
 
@@ -30,6 +30,11 @@ pub struct Model {
 	pub description: Option<String>,
 	#[sea_orm(column_type = "Text", unique)]
 	pub path: String,
+	/// a comma-separated list of OIDC groups that have access to this library. If this is set, then
+	/// the access of the library will be managed by syncing against configured OIDC groups
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oidc_groups: Option<String>,
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
 	#[sea_orm(column_type = "Json", nullable)]
@@ -48,9 +53,9 @@ pub struct Model {
 	#[sea_orm(has_many)]
 	#[graphql(skip)]
 	pub last_library_visit: HasMany<last_library_visit::Entity>,
-	#[sea_orm(has_many, relation_enum = "HiddenFromUsers")]
+	#[sea_orm(has_many, relation_enum = "AccessUsers")]
 	#[graphql(skip)]
-	pub library_exclusions: HasMany<library_exclusion::Entity>,
+	pub access_records: HasMany<library_access::Entity>,
 	#[sea_orm(
 		belongs_to,
 		from = "config_id",
@@ -70,9 +75,8 @@ pub struct Model {
 
 impl Entity {
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		Entity::find().filter(Column::Id.not_in_subquery(
-			library_exclusion::Entity::library_hidden_to_user_query(user),
-		))
+		Entity::find()
+			.filter(Column::Id.in_subquery(library_access::Entity::for_user(user)))
 	}
 }
 
@@ -150,7 +154,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "libraries" WHERE "libraries"."id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+			r#"SELECT  FROM "libraries" WHERE "libraries"."id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
 		);
 	}
 }

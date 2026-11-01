@@ -16,7 +16,7 @@ use models::{
 		user_login_activity,
 	},
 	services::user::create_user_with_preferences,
-	shared::image::ImageRef,
+	shared::{enums::UserPermission, image::ImageRef, permission_set::PermissionSet},
 };
 use reqwest::header;
 use sea_orm::{prelude::*, ExprTrait};
@@ -403,30 +403,31 @@ pub async fn register(
 		.await?
 		> 0;
 
-	let mut is_server_owner = false;
-
 	let session_user = fetch_session_user(&session, ctx.conn.as_ref()).await?;
 
 	if let Some(user) = session_user {
-		if !user.is_server_owner {
+		if !user.has_permission(UserPermission::CreateUser) {
 			return Err(APIError::Forbidden(String::from(
 				"You do not have permission to access this resource.",
 			)));
 		}
-	} else if session_user.is_none() && has_users {
+	} else if has_users {
 		// if users exist, a valid session is required to register a new user
 		return Err(APIError::Unauthorized);
-	} else if !has_users {
-		// if no users present, the user is automatically a server owner
-		is_server_owner = true;
 	}
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
+	let bootstrap_permissions = if !has_users {
+		PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
+	} else {
+		None
+	};
+
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),
 		hashed_password: Set(hashed_password),
-		is_server_owner: Set(is_server_owner),
+		permissions: Set(bootstrap_permissions),
 		..Default::default()
 	};
 	let updated_user = create_user_with_preferences(conn, active_model, None).await?;

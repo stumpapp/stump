@@ -461,6 +461,7 @@ mod tests {
 			emoji: None,
 			last_scanned_at: None,
 			config_id: 1,
+			oidc_groups: None,
 			path: String::default(),
 			status: FileStatus::Ready,
 			thumbnail_meta: None,

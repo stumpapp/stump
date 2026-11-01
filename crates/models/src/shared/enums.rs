@@ -3,8 +3,6 @@ use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
-// TODO: Consider not using screaming case?
-
 /// The role of an author in relation to a work or series
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
 pub enum AuthorRole {
@@ -731,11 +729,6 @@ pub enum SupportedFont {
 	// Custom(String),
 }
 
-// TODO(permissions): Consider adding the following:
-// - Access to library logs
-// - Access to system logs
-// - Access to jobs and job management
-
 /// The permissions a user may be granted
 #[derive(
 	Eq,
@@ -760,6 +753,8 @@ pub enum SupportedFont {
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
+	/// Grant access to the GraphQL playground interface
+	AccessGraphQLPlayground,
 	/// Grant access to read/create their own API keys
 	AccessApiKeys,
 	/// Grant access to the koreader sync feature
@@ -819,6 +814,16 @@ pub enum UserPermission {
 	/// Note that this is explicitly for querying users via user-specific endpoints.
 	/// This would not affect relational queries, such as members in a common book club.
 	ReadUsers,
+	/// Grant access to create managed user accounts
+	CreateUser,
+	/// Grant access to update another user account, excluding preferences
+	UpdateUser,
+	/// Grant access to delete another user
+	DeleteUser,
+	/// Grant access to lock another user, preventing them from logging in until an admin unlocks them
+	LockUser,
+	/// Grant access to view and manage active sessions and auth tokens for other users
+	ManageUserSessions,
 	/// Grant access to manage users (create,edit,delete)
 	ManageUsers,
 	/// Grant access to read notifiers
@@ -829,10 +834,16 @@ pub enum UserPermission {
 	ManageNotifier,
 	/// Grant access to delete a notifier
 	DeleteNotifier,
-	/// Grant access to read jobs
-	ReadJobs,
-	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
-	ManageJobs,
+	/// Grant access to read/subscribe to server-side events (job progress, media updates, etc.)
+	ReadEvents,
+	/// Grant access to read background job history and status
+	ReadBackgroundJobs,
+	/// Grant access to manage background jobs (cancel, delete history/logs)
+	ManageBackgroundJobs,
+	/// Grant access to read scheduled background job configuration
+	ReadScheduledBackgroundJobs,
+	/// Grant access to manage scheduled background job configuration (create, update, delete)
+	ManageScheduledBackgroundJobs,
 	/// Grant access to read metadata fetch statuses
 	MetadataFetchRecordRead,
 	/// Grant access to manage metadata fetch statuses (accept matches, etc)
@@ -845,7 +856,15 @@ pub enum UserPermission {
 	ReadPersistedLogs,
 	/// Grant access to read system logs
 	ReadSystemLogs,
-	/// Grant access to manage the server. This is effectively a step below server owner
+	/// Grant access to view all smart lists, even those they don't have explicit access to
+	ViewAllSmartLists,
+	/// Grant moderator-level powers across all book clubs (edit/delete any message,
+	/// lock/pin/create/archive discussions, see private clubs they're not a member of)
+	ModerateBookClubs,
+	/// Grant admin-level powers across all book clubs (everything ModerateBookClubs
+	/// grants, plus suggestion administration)
+	ManageBookClubs,
+	/// Grant access to manage the server. This is effectively full access and encompasses all other permissions
 	ManageServer,
 }
 

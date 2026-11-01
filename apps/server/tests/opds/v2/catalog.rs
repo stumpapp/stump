@@ -1,9 +1,8 @@
 use crate::common::{
-	account::CreateTestUser, series::setup_single_series_with_n_books, TestApp,
+	account::CreateTestUser, library::setup_library,
+	series::setup_single_series_with_n_books, TestApp,
 };
 
-use models::entity::library_exclusion;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set};
 use serde_json::Value;
 use tests::fake_data;
 
@@ -16,12 +15,15 @@ fn link<'a>(body: &'a Value, rel: &str) -> Option<&'a str> {
 }
 
 async fn setup_library_with_series(app: &TestApp, id: &str, series_count: usize) {
-	let library = fake_data::Library {
-		id: Some(id.to_string()),
-		name: Some(id.to_string()),
-		..Default::default()
-	}
-	.insert(app.conn())
+	let library = setup_library(
+		app,
+		fake_data::Library {
+			id: Some(id.to_string()),
+			name: Some(id.to_string()),
+			..Default::default()
+		},
+		None,
+	)
 	.await;
 
 	for number in 0..series_count {
@@ -130,8 +132,9 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 }
 
 #[tokio::test]
-async fn library_series_feed_rejects_a_library_hidden_from_the_user() {
+async fn library_series_feed_rejects_a_library_not_granted_to_the_user() {
 	let app = TestApp::new_with_default_user().await;
+	// only the default user is granted access
 	setup_library_with_series(&app, "hidden-library", 1).await;
 	let other = CreateTestUser {
 		username: "other-opds-user".to_string(),
@@ -139,14 +142,6 @@ async fn library_series_feed_rejects_a_library_hidden_from_the_user() {
 	}
 	.insert(&app)
 	.await;
-	library_exclusion::ActiveModel {
-		user_id: Set(other.id),
-		library_id: Set("hidden-library".to_string()),
-		..Default::default()
-	}
-	.insert(app.conn())
-	.await
-	.expect("should hide library from other user");
 
 	let response = app
 		.server
@@ -159,10 +154,12 @@ async fn library_series_feed_rejects_a_library_hidden_from_the_user() {
 #[tokio::test]
 async fn book_feed_preserves_pagination_links_until_the_last_page() {
 	let app = TestApp::new_with_default_user().await;
+	let library = setup_library(&app, fake_data::Library::default(), None).await;
 	setup_single_series_with_n_books(
 		&app,
 		fake_data::Series {
 			id: Some("paginated-series".to_string()),
+			library_id: Some(library.id),
 			..Default::default()
 		},
 		3,

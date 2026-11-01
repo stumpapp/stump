@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 import { LibraryManagementContext, LibraryPatchParams } from './context'
 import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
 import { transformConfigForMutation } from './utils'
@@ -28,7 +28,7 @@ const LibraryAnalysisScene = lazy(() => import('./integrations/analysis'))
 const LibraryMetadataScene = lazy(() => import('./integrations/metadata'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
-const AccessControlScene = lazy(() => import('./danger/accessControl'))
+const AccessControlScene = lazy(() => import('./danger/AccessControlScene'))
 const DeletionScene = lazy(() => import('./danger/deletion'))
 
 export const LibrarySettingsConfig = graphql(`

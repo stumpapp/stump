@@ -2,19 +2,16 @@
 title: Library Access
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Step, Steps } from 'fumadocs-ui/components/steps'
 
-<Callout type="warn">
-    Access to libraries today is effectively an opt-out model. Stump will be moving to an opt-in model in the future, but for now users will have access to all libraries by default. You can follow [this issue](https://github.com/stumpapp/stump/issues/1151) to track the progress of this change.
-</Callout>
+A user must be explicitly granted access to see content in a library. By default, only the user who created a library will be automatically granted access to it.
 
-A user can be explicitly excluded from seeing a library. This is useful for hiding libraries that contain content that a user should not see, such as age-restricted content or content that is not relevant to them.
-
-## Configure Exclusions
+## Configure Access
 
 <Callout title="Permission required">
 	This functionality is gated behind the `MANAGE_LIBRARY` and `READ_USERS` user permissions. To
-	learn more about permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
+	learn more about permissions, see the [permissions](/docs/guides/access-control/permissions)
+	guide. Additionally, you must have access to the library you are trying to manage.
 </Callout>
 
 <Steps>
@@ -23,24 +20,37 @@ A user can be explicitly excluded from seeing a library. This is useful for hidi
 ### Navigate to the library settings
 
 Navigate to the library you want to exclude the user from and click on the `Settings` tab.
+
 </Step>
 
 <Step>
 ### Select `Access Control` in the sidebar
 
-The `Exclusions` section is located towards the bottom of the settings page. It contains a multi-select dropdown that allows you to select the users you want to exclude from the library.
+The `Authorize users` section is located towards the bottom of the settings page. It contains a multi-select dropdown that allows you to select the users you want to have access to the library.
+
+<Callout title="OIDC">
+	If you are using OIDC, this option may not be available depending on your configuration. For more
+	information, see the [OIDC](/docs/guides/access-control/oidc) guide.
+</Callout>
+
 </Step>
 
 <Step>
-### Select the user(s) to exclude
+### Select the user(s) to grant access
 
-Use the multi-select dropdown to select the user you want to exclude from the library. You can select multiple users if you want to exclude more than one user.
+Use the multi-select dropdown to select the user you want to to grant access to the library. You can select multiple users if you want to grant access to more than one user.
+
 </Step>
 
 <Step>
 ### Save your changes
 
-Autosave is enabled, so any changes should take effect immediately. Any user excluded from a library will no longer have access to the library or any content within it.
+Click the `Save changes` button and it should take effect immediately.
+
 </Step>
 
 </Steps>
+
+## OIDC-Managed Libraries
+
+You can configure a library to be OIDC-managed by specifying the groups which are allowed to access the library. This assumes that you have properly configured OIDC for your Stump instance. For more information, see the [OIDC](/docs/guides/access-control/oidc) guide.

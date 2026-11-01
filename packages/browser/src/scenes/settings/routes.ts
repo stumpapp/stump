@@ -82,7 +82,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: AlarmClock,
 				label: 'Jobs',
 				localeKey: 'server/jobs',
-				permissions: [UserPermission.ReadJobs],
+				permissions: [UserPermission.ReadBackgroundJobs],
 				to: '/settings/jobs',
 				prefetch: () => Promise.all([prefetchJobs(client, api), prefetchScheduler(client, api)]),
 			},

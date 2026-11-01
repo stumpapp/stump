@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use async_graphql::SimpleObject;
+use models::shared::enums::UserPermission;
 use schematic::Config;
 use serde::Serialize;
 
@@ -30,7 +33,15 @@ pub struct OidcConfig {
 		parse_env = schematic::env::split_comma
 	)]
 	pub scopes: Vec<String>,
-
+	/// The claim name containing the user's group memberships
+	#[setting(default = "groups")]
+	#[graphql(skip)]
+	pub groups_claim: String,
+	/// Maps provider group names to Stump permissions. If empty, permissions are
+	/// not managed by OIDC at all
+	#[serde(default)]
+	#[graphql(skip)] // HashMap is not a SimpleObject
+	pub group_permission_mapping: HashMap<String, Vec<UserPermission>>,
 	/// Allow automatic user registration via OIDC
 	#[setting(default = true)]
 	pub allow_registration: bool,
@@ -59,10 +70,10 @@ impl OidcConfig {
 			&& !self.client_secret.is_empty();
 		if !is_configured_properly && self.enabled {
 			tracing::warn!(
-				client_id = ?self.client_id,
-				issuer_url = ?self.issuer_url,
-				client_secret_set = !self.client_secret.is_empty(),
-				"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
+			client_id = ?self.client_id,
+			issuer_url = ?self.issuer_url,
+			client_secret_set = !self.client_secret.is_empty(),
+			"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
 			);
 		}
 		is_configured_properly
@@ -77,11 +88,20 @@ impl std::fmt::Debug for OidcConfig {
 			.field("issuer_url", &self.issuer_url)
 			.field("client_secret", &"[REDACTED]")
 			.field("scopes", &self.scopes)
+			.field("groups_claim", &self.groups_claim)
+			.field("group_permission_mapping", &self.group_permission_mapping)
 			.field("allow_registration", &self.allow_registration)
 			.field("disable_local_auth", &self.disable_local_auth)
 			.field("extra_audiences", &self.extra_audiences)
 			.field("ca_cert_file", &self.ca_cert_file)
 			.finish()
+	}
+}
+
+impl OidcConfig {
+	/// Get the extra trusted audiences for ID token verification, if any
+	pub fn get_extra_audiences(&self) -> Vec<String> {
+		self.extra_audiences.clone()
 	}
 }
 

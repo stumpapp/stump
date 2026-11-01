@@ -1,9 +1,11 @@
 use chrono::Utc;
 use models::entity::user::{AuthUser, LoginUser};
 use models::entity::{
-	library, library_config, media, media_metadata, reading_session, series, user,
+	library, library_access, library_config, media, media_metadata, reading_session,
+	series, user,
 };
-use models::shared::enums::{FileStatus, ReadingStatus};
+use models::shared::enums::{FileStatus, ReadingStatus, UserPermission};
+use models::shared::permission_set::PermissionSet;
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
 use sea_orm::{prelude::*, ActiveModelTrait, ActiveValue, DbConn};
@@ -104,8 +106,10 @@ impl Media {
 
 #[derive(Default)]
 pub struct User {
-	username: String,
-	hashed_password: Option<String>,
+	pub username: String,
+	pub hashed_password: Option<String>,
+	pub permissions: Option<Vec<UserPermission>>,
+	pub oidc_groups: Option<String>,
 }
 
 impl User {
@@ -122,7 +126,15 @@ impl User {
 			hashed_password: sea_orm::Set(
 				self.hashed_password.clone().unwrap_or("".to_string()),
 			),
-			is_server_owner: sea_orm::Set(true),
+			permissions: sea_orm::Set(
+				PermissionSet::new(self.permissions.clone().unwrap_or_default())
+					.resolve_into_string(),
+			),
+			oidc_groups: self
+				.oidc_groups
+				.as_ref()
+				.map(|groups| sea_orm::Set(Some(groups.clone())))
+				.unwrap_or(sea_orm::NotSet),
 			is_locked: sea_orm::Set(false),
 			..Default::default()
 		};
@@ -148,6 +160,7 @@ pub struct Library {
 	pub id: Option<String>,
 	pub name: Option<String>,
 	pub path: Option<String>,
+	pub oidc_groups: Option<String>,
 }
 
 impl Library {
@@ -162,6 +175,11 @@ impl Library {
 		});
 
 		let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
+		let oidc_groups = self
+			.oidc_groups
+			.as_ref()
+			.map(|groups| sea_orm::Set(Some(groups.clone())))
+			.unwrap_or(sea_orm::NotSet);
 
 		let config = library_config::ActiveModel {
 			library_id: sea_orm::Set(Some(id.clone())),
@@ -176,10 +194,26 @@ impl Library {
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
 			config_id: sea_orm::Set(config.id),
+			oidc_groups,
 			..Default::default()
 		};
 
 		model.insert(db).await.expect("could not insert library")
+	}
+
+	pub async fn insert_with_user(&self, db: &DbConn, user_id: &str) -> library::Model {
+		let library = self.insert(db).await;
+
+		let _access_record = library_access::ActiveModel {
+			library_id: sea_orm::Set(library.id.clone()),
+			user_id: sea_orm::Set(user_id.to_string()),
+			..Default::default()
+		}
+		.insert(db)
+		.await
+		.expect("could not insert library access record");
+
+		library
 	}
 }
 

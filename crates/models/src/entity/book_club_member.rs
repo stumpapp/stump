@@ -10,7 +10,7 @@ use sea_orm::{
 	ColumnTrait, Condition, ExprTrait,
 };
 
-use crate::shared::book_club::BookClubMemberRole;
+use crate::shared::{book_club::BookClubMemberRole, enums::UserPermission};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -96,7 +96,7 @@ impl Entity {
 	}
 
 	pub fn find_members_accessible_to_user(user: &AuthUser) -> Select<Self> {
-		if user.is_server_owner {
+		if user.has_permission(UserPermission::ModerateBookClubs) {
 			Self::find()
 		} else {
 			Self::find().filter(
@@ -132,8 +132,7 @@ mod tests {
 
 	#[test]
 	fn test_find_members_accessible_to_user() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select = Entity::find_members_accessible_to_user(&user);
 		assert_eq!(
@@ -145,8 +144,11 @@ mod tests {
 	}
 
 	#[test]
-	fn test_find_members_accessible_to_user_server_owner() {
-		let user = get_default_user();
+	fn test_find_members_accessible_to_user_book_club_moderator() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ModerateBookClubs],
+			..get_default_user()
+		};
 
 		let select = Entity::find_members_accessible_to_user(&user);
 		assert_eq!(
@@ -156,8 +158,11 @@ mod tests {
 	}
 
 	#[test]
-	fn test_find_members_accessible_to_book_club_id_for_server_owner() {
-		let user = get_default_user();
+	fn test_find_members_accessible_to_book_club_id_for_book_club_moderator() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ModerateBookClubs],
+			..get_default_user()
+		};
 
 		let select =
 			Entity::find_members_accessible_to_user_for_book_club_id(&user, "321");

@@ -19,7 +19,7 @@
 		"fast-xml-parser": "^5.10.1",
 		"ts-essentials": "^10.2.0",
 		"typescript": "^5.4.5",
-		"vitest": "^4.1.11"
+		"vitest": "^5.0.5"
 	},
 	"dependencies": {
 		"axios": "^1.16.1",

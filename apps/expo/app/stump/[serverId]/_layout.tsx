@@ -228,6 +228,7 @@ function Screen() {
 				const instance = new Api({
 					baseURL: effectiveServerUrl,
 					authMethod: 'token',
+					customHeaders: sdk?.customHeaders,
 				})
 				instance.tokens = token
 				setSDK(instance)

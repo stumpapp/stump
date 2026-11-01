@@ -280,9 +280,12 @@ export const useSavedServers = () => {
 				})
 			}
 
+			// The cached SDK instance was built from the old config (URL, auth, custom headers)
+			removeInstanceFromCache(id)
+
 			return serverMeta
 		},
-		[setDefaultServer, editServer, createServerConfig],
+		[setDefaultServer, editServer, createServerConfig, removeInstanceFromCache],
 	)
 
 	/**

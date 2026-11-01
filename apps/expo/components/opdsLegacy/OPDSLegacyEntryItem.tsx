@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'expo-router'
 import { Download, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
-import { Image, Platform, Pressable, View } from 'react-native'
+import { Image, Platform, View } from 'react-native'
 
 import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
@@ -176,87 +176,85 @@ export default function OPDSEntry({ entry }: Props) {
 						: []),
 				]}
 			>
-				<Pressable onPress={onPress}>
-					{({ pressed }) => (
-						<View
-							className={cn('gap-1 items-center', {
-								'gap-4 flex-row': layout === 'list',
-							})}
-							style={{
-								opacity: pressed ? 0.75 : 1,
-								paddingHorizontal,
-							}}
-						>
-							{!thumbnailUrl &&
-								Platform.select({
-									ios: (
-										<TurboImage
-											source={{ uri: iconSource.localUri || iconSource.uri }}
-											style={{ width: thumbnailWidth, height: thumbnailWidth }}
-										/>
-									),
-									android: (
-										<Image
-											// @ts-expect-error: It's fine
-											source={iconSource}
-											style={{ width: thumbnailWidth, height: thumbnailWidth }}
-										/>
-									),
-								})}
-
-							{thumbnailUrl && (
-								<View className="my-2 relative">
-									<ThumbnailImage
-										source={{
-											uri: resolveUrl(thumbnailUrl),
-											headers: {
-												...sdk.customHeaders,
-												Authorization: sdk.authorizationHeader || '',
-											},
-										}}
-										size={{
-											height: thumbnailWidth / thumbnailRatio,
-											width: thumbnailWidth,
-										}}
+				{({ pressed }) => (
+					<View
+						className={cn('gap-1 items-center', {
+							'gap-4 flex-row': layout === 'list',
+						})}
+						style={{
+							opacity: pressed ? 0.75 : 1,
+							paddingHorizontal,
+						}}
+					>
+						{!thumbnailUrl &&
+							Platform.select({
+								ios: (
+									<TurboImage
+										source={{ uri: iconSource.localUri || iconSource.uri }}
+										style={{ width: thumbnailWidth, height: thumbnailWidth }}
 									/>
+								),
+								android: (
+									<Image
+										// @ts-expect-error: It's fine
+										source={iconSource}
+										style={{ width: thumbnailWidth, height: thumbnailWidth }}
+									/>
+								),
+							})}
 
-									{isStreamable && (
-										<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
-											<Icon as={Radio} color="white" className="h-5 w-5" />
-										</View>
-									)}
+						{thumbnailUrl && (
+							<View className="my-2 relative">
+								<ThumbnailImage
+									source={{
+										uri: resolveUrl(thumbnailUrl),
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
+									}}
+									size={{
+										height: thumbnailWidth / thumbnailRatio,
+										width: thumbnailWidth,
+									}}
+								/>
 
-									{isDownloaded && (
-										<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
-											<Download color="white" className="h-5 w-5" />
-										</View>
-									)}
-								</View>
-							)}
+								{isStreamable && (
+									<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
+										<Icon as={Radio} color="white" className="h-5 w-5" />
+									</View>
+								)}
 
-							<View
-								style={{
-									width: layout === 'grid' ? itemWidth - 16 : undefined,
-									flex: layout === 'list' ? 1 : undefined,
-									flexShrink: layout === 'list' ? 1 : undefined,
-								}}
-							>
-								<Text
-									className={cn('text-base font-medium', {
-										'text-center': layout === 'grid',
-									})}
-									numberOfLines={2}
-								>
-									{friendlyName}
-								</Text>
-
-								{layout === 'list' && streamingData?.pageCount != null && (
-									<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
+								{isDownloaded && (
+									<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
+										<Download color="white" className="h-5 w-5" />
+									</View>
 								)}
 							</View>
+						)}
+
+						<View
+							style={{
+								width: layout === 'grid' ? itemWidth - 16 : undefined,
+								flex: layout === 'list' ? 1 : undefined,
+								flexShrink: layout === 'list' ? 1 : undefined,
+							}}
+						>
+							<Text
+								className={cn('text-base font-medium', {
+									'text-center': layout === 'grid',
+								})}
+								numberOfLines={2}
+							>
+								{friendlyName}
+							</Text>
+
+							{layout === 'list' && streamingData?.pageCount != null && (
+								<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
+							)}
 						</View>
-					)}
-				</Pressable>
+					</View>
+				)}
 			</ContextMenu>
 
 			<OPDSLegacyEntryItemSheet ref={sheetRef} entry={entry} />

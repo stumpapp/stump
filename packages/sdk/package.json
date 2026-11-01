@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/qs": "^6.15.1",
-		"fast-xml-parser": "^5.10.1",
+		"fast-xml-parser": "^5.11.2",
 		"ts-essentials": "^10.2.0",
 		"typescript": "^5.4.5",
 		"vitest": "^4.1.11"

@@ -7,6 +7,7 @@ import {
 	type StyleProp,
 	StyleSheet,
 	Text,
+	type TextInstance,
 	type TextProps,
 	View,
 	type ViewStyle,
@@ -286,7 +287,10 @@ function ContextMenuSeparator({
 	)
 }
 
-function ContextMenuShortcut({ className, ...props }: TextProps & React.RefAttributes<Text>) {
+function ContextMenuShortcut({
+	className,
+	...props
+}: TextProps & React.RefAttributes<TextInstance>) {
 	return (
 		<Text
 			className={cn('text-xs tracking-widest text-foreground-muted ml-auto', className)}

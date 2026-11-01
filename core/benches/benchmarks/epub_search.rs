@@ -1,12 +1,10 @@
-use std::path::PathBuf;
-
 use criterion::{criterion_group, Criterion};
 use stump_core::readium::{search_epub, EpubSearchOptions};
 use tokio_util::sync::CancellationToken;
 
 fn fixture_epub() -> String {
-	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-		.join("integration-tests/data/book.epub")
+	tests::fixtures::test_data_dir()
+		.join("book.epub")
 		.to_string_lossy()
 		.to_string()
 }

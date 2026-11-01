@@ -152,7 +152,7 @@ type HeaderProps = {
 }
 
 function ListHeader({ tab, setTab }: HeaderProps) {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<View className="px-4 pb-2 w-full">

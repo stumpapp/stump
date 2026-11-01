@@ -3181,6 +3181,8 @@
       "overview": "Overview",
       "page": "Page",
       "pages": "Pages",
+      "pagesCount_one": "{{count}} Page",
+      "pagesCount_other": "{{count}} Pages",
       "pageXOfY": "Page {{current}} of {{total}}",
       "pageX": "Page {{current}}",
       "password": "Password",

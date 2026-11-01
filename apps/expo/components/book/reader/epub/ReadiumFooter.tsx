@@ -50,7 +50,7 @@ export default function ReadiumFooter() {
 	const [showMenu, setShowMenu] = useState(false)
 
 	const { timer } = useEpubReaderContext()
-	const { t, translate, locale } = useTranslate()
+	const { translate, locale } = useTranslate()
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 

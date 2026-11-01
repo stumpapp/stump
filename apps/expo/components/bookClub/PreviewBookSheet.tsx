@@ -2,8 +2,9 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useGraphQL, useSDK } from '@stump/client'
 import { graphql, PreviewBookSheetQuery } from '@stump/graphql'
 import { forwardRef, useImperativeHandle, useRef } from 'react'
+import type { ViewStyle } from 'react-native'
 import { Platform, View } from 'react-native'
-import Animated from 'react-native-reanimated'
+import Animated, { AnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
@@ -82,22 +83,32 @@ export const PreviewBookSheet = forwardRef<PreviewBookSheetRef, Props>(
 		const colors = useColors()
 		const insets = useSafeAreaInsets()
 
+		const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
+
 		return (
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
 				grabber
-				scrollable
+				scrollableRef={animatedScrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
 			>
-				{book && <BookContent book={book} onConfirmAddBook={onConfirmAddBook} />}
+				{book && (
+					<BookContent
+						book={book}
+						onConfirmAddBook={onConfirmAddBook}
+						animatedScrollRef={animatedScrollRef}
+						parallaxStyle={parallaxStyle}
+					/>
+				)}
 			</TrueSheet>
 		)
 	},
@@ -106,14 +117,19 @@ PreviewBookSheet.displayName = 'PreviewBookSheet'
 
 type BookContentProps = {
 	book: NonNullable<NonNullable<PreviewBookSheetQuery>['mediaById']>
+	animatedScrollRef: ReturnType<typeof useOverviewAnimations>['animatedScrollRef']
+	parallaxStyle: AnimatedStyle<ViewStyle>
 } & Pick<Props, 'onConfirmAddBook'>
 
-function BookContent({ book, onConfirmAddBook }: BookContentProps) {
+function BookContent({
+	book,
+	onConfirmAddBook,
+	animatedScrollRef,
+	parallaxStyle,
+}: BookContentProps) {
 	const { sdk } = useSDK()
 
 	const thumbnailRatio = usePreferencesStore((store) => store.thumbnailRatio)
-
-	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 	const { url: uri, metadata: placeholderData } = book.thumbnail
 
@@ -134,7 +150,11 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						style={{ width: '100%', height: '100%' }}
+						style={{
+							flex: 1,
+							width: '100%',
+							height: '100%',
+						}}
 						resizeMode="cover"
 						fadeDuration={2000}
 						// android only supports up to blur={25} which doesn't look good,

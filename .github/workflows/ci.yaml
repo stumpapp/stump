@@ -94,6 +94,11 @@ jobs:
       - name: Setup Node and Yarn
         uses: ./.github/actions/setup-yarn
 
+      # i enable typed routes for expo-router, but those type defs do not get commited, so
+      # in ci we have to manually generate them like so so that type checking is accurate
+      - name: Generate expo-router types
+        run: cd apps/expo && npx expo customize tsconfig.json
+
       - name: Run TypeScript lints
         run: yarn lint
 

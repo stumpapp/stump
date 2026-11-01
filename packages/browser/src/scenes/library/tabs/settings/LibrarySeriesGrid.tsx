@@ -1,4 +1,4 @@
-/* eslint-disable react-compiler/react-compiler */
+/* eslint-disable react-hooks/incompatible-library */
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql, LibrarySeriesGridQuery } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'

@@ -5,8 +5,8 @@ import { graphql, LibraryOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers, Library } from 'lucide-react-native'
-import { forwardRef, useState } from 'react'
-import { View } from 'react-native'
+import { forwardRef, RefObject, useRef, useState } from 'react'
+import { type ScrollViewInstance, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -59,6 +59,7 @@ export const LibraryOverviewSheet = forwardRef<TrueSheet, Props>(({ libraryId },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('libraryById', ['overviewSheet', libraryId]), {
 		id: libraryId,
 	})
+	const innerScrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
@@ -74,19 +75,20 @@ export const LibraryOverviewSheet = forwardRef<TrueSheet, Props>(({ libraryId },
 				ref={ref}
 				detents={[0.5, 1]}
 				grabber
-				scrollable
+				scrollableRef={innerScrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<SheetContent library={library} />
+				<SheetContent library={library} scrollRef={innerScrollRef} />
 			</TrueSheet>
 
 			{/*@ts-expect-error: it should be fine*/}
@@ -98,11 +100,12 @@ LibraryOverviewSheet.displayName = 'LibraryOverviewSheet'
 
 type SheetContentProps = {
 	library: NonNullable<LibraryOverviewSheetQuery['libraryById']>
+	scrollRef: RefObject<ScrollViewInstance | null>
 }
 
 // TODO: make less ugly, low key kinda ugly tbh. I think my brain wants a grid rather than flex wrap maybe
 // TODO: Show more stuff
-function SheetContent({ library }: SheetContentProps) {
+function SheetContent({ library, scrollRef }: SheetContentProps) {
 	const { stats } = library
 
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
@@ -157,7 +160,7 @@ function SheetContent({ library }: SheetContentProps) {
 	] satisfies StatCardProps[]
 
 	return (
-		<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+		<ScrollView ref={scrollRef} className="p-6 flex-1" nestedScrollEnabled>
 			<View className="gap-8">
 				<View>
 					<Heading size="2xl" numberOfLines={3}>

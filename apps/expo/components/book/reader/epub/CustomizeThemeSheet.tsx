@@ -1,5 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { type ScrollViewInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -22,6 +23,7 @@ export default function CustomizeThemeSheet() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
+	const innerScrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const handleClose = () => {
@@ -34,17 +36,23 @@ export default function CustomizeThemeSheet() {
 				ref={sheetRef}
 				detents={[1]}
 				grabber
-				scrollable
+				scrollableRef={innerScrollRef}
 				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<CustomizeTheme onCancel={handleClose} mode={mode} theme={name} />
+				<CustomizeTheme
+					onCancel={handleClose}
+					mode={mode}
+					theme={name}
+					scrollRef={innerScrollRef}
+				/>
 			</TrueSheet>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

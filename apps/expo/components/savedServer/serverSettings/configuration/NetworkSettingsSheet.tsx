@@ -1,6 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useRef, useState } from 'react'
-import { ScrollView } from 'react-native'
+import { ScrollView, type ScrollViewInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
@@ -17,6 +17,7 @@ export function NetworkSettingsSheet() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 	const sheetRef = useRef<TrueSheet>(null)
+	const scrollRef = useRef<ScrollViewInstance>(null)
 
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -26,17 +27,18 @@ export function NetworkSettingsSheet() {
 			ref={sheetRef}
 			detents={[1]}
 			grabber
-			scrollable
+			scrollableRef={scrollRef}
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
 			style={{
+				flex: 1,
 				paddingBottom: insets.bottom,
 			}}
 			insetAdjustment="automatic"
 			onDidPresent={() => setIsOpen(true)}
 			onDidDismiss={() => setIsOpen(false)}
 		>
-			<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+			<ScrollView ref={scrollRef} className="p-6 flex-1" nestedScrollEnabled>
 				<NetworkSettingsSheetContent />
 			</ScrollView>
 

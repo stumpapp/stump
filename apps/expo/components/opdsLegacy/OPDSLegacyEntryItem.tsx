@@ -9,9 +9,9 @@ import {
 import { useRouter } from 'expo-router'
 import { Download, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
-import { Image, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 
-import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload, useTranslate } from '~/lib/hooks'
 import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -33,6 +33,7 @@ type Props = {
 export default function OPDSEntry({ entry }: Props) {
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -97,7 +98,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'See Details',
+								label: translate('shared.bookActions.seeDetails'),
 								icon: {
 									ios: 'info.circle',
 									android: Info,
@@ -117,7 +118,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'Download',
+								label: translate('shared.common.download'),
 								disabled: !downloadLink || isDownloaded,
 								onPress: () => {
 									if (!downloadLink) return
@@ -157,7 +158,8 @@ export default function OPDSEntry({ entry }: Props) {
 								{
 									items: [
 										{
-											label: 'Delete Download',
+											// TODO(ux): confirmation like in stump delete flow
+											label: translate('shared.bookActions.deleteDownload.label'),
 											onPress: () => {
 												deleteBook({
 													id: entry.id,
@@ -186,22 +188,14 @@ export default function OPDSEntry({ entry }: Props) {
 							paddingHorizontal,
 						}}
 					>
-						{!thumbnailUrl &&
-							Platform.select({
-								ios: (
-									<TurboImage
-										source={{ uri: iconSource.localUri || iconSource.uri }}
-										style={{ width: thumbnailWidth, height: thumbnailWidth }}
-									/>
-								),
-								android: (
-									<Image
-										// @ts-expect-error: It's fine
-										source={iconSource}
-										style={{ width: thumbnailWidth, height: thumbnailWidth }}
-									/>
-								),
-							})}
+						{!thumbnailUrl && (
+							<TurboImage
+								source={{ uri: iconSource.localUri || iconSource.uri }}
+								style={{ width: thumbnailWidth, height: thumbnailWidth }}
+								// see https://github.com/stumpapp/stump/issues/1429
+								allowHardware={Platform.OS !== 'android'}
+							/>
+						)}
 
 						{thumbnailUrl && (
 							<View className="my-2 relative">
@@ -217,6 +211,8 @@ export default function OPDSEntry({ entry }: Props) {
 										height: thumbnailWidth / thumbnailRatio,
 										width: thumbnailWidth,
 									}}
+									// see https://github.com/stumpapp/stump/issues/1429
+									allowHardware={Platform.OS !== 'android'}
 								/>
 
 								{isStreamable && (
@@ -250,7 +246,9 @@ export default function OPDSEntry({ entry }: Props) {
 							</Text>
 
 							{layout === 'list' && streamingData?.pageCount != null && (
-								<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
+								<Text className="text-foreground-muted">
+									{translate('shared.common.pagesCount', { count: streamingData.pageCount })}
+								</Text>
 							)}
 						</View>
 					</View>

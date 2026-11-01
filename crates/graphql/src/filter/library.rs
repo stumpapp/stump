@@ -1,9 +1,17 @@
 use async_graphql::InputObject;
-use models::entity::library;
+use models::{
+	entity::{library, library_config},
+	shared::enums::LibraryType,
+};
+use sea_orm::{
+	prelude::*,
+	sea_query::{Query, SelectStatement},
+	Condition,
+};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{apply_string_filter, IntoFilter, StringLikeFilter};
+use super::{apply_string_filter, ConceptualFilter, IntoFilter, StringLikeFilter};
 
 // TODO: Support filter by tags (requires join logic)
 
@@ -58,5 +66,33 @@ impl IntoFilter for LibraryFilterInput {
 				self.path
 					.map(|f| apply_string_filter(library::Column::Path, f)),
 			)
+	}
+}
+
+fn library_type_id_subquery(library_types: Vec<LibraryType>) -> SelectStatement {
+	Query::select()
+		.column(library_config::Column::LibraryId)
+		.from(library_config::Entity)
+		.and_where(library_config::Column::LibraryId.is_not_null())
+		.and_where(library_config::Column::LibraryType.is_in(library_types))
+		.to_owned()
+}
+
+pub(super) fn apply_library_type_filter<C: ColumnTrait + Copy>(
+	library_id: C,
+	filter: ConceptualFilter<LibraryType>,
+) -> Condition {
+	let (values, negate) = match filter {
+		ConceptualFilter::Is(value) => (vec![value], false),
+		ConceptualFilter::IsNot(value) => (vec![value], true),
+		ConceptualFilter::IsAnyOf(values) => (values, false),
+		ConceptualFilter::IsNoneOf(values) => (values, true),
+	};
+	let condition =
+		Condition::all().add(library_id.in_subquery(library_type_id_subquery(values)));
+	if negate {
+		condition.not()
+	} else {
+		condition
 	}
 }

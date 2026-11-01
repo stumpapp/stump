@@ -17,45 +17,30 @@ use sea_orm::{
 use super::{apply, ProviderClientCache};
 use crate::CoreError;
 
-async fn library_type_for_series(
+pub(super) async fn library_type_for_library(
 	conn: &DatabaseConnection,
-	series_id: &str,
+	library_id: &str,
 ) -> Result<LibraryType, CoreError> {
-	let library_id = series::Entity::find_by_id(series_id)
-		.select_only()
-		.column(series::Column::LibraryId)
-		.into_tuple::<String>()
-		.one(conn)
-		.await?
-		.ok_or_else(|| CoreError::NotFound(format!("Series {series_id}")))?;
-
 	let config = library_config::Entity::find()
 		.filter(library_config::Column::LibraryId.eq(library_id))
 		.one(conn)
-		.await
-		.map_err(|e| CoreError::InternalError(e.to_string()))?
+		.await?
 		.ok_or_else(|| CoreError::NotFound("Library missing config!".into()))?;
-
 	Ok(config.library_type)
 }
 
-// TODO: This is terrible, I should just bite the bullet and put a direct fk on media
 async fn library_type_for_media(
 	conn: &DatabaseConnection,
 	media_id: &str,
 ) -> Result<LibraryType, CoreError> {
-	let tuple = media::Entity::find()
-		.filter(media::Column::Id.eq(media_id))
-		.find_also_related(series::Entity)
+	let library_id = media::Entity::find_by_id(media_id)
+		.select_only()
+		.column(media::Column::LibraryId)
+		.into_tuple::<String>()
 		.one(conn)
 		.await?
 		.ok_or_else(|| CoreError::NotFound(format!("Media {media_id}")))?;
-
-	let (_, Some(series)) = tuple else {
-		return Err(CoreError::NotFound(format!("Series for media {media_id}")));
-	};
-
-	library_type_for_series(conn, &series.id).await
+	library_type_for_library(conn, &library_id).await
 }
 
 /// Filters provider configs down to those that support the given library type, and,
@@ -111,7 +96,10 @@ pub async fn fetch_series_metadata(
 	models: series::ModelWithMetadata,
 	provider_cache: &ProviderClientCache,
 ) -> Result<Vec<MatchCandidate>, CoreError> {
-	let library_type = library_type_for_series(conn, &models.series.id).await?;
+	let library_id = models.series.library_id.as_deref().ok_or_else(|| {
+		CoreError::NotFound(format!("Library for series {}", models.series.id))
+	})?;
+	let library_type = library_type_for_library(conn, library_id).await?;
 
 	let search_name = models
 		.metadata

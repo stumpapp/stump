@@ -21,6 +21,8 @@ const fragment = graphql(`
 			resolvedName
 		}
 		library {
+			id
+			name
 			config {
 				libraryType
 			}
@@ -110,12 +112,20 @@ export function BookOverviewDetails({ fragment: fragmentRef }: Props) {
 						<span>Art {joined(artists, 'pencillers')}</span>
 					)}
 
-					<Link to={paths.seriesOverview(media.series.id)} underline={false}>
-						<Badge size="sm" rounded="full" variant="secondary" className="cursor-pointer">
-							{media.series.resolvedName}
-							{position != null && ` ${presentation.positionLabel(position)}`}
-						</Badge>
-					</Link>
+					{media.series ? (
+						<Link to={paths.seriesOverview(media.series.id)} underline={false}>
+							<Badge size="sm" rounded="full" variant="secondary" className="cursor-pointer">
+								{media.series.resolvedName}
+								{position != null && ` ${presentation.positionLabel(position)}`}
+							</Badge>
+						</Link>
+					) : (
+						<Link to={paths.libraryBooks(media.library.id)} underline={false}>
+							<Badge size="sm" rounded="full" variant="secondary" className="cursor-pointer">
+								{media.library.name}
+							</Badge>
+						</Link>
+					)}
 				</div>
 
 				{(isReading || isPreviouslyCompleted) && (

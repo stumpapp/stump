@@ -419,6 +419,7 @@ mod tests {
 			path: "path/to/book1.epub".to_string(),
 			status: FileStatus::Ready,
 			series_id: None,
+			library_id: "library-1".to_string(),
 			deleted_at: None,
 			thumbnail_meta: None,
 			thumbnail_path: None,

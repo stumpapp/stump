@@ -1,5 +1,5 @@
 import { NewCard, Select } from '@stump/components'
-import { LibraryPattern } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode } from '@stump/graphql'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -12,7 +12,9 @@ export default function LibraryPatternRadioGroup() {
 
 	const { t } = useTranslate()
 
+	const organizationMode = useWatch({ control: form.control, name: 'organizationMode' })
 	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
+	const isMetadata = organizationMode === OrganizationMode.Metadata
 	const isCreating = !ctx?.library
 
 	const handleChange = useCallback(
@@ -24,53 +26,69 @@ export default function LibraryPatternRadioGroup() {
 		[form, isCreating],
 	)
 
-	// TODO: metadata options can live here once implemented, prob
-	// do sm like if organization_mode = metadata, hide filesystem pattern?
-	// otherwise if organization_mode = filesystem then show it?
-	// or maybe disable? idk
+	const handleModeChange = useCallback(
+		(mode: OrganizationMode) => {
+			if (!isCreating) return
+			form.setValue('organizationMode', mode, { shouldDirty: true })
+			// it would be nonsensical to allow metadata organizaiton without
+			// opting into processing metadata
+			if (mode === OrganizationMode.Metadata) {
+				form.setValue('processMetadata', true)
+				form.setValue('oneshotsDirectory', null)
+			}
+		},
+		[form, isCreating],
+	)
 
 	return (
 		<NewCard label={t(getKey('label'))} description={t(getKey('description'))}>
-			{/*<NewCard.Row
-				label="Mode"
-				// The library will be constructed based on how the files are organized
-				description="The library will be constructed from the metadata of books within it"
-			>
-				<div>
-					<Select value="Metadata" onValueChange={() => {}}>
-						<Select.Trigger size="sm">
-							<Select.Value />
-						</Select.Trigger>
-						<Select.Content>
-							{['Metadata', 'Filesystem'].map((mode) => (
-								<Select.Item key={mode} value={mode}>
-									{mode}
-								</Select.Item>
-							))}
-						</Select.Content>
-					</Select>
-				</div>
-			</NewCard.Row>*/}
-
 			<NewCard.Row
-				label={t(getKey('filesystemPattern.label'))}
-				description={t(getKey(`filesystemPattern.${libraryPattern}.description`))}
+				label={t(getKey('mode.label'))}
+				description={t(getKey(`mode.${isMetadata ? 'metadata' : 'filesystem'}.description`))}
+				disabled={!isCreating}
 			>
 				<div>
-					<Select value={libraryPattern} onValueChange={handleChange}>
-						<Select.Trigger size="sm">
+					<Select value={organizationMode} onValueChange={handleModeChange} disabled={!isCreating}>
+						<Select.Trigger size="sm" aria-label={t(getKey('mode.label'))}>
 							<Select.Value />
 						</Select.Trigger>
 						<Select.Content>
-							{[LibraryPattern.CollectionBased, LibraryPattern.SeriesBased].map((pattern) => (
-								<Select.Item key={pattern} value={pattern}>
-									{t(getKey(`filesystemPattern.${pattern}.label`))}
+							{[OrganizationMode.Filesystem, OrganizationMode.Metadata].map((mode) => (
+								<Select.Item key={mode} value={mode}>
+									{t(
+										getKey(
+											`mode.${mode === OrganizationMode.Metadata ? 'metadata' : 'filesystem'}.label`,
+										),
+									)}
 								</Select.Item>
 							))}
 						</Select.Content>
 					</Select>
 				</div>
 			</NewCard.Row>
+
+			{/* metadata libraries group books by their series metadata, so folder patterns do not apply */}
+			{!isMetadata && (
+				<NewCard.Row
+					label={t(getKey('filesystemPattern.label'))}
+					description={t(getKey(`filesystemPattern.${libraryPattern}.description`))}
+				>
+					<div>
+						<Select value={libraryPattern} onValueChange={handleChange}>
+							<Select.Trigger size="sm">
+								<Select.Value />
+							</Select.Trigger>
+							<Select.Content>
+								{[LibraryPattern.CollectionBased, LibraryPattern.SeriesBased].map((pattern) => (
+									<Select.Item key={pattern} value={pattern}>
+										{t(getKey(`filesystemPattern.${pattern}.label`))}
+									</Select.Item>
+								))}
+							</Select.Content>
+						</Select>
+					</div>
+				</NewCard.Row>
+			)}
 		</NewCard>
 	)
 }

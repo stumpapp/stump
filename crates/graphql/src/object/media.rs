@@ -2,24 +2,23 @@ use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
 
-use models::entity::{
-	library, media, media_analysis, media_metadata, reading_session, series, tag,
-};
 use models::{
+	entity::{library, media, media_analysis, media_metadata, reading_session, tag},
 	services::reading_timeline::sessions_with_events,
-	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
+	shared::{
+		analysis::MediaAnalysisData, enums::SeriesKind, image::ImageRef,
+		ordering::OrderDirection,
+	},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{
-	prelude::*, sea_query::Query, ExprTrait, FromQueryResult, Order, QueryOrder,
-	QuerySelect,
-};
+use sea_orm::{prelude::*, ExprTrait, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
-		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
+		library::LibraryLoader,
+		library_config::LibraryConfigLoader,
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
 			ReadingSessionLoader, ReadthroughRecordLoaderKey,
@@ -31,7 +30,7 @@ use crate::{
 		epub::Epub,
 		reading_timeline::{BookReadingTimeline, SessionWithEvents},
 	},
-	order::order_spec,
+	order::series_position_spec,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -109,70 +108,36 @@ impl Media {
 	}
 
 	/// The series the media belongs to
-	async fn series(&self, ctx: &Context<'_>) -> Result<Series> {
+	async fn series(&self, ctx: &Context<'_>) -> Result<Option<Series>> {
+		let Some(series_id) = self.model.series_id.clone() else {
+			return Ok(None);
+		};
 		let loader = ctx.data::<DataLoader<SeriesLoader>>()?;
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
 		let series = loader
 			.load_one(series_id)
 			.await?
 			.ok_or("Series not found")?;
 
-		Ok(series)
+		Ok(Some(series))
 	}
 
-	async fn library_id(&self, ctx: &Context<'_>) -> Result<String> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let id: String = library::Entity::find()
-			.select_only()
-			.column(library::Column::Id)
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
-			.into_tuple()
-			.one(conn)
-			.await?
-			.ok_or("Library not found")?;
-
-		Ok(id)
+	async fn library_id(&self) -> &str {
+		&self.model.library_id
 	}
 
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let model = library::Entity::find()
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
-			.one(conn)
+		ctx.data::<DataLoader<LibraryLoader>>()?
+			.load_one(self.model.library_id.clone())
 			.await?
-			.ok_or("Library not found")?;
-
-		Ok(Library::from(model))
+			.ok_or_else(|| "Library not found".into())
 	}
 
 	async fn library_config(&self, ctx: &Context<'_>) -> Result<LibraryConfig> {
 		let loader = ctx.data::<DataLoader<LibraryConfigLoader>>()?;
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
 		loader
-			.load_one(LibraryConfigLoaderKey { series_id })
+			.load_one(self.model.library_id.clone())
 			.await?
 			.map(LibraryConfig::from)
 			.ok_or_else(|| "Library config not found".into())
@@ -194,7 +159,7 @@ impl Media {
 
 	/// A reference to the thumbnail image for the media. This will be a fully
 	/// qualified URL to the image.
-	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+	pub async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
 		let last_modified = self.model.updated_at;
@@ -311,9 +276,19 @@ impl Media {
 	}
 
 	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {
+		let Some(series_id) = self.model.series_id.clone() else {
+			return Ok(None);
+		};
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
+		// without a loadable series, fall back to filesystem (name) ordering
+		let kind = self.series(ctx).await?.map(|series| series.model.kind);
+		if let Some(position) = self
+			.metadata
+			.as_ref()
+			.and_then(|m| m.model.number)
+			.filter(|_| kind != Some(SeriesKind::Virtual))
+		{
 			if position.fract().is_zero() {
 				return Ok(Some(position.to_i64().unwrap_or(0)));
 			}
@@ -324,22 +299,22 @@ impl Media {
 			position: i64,
 		}
 
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-
 		let position = PositionResult::find_by_statement(db_statement(
 			conn,
 			r#"
             SELECT position
             FROM (
                 SELECT
-                    id,
+					m.id,
                     ROW_NUMBER() OVER (
-                        PARTITION BY series_id
-                        ORDER BY name
+						PARTITION BY m.series_id
+						ORDER BY CASE WHEN s.kind = 'VIRTUAL' THEN mm.number END NULLS LAST, m.name, m.id
                     ) as position
-                FROM media
-                WHERE series_id = $1
-                AND deleted_at IS NULL
+				FROM media m
+				LEFT JOIN media_metadata mm ON mm.media_id = m.id
+				LEFT JOIN series s ON s.id = m.series_id
+				WHERE m.series_id = $1
+				AND m.deleted_at IS NULL
             ) ranked
             WHERE id = $2
             "#,
@@ -371,14 +346,19 @@ impl Media {
 			},
 		};
 
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
+		let Some(series_id) = self.model.series_id.clone() else {
+			return Ok(PaginatedResponse {
+				nodes: vec![],
+				page_info: CursorPaginationInfo {
+					current_cursor: None,
+					next_cursor: None,
+					limit: pagination.limit,
+				}
+				.into(),
+			});
+		};
 
-		let spec = order_spec![
-			(media_metadata::Column::Number, Order::Asc),
-			(media::Column::Name, Order::Asc),
-			(media::Column::Id, Order::Asc),
-		];
-		// ^ this Id addition is really just a tie breaker
+		let spec = series_position_spec();
 
 		let query = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::SeriesId.eq(series_id))
@@ -438,15 +418,7 @@ impl Media {
 		let (library_path,) = library::Entity::find()
 			.select_only()
 			.column(library::Column::Path)
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(self.model.series_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(library::Column::Id.eq(&self.model.library_id))
 			.into_tuple::<(String,)>()
 			.one(conn)
 			.await?

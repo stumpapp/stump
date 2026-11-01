@@ -38,7 +38,7 @@ export default function ContinueReading() {
 				),
 			)
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
-			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
+			.leftJoin(libraryRefs, eq(downloadedFiles.libraryId, libraryRefs.id))
 			.orderBy(desc(readProgress.lastModified), desc(downloadedFiles.downloadedAt)),
 		['continue-reading', id],
 	)

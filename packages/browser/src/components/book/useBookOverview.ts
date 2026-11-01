@@ -7,6 +7,7 @@ const query = graphql(`
 		mediaById(id: $id) {
 			id
 			resolvedName
+			seriesId
 			...BookHeader
 			...BookOverviewDetails
 			...BookInfoSheet

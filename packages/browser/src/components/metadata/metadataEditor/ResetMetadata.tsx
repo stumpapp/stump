@@ -14,9 +14,10 @@ import { useState } from 'react'
 type Props = {
 	onConfirmReset: (impact: MetadataResetImpact) => void
 	isDisabled?: boolean
+	isVirtual?: boolean
 }
 
-export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
+export default function ResetMetadata({ onConfirmReset, isDisabled, isVirtual }: Props) {
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	const [impact, setImpact] = useState<MetadataResetImpact>(MetadataResetImpact.Series)
@@ -63,7 +64,11 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 					<RadioGroup.CardItem
 						label="Books"
 						value="BOOKS"
-						description="Remove all the metadata for books in this series "
+						description={
+							isVirtual
+								? 'Remove book metadata and make these books standalone'
+								: 'Remove all the metadata for books in this series'
+						}
 						className={cn('rounded-t-none border-0 bg-background hover:bg-muted/50', {
 							'bg-muted/70 hover:bg-muted/70': impact === MetadataResetImpact.Books,
 						})}
@@ -72,7 +77,11 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 					<RadioGroup.CardItem
 						label="Everything"
 						value="EVERYTHING"
-						description="Remove all the metadata for everything related to this series"
+						description={
+							isVirtual
+								? 'Remove series and book metadata and make these books standalone'
+								: 'Remove all the metadata for everything related to this series'
+						}
 						className={cn('rounded-t-none border-0 bg-background hover:bg-muted/50', {
 							'bg-muted/70 hover:bg-muted/70': impact === MetadataResetImpact.Everything,
 						})}

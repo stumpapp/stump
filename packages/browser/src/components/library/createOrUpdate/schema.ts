@@ -5,6 +5,7 @@ import {
 	LibrarySettingsConfigFragment,
 	LibraryType,
 	LibraryViewMode,
+	OrganizationMode,
 	ReadingDirection,
 	ReadingImageScaleFit,
 	ReadingMode,
@@ -103,14 +104,51 @@ const thumbnailConfig = z.object({
 	resizeMethod: resizeOptionsSchema.nullish(),
 })
 
+type OrganizationFields = {
+	organizationMode: OrganizationMode
+	processMetadata: boolean
+	oneshotsDirectory?: string | null
+}
+
+/**
+ * Mirrors the server-side organization validation: metadata libraries need metadata processing
+ * and cannot use a oneshots directory, and the mode cannot change once a library exists
+ */
+export const refineOrganization =
+	(library?: Library) => (values: OrganizationFields, ctx: z.RefinementCtx) => {
+		if (values.organizationMode === OrganizationMode.Metadata) {
+			if (!values.processMetadata) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['processMetadata'],
+					message: 'Metadata libraries require metadata processing',
+				})
+			}
+			if (values.oneshotsDirectory != null) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['oneshotsDirectory'],
+					message: 'Metadata libraries do not use a oneshots directory',
+				})
+			}
+		}
+		if (library && values.organizationMode !== library.config.organizationMode) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['organizationMode'],
+				message: 'Library organization cannot be changed after creation',
+			})
+		}
+	}
+
 /**
  * A function which builds a schema used for validating form data when creating or updating a library
  */
 export const buildSchema = (
 	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
 	library?: Library,
-) =>
-	z.object({
+) => {
+	const schema = z.object({
 		convertRarToZip: z.boolean().default(false),
 		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),
 		defaultReadingImageScaleFit: z
@@ -135,6 +173,7 @@ export const buildSchema = (
 				}),
 			)
 			.default([]),
+		organizationMode: z.nativeEnum(OrganizationMode).default(OrganizationMode.Filesystem),
 		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		libraryType: z.nativeEnum(LibraryType).default(LibraryType.Mixed),
 		defaultLibraryViewMode: z.string().refine(isLibraryViewMode).default('SERIES'),
@@ -208,6 +247,10 @@ export const buildSchema = (
 		thumbnailConfig,
 		processThumbnailColorsEvenWithoutConfig: z.boolean().default(false),
 	})
+
+	return schema.superRefine(refineOrganization(library))
+}
+
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 
 /**
@@ -231,6 +274,7 @@ export const formDefaults = (
 	hardDeleteConversions: library?.config.hardDeleteConversions ?? false,
 	watch: library?.config.watch ?? true,
 	ignoreRules: toFormIgnoreRules(library?.config.ignoreRules || []),
+	organizationMode: library?.config.organizationMode ?? OrganizationMode.Filesystem,
 	libraryPattern: library?.config.libraryPattern || LibraryPattern.SeriesBased,
 	libraryType: library?.config.libraryType || LibraryType.Mixed,
 	name: library?.name || '',

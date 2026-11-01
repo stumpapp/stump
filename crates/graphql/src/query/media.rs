@@ -525,11 +525,13 @@ impl MediaQuery {
 						m.series_id,
 						ROW_NUMBER() OVER(
 							PARTITION BY m.series_id
-							ORDER BY m.name
+							ORDER BY CASE WHEN s.kind = 'VIRTUAL' THEN mm.number END NULLS LAST, m.name, m.id
 						) as book_rank,
 						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
 					FROM
 						media m
+                    LEFT JOIN media_metadata mm ON mm.media_id = m.id
+                    LEFT JOIN series s ON s.id = m.series_id
 					LEFT JOIN
 						series_last_read srl ON srl.series_id = m.series_id
 					WHERE

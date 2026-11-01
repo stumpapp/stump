@@ -1,5 +1,10 @@
 import { useGraphQLMutation } from '@stump/client'
-import { graphql, SeriesBooksSceneSeriesNameQuery, UserPermission } from '@stump/graphql'
+import {
+	graphql,
+	SeriesBooksSceneSeriesNameQuery,
+	SeriesKind,
+	UserPermission,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { DownloadCloud, Info, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
@@ -26,12 +31,19 @@ type SeriesActionsProps = {
 
 type Props = {
 	seriesId: string
+	seriesKind: SeriesKind
 	layoutKey: string
 	stats: NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['stats']
 	additionalActions: SeriesActionsProps
 }
 
-export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalActions }: Props) {
+export function SeriesBooksListHeader({
+	seriesId,
+	seriesKind,
+	layoutKey,
+	stats,
+	additionalActions,
+}: Props) {
 	const client = useQueryClient()
 	const { mutate: scanSeries } = useGraphQLMutation(scanMutation, {
 		onSuccess: () => {
@@ -58,7 +70,7 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 			},
 		]
 
-		if (checkPermission(UserPermission.ScanLibrary)) {
+		if (seriesKind === SeriesKind.Filesystem && checkPermission(UserPermission.ScanLibrary)) {
 			result.push({
 				key: 'scan',
 				label: 'Scan Series',
@@ -86,7 +98,7 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		}
 
 		return result
-	}, [additionalActions, checkPermission, scanSeries, seriesId])
+	}, [additionalActions, checkPermission, scanSeries, seriesId, seriesKind])
 
 	const sortMenu = useSeriesBooksSortAndDisplayMenu({
 		layoutKey,

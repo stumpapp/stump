@@ -3,11 +3,14 @@ use metadata_integrations::{
 	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride,
 };
 use models::{
-	entity::{media, media_metadata, metadata_fetch_record, series, series_metadata},
+	entity::{media, metadata_fetch_record, series, series_metadata},
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
-use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set, TransactionTrait};
-use stump_core::metadata::provider::ProviderClientCache;
+use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
+use stump_core::metadata::{
+	membership::{remove_series_thumbnails, reset_media_metadata},
+	provider::ProviderClientCache,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -86,35 +89,18 @@ impl SeriesMetadataMutation {
 			}
 		}
 
-		if matches!(
+		let thumbnails = if matches!(
 			impact,
 			MetadataResetImpact::Books | MetadataResetImpact::Everything
 		) {
-			let media_metadata_models = media_metadata::Entity::find()
-				.filter(
-					media_metadata::Column::MediaId.in_subquery(
-						Query::select()
-							.column(media::Column::Id)
-							.from(media::Entity)
-							.and_where(
-								media::Column::SeriesId.eq(model.series.id.clone()),
-							)
-							.to_owned(),
-					),
-				)
-				.all(&tx)
-				.await?;
-			tracing::trace!(
-				count = media_metadata_models.len(),
-				"Found media metadata to delete"
-			);
-
-			for media_metadata in media_metadata_models {
-				media_metadata.delete(&tx).await?;
-			}
-		}
+			reset_media_metadata(&tx, media::Column::SeriesId.eq(&model.series.id))
+				.await?
+		} else {
+			vec![]
+		};
 
 		tx.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		tracing::debug!(?impact, series_id = ?model.series.id, "Reset metadata for series");
 

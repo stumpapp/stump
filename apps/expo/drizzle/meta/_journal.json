@@ -57,6 +57,13 @@
       "when": 1787718487886,
       "tag": "0007_small_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1790797446751,
+      "tag": "0008_rapid_otto_octavius",
+      "breakpoints": true
     }
   ]
 }

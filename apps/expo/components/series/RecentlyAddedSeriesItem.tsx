@@ -14,25 +14,7 @@ const fragment = graphql(`
 		id
 		createdAt
 		resolvedName
-		media(take: 2, skip: 1) {
-			resolvedName
-			thumbnail {
-				url
-				metadata {
-					averageColor
-					colors {
-						color
-						percentage
-					}
-					thumbhash
-				}
-				height
-				width
-			}
-		}
-		mediaCount
-		readCount
-		thumbnail {
+		stackedThumbnails {
 			url
 			metadata {
 				averageColor
@@ -42,7 +24,11 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
+		mediaCount
+		readCount
 	}
 `)
 
@@ -63,7 +49,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
-	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
+	const thumbnailData = data.stackedThumbnails
 
 	// TODO(oneshots): should this just lead to oneshotBook.id? for mobile feels like it warrants
 	// a badge or something to indicate it is a oneshot?

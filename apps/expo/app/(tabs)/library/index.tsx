@@ -59,7 +59,7 @@ export default function Screen() {
 			.from(downloadedFiles)
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
-			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
+			.leftJoin(libraryRefs, eq(downloadedFiles.libraryId, libraryRefs.id))
 			.where(whereClause)
 			.orderBy(() => dbOrderBy),
 		[id, sortConfig, sourceFilter],

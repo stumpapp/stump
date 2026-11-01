@@ -45,7 +45,7 @@ export default function ReadingDefaultsScene() {
 
 	const schema = useMemo(
 		() =>
-			buildSchema([], library).pick({
+			buildSchema([], library).innerType().pick({
 				defaultReadingDir: true,
 				defaultReadingImageScaleFit: true,
 				defaultReadingMode: true,

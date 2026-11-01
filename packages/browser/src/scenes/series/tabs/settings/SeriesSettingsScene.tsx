@@ -1,5 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { graphql, MetadataResetImpact, UserPermission } from '@stump/graphql'
+import { graphql, MetadataResetImpact, SeriesKind, UserPermission } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -11,6 +12,7 @@ import SeriesTagEditor from '@/components/series/SeriesTagEditor'
 import { SettingsSection } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 const query = graphql(`
 	query SeriesSettingsScene($id: ID!) {
@@ -48,11 +50,25 @@ export default function SeriesSettingsScene() {
 		id: series.id ?? '',
 	})
 
-	const { mutate: resetMetadata } = useGraphQLMutation(resetMetadataMutation)
+	const queryClient = useQueryClient()
+	const { mutate: resetMetadata } = useGraphQLMutation(resetMetadataMutation, {
+		onSuccess: () => invalidateThumbnailQueries(queryClient),
+	})
 
 	const handleResetMetadata = useCallback(
-		(impact: MetadataResetImpact) => resetMetadata({ id: series.id, impact }),
-		[resetMetadata, series.id],
+		(impact: MetadataResetImpact) =>
+			resetMetadata(
+				{ id: series.id, impact },
+				{
+					onSuccess: () => {
+						// resetting the books of a virtual series takes them all out of it, which deletes it
+						if (series.kind === SeriesKind.Virtual && impact !== MetadataResetImpact.Series) {
+							navigate(paths.librarySeries(series.library.id))
+						}
+					},
+				},
+			),
+		[resetMetadata, series.id, series.kind, series.library.id, navigate, paths],
 	)
 
 	useEffect(() => {
@@ -78,7 +94,10 @@ export default function SeriesSettingsScene() {
 				description="Extra information about your series"
 				actions={
 					checkPermission(UserPermission.EditMetadata) && (
-						<ResetMetadata onConfirmReset={handleResetMetadata} />
+						<ResetMetadata
+							isVirtual={series.kind === SeriesKind.Virtual}
+							onConfirmReset={handleResetMetadata}
+						/>
 					)
 				}
 			>

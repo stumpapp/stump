@@ -119,6 +119,14 @@ pretty_assertions = "1.4.1"
 # Only used to test with sea-orm
 maplit = { version = "1.0.2" }
 
+# TODO: remove once sqlx releases a version where libsqlite3-sys >= 0.38 so that the 
+# bundled sqlite version >= 3.53
+[patch.crates-io]
+sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "e5cbd61a2fd8b100698bc5ad626a04ef8d1fa724" }
+sqlx-core = { git = "https://github.com/launchbadge/sqlx", rev = "e5cbd61a2fd8b100698bc5ad626a04ef8d1fa724" }
+sqlx-postgres = { git = "https://github.com/launchbadge/sqlx", rev = "e5cbd61a2fd8b100698bc5ad626a04ef8d1fa724" }
+sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "e5cbd61a2fd8b100698bc5ad626a04ef8d1fa724" }
+
 [profile.dev.package."*"]
 # Compile all dependencies with opt-level=3 to help speed up tests and
 # debug builds

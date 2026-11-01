@@ -24,26 +24,7 @@ export const query = graphql(`
 				mediaCount
 				percentageCompleted
 				status
-				# We fetch 2 and skip 1 because the first thumbnail _might_ be the same as the series thumbnail.
-				# See https://github.com/stumpapp/stump/issues/899
-				media(take: 2, skip: 1) {
-					id
-					thumbnail {
-						url
-						metadata {
-							averageColor
-							colors {
-								color
-								percentage
-							}
-							thumbhash
-						}
-					}
-				}
-				oneshotBook {
-					id
-				}
-				thumbnail {
+				stackedThumbnails {
 					url
 					metadata {
 						averageColor
@@ -53,6 +34,9 @@ export const query = graphql(`
 						}
 						thumbhash
 					}
+				}
+				oneshotBook {
+					id
 				}
 			}
 			pageInfo {

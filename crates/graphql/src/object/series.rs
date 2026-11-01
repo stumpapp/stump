@@ -15,8 +15,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, ExprTrait, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect,
-	QueryTrait,
+	Condition, ExprTrait, FromQueryResult, JoinType, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -25,9 +24,12 @@ use crate::{
 		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
+		series_thumbnail_media::{
+			SeriesThumbnailMediaLoader, SeriesThumbnailMediaLoaderKey,
+		},
 	},
 	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
-	order::order_spec,
+	order::series_position_spec,
 	utils::db_statement,
 };
 
@@ -121,17 +123,57 @@ impl Series {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			// TODO: Consider allowing custom ordering?
-			.order_by_asc(media::Column::Name)
-			.apply_if(take, |query, take| query.limit(take))
-			.apply_if(skip, |query, skip| query.offset(skip))
-			.into_model::<media::ModelWithMetadata>()
-			.all(conn)
-			.await?;
+		let models = media::Entity::order_in_series(
+			media::ModelWithMetadata::find_for_user(user)
+				.filter(media::Column::SeriesId.eq(self.model.id.clone())),
+		)
+		.apply_if(take, |query, take| query.limit(take))
+		.apply_if(skip, |query, skip| query.offset(skip))
+		.into_model::<media::ModelWithMetadata>()
+		.all(conn)
+		.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
+	}
+
+	// Note: originally i did this (kinda) client-side, where i just skipped the first
+	// and assumed the others were good. the problem i observed was it wasn't perfect,
+	// a few instances where we'd have duplicated thumbs in the stack
+
+	/// Thumbnails for a stacked series card, in order of:
+	///
+	/// 1. the series thumbnail (e.g., if manually set)
+	/// 2. the first `take` amount of books, excluding the one which the thumbnail
+	///    was derived from
+	async fn stacked_thumbnails(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default = 3, validator(minimum = 1, maximum = 5))] take: usize,
+	) -> Result<Vec<ImageRef>> {
+		let mut thumbnails = vec![self.thumbnail(ctx).await?];
+
+		if take == 1 {
+			return Ok(thumbnails);
+		}
+
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<SeriesThumbnailMediaLoader>>()?;
+
+		let skip = usize::from(self.model.thumbnail_path.is_none());
+		let books = loader
+			.load_one(SeriesThumbnailMediaLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+				limit: take - 1 + skip,
+			})
+			.await?
+			.unwrap_or_default();
+
+		for book in books.iter().skip(skip) {
+			thumbnails.push(book.thumbnail(ctx).await?);
+		}
+
+		Ok(thumbnails)
 	}
 
 	async fn media_count(&self, ctx: &Context<'_>) -> Result<i64> {
@@ -189,12 +231,7 @@ impl Series {
 		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
-		let spec = order_spec![
-			(media_metadata::Column::Number, Order::Asc),
-			(media::Column::Name, Order::Asc),
-			(media::Column::Id, Order::Asc),
-		];
-		// ^ this Id addition is really just a tie breaker
+		let spec = series_position_spec();
 
 		let mut query = media::ModelWithMetadata::find_for_user(user)
 			.join_rev(
@@ -229,6 +266,7 @@ impl Series {
 
 		if let Some(id) = cursor {
 			let cursor_row = media::ModelWithMetadata::find_by_id_for_user(id, user)
+				.filter(media::Column::SeriesId.eq(self.model.id.clone()))
 				.into_model::<media::ModelWithMetadata>()
 				.one(conn)
 				.await?

@@ -647,6 +647,19 @@
             "SERIES_BASED": {
               "description": "Each folder at any level recursively is a single series"
             }
+          },
+          "mode": {
+            "label": "Mode",
+            "filesystem": {
+              "label": "Filesystem",
+              "description": "Group books into series using their folders and a filesystem pattern"
+            },
+            "metadata": {
+              "label": "Metadata",
+              "description": "Scan every folder and group books by their series metadata, if present"
+            },
+            "processingRequired": "Processing metadata is required to organize a library via metadata",
+            "noOneshots": "Metadata libraries use metadata for oneshot organization"
           }
         },
         "viewOptions": {
@@ -909,18 +922,19 @@
         "sections": {
           "cleanLibrary": {
             "heading": "Clean Library",
-            "description": "Remove all media and series that cannot be located on disk",
+            "description": "Remove missing books and series, and empty series",
             "disclaimerTitle": "No files will be deleted",
-            "disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+            "disclaimer": "This action removes database records for missing books and series, and for empty series. Files on disk will not be deleted.",
             "confirmation": {
               "label": "Clean Library",
-              "text": "Are you sure you want to clean this library?"
+              "text": "Are you sure you want to clean this library?",
+              "loading": "Cleaning library..."
             },
             "emptyText": "There was nothing to clean",
             "missingEntitiesTable": {
               "columns": {
                 "id": "ID",
-                "path": "Path",
+                "path": "Path or name",
                 "type": "Type"
               },
               "types": {
@@ -928,8 +942,8 @@
                 "SERIES": "Series",
                 "LIBRARY": "Library"
               },
-              "emptyHeading": "Nothing is missing for this library",
-              "emptySubtitle": "All files referenced in the database were located on disk"
+              "emptyHeading": "Nothing to clean for this library",
+              "emptySubtitle": "All files were located on disk and there are no empty series"
             }
           },
           "deleteLibrary": {
@@ -2823,6 +2837,7 @@
   },
   "shared": {
     "common": {
+      "standaloneBooks": "Standalone Books",
       "add": "Add",
       "andXMoreTrailing": "...and {{count}} more",
       "cancel": "Cancel",

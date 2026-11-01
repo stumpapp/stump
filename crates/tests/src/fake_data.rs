@@ -38,6 +38,13 @@ pub struct MediaMetadata {
 
 impl Media {
 	pub async fn insert(&self, db: &DbConn) -> media::Model {
+		let library_id = series::Entity::find_by_id(&self.series_id)
+			.one(db)
+			.await
+			.expect("could not find series")
+			.expect("series must exist")
+			.library_id
+			.expect("series must belong to a library");
 		let id = self
 			.id
 			.clone()
@@ -51,6 +58,7 @@ impl Media {
 		let metadata = self.metadata.clone();
 
 		let model = media::ActiveModel {
+			library_id: ActiveValue::Set(library_id),
 			series_id: ActiveValue::Set(Some(self.series_id.clone())),
 			id: ActiveValue::Set(id.clone()),
 			name: ActiveValue::Set(name.clone()),
@@ -194,6 +202,10 @@ pub struct Series {
 
 impl Series {
 	pub async fn insert(&self, db: &DbConn) -> series::Model {
+		let library_id = match &self.library_id {
+			Some(id) => id.clone(),
+			None => Library::default().insert(db).await.id,
+		};
 		let id = self
 			.id
 			.clone()
@@ -208,12 +220,9 @@ impl Series {
 		let model = series::ActiveModel {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
-			path: sea_orm::Set(path),
+			path: sea_orm::Set(Some(path)),
 			is_oneshot: sea_orm::Set(self.is_oneshot),
-			library_id: match &self.library_id {
-				Some(lib_id) => sea_orm::Set(Some(lib_id.clone())),
-				None => sea_orm::NotSet,
-			},
+			library_id: sea_orm::Set(Some(library_id)),
 			..Default::default()
 		};
 

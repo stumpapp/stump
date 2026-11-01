@@ -217,8 +217,13 @@ export function BookHeader({ fragment: fragmentRef, onInfoClick }: Props) {
 			<EntityHeader
 				name={book.resolvedName}
 				parents={[
-					{ label: book.library.name, to: paths.library(book.library.id) },
-					{ label: book.series.resolvedName, to: paths.seriesOverview(book.series.id) },
+					{
+						label: book.library.name,
+						to: book.series ? paths.library(book.library.id) : paths.libraryBooks(book.library.id),
+					},
+					...(book.series
+						? [{ label: book.series.resolvedName, to: paths.seriesOverview(book.series.id) }]
+						: []),
 				]}
 				tabs={tabs}
 				actions={actions.length ? actions : undefined}

@@ -80,7 +80,6 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 					name="updateServerSheet"
 					ref={sheetRef}
 					detents={[1]}
-					scrollable
 					headerLabel={translate('shared.addOrEditServer.updateServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{

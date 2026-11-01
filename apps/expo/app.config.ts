@@ -204,7 +204,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				{
 					android: {
 						usesCleartextTraffic: true,
-						compileSdkVersion: 36,
+						compileSdkVersion: 37,
 						targetSdkVersion: 36,
 						// Note: I've needed this since expo@^54.0.13
 						gradleProperties: {

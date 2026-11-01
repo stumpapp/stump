@@ -3,8 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation, useRouter } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
-import { Platform, TextInputChangeEventData, View } from 'react-native'
-import { NativeSyntheticEvent } from 'react-native'
+import { Platform, TextInputChangeEvent, View } from 'react-native'
 
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
@@ -64,8 +63,7 @@ export default function Screen() {
 			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
 				placeholder: translate('shared.common.search'),
-				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
-					setQuery(e.nativeEvent.text),
+				onChangeText: (e: TextInputChangeEvent) => setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
 				onSearchButtonPress: () => onSearch(),
 				onFocus: () => setIsInputFocused(true),

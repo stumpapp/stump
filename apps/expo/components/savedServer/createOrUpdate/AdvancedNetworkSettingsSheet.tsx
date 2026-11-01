@@ -13,7 +13,6 @@ export function AdvancedNetworkSettingsSheet() {
 			name="advancedNetworkSettingsSheet"
 			ref={sheetRef}
 			detents={[1]}
-			scrollable
 			headerLabel="Network Settings"
 			headerRightButton={{ type: 'check', onPress: () => sheetRef.current?.dismiss() }}
 		>

@@ -1,7 +1,7 @@
 import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { isAxiosError } from 'axios'
-import { NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/native-tabs'
 import { useEffect } from 'react'
 
 import { ServerErrorBoundary } from '~/components/error'

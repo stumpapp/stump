@@ -9,9 +9,9 @@ import {
 import { useRouter } from 'expo-router'
 import { Download, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
-import { Image, Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 
-import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload, useTranslate } from '~/lib/hooks'
 import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -33,6 +33,7 @@ type Props = {
 export default function OPDSEntry({ entry }: Props) {
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
+	const { translate } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -97,7 +98,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'See Details',
+								label: translate('shared.bookActions.seeDetails'),
 								icon: {
 									ios: 'info.circle',
 									android: Info,
@@ -117,7 +118,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'Download',
+								label: translate('shared.common.download'),
 								disabled: !downloadLink || isDownloaded,
 								onPress: () => {
 									if (!downloadLink) return
@@ -157,7 +158,8 @@ export default function OPDSEntry({ entry }: Props) {
 								{
 									items: [
 										{
-											label: 'Delete Download',
+											// TODO(ux): confirmation like in stump delete flow
+											label: translate('shared.bookActions.deleteDownload.label'),
 											onPress: () => {
 												deleteBook({
 													id: entry.id,
@@ -176,87 +178,81 @@ export default function OPDSEntry({ entry }: Props) {
 						: []),
 				]}
 			>
-				<Pressable onPress={onPress}>
-					{({ pressed }) => (
-						<View
-							className={cn('gap-1 items-center', {
-								'gap-4 flex-row': layout === 'list',
-							})}
-							style={{
-								opacity: pressed ? 0.75 : 1,
-								paddingHorizontal,
-							}}
-						>
-							{!thumbnailUrl &&
-								Platform.select({
-									ios: (
-										<TurboImage
-											source={{ uri: iconSource.localUri || iconSource.uri }}
-											style={{ width: thumbnailWidth, height: thumbnailWidth }}
-										/>
-									),
-									android: (
-										<Image
-											// @ts-expect-error: It's fine
-											source={iconSource}
-											style={{ width: thumbnailWidth, height: thumbnailWidth }}
-										/>
-									),
-								})}
+				{({ pressed }) => (
+					<View
+						className={cn('gap-1 items-center', {
+							'gap-4 flex-row': layout === 'list',
+						})}
+						style={{
+							opacity: pressed ? 0.75 : 1,
+							paddingHorizontal,
+						}}
+					>
+						{!thumbnailUrl && (
+							<TurboImage
+								source={{ uri: iconSource.localUri || iconSource.uri }}
+								style={{ width: thumbnailWidth, height: thumbnailWidth }}
+								// see https://github.com/stumpapp/stump/issues/1429
+								allowHardware={Platform.OS !== 'android'}
+							/>
+						)}
 
-							{thumbnailUrl && (
-								<View className="my-2 relative">
-									<ThumbnailImage
-										source={{
-											uri: resolveUrl(thumbnailUrl),
-											headers: {
-												...sdk.customHeaders,
-												Authorization: sdk.authorizationHeader || '',
-											},
-										}}
-										size={{
-											height: thumbnailWidth / thumbnailRatio,
-											width: thumbnailWidth,
-										}}
-									/>
+						{thumbnailUrl && (
+							<View className="my-2 relative">
+								<ThumbnailImage
+									source={{
+										uri: resolveUrl(thumbnailUrl),
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
+									}}
+									size={{
+										height: thumbnailWidth / thumbnailRatio,
+										width: thumbnailWidth,
+									}}
+									// see https://github.com/stumpapp/stump/issues/1429
+									allowHardware={Platform.OS !== 'android'}
+								/>
 
-									{isStreamable && (
-										<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
-											<Icon as={Radio} color="white" className="h-5 w-5" />
-										</View>
-									)}
+								{isStreamable && (
+									<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
+										<Icon as={Radio} color="white" className="h-5 w-5" />
+									</View>
+								)}
 
-									{isDownloaded && (
-										<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
-											<Download color="white" className="h-5 w-5" />
-										</View>
-									)}
-								</View>
-							)}
-
-							<View
-								style={{
-									width: layout === 'grid' ? itemWidth - 16 : undefined,
-									flex: layout === 'list' ? 1 : undefined,
-									flexShrink: layout === 'list' ? 1 : undefined,
-								}}
-							>
-								<Text
-									className={cn('text-base font-medium', {
-										'text-center': layout === 'grid',
-									})}
-									numberOfLines={2}
-								>
-									{friendlyName}
-								</Text>
-
-								{layout === 'list' && streamingData?.pageCount != null && (
-									<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
+								{isDownloaded && (
+									<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
+										<Download color="white" className="h-5 w-5" />
+									</View>
 								)}
 							</View>
+						)}
+
+						<View
+							style={{
+								width: layout === 'grid' ? itemWidth - 16 : undefined,
+								flex: layout === 'list' ? 1 : undefined,
+								flexShrink: layout === 'list' ? 1 : undefined,
+							}}
+						>
+							<Text
+								className={cn('text-base font-medium', {
+									'text-center': layout === 'grid',
+								})}
+								numberOfLines={2}
+							>
+								{friendlyName}
+							</Text>
+
+							{layout === 'list' && streamingData?.pageCount != null && (
+								<Text className="text-foreground-muted">
+									{translate('shared.common.pagesCount', { count: streamingData.pageCount })}
+								</Text>
+							)}
 						</View>
-					)}
-				</Pressable>
+					</View>
+				)}
 			</ContextMenu>
 
 			<OPDSLegacyEntryItemSheet ref={sheetRef} entry={entry} />

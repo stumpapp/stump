@@ -1,9 +1,16 @@
+import { Button, Divider, Host, Image, Menu, Picker, Text, Toggle } from '@expo/ui/swift-ui'
+import {
+	buttonStyle,
+	controlSize,
+	cornerRadius,
+	disabled,
+	frame,
+	pickerStyle,
+	tag,
+} from '@expo/ui/swift-ui/modifiers'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { Ellipsis } from 'lucide-react-native'
-import { useState } from 'react'
-import * as NativeDropdownMenu from 'zeego/dropdown-menu'
+import { View } from 'react-native'
 
-import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { BookPreferences, useBookPreferences } from '~/stores/reader'
@@ -17,7 +24,6 @@ export function PagedActionMenu({
 	onShowSettings,
 }: PagedActionMenuProps) {
 	const { translate } = useTranslate()
-	const [isOpen, setIsOpen] = useState(false)
 
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
@@ -34,72 +40,49 @@ export function PagedActionMenu({
 		}
 	}
 
-	// TODO: Consider using expo/ui, see if I can replicate the pickers with icons
 	return (
-		<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-			<NativeDropdownMenu.Trigger>
-				<HeaderButton
-					icon={{
-						ios: 'ellipsis',
-						android: Ellipsis,
-						color: !IS_IOS_26_PLUS ? COLORS.dark.foreground.DEFAULT : 'primary',
-					}}
-					ios={{
-						variant: 'glass',
-					}}
-				/>
-			</NativeDropdownMenu.Trigger>
+		<View>
+			<Host matchContents>
+				<Menu
+					label={
+						<Image
+							systemName="ellipsis"
+							color={!IS_IOS_26_PLUS ? COLORS.dark.foreground.DEFAULT : 'primary'}
+							size={24}
+							modifiers={[frame({ height: 35 })]}
+						/>
+					}
+					modifiers={[controlSize('small'), buttonStyle('glass'), cornerRadius(999)]}
+				>
+					<Menu
+						label={translate('shared.readerSettings.readingMode.label')}
+						systemImage="book.pages"
+					>
+						<Picker
+							selection={readingMode}
+							onSelectionChange={(selection) => handleUpdateSettings({ readingMode: selection })}
+							modifiers={[pickerStyle('inline')]}
+						>
+							<Text modifiers={[tag(ReadingMode.Paged)]}>
+								{translate('shared.readerSettings.readingMode.options.PAGED')}
+							</Text>
+							<Text modifiers={[tag(ReadingMode.ContinuousHorizontal)]}>
+								{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
+							</Text>
+							<Text modifiers={[tag(ReadingMode.ContinuousVertical)]}>
+								{translate('shared.readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
+							</Text>
+						</Picker>
+					</Menu>
 
-			<NativeDropdownMenu.Content>
-				<NativeDropdownMenu.Group>
-					<NativeDropdownMenu.Sub>
-						<NativeDropdownMenu.SubTrigger key="preset">
-							<NativeDropdownMenu.ItemTitle>
-								{translate('shared.readerSettings.readingMode.label')}
-							</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'book.pages' }} />
-						</NativeDropdownMenu.SubTrigger>
-
-						<NativeDropdownMenu.SubContent>
-							<NativeDropdownMenu.CheckboxItem
-								key="standard"
-								value={readingMode === ReadingMode.Paged}
-								onValueChange={() => handleUpdateSettings({ readingMode: ReadingMode.Paged })}
-							>
-								<NativeDropdownMenu.ItemTitle>
-									{translate('shared.readerSettings.readingMode.options.PAGED')}
-								</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.CheckboxItem>
-
-							<NativeDropdownMenu.CheckboxItem
-								key="hscroll"
-								value={readingMode === ReadingMode.ContinuousHorizontal}
-								onValueChange={() =>
-									handleUpdateSettings({ readingMode: ReadingMode.ContinuousHorizontal })
-								}
-							>
-								<NativeDropdownMenu.ItemTitle>
-									{translate('shared.readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
-								</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.CheckboxItem>
-
-							<NativeDropdownMenu.CheckboxItem
-								key="vscroll"
-								value={readingMode === ReadingMode.ContinuousVertical}
-								onValueChange={() =>
-									handleUpdateSettings({ readingMode: ReadingMode.ContinuousVertical })
-								}
-							>
-								<NativeDropdownMenu.ItemTitle>
-									{translate('shared.readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
-								</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.CheckboxItem>
-						</NativeDropdownMenu.SubContent>
-					</NativeDropdownMenu.Sub>
-
-					<NativeDropdownMenu.Item
-						key="readingDirection"
-						onSelect={() =>
+					<Button
+						label={translate('shared.readerSettings.readingDirection.label')}
+						systemImage={
+							readingDirection === ReadingDirection.Ltr
+								? 'arrow.right.square'
+								: 'arrow.backward.square'
+						}
+						onPress={() =>
 							handleUpdateSettings({
 								readingDirection:
 									readingDirection === ReadingDirection.Ltr
@@ -107,73 +90,36 @@ export function PagedActionMenu({
 										: ReadingDirection.Ltr,
 							})
 						}
-					>
-						<NativeDropdownMenu.ItemTitle>
-							{translate('shared.readerSettings.readingDirection.label')}
-						</NativeDropdownMenu.ItemTitle>
-						<NativeDropdownMenu.ItemIcon
-							ios={{
-								name:
-									readingDirection === ReadingDirection.Ltr
-										? 'arrow.right.square'
-										: 'arrow.backward.square',
-							}}
-						/>
-					</NativeDropdownMenu.Item>
+					/>
 
 					{onResetTimer && (
-						<NativeDropdownMenu.Sub>
-							<NativeDropdownMenu.SubTrigger key="preset">
-								<NativeDropdownMenu.ItemTitle>
-									{translate('shared.readerSettings.readingTimer.label')}
-								</NativeDropdownMenu.ItemTitle>
-								<NativeDropdownMenu.ItemIcon
-									ios={{
-										name: 'timer',
-									}}
-								/>
-							</NativeDropdownMenu.SubTrigger>
-
-							<NativeDropdownMenu.SubContent>
-								<NativeDropdownMenu.CheckboxItem
-									key="enabled"
-									value={!!trackElapsedTime}
-									onValueChange={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
-								>
-									<NativeDropdownMenu.ItemTitle>
-										{translate('shared.common.enabled')}
-									</NativeDropdownMenu.ItemTitle>
-								</NativeDropdownMenu.CheckboxItem>
-								<NativeDropdownMenu.Item
-									key="reset"
-									destructive
-									disabled={!trackElapsedTime || !onResetTimer}
-									onSelect={onResetTimer}
-								>
-									<NativeDropdownMenu.ItemTitle>
-										{translate('shared.readerSettings.readingTimer.resetTimer')}
-									</NativeDropdownMenu.ItemTitle>
-								</NativeDropdownMenu.Item>
-							</NativeDropdownMenu.SubContent>
-						</NativeDropdownMenu.Sub>
-					)}
-				</NativeDropdownMenu.Group>
-
-				{onShowSettings && (
-					<NativeDropdownMenu.Group>
-						<NativeDropdownMenu.Item key="globalSettings" onSelect={onShowSettings}>
-							<NativeDropdownMenu.ItemTitle>
-								{translate('shared.readerSettings.allSettings')}
-							</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon
-								ios={{
-									name: 'slider.horizontal.3',
-								}}
+						<Menu label={translate('shared.readerSettings.readingTimer.label')} systemImage="timer">
+							<Toggle
+								label={translate('shared.common.enabled')}
+								isOn={!!trackElapsedTime}
+								onIsOnChange={(isOn) => setBookPreferences({ trackElapsedTime: isOn })}
 							/>
-						</NativeDropdownMenu.Item>
-					</NativeDropdownMenu.Group>
-				)}
-			</NativeDropdownMenu.Content>
-		</NativeDropdownMenu.Root>
+							<Button
+								label={translate('shared.readerSettings.readingTimer.resetTimer')}
+								role="destructive"
+								onPress={onResetTimer}
+								modifiers={[disabled(!trackElapsedTime)]}
+							/>
+						</Menu>
+					)}
+
+					{onShowSettings && (
+						<>
+							<Divider />
+							<Button
+								label={translate('shared.readerSettings.allSettings')}
+								systemImage="slider.horizontal.3"
+								onPress={onShowSettings}
+							/>
+						</>
+					)}
+				</Menu>
+			</Host>
+		</View>
 	)
 }

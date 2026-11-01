@@ -157,13 +157,13 @@ export default function RootLayout() {
 	}, [])
 
 	React.useEffect(() => {
-		const subscription = AppState.addEventListener('memoryWarning', (status) => {
+		const subscription = AppState.addEventListener('memoryWarning', () => {
 			Sentry.addBreadcrumb({
 				category: 'system',
 				message: 'Memory warning received',
 				level: 'warning',
 				data: {
-					appStateStatus: status,
+					appStateStatus: AppState.currentState,
 				},
 			})
 		})

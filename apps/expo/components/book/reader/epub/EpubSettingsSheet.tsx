@@ -1,6 +1,6 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
-import { useContext, useState } from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { useContext, useRef, useState } from 'react'
+import { Platform, ScrollView, type ScrollViewInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
@@ -20,6 +20,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
+	const scrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 	const [touchingSlider, setTouchingSlider] = useState(false)
 
@@ -31,10 +32,11 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				detents={[0.65]}
 				dimmed={!touchingSlider}
 				grabber
-				scrollable
+				scrollableRef={scrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
@@ -48,7 +50,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				}}
 			>
 				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
-					<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+					<ScrollView ref={scrollRef} className="p-6 flex-1" nestedScrollEnabled>
 						<ThemeSheetContent isSheetOpen={isOpen} setTouchingSlider={setTouchingSlider} />
 					</ScrollView>
 				</PortalHostProvider>

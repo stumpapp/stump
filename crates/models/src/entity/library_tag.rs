@@ -1,5 +1,8 @@
 use sea_orm::entity::prelude::*;
 
+use super::{library, tag};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "library_tags")]
 pub struct Model {
@@ -8,38 +11,22 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub library_id: String,
 	pub tag_id: i32,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::library::Entity",
-		from = "Column::LibraryId",
-		to = "super::library::Column::Id",
+		belongs_to,
+		from = "library_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Library,
+	pub library: BelongsTo<library::Entity>,
 	#[sea_orm(
-		belongs_to = "super::tag::Entity",
-		from = "Column::TagId",
-		to = "super::tag::Column::Id",
+		belongs_to,
+		from = "tag_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Tag,
-}
-
-impl Related<super::library::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Library.def()
-	}
-}
-
-impl Related<super::tag::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Tag.def()
-	}
+	pub tag: BelongsTo<tag::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

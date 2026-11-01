@@ -232,7 +232,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 					disabled={isPending || enabledProviders.length === 0}
 					isLoading={isPending}
 				>
-					{t(getKey('searchButton'))}
+					{translate('shared.common.search')}
 				</Button>
 			</Dialog.Footer>
 		</>

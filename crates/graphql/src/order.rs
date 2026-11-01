@@ -226,7 +226,7 @@ struct OrderSpecColumn {
 
 impl OrderSpecColumn {
 	fn expr(&self) -> SimpleExpr {
-		Expr::col((self.table.clone(), self.column.clone())).into()
+		Expr::col((self.table.clone(), self.column.clone()))
 	}
 
 	/// `col = value`, or `col IS NULL` when the cursor value is null
@@ -248,7 +248,7 @@ impl OrderSpecColumn {
 		let cmp = match &self.order {
 			Order::Asc => self.expr().gt(value.clone()),
 			Order::Desc => self.expr().lt(value.clone()),
-			Order::Field(_) => unimplemented!("OrderSpec does not support Order::Field!"),
+			_ => unimplemented!("OrderSpec does not support this order!"),
 			// ^ realistically should never hit and want to fail v loudly
 		};
 		Some(cmp.or(self.expr().is_null())) // nulls last

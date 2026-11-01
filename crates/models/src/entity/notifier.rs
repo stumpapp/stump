@@ -3,6 +3,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "notifiers")]
 #[graphql(name = "NotifierModel")]
@@ -16,9 +17,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Blob")]
 	pub config: Vec<u8>,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 

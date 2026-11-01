@@ -17,14 +17,14 @@ export default function SettingsDialog() {
 	return (
 		<Dialog>
 			<Dialog.Trigger asChild>
-				<ControlButton>
+				<ControlButton variant="on-overlay">
 					<Settings2 className="h-4 w-4" />
 				</ControlButton>
 			</Dialog.Trigger>
 
 			<Dialog.Content
 				size="md"
-				className="pt-0 z-101 scrollbar-hide flex max-h-[95vh] flex-col overflow-y-auto"
+				className="pt-0 z-101 scrollbar-hide flex max-h-[95vh] flex-col overflow-x-hidden overflow-y-auto"
 			>
 				<div className="top-0 -mx-6 px-6 pt-6 pb-4 backdrop-blur-md sticky z-10 bg-dialog/80">
 					<Dialog.Header>

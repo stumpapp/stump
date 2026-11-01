@@ -27,13 +27,6 @@
           "label": "Options"
         }
       },
-      "options/thumbnails": {
-        "sections": {
-          "management": {
-            "heading": "Management"
-          }
-        }
-      },
       "integrations/analysis": {
         "sections": {
           "analyzeBooks": {
@@ -123,7 +116,7 @@
         "manageLibrary": "Manage"
       }
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edit thumbnail"
     }
   },

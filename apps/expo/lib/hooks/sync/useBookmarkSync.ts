@@ -97,7 +97,6 @@ export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSync
 			return () => {
 				didSync.current = false
 			}
-			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [enabled, serverId]),
 	)

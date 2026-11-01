@@ -194,6 +194,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 					<View className="gap-4 w-full">
 						<Button
+							// eslint-disable-next-line react-hooks/refs
 							onPress={handleSubmit(onSubmit)}
 							className="mt-4 w-full"
 							roundness="full"

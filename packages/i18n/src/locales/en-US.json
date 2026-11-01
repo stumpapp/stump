@@ -56,7 +56,8 @@
       "settings": "Settings",
       "browse": "Browse",
       "clubs": "Clubs",
-      "activity": "Activity"
+      "activity": "Activity",
+      "stats": "Stats"
     },
     "localLibrary": {
       "title": "Local Library",
@@ -229,14 +230,6 @@
         "bookClubsEnabled": "Book Club Features"
       },
       "autoSyncLocalData": "Auto-Sync Local Data",
-      "textCase": {
-        "label": "Text Case",
-        "options": {
-          "lowerCase": "Lowercase",
-          "sentenceCase": "Sentence Case",
-          "titleCase": "Title Case"
-        }
-      },
       "tintListBackground": "Tint List Backgrounds",
       "management": {
         "label": "Management",
@@ -529,9 +522,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "name": "Name",
             "description": "Description"
@@ -632,28 +622,6 @@
           "label": "Library Content",
           "description": "The type of content present in this library"
         },
-        "defaultLibraryView": {
-          "label": "Default Library View",
-          "description": "Configure which tab is shown by default when opening this library",
-          "hideSeriesView": {
-            "label": "Hide Series Tab",
-            "description": "Hide the series tab from the library navigation"
-          },
-          "skipBookOverview": {
-            "label": "Skip Book Overview",
-            "description": "Open the reader directly when selecting books in this library"
-          },
-          "options": {
-            "series": {
-              "label": "Series",
-              "description": "Show the series tab by default"
-            },
-            "books": {
-              "label": "Books",
-              "description": "Show the books tab by default"
-            }
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "Reading Settings",
@@ -694,10 +662,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
-            "factor": {
-              "label": "Scale Factor"
-            }
+            "label": "Scale Factor",
+            "description": "Scale the thumbnail by a factor of the original size"
           },
           "exact": {
             "description": "Resize the thumbnail to an exact size in pixels",
@@ -710,25 +676,24 @@
           },
           "scaleDimension": {
             "label": "Auto Scaled",
-            "description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+            "description": "Set the exact size of one dimension and auto-scale the other",
             "dimension": {
               "label": "Dimension",
               "options": {
                 "width": "Width",
                 "height": "Height"
               }
-            },
-            "size": {
-              "label": "Size"
             }
           },
-          "format": {
-            "label": "Image Format",
-            "description": "The format of the generated thumbnail images"
+          "output": {
+            "description": "The format and quality to use for the image (1-100)",
+            "format": "Format",
+            "quality": "Quality"
           },
-          "quality": {
-            "label": "Quality",
-            "description": "The quality of the generated thumbnail images, between 1 and 100"
+          "thumbnailColors": {
+            "label": "Thumbnail Colors",
+            "description": "Extract dominant colors from thumbnails for aesthetic-use throughout the app",
+            "requiredWhenGenerationOn": "This is required when generation is enabled"
           }
         },
         "ignoreRules": {
@@ -799,29 +764,38 @@
             "description": "If using KoReader, generate additional hashes in the format it expects"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organization",
-            "description": "Identify which pattern most closely matches the organization of your library",
-            "docs": [
-              "Not sure which to choose? Click",
-              "here",
-              "for more information.",
-              "You cannot change this setting later"
-            ],
-            "disabled": "You cannot change this setting"
-          },
-          "options": {
-            "label": "Library Pattern",
-            "description": "The setting which determines how Stump will organize your library",
-            "collectionPriority": {
-              "label": "Collection Priority",
+        "organization": {
+          "label": "Organization",
+          "description": "This will inform Stump how to interpret your library during scans. These settings cannot be changed later",
+          "filesystemPattern": {
+            "label": "Filesystem Pattern",
+            "COLLECTION_BASED": {
+              "label": "Top-Level Collections",
               "description": "Each folder at the top-most level of the library root is a single series"
             },
-            "seriesPriority": {
-              "label": "Series Priority",
+            "SERIES_BASED": {
+              "label": "Recursive Series",
               "description": "Each folder at any level recursively is a single series"
             }
+          }
+        },
+        "viewOptions": {
+          "label": "View Options",
+          "defaultTab": {
+            "label": "Default Tab",
+            "description": "The tab which will open when you enter the library",
+            "options": {
+              "BOOKS": "Books",
+              "SERIES": "Series"
+            }
+          },
+          "hideSeries": {
+            "label": "Hide Series Tab",
+            "description": "Hide the series tab from the library navigation"
+          },
+          "skipBookOverview": {
+            "label": "Skip Book Overview",
+            "description": "Open the reader directly when selecting books in this library"
           }
         }
       },
@@ -839,8 +813,7 @@
     },
     "createLibraryScene": {
       "heading": "Create Library",
-      "subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-      "subtitleLink": "relevant documentation",
+      "subtitle": "Libraries are used to group your books together",
       "form": {
         "stepLabel": "Step",
         "steps": [
@@ -866,9 +839,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "generateThumbnails": "Generate Thumbnails",
             "processThumbnailColors": "Process Thumbnail Colors",
@@ -896,7 +866,18 @@
         "buttons": {
           "confirm": "Create Library"
         }
-      }
+      },
+      "failedToCreateLibrary": "Failed to Create Library"
+    },
+    "directoryPicker": {
+      "title": "Select a Directory",
+      "description": "Pick the directory where your library is located",
+      "unableToOpen": "Unable to Open",
+      "noSubdirectories": "No subdirectories",
+      "goToParent": "Go to Parent",
+      "goToPath": "Go to Path",
+      "inputPlaceholder": "/path/to/directory",
+      "showHiddenFiles": "Show Hidden"
     },
     "fileExplorer": {
       "uploadModal": {
@@ -1034,13 +1015,7 @@
       },
       "options/thumbnails": {
         "title": "Thumbnails",
-        "description": "Settings and management options for thumbnails in this library",
-        "sections": {
-          "management": {
-            "heading": "Manage Thumbnails",
-            "description": "Manage the existing thumbnails for this library"
-          }
-        }
+        "description": "Settings and management options for thumbnails in this library"
       },
       "integrations/analysis": {
         "title": "Analysis",
@@ -1272,6 +1247,27 @@
         "failedToUpdateCompletion": "Failed to update book completion status"
       }
     },
+    "thumbnailManagement": {
+      "changeThumbnail": {
+        "label": "Change Thumbnail",
+        "descriptionLibrary": "Choose a different thumbnail for this library"
+      },
+      "deleteThumbnails": {
+        "label": "Delete Thumbnails",
+        "descriptionLibrary": "Permanently delete all generated thumbnails for this library"
+      },
+      "regenerateThumbnails": {
+        "label": "Regenerate Thumbnails",
+        "description": "Either generate missing thumbnails or force the recreation of all thumbnails"
+      },
+      "processColors": {
+        "label": "Extract Thumbnail Colors",
+        "description": "The dominant colors from thumbnails for aesthetic-use throughout the app"
+      },
+      "generate": "Generate",
+      "everything": "Everything",
+      "missingOnly": "Missing Only"
+    },
     "createOrUpdateSmartListForm": {
       "validation": {
         "nameTooShort": "Name must be at least 2 characters",
@@ -1450,9 +1446,6 @@
           }
         ],
         "review": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
           "labels": {
             "name": "Name",
             "description": "Description",
@@ -1463,7 +1456,11 @@
         "buttons": {
           "confirm": "Create List"
         }
-      }
+      },
+      "failedToCreateSmartList": "Failed to Create Smart List"
+    },
+    "steppedForm": {
+      "sheetTitle": "Steps"
     },
     "createOrUpdateApiKey": {
       "validation": {
@@ -1818,25 +1815,21 @@
             "label": "Layout and Arrangement",
             "description": "Customize how Stump displays information and organizes content"
           },
-          "primaryNavigation": {
-            "label": "Primary Navigation",
-            "description": "Choose between a minimal sidebar or a topbar navigation",
-            "options": {
-              "sidebar": "Sidebar",
-              "topbar": "Topbar"
+          "sidebar": {
+            "sidebarStyle": {
+              "label": "Sidebar Style",
+              "options": {
+                "sidebar": "Normal",
+                "floating": "Floating",
+                "inset": "Inset"
+              }
             },
-            "disclaimer": "* Settings for the unselected option will be disabled or hidden"
-          },
-          "doubleSidebar": {
-            "label": "Settings Sidebar",
-            "description": "Enables sidebar navigation for the settings pages"
-          },
-          "replacePrimarySidebar": {
-            "label": "Replace Primary Sidebar",
-            "description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
-            "tooltips": {
-              "doubleSidebar": "This setting requires the settings sidebar to be enabled",
-              "topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+            "collapseBehavior": {
+              "label": "Collapse Behavior",
+              "options": {
+                "icon": "Show Icons",
+                "offcanvas": "Fully Hide"
+              }
             }
           },
           "navigationArrangement": {
@@ -2726,11 +2719,10 @@
       "diskUsage": "Disk Usage"
     },
     "noLibraries": {
-      "heading": "Nothing to See Here",
-      "messagePrefix": "You can't see what you don't have",
+      "heading": "You Have No Libraries",
       "message": {
-        "create": "Create a library to get started",
-        "wait": "Once libraries are created, they'll be displayed here"
+        "create": "Once you create a library, content will start showing up here",
+        "wait": "Once a library is created, content will start showing up here"
       },
       "links": {
         "create": "Create Library",
@@ -2759,7 +2751,6 @@
         "seeAll": "See All"
       },
       "libraryOptions": {
-        "scanLibrary": "Scan",
         "manageLibrary": "Settings",
         "deleteLibrary": "Delete"
       }
@@ -2775,26 +2766,24 @@
       "placeholder": "Select or create tag",
       "placeholderNoTags": "No tags available"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Select Thumbnail",
-      "options": {
-        "selectFromBooks": "Select from Books",
-        "uploadImage": "Upload Image"
+      "chooseAPage": "Choose a Page",
+      "chooseFromBooks": "Choose from Books",
+      "uploadImage": "Upload Image",
+      "title": "Select a Thumbnail",
+      "descriptions": {
+        "chooseBookPage": "Choose a page from this book to use as the new thumbnail",
+        "chooseSeriesBook": "Select a book from the series",
+        "chooseLibrarySeries": "Select a series from the library"
       },
-      "uploadImage": {
+      "uploadDialog": {
         "emptyState": "A preview of your image will appear here",
         "prompt": "Drop image here or click to select",
         "remove": "Remove Image",
         "fileTooLarge": "File Too Large",
         "onlyOneFile": "Only one file is allowed",
         "noFile": "No file was provided"
-      }
-    },
-    "thumbnailSelector": {
-      "title": "Select a Thumbnail",
-      "descriptions": {
-        "chooseBookPage": "Choose a page from this book to use as the new thumbnail",
-        "chooseSeriesBook": "Select a book from the series"
       },
       "actions": {
         "confirmSelection": "Confirm Selection"
@@ -2977,6 +2966,7 @@
       "confirm": "Confirm",
       "copy": "Copy",
       "created": "Created",
+      "credits": "Credits",
       "delete": "Delete",
       "deleteConfirmation": {
         "title": "Delete {{type}}",
@@ -2984,6 +2974,9 @@
         "confirm": "Delete {{type}}",
         "typeToConfirm": "Type {{name}} to confirm:"
       },
+      "documentation": "Documentation",
+      "email": "Email",
+      "extract": "Extract",
       "extend": "Extend",
       "experimentalDisclaimer": {
         "title": "This feature is experimental",
@@ -3016,11 +3009,13 @@
       "lastUpdated": "Last Updated",
       "limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
       "notFullyImplemented": {
-      	"label": "Not Fully Implemented",
-       	"description": "This feature is still under active development, not fully functional, and not ready for use"
+        "label": "Not Fully Implemented",
+        "description": "This feature is still under active development, not fully functional, and not ready for use"
       },
       "logIn": "Log In",
       "login": "Login",
+      "members_one": "Member",
+      "members_other": "Members",
       "seeError": "See error",
       "remove": "Remove",
       "goBack": "Go Back",
@@ -3030,6 +3025,7 @@
       "returnHome": "Return Home",
       "run": "Run",
       "tryAgain": "Try Again",
+      "management": "Management",
       "notConfigured": "Not Configured",
       "notReady": "This feature is not ready",
       "notUsedYet": "Not Used Yet",
@@ -3047,6 +3043,8 @@
       "xBooks_other": "{{count}} Books",
       "seeMore": "See More",
       "series": "Series",
+      "series_one": "Series",
+      "series_other": "Series",
       "fileUpload": {
         "someRejected": "Some files were rejected. Please check the file types and try again",
         "tooManyFiles": "You have selected too many files",
@@ -3070,36 +3068,56 @@
       "favorite": "Favorite",
       "finished": "Finished",
       "grid": "Grid",
+      "hash": "Hash",
+      "koreaderHash": "KOReader Hash",
+      "lastFinished": "Last Finished",
       "list": "List",
       "lastCompleted": "Last Completed",
+      "modifiedOnDisk": "Modified on Disk",
+      "less": "Less",
+      "more": "More",
       "name": "Name",
+      "next": "Next",
+      "no": "No",
       "notAvailable": "Not Available",
       "ok": "Okay",
       "options": "Options",
+      "output": "Output",
+      "overview": "Overview",
       "page": "Page",
       "pages": "Pages",
       "pageXOfY": "Page {{current}} of {{total}}",
       "pageX": "Page {{current}}",
       "password": "Password",
+      "path": "Path",
       "progress": "Progress",
       "publication": "Publication",
       "read": "Read",
       "readAgain": "Read Again",
       "readTime": "Reading Time",
+      "reading": "Reading",
       "readthrough": "Readthrough",
+      "readthroughs_one": "Readthrough",
+      "readthroughs_other": "Readthroughs",
+      "readLess": "Read Less",
       "readMore": "Read More",
       "refresh": "Refresh",
       "reset": "Reset",
       "select": "Select",
       "settings": "Settings",
       "servers": "Servers",
+      "size": "Size",
       "test": "Test",
+      "thisActionCannotBeUndone": "This action cannot be undone",
       "thisBook": "this book",
       "thisServer": "this server",
+      "thumbnail": "Thumbnail",
       "truncatedText": "{{text}}...",
       "unknownTitle": "Untitled",
       "url": "URL",
       "username": "Username",
+      "users_one": "User",
+      "users_other": "Users",
       "value": "Value",
       "version": "Version",
       "accessOpdsV2": "Access OPDS v2.0",
@@ -3107,6 +3125,8 @@
       "presentTime": "Present",
       "home": "Home",
       "libraries": "Libraries",
+      "libraries_one": "Library",
+      "libraries_other": "Libraries",
       "smartLists": "Smart Lists",
       "files": "Files",
       "search": "Search",
@@ -3114,10 +3134,14 @@
       "global": "Global",
       "preferences": "Preferences",
       "time": {
-	      "day": "Day",
-				"dateAndTime": "Date and Time",
-	      "month": "Month"
-      }
+        "day": "Day",
+        "daysCount_one": "{{count}} Day",
+        "daysCount_other": "{{count}} Days",
+        "dateAndTime": "Date and Time",
+        "month": "Month",
+        "dateRange": "{{startDate}} - {{endDate}}"
+      },
+      "yes": "Yes"
     },
     "libraryType": {
       "BOOK": "Books",
@@ -3171,6 +3195,7 @@
       "genre": "Genre",
       "language": "Language",
       "publisher": "Publisher",
+      "published": "Published",
       "volume": "Volume",
       "writers": "Writers",
       "colorists": "Colorists",
@@ -3282,6 +3307,10 @@
       "ABANDONED": "Abandoned"
     },
     "bookActions": {
+      "analyze": "Analyze",
+      "readFromBeginning": "Read from Beginning",
+      "readIncognito": "Read Incognito",
+      "openNativePdf": "Open in Native PDF Viewer",
       "markAsRead": {
         "label": "Mark as Read",
         "confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
@@ -3295,6 +3324,7 @@
       "deleteReadHistory": {
         "label": "Delete Read History",
         "confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+        "disclaimer": "Your completion history cannot be recovered once deleted",
         "failure": "Failed to delete read history"
       },
       "deleteBook": {
@@ -3308,6 +3338,10 @@
       "goToSeries": "Go to Series",
       "seeDetails": "See Details",
       "goToLibrary": "Go to Library"
+    },
+    "libraryActions": {
+      "scan": "Scan",
+      "scanAll": "Scan All"
     },
     "sorting": {
       "label": "Sort By",
@@ -3446,11 +3480,11 @@
       "unknownSeriesName": "series"
     },
     "readingDevice": {
-    	"device": "Device",
-    	"description": "Some reading features correlate activity to specific devices. You can set these if you want to opt-in to that behavior",
-     	"placeholder": {
-      	"ios": "My iOS Device",
-       	"android": "My Android Device",
+      "device": "Device",
+      "description": "Some reading features correlate activity to specific devices. You can set these if you want to opt-in to that behavior",
+      "placeholder": {
+        "ios": "My iOS Device",
+        "android": "My Android Device",
         "macos": "My macOS Device"
       }
     },
@@ -3459,26 +3493,58 @@
       "startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
       "readthroughDateRange": "{{startDate}} - {{endDate}}",
       "feedType": {
-	      "sessions": "Sessions",
-	      "events": "Events"
+        "sessions": "Sessions",
+        "events": "Events"
       },
       "goToSession": "Go to Session",
       "deleteSession": {
-      	"label": "Delete Session",
-       	"finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
+        "label": "Delete Session",
+        "finishedConfirm": "This session completes a readthrough, so deleting it will will greatly change your timeline and cannot be undone",
         "dnfedConfirm": "This session completes a DNF readthrough, so deleting it will will greatly change your timeline and cannot be undone",
         "normalConfirm": "This will permanently remove the session from your timeline",
         "failedToDelete": "Failed to Delete Session"
       },
       "extendSession": {
-      	"label": "Extend Session",
-       	"description": "This will update the session so that it is still active, which impacts the reported session duration window",
+        "label": "Extend Session",
+        "description": "This will update the session so that it is still active, which impacts the reported session duration window",
         "failedToExtend": "Failed to Extend Session"
+      },
+      "emptyState": {
+        "label": "No Activity",
+        "description": "Once you start reading, come back here to see your timeline"
       }
     },
     "readingJournal": {
-    	"editorPlaceholder": "Write some thoughts down...",
-    	"failedToSaveEntry": "Failed to Save Journal Entry"
+      "editorPlaceholder": "Write some thoughts down...",
+      "failedToSaveEntry": "Failed to Save Journal Entry"
+    },
+    "readingStats": {
+      "title": "Stats",
+      "range": {
+        "week": "This Week",
+        "month": "This Month",
+        "year": "This Year",
+        "lifetime": "Lifetime"
+      },
+      "activeDays_one": "You read on {{count}} day",
+      "activeDays_other": "You read on {{count}} days",
+      "dailyActivity": "Your Days",
+      "streaks": {
+        "current": "Current Streak",
+        "longest": "Longest Streak"
+      },
+      "dayOfWeek": {
+        "title": "By Weekday",
+        "description": "Average time read on each day of the week"
+      },
+      "booksFinished": "Books Finished",
+      "avgPerActiveDay": "Avg. per Day",
+      "avgPerSession": "Avg. Session Time",
+      "timeToFinish": {
+        "title": "Time to Finish",
+        "books_one": "Based on {{count}} book",
+        "books_other": "Based on {{count}} books"
+      }
     },
     "errors": {
       "unknown": "Unknown Error",
@@ -3529,6 +3595,14 @@
         "invalidPage": "'{{page}}' is not a page number"
       },
       "showCurrentChapter": "Show Current Chapter"
+    },
+    "textCase": {
+      "label": "Text Case",
+      "options": {
+        "lowerCase": "Lowercase",
+        "sentenceCase": "Sentence Case",
+        "titleCase": "Title Case"
+      }
     },
     "addOrEditServer": {
       "createServer": "Create Server",
@@ -3654,6 +3728,7 @@
       }
     },
     "serverSettings": {
+      "title": "Server Settings",
       "updateAvailable": {
         "message": "Your server is not up to date. Please update to the latest version!"
       },
@@ -3665,10 +3740,7 @@
         "build": "Build",
         "nonStableChannel": {
           "title": "You are running a non-stable build of Stump",
-          "description": [
-            "It looks like you are running the",
-            "build channel"
-          ]
+          "description": "It looks like you are running the {{channelName}} build channel"
         },
         "debugInfo": {
           "label": "Debug Information",

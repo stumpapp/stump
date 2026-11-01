@@ -10,7 +10,7 @@ use dashmap::DashMap;
 use models::entity::{job, log, server_config};
 use sea_orm::{
 	prelude::*, sea_query::OnConflict, sqlx::types::chrono::Utc, ActiveValue::Set,
-	DatabaseConnection, SelectColumns,
+	DatabaseConnection, QuerySelect,
 };
 use serde::Serialize;
 use tokio::sync::broadcast;
@@ -159,7 +159,7 @@ impl JobContext {
 	/// A convenience method to fetch the encryption key from the server config
 	pub async fn get_encryption_key(&self) -> Result<String, CoreError> {
 		let record = server_config::Entity::find()
-			.select_column(server_config::Column::EncryptionKey)
+			.column(server_config::Column::EncryptionKey)
 			.one(self.apalis_state.conn.as_ref())
 			.await?;
 

@@ -19,6 +19,7 @@ const fragment = graphql(`
 		autoApplyConfig
 		createdAt
 		updatedAt
+		...EditProviderDialog
 	}
 `)
 

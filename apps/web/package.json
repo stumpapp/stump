@@ -1,15 +1,16 @@
 {
 	"name": "@stump/web",
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"description": "",
 	"license": "MIT",
 	"scripts": {
 		"dev": "vite --host",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint .",
 		"start": "vite preview",
 		"build": "vite build",
 		"e2e": "playwright test",
 		"e2e:install": "playwright install --with-deps chromium",
-		"check-types": "tsc --noEmit --project tsconfig.test.json",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"clean": "rimraf node_modules"
 	},

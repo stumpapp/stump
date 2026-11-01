@@ -3,7 +3,7 @@ use std::{collections::HashMap, str::FromStr, sync::Arc};
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::session;
-use sea_orm::{prelude::*, DatabaseConnection, Set};
+use sea_orm::{prelude::*, DatabaseConnection, ExprTrait, Set};
 use stump_core::config::StumpConfig;
 use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;

@@ -38,7 +38,11 @@ export function EventTimelineRow({
 	return (
 		<View className="gap-2.5 flex flex-row items-center" {...props}>
 			{feedType === 'sessions' && (
-				<Text className="py-4">
+				<Text
+					className="py-4 w-[4.5rem] shrink-0"
+					style={{ fontVariant: ['tabular-nums'] }}
+					numberOfLines={1}
+				>
 					{intlFormat(timestamp, {
 						hour: 'numeric',
 						minute: 'numeric',

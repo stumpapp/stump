@@ -120,7 +120,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r"
 			SELECT
@@ -273,7 +273,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -361,7 +361,9 @@ impl MediaQuery {
 				}
 
 				let nodes = query
-					.select_also(media_metadata::Entity)
+					// select_also_fake is the 2.0 replacement for select_also, i really
+					// hate the name of it tho
+					.select_also_fake(media_metadata::Entity)
 					.limit(info.limit)
 					.all(conn)
 					.await?
@@ -392,7 +394,7 @@ impl MediaQuery {
 			Pagination::Offset(info) => {
 				let count = query.clone().count(conn).await?;
 				let nodes = query
-					.select_also(media_metadata::Entity)
+					.select_also_fake(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
@@ -410,7 +412,7 @@ impl MediaQuery {
 			},
 			Pagination::None(_) => {
 				let nodes = query
-					.select_also(media_metadata::Entity)
+					.select_also_fake(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()
@@ -586,7 +588,7 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(db_statement(
+			.query_one_raw(db_statement(
 				conn,
 				r#"
 					-- Count total number of on deck items (for pagination)
@@ -772,7 +774,7 @@ impl MediaQuery {
 					Query::select()
 						.column(media::Column::Hash)
 						.from(media::Entity)
-						.add_group_by([Expr::col(media::Column::Hash).into()])
+						.add_group_by([Expr::col(media::Column::Hash)])
 						.and_having(Expr::col(media::Column::Id).count().gt(1))
 						.to_owned(),
 				),

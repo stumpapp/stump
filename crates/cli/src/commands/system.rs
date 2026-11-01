@@ -49,7 +49,7 @@ async fn set_journal_mode(mode: JournalMode, config: &StumpConfig) -> CliResult<
 	progress.set_message("Fetching current journal mode...");
 
 	let journal_mode = match conn
-		.query_one(Statement::from_string(
+		.query_one_raw(Statement::from_string(
 			DatabaseBackend::Sqlite,
 			"PRAGMA journal_mode;",
 		))

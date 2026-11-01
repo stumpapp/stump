@@ -2,6 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { parseGraphQLDateTime } from '@stump/client'
 import { extractErrorMessage } from '@stump/graphql'
 import { useMutation } from '@tanstack/react-query'
+import { isBefore, subMinutes } from 'date-fns'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -84,7 +85,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	const serverIdsToSyncUponClose = useRef(new Set<string>())
 
 	const shouldPull = useMemo(
-		() => !oldestModifiedAt || oldestModifiedAt.getTime() < Date.now() - 5 * 60 * 1000,
+		() => !oldestModifiedAt || isBefore(oldestModifiedAt, subMinutes(new Date(), 5)),
 		[oldestModifiedAt],
 	)
 
@@ -102,7 +103,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				refreshDownloads()
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[isOpen, shouldPull],
 	)

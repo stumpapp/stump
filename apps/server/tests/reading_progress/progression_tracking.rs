@@ -9,7 +9,7 @@ use models::{
 	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{prelude::*, ExprTrait, QueryOrder};
 use serde_json::json;
 use tests::fake_data;
 

@@ -3,8 +3,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{prelude::*, ActiveValue};
 
-use crate::entity::user::AuthUser;
+use crate::entity::user::{self, AuthUser};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "reading_devices")]
 #[graphql(name = "ReadingDeviceModel")]
@@ -17,24 +18,21 @@ pub struct Model {
 
 	pub created_at: DateTimeUtc,
 	pub updated_at: DateTimeUtc,
+	#[sea_orm(
+		belongs_to,
+		from = "user_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 impl Entity {
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		Entity::find().filter(Column::UserId.eq(&user.id))
 	}
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	User,
 }
 
 #[async_trait]

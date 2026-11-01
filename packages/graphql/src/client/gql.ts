@@ -108,6 +108,11 @@ type Documents = {
     "\n\tmutation LibrarySeriesListHeaderScanLibrary($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": typeof types.LibrarySeriesListHeaderScanLibraryDocument,
     "\n\tquery ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int) {\n\t\treadingSessionConflictView(mediaId: $mediaId, branchedSessionId: $branchedSessionId) {\n\t\t\tancestorSession {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tendPage\n\t\t\t\tendPercentage\n\t\t\t\telapsedSeconds\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\treadthroughNumber\n\t\t\t\tendLocator {\n\t\t\t\t\thref\n\t\t\t\t\tchapterTitle\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tremoteSessions {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tendPage\n\t\t\t\tendPercentage\n\t\t\t\telapsedSeconds\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\treadthroughNumber\n\t\t\t\tendLocator {\n\t\t\t\t\thref\n\t\t\t\t\tchapterTitle\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ReadingSessionConflictViewDocument,
     "\n\tmutation AcceptLocalProgress($id: ID!, $ancestorSessionId: Int, $input: MediaProgressInput!) {\n\t\tacceptLocalProgress(id: $id, ancestorSessionId: $ancestorSessionId, input: $input) {\n\t\t\tid\n\t\t\tendPage\n\t\t\tendPercentage\n\t\t\telapsedSeconds\n\t\t\tupdatedAt\n\t\t\tendLocator {\n\t\t\t\thref\n\t\t\t\tchapterTitle\n\t\t\t\tlocations {\n\t\t\t\t\tprogression\n\t\t\t\t\ttotalProgression\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.AcceptLocalProgressDocument,
+    "\n\tquery MyReadingStreaks {\n\t\tmyReadingStreaks {\n\t\t\tcurrentDays\n\t\t\tlongestDays\n\t\t}\n\t}\n": typeof types.MyReadingStreaksDocument,
+    "\n\tfragment DailyActivityGrid on ReadingStats {\n\t\trange {\n\t\t\tstart\n\t\t\tend\n\t\t}\n\t\tdailyActivity {\n\t\t\tdate\n\t\t\ttotalSeconds\n\t\t\tsessionCount\n\t\t}\n\t}\n": typeof types.DailyActivityGridFragmentDoc,
+    "\n\tquery RangedUserReadingStats($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...DailyActivityGrid\n\t\t\t...WeekdayChart\n\t\t\t...TimeToFinishStats\n\t\t}\n\t}\n": typeof types.RangedUserReadingStatsDocument,
+    "\n\tfragment TimeToFinishStats on ReadingStats {\n\t\ttimeToFinish {\n\t\t\tlibraryType\n\t\t\tsampleSize\n\t\t\tmedianActiveSeconds\n\t\t}\n\t}\n": typeof types.TimeToFinishStatsFragmentDoc,
+    "\n\tfragment WeekdayChart on ReadingStats {\n\t\tdayOfWeek {\n\t\t\tisoWeekday\n\t\t\taverageSeconds\n\t\t}\n\t}\n": typeof types.WeekdayChartFragmentDoc,
     "\n\tfragment ReadingSessionCard on SessionWithEvents {\n\t\tsession {\n\t\t\tid\n\t\t\tstatus\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tstartPage\n\t\t\tendPage\n\t\t\tendLocator {\n\t\t\t\tlocations {\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t}\n\t\t\tendPercentage\n\t\t\telapsedSeconds\n\t\t\tmediaId\n\t\t\tjournalEntry {\n\t\t\t\tcontent\n\t\t\t}\n\t\t\tisLatest\n\t\t}\n\t\tevents {\n\t\t\t__typename\n\t\t\t... on Bookmark {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on MediaAnnotation {\n\t\t\t\tid\n\t\t\t\tannotationText\n\t\t\t}\n\t\t}\n\t\t...SessionWithEventsTimeline\n\t}\n": typeof types.ReadingSessionCardFragmentDoc,
     "\n\tfragment ReadingSessionCardMedia on SessionWithEvents {\n\t\tsession {\n\t\t\tmedia {\n\t\t\t\tresolvedName\n\t\t\t\tpages\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\taverageColor\n\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthumbhash\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ReadingSessionCardMediaFragmentDoc,
     "\n\tmutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {\n\t\tpatchReadingSession(sessionId: $sessionId, input: $input) {\n\t\t\tid\n\t\t\t# createdAt\n\t\t\t# updatedAt\n\t\t\telapsedSeconds\n\t\t}\n\t}\n": typeof types.PatchReadingSessionEditSheetDocument,
@@ -138,12 +143,26 @@ type Documents = {
     "\n\tmutation UseSyncDeviceName($deviceId: String!, $deviceName: String!) {\n\t\tupsertReadingDevice(id: $deviceId, name: $deviceName) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.UseSyncDeviceNameDocument,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t\theight\n\t\t\twidth\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tpage\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\thref\n\t\t\t}\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t\tcreatedAt\n\t\tlibraryConfig {\n\t\t\tskipBookOverview\n\t\t}\n\t}\n": typeof types.BookCardFragmentDoc,
-    "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookSearchOverlayDocument,
+    "\n\tfragment BookHeader on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\textension\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\t...BookReadingActions\n\t}\n": typeof types.BookHeaderFragmentDoc,
+    "\n\tmutation BookHeaderAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.BookHeaderAnalyzeDocument,
+    "\n\tfragment BookInfoSheet on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\tsize\n\t\textension\n\t\thash\n\t\tkoreaderHash\n\t\trelativeLibraryPath\n\t\tcreatedAt\n\t\tmodifiedAt\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tmetadata {\n\t\t\tpublisher\n\t\t\tyear\n\t\t\tmonth\n\t\t\tday\n\t\t\tlanguage\n\t\t\tageRating\n\t\t\tvolume\n\t\t\tnumber\n\t\t\tstoryArc\n\t\t\tstoryArcNumber\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tinkers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tcharacters\n\t\t\tteams\n\t\t\tidentifierIsbn\n\t\t\tidentifierAmazon\n\t\t\tidentifierCalibre\n\t\t\tidentifierGoogle\n\t\t\tidentifierMobiAsin\n\t\t\tidentifierUuid\n\t\t}\n\t\treadHistory {\n\t\t\tcompletedAt\n\t\t\tdnf\n\t\t}\n\t}\n": typeof types.BookInfoSheetFragmentDoc,
+    "\n\tfragment BookOverviewDetails on Media {\n\t\tresolvedName\n\t\tseriesPosition\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tconfig {\n\t\t\t\tlibraryType\n\t\t\t}\n\t\t}\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tlinks\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tnumber\n\t\t\tvolume\n\t\t}\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t\t...BookStatRow\n\t}\n": typeof types.BookOverviewDetailsFragmentDoc,
+    "\n\tfragment BookSearchSelection on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.BookSearchSelectionFragmentDoc,
+    "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookSearchSelection\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookSearchOverlayDocument,
+    "\n\tfragment BookStatRow on Media {\n\t\tpages\n\t\tsize\n\t\textension\n\t\tmetadata {\n\t\t\tyear\n\t\t}\n\t}\n": typeof types.BookStatRowFragmentDoc,
+    "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.EmailBookDropdownDeviceDocument,
+    "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": typeof types.SendEmailAttachmentDocument,
     "\n\tfragment SimpleBookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\tcreatedAt\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SimpleBookCardFragmentDoc,
     "\n\tfragment MediaMetadataEditor on MediaMetadata {\n\t\tageRating\n\t\tcharacters\n\t\tcolorists\n\t\tcoverArtists\n\t\tday\n\t\teditors\n\t\tformat\n\t\tidentifierAmazon\n\t\tidentifierCalibre\n\t\tidentifierGoogle\n\t\tidentifierIsbn\n\t\tidentifierMobiAsin\n\t\tidentifierUuid\n\t\tgenres\n\t\tinkers\n\t\tlanguage\n\t\tletterers\n\t\tlinks\n\t\tmonth\n\t\tnotes\n\t\tnumber\n\t\tpageCount\n\t\tpencillers\n\t\tpublisher\n\t\tseries\n\t\tseriesGroup\n\t\tstoryArc\n\t\tstoryArcNumber\n\t\tsummary\n\t\tteams\n\t\ttitle\n\t\ttitleSort\n\t\tvolume\n\t\twriters\n\t\tyear\n\t\tlockedFields\n\t}\n": typeof types.MediaMetadataEditorFragmentDoc,
     "\n\tmutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {\n\t\tupdateMediaMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateMediaMetadataDocument,
     "\n\tmutation MediaEditorSetLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.MediaEditorSetLockedFieldsDocument,
-    "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tseriesId\n\t\t\tpages\n\t\t\tsize\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tlanguage\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookOverviewSceneDocument,
+    "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\t...BookOverviewDetails\n\t\t\t...BookInfoSheet\n\t\t\t...BookReadingActions\n\t\t\tlibrary {\n\t\t\t\tconfig {\n\t\t\t\t\tlibraryType\n\t\t\t\t}\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookOverviewSceneDocument,
+    "\n\tfragment BookReadingActions on Media {\n\t\tid\n\t\textension\n\t\treadProgress {\n\t\t\tpage\n\t\t\tlocator {\n\t\t\t\thref\n\t\t\t}\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookReadingActionsFragmentDoc,
+    "\n\tmutation BookReadingActionsComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n": typeof types.BookReadingActionsCompleteDocument,
+    "\n\tmutation BookReadingActionsDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n": typeof types.BookReadingActionsDeleteSessionDocument,
+    "\n\tmutation BookReadingActionsDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n": typeof types.BookReadingActionsDeleteHistoryDocument,
+    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUpdateDocument,
+    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUploadDocument,
     "\n\tmutation DeleteBookClubConfirmation($id: ID!) {\n\t\tdeleteBookClub(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteBookClubConfirmationDocument,
     "\n\tfragment BookClubBookItem on BookClubBook {\n\t\tid\n\t\ttitle\n\t\tauthor\n\t\timageUrl\n\t\turl\n\t\tentity {\n\t\t\t__typename\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\twriters\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t\tcompletedAt\n\t\taddedAt\n\t}\n": typeof types.BookClubBookItemFragmentDoc,
     "\n\tquery BookClubBooksScene($id: ID!) {\n\t\tbookClubById(id: $id) {\n\t\t\tid\n\t\t\tpreviousBooks {\n\t\t\t\tid\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookClubBooksSceneDocument,
@@ -154,6 +173,7 @@ type Documents = {
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteLibraryDocument,
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LastVisitedLibraryDocument,
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": typeof types.LibraryBooksAlphabetDocument,
+    "\n\tfragment LibraryWebGridItem on Library {\n\t\tid\n\t\tname\n\t\tseries(take: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tstats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": typeof types.LibraryWebGridItemFragmentDoc,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": typeof types.LibrarySeriesAlphabetDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": typeof types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": typeof types.AcceptAllPendingMatchesDocument,
@@ -167,14 +187,12 @@ type Documents = {
     "\n\tmutation SetSeriesLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.SetSeriesLockedFieldsDocument,
     "\n\tquery SideBarQuery {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SideBarQueryDocument,
     "\n\tquery BookClubSideBarSection {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t\tmembers {\n\t\t\t\tid\n\t\t\t\tuserId\n\t\t\t\trole\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookClubSideBarSectionDocument,
+    "\n\tfragment LibraryEmoji on Library {\n\t\tid\n\t}\n": typeof types.LibraryEmojiFragmentDoc,
     "\n\tmutation UpdateLibraryEmoji($id: ID!, $emoji: String) {\n\t\tupdateLibraryEmoji(id: $id, emoji: $emoji) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.UpdateLibraryEmojiDocument,
+    "\n\tfragment LibraryOptionsMenu on Library {\n\t\tid\n\t\tname\n\t}\n": typeof types.LibraryOptionsMenuFragmentDoc,
     "\n\tmutation ScanLibraryMutation($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": typeof types.ScanLibraryMutationDocument,
-    "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibrarySideBarSectionDocument,
+    "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t\t...LibraryEmoji\n\t\t\t\t...LibraryOptionsMenu\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibrarySideBarSectionDocument,
     "\n\tquery SmartListSideBarSection {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SmartListSideBarSectionDocument,
-    "\n\tquery TopNavigation {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.TopNavigationDocument,
-    "\n\tquery BookClubNavigationItem {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t}\n\t}\n": typeof types.BookClubNavigationItemDocument,
-    "\n\tquery LibraryNavigationItem {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryNavigationItemDocument,
-    "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SmartListNavigationItemDocument,
     "\n\tquery NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {\n\t\tseriesById(id: $id) @include(if: $isSeries) {\n\t\t\tlibraryId\n\t\t}\n\t\tmediaById(id: $id) @include(if: $isBook) {\n\t\t\tlibraryId\n\t\t}\n\t}\n": typeof types.NavigationEntityLibraryDocument,
     "\n\tmutation CreateEpubAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tmediaId\n\t\t\tuserId\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.CreateEpubAnnotationDocument,
     "\n\tmutation UpdateEpubAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.UpdateEpubAnnotationDocument,
@@ -183,33 +201,31 @@ type Documents = {
     "\n\tmutation DeleteBookmark($id: String!) {\n\t\tdeleteBookmark(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.DeleteBookmarkDocument,
     "\n\tquery ReadiumWebReader($id: ID!) {\n\t\tepubById(id: $id) {\n\t\t\tmediaId\n\t\t\ttoc\n\t\t\tbookmarks {\n\t\t\t\tid\n\t\t\t\tuserId\n\t\t\t\tmediaId\n\t\t\t\tpreviewContent\n\t\t\t\tcreatedAt\n\t\t\t\tlocator {\n\t\t\t\t\tchapterTitle\n\t\t\t\t\thref\n\t\t\t\t\ttitle\n\t\t\t\t\ttype\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tfragments\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\tposition\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\tcssSelector\n\t\t\t\t\t}\n\t\t\t\t\ttext {\n\t\t\t\t\t\tafter\n\t\t\t\t\t\tbefore\n\t\t\t\t\t\thighlight\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tannotations {\n\t\t\t\tid\n\t\t\t\tmediaId\n\t\t\t\tuserId\n\t\t\t\tannotationText\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\tlocator {\n\t\t\t\t\tchapterTitle\n\t\t\t\t\thref\n\t\t\t\t\ttitle\n\t\t\t\t\ttype\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tfragments\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\tposition\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\tcssSelector\n\t\t\t\t\t}\n\t\t\t\t\ttext {\n\t\t\t\t\t\tafter\n\t\t\t\t\t\tbefore\n\t\t\t\t\t\thighlight\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tmedia {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tpages\n\t\t\t\textension\n\t\t\t\treadProgress {\n\t\t\t\t\tpercentageCompleted\n\t\t\t\t\tpage\n\t\t\t\t\telapsedSeconds\n\t\t\t\t\tlocator {\n\t\t\t\t\t\tchapterTitle\n\t\t\t\t\t\thref\n\t\t\t\t\t\ttitle\n\t\t\t\t\t\ttype\n\t\t\t\t\t\tlocations {\n\t\t\t\t\t\t\tfragments\n\t\t\t\t\t\t\tprogression\n\t\t\t\t\t\t\tposition\n\t\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\t\tcssSelector\n\t\t\t\t\t\t}\n\t\t\t\t\t\ttext {\n\t\t\t\t\t\t\tafter\n\t\t\t\t\t\t\tbefore\n\t\t\t\t\t\t\thighlight\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tlibraryConfig {\n\t\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\t\tdefaultReadingMode\n\t\t\t\t\tdefaultReadingDir\n\t\t\t\t}\n\t\t\t\tnextInSeries(pagination: { cursor: { limit: 1 } }) {\n\t\t\t\t\tnodes {\n\t\t\t\t\t\tid\n\t\t\t\t\t\tname: resolvedName\n\t\t\t\t\t\tthumbnail {\n\t\t\t\t\t\t\turl\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ReadiumWebReaderDocument,
     "\n\tmutation UpdateReadiumEpubProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateReadiumEpubProgressDocument,
+    "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t\textension\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBookGridDocument,
     "\n\tquery SeriesBooksAlphabet($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": typeof types.SeriesBooksAlphabetDocument,
+    "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n": typeof types.SeriesActionCompleteDocument,
+    "\n\tmutation SeriesHeaderAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": typeof types.SeriesHeaderAnalyzeDocument,
+    "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesOverviewSheetExtasDocument,
+    "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesTagEditorSetTagsDocument,
     "\n\tfragment SeriesMetadataEditor on SeriesMetadata {\n\t\tageRating\n\t\tbooktype\n\t\tcharacters\n\t\tcollects {\n\t\t\tseries\n\t\t\tcomicid\n\t\t\tissueid\n\t\t\tissues\n\t\t}\n\t\tcomicImage\n\t\tcomicid\n\t\tdescriptionFormatted\n\t\tgenres\n\t\timprint\n\t\tlinks\n\t\tmetaType\n\t\tpublicationRun\n\t\tpublisher\n\t\tstatus\n\t\tsummary\n\t\ttitle\n\t\ttotalIssues\n\t\tvolume\n\t\twriters\n\t\tyear\n\t\tlockedFields\n\t}\n": typeof types.SeriesMetadataEditorFragmentDoc,
     "\n\tmutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {\n\t\tupdateSeriesMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateSeriesMetadataDocument,
     "\n\tmutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.SeriesEditorSetLockedFieldsDocument,
+    "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.SeriesLayoutDocument,
+    "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksSceneDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUpdateDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUploadDocument,
     "\n\tsubscription UseCoreEvent {\n\t\treadEvents {\n\t\t\t__typename\n\t\t\t... on CreatedManySeries {\n\t\t\t\tcount\n\t\t\t\tlibraryId\n\t\t\t}\n\t\t\t... on CreatedMedia {\n\t\t\t\tid\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on CreatedOrUpdatedManyMedia {\n\t\t\t\tcount\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on DiscoveredMissingLibrary {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobStarted {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobUpdate {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tstatus\n\t\t\t\tmessage\n\t\t\t\tcompletedTasks\n\t\t\t\tremainingTasks\n\t\t\t\tcompletedSubtasks\n\t\t\t\ttotalSubtasks\n\t\t\t\tsubtitle\n\t\t\t}\n\t\t\t... on JobOutput {\n\t\t\t\tid\n\t\t\t\toutput {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tcreatedSeries\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t\tupdatedSeries\n\t\t\t\t\t}\n\t\t\t\t\t... on SeriesScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UseCoreEventDocument,
     "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UsePreferencesDocument,
-    "\n\tmutation BookActionMenuComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n": typeof types.BookActionMenuCompleteDocument,
-    "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n": typeof types.BookActionMenuDeleteSessionDocument,
-    "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n": typeof types.BookActionMenuDeleteHistoryDocument,
-    "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": typeof types.BookFileInformationFragmentDoc,
-    "\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookLibrarySeriesLinksDocument,
     "\n\tfragment BookMetadata on Media {\n\t\tmetadata {\n\t\t\tageRating\n\t\t\tcharacters\n\t\t\tcolorists\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tgenres\n\t\t\tinkers\n\t\t\tletterers\n\t\t\tlinks\n\t\t\tpencillers\n\t\t\tpublisher\n\t\t\tteams\n\t\t\twriters\n\t\t\tyear\n\t\t\tmonth\n\t\t\tday\n\t\t\tvolume\n\t\t\tnumber\n\t\t}\n\t}\n": typeof types.BookMetadataFragmentDoc,
     "\n\tquery BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookCard\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BooksAfterCurrentQueryDocument,
     "\n\tquery BooksAlphabet {\n\t\tmediaAlphabet\n\t}\n": typeof types.BooksAlphabetDocument,
-    "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.EmailBookDropdownDeviceDocument,
-    "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": typeof types.SendEmailAttachmentDocument,
     "\n\tquery BookReaderScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tpages\n\t\t\textension\n\t\t\treadProgress {\n\t\t\t\tpercentageCompleted\n\t\t\t\tpage\n\t\t\t\telapsedSeconds\n\t\t\t}\n\t\t\tlibraryConfig {\n\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\tdefaultReadingMode\n\t\t\t\tdefaultReadingDir\n\t\t\t}\n\t\t\tanalysisData {\n\t\t\t\tdimensions {\n\t\t\t\t\theight\n\t\t\t\t\twidth\n\t\t\t\t}\n\t\t\t}\n\t\t\tnextInSeries(pagination: { cursor: { limit: 1 } }) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\tname: resolvedName\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookReaderSceneDocument,
     "\n\tmutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateReadProgressDocument,
-    "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": typeof types.BookManagementSceneDocument,
-    "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.BookManagementSceneAnalyzeDocument,
     "\n\tquery BookMetadataSearchProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": typeof types.BookMetadataSearchProvidersDocument,
     "\n\tquery BookMetadataSearchContext($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tmetadata {\n\t\t\t\t\tcomicid\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookMetadataSearchContextDocument,
     "\n\tmutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {\n\t\tfetchMediaMetadata(id: $id, search: $search) {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": typeof types.SearchMediaMetadataDocument,
+    "\n\tquery BookSettingsScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookSettingsSceneDocument,
     "\n\tmutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetMediaTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookTagEditorSetTagsDocument,
-    "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": typeof types.BookThumbnailSelectorFragmentDoc,
-    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUpdateDocument,
-    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUploadDocument,
     "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.BookClubLayoutDocument,
     "\n\tmutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {\n\t\tupdateBookClub(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\temoji\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tdescription\n\t\t}\n\t}\n": typeof types.UpdateBookClubDocument,
     "\n\tquery UserBookClubsScene {\n\t\tbookClubs(all: false) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tmembersCount\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UserBookClubsSceneDocument,
@@ -233,6 +249,8 @@ type Documents = {
     "\n\tquery RecentlyAddedSeries($pagination: Pagination!) {\n\t\trecentlyAddedSeries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\toneshotBook {\n\t\t\t\t\tid\n\t\t\t\t}\n\t\t\t\tmedia(take: 2, skip: 1) {\n\t\t\t\t\tid\n\t\t\t\t\tresolvedName\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t\tmetadata {\n\t\t\t\t\t\t\taverageColor\n\t\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tthumbhash\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\taverageColor\n\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthumbhash\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedSeriesDocument,
     "\n\tquery HomeArrangementPreferences {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\thomeArrangement {\n\t\t\t\t\tsections {\n\t\t\t\t\t\tvisible\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on InProgressBooks {\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t... on OnDeckBooks {\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t... on RecentlyAdded {\n\t\t\t\t\t\t\t\tentity\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.HomeArrangementPreferencesDocument,
     "\n\tmutation UpdateHomeArrangement($input: HomeArrangementInput!) {\n\t\tupdateHomeArrangement(input: $input) {\n\t\t\tsections {\n\t\t\t\tvisible\n\t\t\t\tconfig {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on InProgressBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on OnDeckBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on RecentlyAdded {\n\t\t\t\t\t\tentity\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateHomeArrangementDocument,
+    "\n\tquery LibrariesScene {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibraryWebGridItem\n\t\t\t}\n\t\t}\n\t\tlibrariesStats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": typeof types.LibrariesSceneDocument,
+    "\n\tmutation LibrariesSceneScanAllLibraries {\n\t\tscanAllLibraries\n\t}\n": typeof types.LibrariesSceneScanAllLibrariesDocument,
     "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tseriesCount\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tconfig {\n\t\t\t\tdefaultLibraryViewMode\n\t\t\t\thideSeriesView\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t\tconfig {\n\t\t\t\toneshotsDirectory\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryLayoutDocument,
     "\n\tmutation VisitLibrary($id: ID!) {\n\t\tvisitLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.VisitLibraryDocument,
     "\n\tquery LibraryBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryBooksSceneDocument,
@@ -258,19 +276,8 @@ type Documents = {
     "\n\tmutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadLibraryThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryThumbnailSelectorUploadDocument,
     "\n\tmutation ProcessLibraryThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tprocessLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": typeof types.ProcessLibraryThumbnailsDocument,
     "\n\tmutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tgenerateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": typeof types.RegenerateThumbnailsDocument,
-    "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n": typeof types.SeriesActionCompleteDocument,
-    "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.SeriesLayoutDocument,
-    "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SeriesLibrayLinkDocument,
-    "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesOverviewSheetExtasDocument,
-    "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksSceneDocument,
-    "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBookGridDocument,
-    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\t...SeriesThumbnailSelector\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesSettingsSceneDocument,
-    "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": typeof types.SeriesSettingsSceneAnalyzeDocument,
+    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesSettingsSceneDocument,
     "\n\tmutation SeriesSettingsSceneResetMetadata($id: ID!, $impact: MetadataResetImpact!) {\n\t\tresetSeriesMetadata(id: $id, impact: $impact) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.SeriesSettingsSceneResetMetadataDocument,
-    "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesTagEditorSetTagsDocument,
-    "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorFragmentDoc,
-    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUpdateDocument,
-    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUploadDocument,
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": typeof types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteApiKeyConfirmModalDocument,
@@ -282,12 +289,13 @@ type Documents = {
     "\n\tmutation NavigationArrangementUpdateLockStatus($locked: Boolean!) {\n\t\tupdateNavigationArrangementLock(locked: $locked) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.NavigationArrangementUpdateLockStatusDocument,
     "\n\tquery CreateEmailerSceneEmailers {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateEmailerSceneEmailersDocument,
     "\n\tmutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {\n\t\tcreateEmailer(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.CreateEmailerSceneCreateEmailerDocument,
-    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.EditEmailerSceneDocument,
+    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\t...CreateOrUpdateEmailerForm\n\t\t}\n\t}\n": typeof types.EditEmailerSceneDocument,
     "\n\tmutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {\n\t\tupdateEmailer(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.EditEmailerSceneEditEmailerDocument,
     "\n\tmutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {\n\t\tcreateEmailDevice(input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateOrUpdateDeviceModalCreateEmailDeviceDocument,
     "\n\tmutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {\n\t\tupdateEmailDevice(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tforbidden\n\t\t}\n\t}\n": typeof types.CreateOrUpdateDeviceModalUpdateEmailDeviceDocument,
     "\n\tmutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {\n\t\tdeleteEmailDevice(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteDeviceConfirmationDeleteEmailDeviceDocument,
     "\n\tquery EmailDevicesTable {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t\temail\n\t\t\tforbidden\n\t\t}\n\t}\n": typeof types.EmailDevicesTableDocument,
+    "\n\tfragment CreateOrUpdateEmailerForm on Emailer {\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": typeof types.CreateOrUpdateEmailerFormFragmentDoc,
     "\n\tfragment EmailerListItem on Emailer {\n\t\tid\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tlastUsedAt\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": typeof types.EmailerListItemFragmentDoc,
     "\n\tmutation DeleteEmailer($emailerId: Int!) {\n\t\tdeleteEmailer(id: $emailerId) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteEmailerDocument,
     "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.EmailerSendHistoryDocument,
@@ -316,9 +324,10 @@ type Documents = {
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
     "\n\tmutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {\n\t\tcreateMetadataProvider(input: $input) {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": typeof types.CreateProviderDialogCreateProviderDocument,
+    "\n\tfragment EditProviderDialog on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t}\n": typeof types.EditProviderDialogFragmentDoc,
     "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": typeof types.EditProviderDialogDocument,
     "\n\tmutation DeleteProviderDialog($id: Int!) {\n\t\tdeleteMetadataProvider(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteProviderDialogDocument,
-    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n": typeof types.ExistingProviderCardFragmentDoc,
+    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t\t...EditProviderDialog\n\t}\n": typeof types.ExistingProviderCardFragmentDoc,
     "\n\tmutation ProviderApiKeyInputValidateKey($config: ValidateMetadataProviderConfigInput!) {\n\t\tvalidateProviderConfig(config: $config) {\n\t\t\tisValid\n\t\t\terror\n\t\t\tresponseStatus\n\t\t}\n\t}\n": typeof types.ProviderApiKeyInputValidateKeyDocument,
     "\n\tquery ProvidersSectionGetProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": typeof types.ProvidersSectionGetProvidersDocument,
     "\n\tmutation CreateTagModal($tags: [String!]!) {\n\t\tcreateTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateTagModalDocument,
@@ -336,8 +345,8 @@ type Documents = {
     "\n\tmutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {\n\t\tupdateUserLockStatus(id: $id, lock: $lock) {\n\t\t\tid\n\t\t\tisLocked\n\t\t}\n\t}\n": typeof types.UserActionMenuLockUserDocument,
     "\n\tmutation UserActionMenuDeleteUserSessions($id: ID!) {\n\t\tdeleteUserSessions(id: $id)\n\t}\n": typeof types.UserActionMenuDeleteUserSessionsDocument,
     "\n\tquery UserTable($pagination: Pagination!) {\n\t\tusers(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tavatarUrl\n\t\t\t\tusername\n\t\t\t\tisServerOwner\n\t\t\t\tisLocked\n\t\t\t\tcreatedAt\n\t\t\t\tlastLogin\n\t\t\t\tloginSessionsCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UserTableDocument,
-    "\n\tfragment SmartListCard on SmartList {\n\t\tid\n\t\tdescription\n\t\tfilters\n\t\tjoiner\n\t\tname\n\t}\n": typeof types.SmartListCardFragmentDoc,
-    "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\t...SmartListCard\n\t\t}\n\t}\n": typeof types.SmartListsWithSearchDocument,
+    "\n\tfragment SmartListWebGridItem on SmartList {\n\t\tid\n\t\tname\n\t\tbooks(limit: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tmeta {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n": typeof types.SmartListWebGridItemFragmentDoc,
+    "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\t...SmartListWebGridItem\n\t\t}\n\t}\n": typeof types.SmartListsWithSearchDocument,
     "\n\tquery SmartListById($id: ID!) {\n\t\tsmartListById(id: $id) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\tviews {\n\t\t\t\tid\n\t\t\t\tlistId\n\t\t\t\tname\n\t\t\t\tbookColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tbookSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t\tgroupColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tgroupSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t\tsearch\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SmartListByIdDocument,
     "\n\tquery SmartListMeta($id: ID!) {\n\t\tsmartListMeta(id: $id) {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n": typeof types.SmartListMetaDocument,
     "\n\tmutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {\n\t\tupdateSmartList(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateSmartListDocument,
@@ -445,6 +454,11 @@ const documents: Documents = {
     "\n\tmutation LibrarySeriesListHeaderScanLibrary($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": types.LibrarySeriesListHeaderScanLibraryDocument,
     "\n\tquery ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int) {\n\t\treadingSessionConflictView(mediaId: $mediaId, branchedSessionId: $branchedSessionId) {\n\t\t\tancestorSession {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tendPage\n\t\t\t\tendPercentage\n\t\t\t\telapsedSeconds\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\treadthroughNumber\n\t\t\t\tendLocator {\n\t\t\t\t\thref\n\t\t\t\t\tchapterTitle\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tremoteSessions {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tendPage\n\t\t\t\tendPercentage\n\t\t\t\telapsedSeconds\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\treadthroughNumber\n\t\t\t\tendLocator {\n\t\t\t\t\thref\n\t\t\t\t\tchapterTitle\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.ReadingSessionConflictViewDocument,
     "\n\tmutation AcceptLocalProgress($id: ID!, $ancestorSessionId: Int, $input: MediaProgressInput!) {\n\t\tacceptLocalProgress(id: $id, ancestorSessionId: $ancestorSessionId, input: $input) {\n\t\t\tid\n\t\t\tendPage\n\t\t\tendPercentage\n\t\t\telapsedSeconds\n\t\t\tupdatedAt\n\t\t\tendLocator {\n\t\t\t\thref\n\t\t\t\tchapterTitle\n\t\t\t\tlocations {\n\t\t\t\t\tprogression\n\t\t\t\t\ttotalProgression\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.AcceptLocalProgressDocument,
+    "\n\tquery MyReadingStreaks {\n\t\tmyReadingStreaks {\n\t\t\tcurrentDays\n\t\t\tlongestDays\n\t\t}\n\t}\n": types.MyReadingStreaksDocument,
+    "\n\tfragment DailyActivityGrid on ReadingStats {\n\t\trange {\n\t\t\tstart\n\t\t\tend\n\t\t}\n\t\tdailyActivity {\n\t\t\tdate\n\t\t\ttotalSeconds\n\t\t\tsessionCount\n\t\t}\n\t}\n": types.DailyActivityGridFragmentDoc,
+    "\n\tquery RangedUserReadingStats($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...DailyActivityGrid\n\t\t\t...WeekdayChart\n\t\t\t...TimeToFinishStats\n\t\t}\n\t}\n": types.RangedUserReadingStatsDocument,
+    "\n\tfragment TimeToFinishStats on ReadingStats {\n\t\ttimeToFinish {\n\t\t\tlibraryType\n\t\t\tsampleSize\n\t\t\tmedianActiveSeconds\n\t\t}\n\t}\n": types.TimeToFinishStatsFragmentDoc,
+    "\n\tfragment WeekdayChart on ReadingStats {\n\t\tdayOfWeek {\n\t\t\tisoWeekday\n\t\t\taverageSeconds\n\t\t}\n\t}\n": types.WeekdayChartFragmentDoc,
     "\n\tfragment ReadingSessionCard on SessionWithEvents {\n\t\tsession {\n\t\t\tid\n\t\t\tstatus\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tstartPage\n\t\t\tendPage\n\t\t\tendLocator {\n\t\t\t\tlocations {\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t}\n\t\t\tendPercentage\n\t\t\telapsedSeconds\n\t\t\tmediaId\n\t\t\tjournalEntry {\n\t\t\t\tcontent\n\t\t\t}\n\t\t\tisLatest\n\t\t}\n\t\tevents {\n\t\t\t__typename\n\t\t\t... on Bookmark {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on MediaAnnotation {\n\t\t\t\tid\n\t\t\t\tannotationText\n\t\t\t}\n\t\t}\n\t\t...SessionWithEventsTimeline\n\t}\n": types.ReadingSessionCardFragmentDoc,
     "\n\tfragment ReadingSessionCardMedia on SessionWithEvents {\n\t\tsession {\n\t\t\tmedia {\n\t\t\t\tresolvedName\n\t\t\t\tpages\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\taverageColor\n\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthumbhash\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.ReadingSessionCardMediaFragmentDoc,
     "\n\tmutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {\n\t\tpatchReadingSession(sessionId: $sessionId, input: $input) {\n\t\t\tid\n\t\t\t# createdAt\n\t\t\t# updatedAt\n\t\t\telapsedSeconds\n\t\t}\n\t}\n": types.PatchReadingSessionEditSheetDocument,
@@ -475,12 +489,26 @@ const documents: Documents = {
     "\n\tmutation UseSyncDeviceName($deviceId: String!, $deviceName: String!) {\n\t\tupsertReadingDevice(id: $deviceId, name: $deviceName) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.UseSyncDeviceNameDocument,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t\theight\n\t\t\twidth\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tpage\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\thref\n\t\t\t}\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t\tcreatedAt\n\t\tlibraryConfig {\n\t\t\tskipBookOverview\n\t\t}\n\t}\n": types.BookCardFragmentDoc,
-    "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookSearchOverlayDocument,
+    "\n\tfragment BookHeader on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\textension\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\t...BookReadingActions\n\t}\n": types.BookHeaderFragmentDoc,
+    "\n\tmutation BookHeaderAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.BookHeaderAnalyzeDocument,
+    "\n\tfragment BookInfoSheet on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\tsize\n\t\textension\n\t\thash\n\t\tkoreaderHash\n\t\trelativeLibraryPath\n\t\tcreatedAt\n\t\tmodifiedAt\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tmetadata {\n\t\t\tpublisher\n\t\t\tyear\n\t\t\tmonth\n\t\t\tday\n\t\t\tlanguage\n\t\t\tageRating\n\t\t\tvolume\n\t\t\tnumber\n\t\t\tstoryArc\n\t\t\tstoryArcNumber\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tinkers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tcharacters\n\t\t\tteams\n\t\t\tidentifierIsbn\n\t\t\tidentifierAmazon\n\t\t\tidentifierCalibre\n\t\t\tidentifierGoogle\n\t\t\tidentifierMobiAsin\n\t\t\tidentifierUuid\n\t\t}\n\t\treadHistory {\n\t\t\tcompletedAt\n\t\t\tdnf\n\t\t}\n\t}\n": types.BookInfoSheetFragmentDoc,
+    "\n\tfragment BookOverviewDetails on Media {\n\t\tresolvedName\n\t\tseriesPosition\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tconfig {\n\t\t\t\tlibraryType\n\t\t\t}\n\t\t}\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tlinks\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tnumber\n\t\t\tvolume\n\t\t}\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t\t...BookStatRow\n\t}\n": types.BookOverviewDetailsFragmentDoc,
+    "\n\tfragment BookSearchSelection on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.BookSearchSelectionFragmentDoc,
+    "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookSearchSelection\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookSearchOverlayDocument,
+    "\n\tfragment BookStatRow on Media {\n\t\tpages\n\t\tsize\n\t\textension\n\t\tmetadata {\n\t\t\tyear\n\t\t}\n\t}\n": types.BookStatRowFragmentDoc,
+    "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.EmailBookDropdownDeviceDocument,
+    "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": types.SendEmailAttachmentDocument,
     "\n\tfragment SimpleBookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\tcreatedAt\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t}\n": types.SimpleBookCardFragmentDoc,
     "\n\tfragment MediaMetadataEditor on MediaMetadata {\n\t\tageRating\n\t\tcharacters\n\t\tcolorists\n\t\tcoverArtists\n\t\tday\n\t\teditors\n\t\tformat\n\t\tidentifierAmazon\n\t\tidentifierCalibre\n\t\tidentifierGoogle\n\t\tidentifierIsbn\n\t\tidentifierMobiAsin\n\t\tidentifierUuid\n\t\tgenres\n\t\tinkers\n\t\tlanguage\n\t\tletterers\n\t\tlinks\n\t\tmonth\n\t\tnotes\n\t\tnumber\n\t\tpageCount\n\t\tpencillers\n\t\tpublisher\n\t\tseries\n\t\tseriesGroup\n\t\tstoryArc\n\t\tstoryArcNumber\n\t\tsummary\n\t\tteams\n\t\ttitle\n\t\ttitleSort\n\t\tvolume\n\t\twriters\n\t\tyear\n\t\tlockedFields\n\t}\n": types.MediaMetadataEditorFragmentDoc,
     "\n\tmutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {\n\t\tupdateMediaMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateMediaMetadataDocument,
     "\n\tmutation MediaEditorSetLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": types.MediaEditorSetLockedFieldsDocument,
-    "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tseriesId\n\t\t\tpages\n\t\t\tsize\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tlanguage\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n": types.BookOverviewSceneDocument,
+    "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\t...BookOverviewDetails\n\t\t\t...BookInfoSheet\n\t\t\t...BookReadingActions\n\t\t\tlibrary {\n\t\t\t\tconfig {\n\t\t\t\t\tlibraryType\n\t\t\t\t}\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookOverviewSceneDocument,
+    "\n\tfragment BookReadingActions on Media {\n\t\tid\n\t\textension\n\t\treadProgress {\n\t\t\tpage\n\t\t\tlocator {\n\t\t\t\thref\n\t\t\t}\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookReadingActionsFragmentDoc,
+    "\n\tmutation BookReadingActionsComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n": types.BookReadingActionsCompleteDocument,
+    "\n\tmutation BookReadingActionsDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n": types.BookReadingActionsDeleteSessionDocument,
+    "\n\tmutation BookReadingActionsDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n": types.BookReadingActionsDeleteHistoryDocument,
+    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUpdateDocument,
+    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUploadDocument,
     "\n\tmutation DeleteBookClubConfirmation($id: ID!) {\n\t\tdeleteBookClub(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteBookClubConfirmationDocument,
     "\n\tfragment BookClubBookItem on BookClubBook {\n\t\tid\n\t\ttitle\n\t\tauthor\n\t\timageUrl\n\t\turl\n\t\tentity {\n\t\t\t__typename\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\twriters\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t\tcompletedAt\n\t\taddedAt\n\t}\n": types.BookClubBookItemFragmentDoc,
     "\n\tquery BookClubBooksScene($id: ID!) {\n\t\tbookClubById(id: $id) {\n\t\t\tid\n\t\t\tpreviousBooks {\n\t\t\t\tid\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t}\n\t}\n": types.BookClubBooksSceneDocument,
@@ -491,6 +519,7 @@ const documents: Documents = {
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteLibraryDocument,
     "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LastVisitedLibraryDocument,
     "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": types.LibraryBooksAlphabetDocument,
+    "\n\tfragment LibraryWebGridItem on Library {\n\t\tid\n\t\tname\n\t\tseries(take: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tstats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": types.LibraryWebGridItemFragmentDoc,
     "\n\tquery LibrarySeriesAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tseriesAlphabet\n\t\t}\n\t}\n": types.LibrarySeriesAlphabetDocument,
     "\n\tquery PendingMetadataMatches {\n\t\tpendingMetadataMatches {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": types.PendingMetadataMatchesDocument,
     "\n\tmutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {\n\t\tacceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)\n\t}\n": types.AcceptAllPendingMatchesDocument,
@@ -504,14 +533,12 @@ const documents: Documents = {
     "\n\tmutation SetSeriesLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": types.SetSeriesLockedFieldsDocument,
     "\n\tquery SideBarQuery {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SideBarQueryDocument,
     "\n\tquery BookClubSideBarSection {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t\tmembers {\n\t\t\t\tid\n\t\t\t\tuserId\n\t\t\t\trole\n\t\t\t}\n\t\t}\n\t}\n": types.BookClubSideBarSectionDocument,
+    "\n\tfragment LibraryEmoji on Library {\n\t\tid\n\t}\n": types.LibraryEmojiFragmentDoc,
     "\n\tmutation UpdateLibraryEmoji($id: ID!, $emoji: String) {\n\t\tupdateLibraryEmoji(id: $id, emoji: $emoji) {\n\t\t\tid\n\t\t}\n\t}\n": types.UpdateLibraryEmojiDocument,
+    "\n\tfragment LibraryOptionsMenu on Library {\n\t\tid\n\t\tname\n\t}\n": types.LibraryOptionsMenuFragmentDoc,
     "\n\tmutation ScanLibraryMutation($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": types.ScanLibraryMutationDocument,
-    "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": types.LibrarySideBarSectionDocument,
+    "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t\t...LibraryEmoji\n\t\t\t\t...LibraryOptionsMenu\n\t\t\t}\n\t\t}\n\t}\n": types.LibrarySideBarSectionDocument,
     "\n\tquery SmartListSideBarSection {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SmartListSideBarSectionDocument,
-    "\n\tquery TopNavigation {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.TopNavigationDocument,
-    "\n\tquery BookClubNavigationItem {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t}\n\t}\n": types.BookClubNavigationItemDocument,
-    "\n\tquery LibraryNavigationItem {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryNavigationItemDocument,
-    "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SmartListNavigationItemDocument,
     "\n\tquery NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {\n\t\tseriesById(id: $id) @include(if: $isSeries) {\n\t\t\tlibraryId\n\t\t}\n\t\tmediaById(id: $id) @include(if: $isBook) {\n\t\t\tlibraryId\n\t\t}\n\t}\n": types.NavigationEntityLibraryDocument,
     "\n\tmutation CreateEpubAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tmediaId\n\t\t\tuserId\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.CreateEpubAnnotationDocument,
     "\n\tmutation UpdateEpubAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.UpdateEpubAnnotationDocument,
@@ -520,33 +547,31 @@ const documents: Documents = {
     "\n\tmutation DeleteBookmark($id: String!) {\n\t\tdeleteBookmark(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.DeleteBookmarkDocument,
     "\n\tquery ReadiumWebReader($id: ID!) {\n\t\tepubById(id: $id) {\n\t\t\tmediaId\n\t\t\ttoc\n\t\t\tbookmarks {\n\t\t\t\tid\n\t\t\t\tuserId\n\t\t\t\tmediaId\n\t\t\t\tpreviewContent\n\t\t\t\tcreatedAt\n\t\t\t\tlocator {\n\t\t\t\t\tchapterTitle\n\t\t\t\t\thref\n\t\t\t\t\ttitle\n\t\t\t\t\ttype\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tfragments\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\tposition\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\tcssSelector\n\t\t\t\t\t}\n\t\t\t\t\ttext {\n\t\t\t\t\t\tafter\n\t\t\t\t\t\tbefore\n\t\t\t\t\t\thighlight\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tannotations {\n\t\t\t\tid\n\t\t\t\tmediaId\n\t\t\t\tuserId\n\t\t\t\tannotationText\n\t\t\t\tcreatedAt\n\t\t\t\tupdatedAt\n\t\t\t\tlocator {\n\t\t\t\t\tchapterTitle\n\t\t\t\t\thref\n\t\t\t\t\ttitle\n\t\t\t\t\ttype\n\t\t\t\t\tlocations {\n\t\t\t\t\t\tfragments\n\t\t\t\t\t\tprogression\n\t\t\t\t\t\tposition\n\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\tcssSelector\n\t\t\t\t\t}\n\t\t\t\t\ttext {\n\t\t\t\t\t\tafter\n\t\t\t\t\t\tbefore\n\t\t\t\t\t\thighlight\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tmedia {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tpages\n\t\t\t\textension\n\t\t\t\treadProgress {\n\t\t\t\t\tpercentageCompleted\n\t\t\t\t\tpage\n\t\t\t\t\telapsedSeconds\n\t\t\t\t\tlocator {\n\t\t\t\t\t\tchapterTitle\n\t\t\t\t\t\thref\n\t\t\t\t\t\ttitle\n\t\t\t\t\t\ttype\n\t\t\t\t\t\tlocations {\n\t\t\t\t\t\t\tfragments\n\t\t\t\t\t\t\tprogression\n\t\t\t\t\t\t\tposition\n\t\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\t\tcssSelector\n\t\t\t\t\t\t}\n\t\t\t\t\t\ttext {\n\t\t\t\t\t\t\tafter\n\t\t\t\t\t\t\tbefore\n\t\t\t\t\t\t\thighlight\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tlibraryConfig {\n\t\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\t\tdefaultReadingMode\n\t\t\t\t\tdefaultReadingDir\n\t\t\t\t}\n\t\t\t\tnextInSeries(pagination: { cursor: { limit: 1 } }) {\n\t\t\t\t\tnodes {\n\t\t\t\t\t\tid\n\t\t\t\t\t\tname: resolvedName\n\t\t\t\t\t\tthumbnail {\n\t\t\t\t\t\t\turl\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.ReadiumWebReaderDocument,
     "\n\tmutation UpdateReadiumEpubProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateReadiumEpubProgressDocument,
+    "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t\textension\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBookGridDocument,
     "\n\tquery SeriesBooksAlphabet($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n": types.SeriesBooksAlphabetDocument,
+    "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n": types.SeriesActionCompleteDocument,
+    "\n\tmutation SeriesHeaderAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": types.SeriesHeaderAnalyzeDocument,
+    "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesOverviewSheetExtasDocument,
+    "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesTagEditorSetTagsDocument,
     "\n\tfragment SeriesMetadataEditor on SeriesMetadata {\n\t\tageRating\n\t\tbooktype\n\t\tcharacters\n\t\tcollects {\n\t\t\tseries\n\t\t\tcomicid\n\t\t\tissueid\n\t\t\tissues\n\t\t}\n\t\tcomicImage\n\t\tcomicid\n\t\tdescriptionFormatted\n\t\tgenres\n\t\timprint\n\t\tlinks\n\t\tmetaType\n\t\tpublicationRun\n\t\tpublisher\n\t\tstatus\n\t\tsummary\n\t\ttitle\n\t\ttotalIssues\n\t\tvolume\n\t\twriters\n\t\tyear\n\t\tlockedFields\n\t}\n": types.SeriesMetadataEditorFragmentDoc,
     "\n\tmutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {\n\t\tupdateSeriesMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateSeriesMetadataDocument,
     "\n\tmutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {\n\t\tsetSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {\n\t\t\tid\n\t\t}\n\t}\n": types.SeriesEditorSetLockedFieldsDocument,
+    "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.SeriesLayoutDocument,
+    "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksSceneDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUpdateDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUploadDocument,
     "\n\tsubscription UseCoreEvent {\n\t\treadEvents {\n\t\t\t__typename\n\t\t\t... on CreatedManySeries {\n\t\t\t\tcount\n\t\t\t\tlibraryId\n\t\t\t}\n\t\t\t... on CreatedMedia {\n\t\t\t\tid\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on CreatedOrUpdatedManyMedia {\n\t\t\t\tcount\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on DiscoveredMissingLibrary {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobStarted {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobUpdate {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tstatus\n\t\t\t\tmessage\n\t\t\t\tcompletedTasks\n\t\t\t\tremainingTasks\n\t\t\t\tcompletedSubtasks\n\t\t\t\ttotalSubtasks\n\t\t\t\tsubtitle\n\t\t\t}\n\t\t\t... on JobOutput {\n\t\t\t\tid\n\t\t\t\toutput {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tcreatedSeries\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t\tupdatedSeries\n\t\t\t\t\t}\n\t\t\t\t\t... on SeriesScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.UseCoreEventDocument,
     "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UsePreferencesDocument,
-    "\n\tmutation BookActionMenuComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n": types.BookActionMenuCompleteDocument,
-    "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n": types.BookActionMenuDeleteSessionDocument,
-    "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n": types.BookActionMenuDeleteHistoryDocument,
-    "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": types.BookFileInformationFragmentDoc,
-    "\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.BookLibrarySeriesLinksDocument,
     "\n\tfragment BookMetadata on Media {\n\t\tmetadata {\n\t\t\tageRating\n\t\t\tcharacters\n\t\t\tcolorists\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tgenres\n\t\t\tinkers\n\t\t\tletterers\n\t\t\tlinks\n\t\t\tpencillers\n\t\t\tpublisher\n\t\t\tteams\n\t\t\twriters\n\t\t\tyear\n\t\t\tmonth\n\t\t\tday\n\t\t\tvolume\n\t\t\tnumber\n\t\t}\n\t}\n": types.BookMetadataFragmentDoc,
     "\n\tquery BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookCard\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BooksAfterCurrentQueryDocument,
     "\n\tquery BooksAlphabet {\n\t\tmediaAlphabet\n\t}\n": types.BooksAlphabetDocument,
-    "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.EmailBookDropdownDeviceDocument,
-    "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": types.SendEmailAttachmentDocument,
     "\n\tquery BookReaderScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tpages\n\t\t\textension\n\t\t\treadProgress {\n\t\t\t\tpercentageCompleted\n\t\t\t\tpage\n\t\t\t\telapsedSeconds\n\t\t\t}\n\t\t\tlibraryConfig {\n\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\tdefaultReadingMode\n\t\t\t\tdefaultReadingDir\n\t\t\t}\n\t\t\tanalysisData {\n\t\t\t\tdimensions {\n\t\t\t\t\theight\n\t\t\t\t\twidth\n\t\t\t\t}\n\t\t\t}\n\t\t\tnextInSeries(pagination: { cursor: { limit: 1 } }) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\tname: resolvedName\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookReaderSceneDocument,
     "\n\tmutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateReadProgressDocument,
-    "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": types.BookManagementSceneDocument,
-    "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.BookManagementSceneAnalyzeDocument,
     "\n\tquery BookMetadataSearchProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": types.BookMetadataSearchProvidersDocument,
     "\n\tquery BookMetadataSearchContext($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tmetadata {\n\t\t\t\t\tcomicid\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookMetadataSearchContextDocument,
     "\n\tmutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {\n\t\tfetchMediaMetadata(id: $id, search: $search) {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": types.SearchMediaMetadataDocument,
+    "\n\tquery BookSettingsScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.BookSettingsSceneDocument,
     "\n\tmutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetMediaTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.BookTagEditorSetTagsDocument,
-    "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": types.BookThumbnailSelectorFragmentDoc,
-    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUpdateDocument,
-    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUploadDocument,
     "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.BookClubLayoutDocument,
     "\n\tmutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {\n\t\tupdateBookClub(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\temoji\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tdescription\n\t\t}\n\t}\n": types.UpdateBookClubDocument,
     "\n\tquery UserBookClubsScene {\n\t\tbookClubs(all: false) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tmembersCount\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": types.UserBookClubsSceneDocument,
@@ -570,6 +595,8 @@ const documents: Documents = {
     "\n\tquery RecentlyAddedSeries($pagination: Pagination!) {\n\t\trecentlyAddedSeries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\toneshotBook {\n\t\t\t\t\tid\n\t\t\t\t}\n\t\t\t\tmedia(take: 2, skip: 1) {\n\t\t\t\t\tid\n\t\t\t\t\tresolvedName\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t\tmetadata {\n\t\t\t\t\t\t\taverageColor\n\t\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tthumbhash\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\taverageColor\n\t\t\t\t\t\tcolors {\n\t\t\t\t\t\t\tcolor\n\t\t\t\t\t\t\tpercentage\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthumbhash\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedSeriesDocument,
     "\n\tquery HomeArrangementPreferences {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\thomeArrangement {\n\t\t\t\t\tsections {\n\t\t\t\t\t\tvisible\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on InProgressBooks {\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t... on OnDeckBooks {\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t... on RecentlyAdded {\n\t\t\t\t\t\t\t\tentity\n\t\t\t\t\t\t\t\tname\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.HomeArrangementPreferencesDocument,
     "\n\tmutation UpdateHomeArrangement($input: HomeArrangementInput!) {\n\t\tupdateHomeArrangement(input: $input) {\n\t\t\tsections {\n\t\t\t\tvisible\n\t\t\t\tconfig {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on InProgressBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on OnDeckBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on RecentlyAdded {\n\t\t\t\t\t\tentity\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateHomeArrangementDocument,
+    "\n\tquery LibrariesScene {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibraryWebGridItem\n\t\t\t}\n\t\t}\n\t\tlibrariesStats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n": types.LibrariesSceneDocument,
+    "\n\tmutation LibrariesSceneScanAllLibraries {\n\t\tscanAllLibraries\n\t}\n": types.LibrariesSceneScanAllLibrariesDocument,
     "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tseriesCount\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tconfig {\n\t\t\t\tdefaultLibraryViewMode\n\t\t\t\thideSeriesView\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t\tconfig {\n\t\t\t\toneshotsDirectory\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryLayoutDocument,
     "\n\tmutation VisitLibrary($id: ID!) {\n\t\tvisitLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.VisitLibraryDocument,
     "\n\tquery LibraryBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryBooksSceneDocument,
@@ -595,19 +622,8 @@ const documents: Documents = {
     "\n\tmutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadLibraryThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryThumbnailSelectorUploadDocument,
     "\n\tmutation ProcessLibraryThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tprocessLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": types.ProcessLibraryThumbnailsDocument,
     "\n\tmutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tgenerateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": types.RegenerateThumbnailsDocument,
-    "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n": types.SeriesActionCompleteDocument,
-    "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.SeriesLayoutDocument,
-    "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SeriesLibrayLinkDocument,
-    "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesOverviewSheetExtasDocument,
-    "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksSceneDocument,
-    "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBookGridDocument,
-    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\t...SeriesThumbnailSelector\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesSettingsSceneDocument,
-    "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": types.SeriesSettingsSceneAnalyzeDocument,
+    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesSettingsSceneDocument,
     "\n\tmutation SeriesSettingsSceneResetMetadata($id: ID!, $impact: MetadataResetImpact!) {\n\t\tresetSeriesMetadata(id: $id, impact: $impact) {\n\t\t\tid\n\t\t}\n\t}\n": types.SeriesSettingsSceneResetMetadataDocument,
-    "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesTagEditorSetTagsDocument,
-    "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorFragmentDoc,
-    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUpdateDocument,
-    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUploadDocument,
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteApiKeyConfirmModalDocument,
@@ -619,12 +635,13 @@ const documents: Documents = {
     "\n\tmutation NavigationArrangementUpdateLockStatus($locked: Boolean!) {\n\t\tupdateNavigationArrangementLock(locked: $locked) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.NavigationArrangementUpdateLockStatusDocument,
     "\n\tquery CreateEmailerSceneEmailers {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t}\n": types.CreateEmailerSceneEmailersDocument,
     "\n\tmutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {\n\t\tcreateEmailer(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.CreateEmailerSceneCreateEmailerDocument,
-    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n": types.EditEmailerSceneDocument,
+    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\t...CreateOrUpdateEmailerForm\n\t\t}\n\t}\n": types.EditEmailerSceneDocument,
     "\n\tmutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {\n\t\tupdateEmailer(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.EditEmailerSceneEditEmailerDocument,
     "\n\tmutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {\n\t\tcreateEmailDevice(input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.CreateOrUpdateDeviceModalCreateEmailDeviceDocument,
     "\n\tmutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {\n\t\tupdateEmailDevice(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tforbidden\n\t\t}\n\t}\n": types.CreateOrUpdateDeviceModalUpdateEmailDeviceDocument,
     "\n\tmutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {\n\t\tdeleteEmailDevice(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteDeviceConfirmationDeleteEmailDeviceDocument,
     "\n\tquery EmailDevicesTable {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t\temail\n\t\t\tforbidden\n\t\t}\n\t}\n": types.EmailDevicesTableDocument,
+    "\n\tfragment CreateOrUpdateEmailerForm on Emailer {\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": types.CreateOrUpdateEmailerFormFragmentDoc,
     "\n\tfragment EmailerListItem on Emailer {\n\t\tid\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tlastUsedAt\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": types.EmailerListItemFragmentDoc,
     "\n\tmutation DeleteEmailer($emailerId: Int!) {\n\t\tdeleteEmailer(id: $emailerId) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteEmailerDocument,
     "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.EmailerSendHistoryDocument,
@@ -653,9 +670,10 @@ const documents: Documents = {
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
     "\n\tmutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {\n\t\tcreateMetadataProvider(input: $input) {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": types.CreateProviderDialogCreateProviderDocument,
+    "\n\tfragment EditProviderDialog on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t}\n": types.EditProviderDialogFragmentDoc,
     "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": types.EditProviderDialogDocument,
     "\n\tmutation DeleteProviderDialog($id: Int!) {\n\t\tdeleteMetadataProvider(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteProviderDialogDocument,
-    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n": types.ExistingProviderCardFragmentDoc,
+    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t\t...EditProviderDialog\n\t}\n": types.ExistingProviderCardFragmentDoc,
     "\n\tmutation ProviderApiKeyInputValidateKey($config: ValidateMetadataProviderConfigInput!) {\n\t\tvalidateProviderConfig(config: $config) {\n\t\t\tisValid\n\t\t\terror\n\t\t\tresponseStatus\n\t\t}\n\t}\n": types.ProviderApiKeyInputValidateKeyDocument,
     "\n\tquery ProvidersSectionGetProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": types.ProvidersSectionGetProvidersDocument,
     "\n\tmutation CreateTagModal($tags: [String!]!) {\n\t\tcreateTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.CreateTagModalDocument,
@@ -673,8 +691,8 @@ const documents: Documents = {
     "\n\tmutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {\n\t\tupdateUserLockStatus(id: $id, lock: $lock) {\n\t\t\tid\n\t\t\tisLocked\n\t\t}\n\t}\n": types.UserActionMenuLockUserDocument,
     "\n\tmutation UserActionMenuDeleteUserSessions($id: ID!) {\n\t\tdeleteUserSessions(id: $id)\n\t}\n": types.UserActionMenuDeleteUserSessionsDocument,
     "\n\tquery UserTable($pagination: Pagination!) {\n\t\tusers(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tavatarUrl\n\t\t\t\tusername\n\t\t\t\tisServerOwner\n\t\t\t\tisLocked\n\t\t\t\tcreatedAt\n\t\t\t\tlastLogin\n\t\t\t\tloginSessionsCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.UserTableDocument,
-    "\n\tfragment SmartListCard on SmartList {\n\t\tid\n\t\tdescription\n\t\tfilters\n\t\tjoiner\n\t\tname\n\t}\n": types.SmartListCardFragmentDoc,
-    "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\t...SmartListCard\n\t\t}\n\t}\n": types.SmartListsWithSearchDocument,
+    "\n\tfragment SmartListWebGridItem on SmartList {\n\t\tid\n\t\tname\n\t\tbooks(limit: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tmeta {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n": types.SmartListWebGridItemFragmentDoc,
+    "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\t...SmartListWebGridItem\n\t\t}\n\t}\n": types.SmartListsWithSearchDocument,
     "\n\tquery SmartListById($id: ID!) {\n\t\tsmartListById(id: $id) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\tviews {\n\t\t\t\tid\n\t\t\t\tlistId\n\t\t\t\tname\n\t\t\t\tbookColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tbookSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t\tgroupColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tgroupSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t\tsearch\n\t\t\t}\n\t\t}\n\t}\n": types.SmartListByIdDocument,
     "\n\tquery SmartListMeta($id: ID!) {\n\t\tsmartListMeta(id: $id) {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n": types.SmartListMetaDocument,
     "\n\tmutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {\n\t\tupdateSmartList(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateSmartListDocument,
@@ -1064,6 +1082,26 @@ export function graphql(source: "\n\tmutation AcceptLocalProgress($id: ID!, $anc
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery MyReadingStreaks {\n\t\tmyReadingStreaks {\n\t\t\tcurrentDays\n\t\t\tlongestDays\n\t\t}\n\t}\n"): typeof import('./graphql').MyReadingStreaksDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment DailyActivityGrid on ReadingStats {\n\t\trange {\n\t\t\tstart\n\t\t\tend\n\t\t}\n\t\tdailyActivity {\n\t\t\tdate\n\t\t\ttotalSeconds\n\t\t\tsessionCount\n\t\t}\n\t}\n"): typeof import('./graphql').DailyActivityGridFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery RangedUserReadingStats($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...DailyActivityGrid\n\t\t\t...WeekdayChart\n\t\t\t...TimeToFinishStats\n\t\t}\n\t}\n"): typeof import('./graphql').RangedUserReadingStatsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment TimeToFinishStats on ReadingStats {\n\t\ttimeToFinish {\n\t\t\tlibraryType\n\t\t\tsampleSize\n\t\t\tmedianActiveSeconds\n\t\t}\n\t}\n"): typeof import('./graphql').TimeToFinishStatsFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment WeekdayChart on ReadingStats {\n\t\tdayOfWeek {\n\t\t\tisoWeekday\n\t\t\taverageSeconds\n\t\t}\n\t}\n"): typeof import('./graphql').WeekdayChartFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tfragment ReadingSessionCard on SessionWithEvents {\n\t\tsession {\n\t\t\tid\n\t\t\tstatus\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tstartPage\n\t\t\tendPage\n\t\t\tendLocator {\n\t\t\t\tlocations {\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t}\n\t\t\tendPercentage\n\t\t\telapsedSeconds\n\t\t\tmediaId\n\t\t\tjournalEntry {\n\t\t\t\tcontent\n\t\t\t}\n\t\t\tisLatest\n\t\t}\n\t\tevents {\n\t\t\t__typename\n\t\t\t... on Bookmark {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on MediaAnnotation {\n\t\t\t\tid\n\t\t\t\tannotationText\n\t\t\t}\n\t\t}\n\t\t...SessionWithEventsTimeline\n\t}\n"): typeof import('./graphql').ReadingSessionCardFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -1184,7 +1222,39 @@ export function graphql(source: "\n\tfragment BookCard on Media {\n\t\tid\n\t\tr
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookSearchOverlayDocument;
+export function graphql(source: "\n\tfragment BookHeader on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\textension\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\t...BookReadingActions\n\t}\n"): typeof import('./graphql').BookHeaderFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookHeaderAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n"): typeof import('./graphql').BookHeaderAnalyzeDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookInfoSheet on Media {\n\t\tid\n\t\tresolvedName\n\t\tpages\n\t\tsize\n\t\textension\n\t\thash\n\t\tkoreaderHash\n\t\trelativeLibraryPath\n\t\tcreatedAt\n\t\tmodifiedAt\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tmetadata {\n\t\t\tpublisher\n\t\t\tyear\n\t\t\tmonth\n\t\t\tday\n\t\t\tlanguage\n\t\t\tageRating\n\t\t\tvolume\n\t\t\tnumber\n\t\t\tstoryArc\n\t\t\tstoryArcNumber\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tinkers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tcharacters\n\t\t\tteams\n\t\t\tidentifierIsbn\n\t\t\tidentifierAmazon\n\t\t\tidentifierCalibre\n\t\t\tidentifierGoogle\n\t\t\tidentifierMobiAsin\n\t\t\tidentifierUuid\n\t\t}\n\t\treadHistory {\n\t\t\tcompletedAt\n\t\t\tdnf\n\t\t}\n\t}\n"): typeof import('./graphql').BookInfoSheetFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookOverviewDetails on Media {\n\t\tresolvedName\n\t\tseriesPosition\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\tlibrary {\n\t\t\tconfig {\n\t\t\t\tlibraryType\n\t\t\t}\n\t\t}\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tlinks\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tnumber\n\t\t\tvolume\n\t\t}\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t\t...BookStatRow\n\t}\n"): typeof import('./graphql').BookOverviewDetailsFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookSearchSelection on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').BookSearchSelectionFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {\n\t\tmedia(pagination: $pagination, filter: $filter) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookSearchSelection\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookSearchOverlayDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookStatRow on Media {\n\t\tpages\n\t\tsize\n\t\textension\n\t\tmetadata {\n\t\t\tyear\n\t\t}\n\t}\n"): typeof import('./graphql').BookStatRowFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').EmailBookDropdownDeviceDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n"): typeof import('./graphql').SendEmailAttachmentDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1204,7 +1274,31 @@ export function graphql(source: "\n\tmutation MediaEditorSetLockedFields($mediaI
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tseriesId\n\t\t\tpages\n\t\t\tsize\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tlanguage\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookOverviewSceneDocument;
+export function graphql(source: "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\t...BookOverviewDetails\n\t\t\t...BookInfoSheet\n\t\t\t...BookReadingActions\n\t\t\tlibrary {\n\t\t\t\tconfig {\n\t\t\t\t\tlibraryType\n\t\t\t\t}\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookOverviewSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookReadingActions on Media {\n\t\tid\n\t\textension\n\t\treadProgress {\n\t\t\tpage\n\t\t\tlocator {\n\t\t\t\thref\n\t\t\t}\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookReadingActionsFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookReadingActionsComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n"): typeof import('./graphql').BookReadingActionsCompleteDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookReadingActionsDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n"): typeof import('./graphql').BookReadingActionsDeleteSessionDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookReadingActionsDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n"): typeof import('./graphql').BookReadingActionsDeleteHistoryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUpdateDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUploadDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1245,6 +1339,10 @@ export function graphql(source: "\n\tquery LastVisitedLibrary {\n\t\tlastVisited
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery LibraryBooksAlphabet($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryBooksAlphabetDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment LibraryWebGridItem on Library {\n\t\tid\n\t\tname\n\t\tseries(take: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tstats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryWebGridItemFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1300,7 +1398,15 @@ export function graphql(source: "\n\tquery BookClubSideBarSection {\n\t\tbookClu
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tfragment LibraryEmoji on Library {\n\t\tid\n\t}\n"): typeof import('./graphql').LibraryEmojiFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tmutation UpdateLibraryEmoji($id: ID!, $emoji: String) {\n\t\tupdateLibraryEmoji(id: $id, emoji: $emoji) {\n\t\t\tid\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryEmojiDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment LibraryOptionsMenu on Library {\n\t\tid\n\t\tname\n\t}\n"): typeof import('./graphql').LibraryOptionsMenuFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1308,27 +1414,11 @@ export function graphql(source: "\n\tmutation ScanLibraryMutation($id: ID!) {\n\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibrarySideBarSectionDocument;
+export function graphql(source: "\n\tquery LibrarySideBarSection {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t\t...LibraryEmoji\n\t\t\t\t...LibraryOptionsMenu\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibrarySideBarSectionDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery SmartListSideBarSection {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListSideBarSectionDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery TopNavigation {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').TopNavigationDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery BookClubNavigationItem {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t}\n\t}\n"): typeof import('./graphql').BookClubNavigationItemDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery LibraryNavigationItem {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryNavigationItemDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListNavigationItemDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1364,7 +1454,27 @@ export function graphql(source: "\n\tmutation UpdateReadiumEpubProgress($id: ID!
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t\textension\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBookGridDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tquery SeriesBooksAlphabet($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tmediaAlphabet\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBooksAlphabetDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n"): typeof import('./graphql').SeriesActionCompleteDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesHeaderAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n"): typeof import('./graphql').SeriesHeaderAnalyzeDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesOverviewSheetExtasDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesTagEditorSetTagsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1380,31 +1490,27 @@ export function graphql(source: "\n\tmutation SeriesEditorSetLockedFields($serie
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesLayoutDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBooksSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUpdateDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUploadDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tsubscription UseCoreEvent {\n\t\treadEvents {\n\t\t\t__typename\n\t\t\t... on CreatedManySeries {\n\t\t\t\tcount\n\t\t\t\tlibraryId\n\t\t\t}\n\t\t\t... on CreatedMedia {\n\t\t\t\tid\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on CreatedOrUpdatedManyMedia {\n\t\t\t\tcount\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on DiscoveredMissingLibrary {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobStarted {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobUpdate {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tstatus\n\t\t\t\tmessage\n\t\t\t\tcompletedTasks\n\t\t\t\tremainingTasks\n\t\t\t\tcompletedSubtasks\n\t\t\t\ttotalSubtasks\n\t\t\t\tsubtitle\n\t\t\t}\n\t\t\t... on JobOutput {\n\t\t\t\tid\n\t\t\t\toutput {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tcreatedSeries\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t\tupdatedSeries\n\t\t\t\t\t}\n\t\t\t\t\t... on SeriesScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UseCoreEventDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').UsePreferencesDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookActionMenuComplete($id: ID!) {\n\t\tfinishMediaProgress(id: $id)\n\t}\n"): typeof import('./graphql').BookActionMenuCompleteDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tclearMediaProgress(id: $id)\n\t}\n"): typeof import('./graphql').BookActionMenuDeleteSessionDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadingHistory(id: $id)\n\t}\n"): typeof import('./graphql').BookActionMenuDeleteHistoryDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n"): typeof import('./graphql').BookFileInformationFragmentDoc;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookLibrarySeriesLinksDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1420,27 +1526,11 @@ export function graphql(source: "\n\tquery BooksAlphabet {\n\t\tmediaAlphabet\n\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').EmailBookDropdownDeviceDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n"): typeof import('./graphql').SendEmailAttachmentDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
 export function graphql(source: "\n\tquery BookReaderScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tpages\n\t\t\textension\n\t\t\treadProgress {\n\t\t\t\tpercentageCompleted\n\t\t\t\tpage\n\t\t\t\telapsedSeconds\n\t\t\t}\n\t\t\tlibraryConfig {\n\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\tdefaultReadingMode\n\t\t\t\tdefaultReadingDir\n\t\t\t}\n\t\t\tanalysisData {\n\t\t\t\tdimensions {\n\t\t\t\t\theight\n\t\t\t\t\twidth\n\t\t\t\t}\n\t\t\t}\n\t\t\tnextInSeries(pagination: { cursor: { limit: 1 } }) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\tname: resolvedName\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookReaderSceneDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateReadProgressDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n"): typeof import('./graphql').BookManagementSceneDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n"): typeof import('./graphql').BookManagementSceneAnalyzeDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1456,19 +1546,11 @@ export function graphql(source: "\n\tmutation SearchMediaMetadata($id: ID!, $sea
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery BookSettingsScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\t...BookHeader\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookSettingsSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tmutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetMediaTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookTagEditorSetTagsDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorFragmentDoc;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUpdateDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUploadDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1561,6 +1643,14 @@ export function graphql(source: "\n\tquery HomeArrangementPreferences {\n\t\tme 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UpdateHomeArrangement($input: HomeArrangementInput!) {\n\t\tupdateHomeArrangement(input: $input) {\n\t\t\tsections {\n\t\t\t\tvisible\n\t\t\t\tconfig {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on InProgressBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on OnDeckBooks {\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t\t... on RecentlyAdded {\n\t\t\t\t\t\tentity\n\t\t\t\t\t\tname\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateHomeArrangementDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LibrariesScene {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibraryWebGridItem\n\t\t\t}\n\t\t}\n\t\tlibrariesStats {\n\t\t\tseriesCount\n\t\t\tbookCount\n\t\t}\n\t}\n"): typeof import('./graphql').LibrariesSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation LibrariesSceneScanAllLibraries {\n\t\tscanAllLibraries\n\t}\n"): typeof import('./graphql').LibrariesSceneScanAllLibrariesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1664,55 +1754,11 @@ export function graphql(source: "\n\tmutation RegenerateThumbnails($id: ID!, $fo
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation SeriesActionComplete($id: ID!) {\n\t\tfinishSeriesProgress(id: $id)\n\t}\n"): typeof import('./graphql').SeriesActionCompleteDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t\ttotalBytes\n\t\t\t\ttotalReadingTimeSeconds\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tthumbhash\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesLayoutDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesLibrayLinkDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesOverviewSheetExtas($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tmetadata {\n\t\t\t\tpublisher\n\t\t\t\tyear\n\t\t\t\tsummary\n\t\t\t\tlinks\n\t\t\t}\n\t\t\tupNext(take: 10) {\n\t\t\t\tid\n\t\t\t\t...SimpleBookCard\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesOverviewSheetExtasDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBooksSceneDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBookGridDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\t...SeriesThumbnailSelector\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneAnalyzeDocument;
+export function graphql(source: "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation SeriesSettingsSceneResetMetadata($id: ID!, $impact: MetadataResetImpact!) {\n\t\tresetSeriesMetadata(id: $id, impact: $impact) {\n\t\t\tid\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneResetMetadataDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation SeriesTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetSeriesTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesTagEditorSetTagsDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorFragmentDoc;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUpdateDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUploadDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1760,7 +1806,7 @@ export function graphql(source: "\n\tmutation CreateEmailerSceneCreateEmailer($i
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n"): typeof import('./graphql').EditEmailerSceneDocument;
+export function graphql(source: "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\t...CreateOrUpdateEmailerForm\n\t\t}\n\t}\n"): typeof import('./graphql').EditEmailerSceneDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1781,6 +1827,10 @@ export function graphql(source: "\n\tmutation DeleteDeviceConfirmationDeleteEmai
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery EmailDevicesTable {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t\temail\n\t\t\tforbidden\n\t\t}\n\t}\n"): typeof import('./graphql').EmailDevicesTableDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment CreateOrUpdateEmailerForm on Emailer {\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n"): typeof import('./graphql').CreateOrUpdateEmailerFormFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1896,6 +1946,10 @@ export function graphql(source: "\n\tmutation CreateProviderDialogCreateProvider
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tfragment EditProviderDialog on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t}\n"): typeof import('./graphql').EditProviderDialogFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n"): typeof import('./graphql').EditProviderDialogDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -1904,7 +1958,7 @@ export function graphql(source: "\n\tmutation DeleteProviderDialog($id: Int!) {\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n"): typeof import('./graphql').ExistingProviderCardFragmentDoc;
+export function graphql(source: "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t\t...EditProviderDialog\n\t}\n"): typeof import('./graphql').ExistingProviderCardFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1976,11 +2030,11 @@ export function graphql(source: "\n\tquery UserTable($pagination: Pagination!) {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tfragment SmartListCard on SmartList {\n\t\tid\n\t\tdescription\n\t\tfilters\n\t\tjoiner\n\t\tname\n\t}\n"): typeof import('./graphql').SmartListCardFragmentDoc;
+export function graphql(source: "\n\tfragment SmartListWebGridItem on SmartList {\n\t\tid\n\t\tname\n\t\tbooks(limit: 5) {\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t\tcolors {\n\t\t\t\t\t\tcolor\n\t\t\t\t\t\tpercentage\n\t\t\t\t\t}\n\t\t\t\t\tthumbhash\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tmeta {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListWebGridItemFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\t...SmartListCard\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListsWithSearchDocument;
+export function graphql(source: "\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\t...SmartListWebGridItem\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListsWithSearchDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

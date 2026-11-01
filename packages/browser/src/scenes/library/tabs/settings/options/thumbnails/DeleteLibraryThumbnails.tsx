@@ -1,19 +1,11 @@
 import { useGraphQLMutation } from '@stump/client'
-import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
-	Button,
-	ConfirmationModal,
-	Heading,
-	Text,
-} from '@stump/components'
+import { Button, ConfirmationModal, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import { useLibraryManagement } from '../../context'
@@ -29,6 +21,7 @@ export default function DeleteLibraryThumbnails() {
 	const {
 		library: { id },
 	} = useLibraryManagement()
+	const { t, translate } = useTranslate()
 
 	// This is a naive way to prevent the user from deleting the thumbnails multiple times
 	// in a row. I don't feel it would be worth it to implement a more robust solution.
@@ -54,44 +47,30 @@ export default function DeleteLibraryThumbnails() {
 
 	return (
 		<>
-			<div>
-				<Heading size="sm">Delete thumbnails</Heading>
-				<Text size="sm" variant="muted">
-					Remove all generated thumbnails for this library
-				</Text>
-			</div>
-
-			<div className="flex">
+			<NewCard.Row
+				label={t('thumbnailManagement.deleteThumbnails.label')}
+				description={t('thumbnailManagement.deleteThumbnails.descriptionLibrary')}
+			>
 				<Button
 					variant="destructive"
 					onClick={() => setShowConfirmation(true)}
 					className="shrink-0"
 					disabled={isPending || !!data}
 				>
-					Delete thumbnails
+					{translate('shared.common.delete')}
 				</Button>
-			</div>
+			</NewCard.Row>
 
 			<ConfirmationModal
-				title="Delete library thumbnails"
-				description="Are you sure you want to delete all thumbnails for this library?"
-				confirmText="Delete thumbnails"
+				title={t('thumbnailManagement.deleteThumbnails.label')}
+				description={translate('shared.common.thisActionCannotBeUndone')}
+				confirmText={translate('shared.common.delete')}
 				confirmVariant="destructive"
 				isOpen={showConfirmation && !data}
 				onClose={() => setShowConfirmation(false)}
 				onConfirm={handleDeleteThumbnails}
 				confirmIsLoading={isPending}
-				size="md"
-			>
-				<Alert variant="warning">
-					<AlertTriangle />
-					<AlertTitle>This cannot be undone</AlertTitle>
-					<AlertDescription>
-						Deleting the library thumbnails will remove all generated images and you will have to
-						manually regenerate them
-					</AlertDescription>
-				</Alert>
-			</ConfirmationModal>
+			/>
 		</>
 	)
 }

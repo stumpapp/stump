@@ -15,7 +15,8 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
+	Condition, ExprTrait, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect,
+	QueryTrait,
 };
 
 use crate::{
@@ -145,7 +146,7 @@ impl Series {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT

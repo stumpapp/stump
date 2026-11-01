@@ -227,14 +227,6 @@
         "bookClubsEnabled": ""
       },
       "autoSyncLocalData": "",
-      "textCase": {
-        "label": "",
-        "options": {
-          "lowerCase": "",
-          "sentenceCase": "",
-          "titleCase": ""
-        }
-      },
       "tintListBackground": "",
       "management": {
         "label": "",
@@ -513,9 +505,6 @@
           }
         ],
         "review": {
-          "yes": "",
-          "no": "",
-          "none": "",
           "labels": {
             "name": "",
             "description": ""
@@ -616,28 +605,6 @@
           "label": "",
           "description": ""
         },
-        "defaultLibraryView": {
-          "label": "",
-          "description": "",
-          "hideSeriesView": {
-            "label": "",
-            "description": ""
-          },
-          "skipBookOverview": {
-            "label": "",
-            "description": ""
-          },
-          "options": {
-            "series": {
-              "label": "",
-              "description": ""
-            },
-            "books": {
-              "label": "",
-              "description": ""
-            }
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "",
@@ -678,10 +645,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "",
-            "factor": {
-              "label": ""
-            }
+            "label": "",
+            "description": ""
           },
           "exact": {
             "description": "",
@@ -701,18 +666,12 @@
                 "width": "",
                 "height": ""
               }
-            },
-            "size": {
-              "label": ""
             }
           },
-          "format": {
-            "label": "",
-            "description": ""
-          },
-          "quality": {
-            "label": "",
-            "description": ""
+          "output": {
+            "description": "",
+            "format": "",
+            "quality": ""
           }
         },
         "ignoreRules": {
@@ -783,29 +742,34 @@
             "description": ""
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "",
-            "description": "",
-            "docs": [
-              "",
-              "",
-              "",
-              ""
-            ],
-            "disabled": ""
-          },
-          "options": {
+        "organization": {
+          "label": "",
+          "filesystemPattern": {
             "label": "",
-            "description": "",
-            "collectionPriority": {
-              "label": "",
+            "COLLECTION_BASED": {
               "description": ""
             },
-            "seriesPriority": {
-              "label": "",
+            "SERIES_BASED": {
               "description": ""
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "",
+            "description": "",
+            "options": {
+              "BOOKS": "",
+              "SERIES": ""
+            }
+          },
+          "hideSeries": {
+            "label": "",
+            "description": ""
+          },
+          "skipBookOverview": {
+            "label": "",
+            "description": ""
           }
         }
       },
@@ -824,7 +788,6 @@
     "createLibraryScene": {
       "heading": "",
       "subtitle": "",
-      "subtitleLink": "",
       "form": {
         "stepLabel": "",
         "steps": [
@@ -850,9 +813,6 @@
           }
         ],
         "review": {
-          "yes": "",
-          "no": "",
-          "none": "",
           "labels": {
             "generateThumbnails": "",
             "processThumbnailColors": "",
@@ -1018,13 +978,7 @@
       },
       "options/thumbnails": {
         "title": "",
-        "description": "",
-        "sections": {
-          "management": {
-            "heading": "",
-            "description": ""
-          }
-        }
+        "description": ""
       },
       "integrations/analysis": {
         "title": "",
@@ -1429,9 +1383,6 @@
           }
         ],
         "review": {
-          "yes": "",
-          "no": "",
-          "none": "",
           "labels": {
             "name": "",
             "description": "",
@@ -1796,27 +1747,6 @@
           "layoutAndArrangement": {
             "label": "",
             "description": ""
-          },
-          "primaryNavigation": {
-            "label": "",
-            "description": "",
-            "options": {
-              "sidebar": "",
-              "topbar": ""
-            },
-            "disclaimer": ""
-          },
-          "doubleSidebar": {
-            "label": "",
-            "description": ""
-          },
-          "replacePrimarySidebar": {
-            "label": "",
-            "description": "",
-            "tooltips": {
-              "doubleSidebar": "",
-              "topbar": ""
-            }
           },
           "navigationArrangement": {
             "label": "",
@@ -2703,7 +2633,6 @@
     },
     "noLibraries": {
       "heading": "",
-      "messagePrefix": "",
       "message": {
         "create": "",
         "wait": ""
@@ -2735,7 +2664,6 @@
         "seeAll": ""
       },
       "libraryOptions": {
-        "scanLibrary": "",
         "manageLibrary": "",
         "deleteLibrary": ""
       }
@@ -2751,26 +2679,22 @@
       "placeholder": "",
       "placeholderNoTags": ""
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "",
-      "options": {
-        "selectFromBooks": "",
-        "uploadImage": ""
+      "chooseFromBooks": "",
+      "uploadImage": "",
+      "title": "",
+      "descriptions": {
+        "chooseBookPage": "",
+        "chooseSeriesBook": ""
       },
-      "uploadImage": {
+      "uploadDialog": {
         "emptyState": "",
         "prompt": "",
         "remove": "",
         "fileTooLarge": "",
         "onlyOneFile": "",
         "noFile": ""
-      }
-    },
-    "thumbnailSelector": {
-      "title": "",
-      "descriptions": {
-        "chooseBookPage": "",
-        "chooseSeriesBook": ""
       },
       "actions": {
         "confirmSelection": ""
@@ -3004,7 +2928,6 @@
       "back": "",
       "continue": "",
       "book": "",
-      "xBooks": "",
       "seeMore": "",
       "series": "",
       "fileUpload": {
@@ -3033,6 +2956,7 @@
       "list": "",
       "lastCompleted": "",
       "name": "",
+      "no": "",
       "notAvailable": "",
       "options": "",
       "page": "",
@@ -3052,6 +2976,7 @@
       "select": "",
       "settings": "",
       "servers": "",
+      "size": "",
       "test": "",
       "thisBook": "",
       "thisServer": "",
@@ -3068,6 +2993,7 @@
       "files": "",
       "search": "",
       "preferences": "",
+      "yes": "",
       "global": ""
     },
     "libraryType": {
@@ -3259,7 +3185,6 @@
         "loadMore": ""
       },
       "controls": {
-        "columnCount": "",
         "continuous": "",
         "previousPage": "",
         "nextPage": "",
@@ -3386,6 +3311,9 @@
       "seeDetails": "",
       "goToLibrary": ""
     },
+    "libraryActions": {
+      "scan": ""
+    },
     "sorting": {
       "labelEllipsis": "",
       "sortField": {
@@ -3467,6 +3395,14 @@
         "invalidPage": ""
       },
       "showCurrentChapter": ""
+    },
+    "textCase": {
+      "label": "",
+      "options": {
+        "lowerCase": "",
+        "sentenceCase": "",
+        "titleCase": ""
+      }
     },
     "addOrEditServer": {
       "createServer": "",
@@ -3550,11 +3486,7 @@
         "exactCommit": "",
         "build": "",
         "nonStableChannel": {
-          "title": "",
-          "description": [
-            "",
-            ""
-          ]
+          "title": ""
         },
         "debugInfo": {
           "label": "",

@@ -1,7 +1,6 @@
 use chrono::{DateTime, Duration, Utc};
 use models::{entity::user::AuthUser, shared::image::ImageRef};
 use sea_orm::{DatabaseBackend::Sqlite, MockDatabase, ModelTrait};
-use std::path::PathBuf;
 
 pub fn is_close_to_now(time: DateTime<Utc>) -> bool {
 	let now = Utc::now();
@@ -31,8 +30,8 @@ pub fn get_default_user() -> AuthUser {
 }
 
 pub fn get_test_epub_path() -> String {
-	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-		.join("../../core/integration-tests/data/book.epub")
+	tests::fixtures::test_data_dir()
+		.join("book.epub")
 		.to_string_lossy()
 		.to_string()
 }

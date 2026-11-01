@@ -4,7 +4,6 @@ import { useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useNavigate, useParams } from 'react-router'
 
-import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -77,14 +76,12 @@ export default function UpdateUserScene() {
 	}
 
 	return (
-		<SceneContainer className="-mt-4">
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/users.updateUser.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				{user && <CreateOrUpdateUserForm user={user} existingUsernames={existingUsernames} />}
-			</ContentContainer>
+			{user && <CreateOrUpdateUserForm user={user} existingUsernames={existingUsernames} />}
 		</SceneContainer>
 	)
 }

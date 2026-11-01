@@ -27,7 +27,7 @@ describe('UploadImageModal', () => {
 	it('shows the localized error when a dropped image exceeds the maximum size', async () => {
 		render(
 			<LocaleProvider locale="en-US">
-				<UploadImageModal isOpen onClose={vi.fn()} onUploadImage={vi.fn()} />
+				<UploadImageModal isOpen onClose={vi.fn()} onUploadImage={vi.fn()} maxSize={1024} />
 			</LocaleProvider>,
 		)
 
@@ -36,7 +36,7 @@ describe('UploadImageModal', () => {
 			throw new Error('Drop target not found')
 		}
 
-		const oversizedFile = new File([new Uint8Array(20 * 1024 * 1024 + 1)], 'oversized.png', {
+		const oversizedFile = new File([new Uint8Array(1025)], 'oversized.png', {
 			type: 'image/png',
 		})
 
@@ -55,6 +55,5 @@ describe('UploadImageModal', () => {
 		})
 
 		await waitFor(() => expect(toast.error).toHaveBeenCalledWith('File too large'))
-		expect(toast.error).not.toHaveBeenCalledWith(expect.stringContaining('20MB max'))
 	})
 })

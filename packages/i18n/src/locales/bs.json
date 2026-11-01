@@ -177,14 +177,6 @@
         "bookClubsEnabled": "Funkcije čitalačkih klubova"
       },
       "autoSyncLocalData": "Automatska sinhronizacija lokalnih podataka",
-      "textCase": {
-        "label": "Velika i mala slova",
-        "options": {
-          "lowerCase": "Mala slova",
-          "sentenceCase": "Rečenični oblik",
-          "titleCase": "Naslovni oblik"
-        }
-      },
       "tintListBackground": "Obojite pozadine lista",
       "management": {
         "label": "Upravljanje",
@@ -513,9 +505,6 @@
           }
         ],
         "review": {
-          "yes": "Da",
-          "no": "Ne",
-          "none": "Nema",
           "labels": {
             "name": "Naziv",
             "description": "Opis"
@@ -611,28 +600,6 @@
           "label": "Sadržaj biblioteke",
           "description": "Vrsta sadržaja prisutnog u ovoj biblioteci"
         },
-        "defaultLibraryView": {
-          "label": "Zadani prikaz biblioteke",
-          "description": "Odredite koja se kartica zadano prikazuje pri otvaranju ove biblioteke",
-          "hideSeriesView": {
-            "label": "Sakrijte karticu serijala",
-            "description": "Sakrijte karticu serijala iz navigacije biblioteke"
-          },
-          "skipBookOverview": {
-            "label": "Preskočite pregled knjige",
-            "description": "Otvorite čitač direktno pri odabiru knjige iz ove biblioteke"
-          },
-          "options": {
-            "series": {
-              "label": "Serijali",
-              "description": "Zadano prikažite karticu serijala"
-            },
-            "books": {
-              "label": "Knjige",
-              "description": "Zadano prikažite karticu knjiga"
-            }
-          }
-        },
         "readingSettings": {
           "section": {
             "heading": "Postavke čitanja",
@@ -673,10 +640,8 @@
             }
           },
           "scaleEvenlyByFactor": {
-            "description": "Skalirajte minijaturu faktorom izvorne veličine. Na primjer, 0,65 daje minijaturu veličine 65% izvornika",
-            "factor": {
-              "label": "Faktor skaliranja"
-            }
+            "label": "Faktor skaliranja",
+            "description": "Skalirajte minijaturu faktorom izvorne veličine. Na primjer, 0,65 daje minijaturu veličine 65% izvornika"
           },
           "exact": {
             "description": "Promijenite veličinu minijature na tačne dimenzije u pikselima",
@@ -696,18 +661,12 @@
                 "width": "Širina",
                 "height": "Visina"
               }
-            },
-            "size": {
-              "label": "Veličina"
             }
           },
-          "format": {
-            "label": "Format slike",
-            "description": "Format generiranih minijatura"
-          },
-          "quality": {
-            "label": "Kvalitet",
-            "description": "Kvalitet generiranih minijatura, od 1 do 100"
+          "output": {
+            "description": "Format generiranih minijatura",
+            "format": "Format slike",
+            "quality": "Kvalitet"
           }
         },
         "ignoreRules": {
@@ -778,29 +737,34 @@
             "description": "Ako koristite KoReader, generirajte dodatne heševe u formatu koji očekuje"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "Organizacija",
-            "description": "Odredite koji obrazac najviše odgovara organizaciji vaše biblioteke",
-            "docs": [
-              "Niste sigurni šta odabrati? Kliknite",
-              "ovdje",
-              "za više informacija.",
-              "Ovu postavku kasnije ne možete promijeniti"
-            ],
-            "disabled": "Ovu postavku ne možete promijeniti"
-          },
-          "options": {
+        "organization": {
+          "label": "Organizacija",
+          "filesystemPattern": {
             "label": "Obrazac biblioteke",
-            "description": "Postavka koja određuje kako će Stump organizirati vašu biblioteku",
-            "collectionPriority": {
-              "label": "Prioritet kolekcije",
+            "COLLECTION_BASED": {
               "description": "Svaka mapa na najvišem nivou korijena biblioteke predstavlja jedan serijal"
             },
-            "seriesPriority": {
-              "label": "Prioritet serijala",
+            "SERIES_BASED": {
               "description": "Svaka mapa na bilo kojem nivou rekurzivno predstavlja jedan serijal"
             }
+          }
+        },
+        "viewOptions": {
+          "defaultTab": {
+            "label": "Zadani prikaz biblioteke",
+            "description": "Odredite koja se kartica zadano prikazuje pri otvaranju ove biblioteke",
+            "options": {
+              "BOOKS": "Knjige",
+              "SERIES": "Serijali"
+            }
+          },
+          "hideSeries": {
+            "label": "Sakrijte karticu serijala",
+            "description": "Sakrijte karticu serijala iz navigacije biblioteke"
+          },
+          "skipBookOverview": {
+            "label": "Preskočite pregled knjige",
+            "description": "Otvorite čitač direktno pri odabiru knjige iz ove biblioteke"
           }
         },
         "oneshotsDirectory": {
@@ -824,7 +788,6 @@
     "createLibraryScene": {
       "heading": "Kreirajte biblioteku",
       "subtitle": "Biblioteke služe za grupiranje knjiga. Ako se želite podsjetiti kako funkcioniraju, pogledajte",
-      "subtitleLink": "odgovarajuću dokumentaciju",
       "form": {
         "stepLabel": "Korak",
         "steps": [
@@ -850,9 +813,6 @@
           }
         ],
         "review": {
-          "yes": "Da",
-          "no": "Ne",
-          "none": "Nema",
           "labels": {
             "generateThumbnails": "Generirajte minijature",
             "processThumbnailColors": "Obradite boje minijatura",
@@ -1017,13 +977,7 @@
       },
       "options/thumbnails": {
         "title": "Minijature",
-        "description": "Postavke i opcije upravljanja minijaturama u ovoj biblioteci",
-        "sections": {
-          "management": {
-            "heading": "Upravljajte minijaturama",
-            "description": "Upravljajte postojećim minijaturama ove biblioteke"
-          }
-        }
+        "description": "Postavke i opcije upravljanja minijaturama u ovoj biblioteci"
       },
       "integrations/analysis": {
         "title": "Analiza",
@@ -1397,9 +1351,6 @@
           }
         ],
         "review": {
-          "yes": "Da",
-          "no": "Ne",
-          "none": "Nema",
           "labels": {
             "name": "Naziv",
             "description": "Opis",
@@ -1665,17 +1616,6 @@
             "buttons": {
               "confirm": "Spremite promjene"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "Jezik"
-            },
-            "heading": "Jezik i lokalne postavke",
-            "subtitle": [
-              "Stump podržava više jezika i lokalnih postavki. Postavite željene opcije u nastavku. Razmislite o tome da pomognete poboljšati kvalitet",
-              "Stumpovih prijevoda",
-              "ako ste u mogućnosti!"
-            ]
           }
         }
       },
@@ -1769,27 +1709,6 @@
           "layoutAndArrangement": {
             "label": "Raspored i organizacija",
             "description": "Prilagodite način na koji Stump prikazuje informacije i organizira sadržaj"
-          },
-          "primaryNavigation": {
-            "label": "Primarna navigacija",
-            "description": "Odaberite minimalnu bočnu traku ili navigaciju na gornjoj traci",
-            "options": {
-              "sidebar": "Bočna traka",
-              "topbar": "Gornja traka"
-            },
-            "disclaimer": "* Postavke neodabrane opcije bit će onemogućene ili skrivene"
-          },
-          "doubleSidebar": {
-            "label": "Bočna traka postavki",
-            "description": "Omogućava navigaciju bočnom trakom na stranicama postavki"
-          },
-          "replacePrimarySidebar": {
-            "label": "Zamijenite primarnu bočnu traku",
-            "description": "Svaka sekundarna bočna traka zamijenit će primarnu umjesto da se prikaže uz nju",
-            "tooltips": {
-              "doubleSidebar": "Ova postavka zahtijeva omogućenu bočnu traku postavki",
-              "topbar": "Ova postavka trenutno nije podržana kada je primarna navigacija postavljena na gornju traku"
-            }
           },
           "navigationArrangement": {
             "label": "Raspored navigacije",
@@ -2028,7 +1947,6 @@
           },
           "optionalFeatures": {
             "label": "Opcionalne funkcije",
-            "description": "Upravljajte opcionalnim funkcijama dostupnim samo u desktop aplikaciji",
             "bundledServer": {
               "label": "Ugrađeni server",
               "description": "Pokrećite ugrađeni server u pozadini dok je desktop aplikacija pokrenuta (zahtijeva ponovno pokretanje)"
@@ -2046,10 +1964,6 @@
         "title": "Postavke servera",
         "description": "Opće postavke povezane s vašom instancom Stump servera",
         "sections": {
-          "serverPublicUrl": {
-            "label": "Javni URL",
-            "description": "URL putem kojeg je vaš server dostupan izvan vaše mreže, ako je primjenjivo. Ovo će omogućiti poveznice za pozivanje i druge funkcije"
-          },
           "customEmojis": {
             "title": "Prilagođeni emojiji",
             "description": "Učitajte prilagođene slikovne emojije i upravljajte njima na svom serveru",
@@ -2065,10 +1979,7 @@
             "noCustomEmojis": "Još nije dodan nijedan prilagođeni emoji",
             "invalidName": "Unesite važeći naziv za emoji",
             "uploadError": "Učitavanje emojija nije uspjelo",
-            "uploadSuccess": "Emoji je učitan",
-            "renameSuccess": "Emoji je preimenovan",
             "renameError": "Preimenovanje emojija nije uspjelo",
-            "deleteSuccess": "Emoji je izbrisan",
             "deleteError": "Brisanje emojija nije uspjelo"
           }
         }
@@ -2113,7 +2024,6 @@
             "description": "Neki zadaci mogu se konfigurirati tako da se automatski izvršavaju prema rasporedu",
             "restartRequiredTitle": "Potrebno je ponovno pokretanje",
             "restartRequired": "Promjene ove konfiguracije stupit će na snagu nakon ponovnog pokretanja servera",
-            "newScheduledJob": "Novi zakazani zadatak",
             "deleteScheduledJob": {
               "title": "Izbrišite zakazani zadatak",
               "description": "Jeste li sigurni da želite izbrisati „{{name}}“? Ova radnja se ne može poništiti.",
@@ -2641,7 +2551,6 @@
     },
     "noLibraries": {
       "heading": "Ovdje nema ničega",
-      "messagePrefix": "Ne možete vidjeti ono što nemate",
       "message": {
         "create": "Kreirajte biblioteku da biste započeli",
         "wait": "Kada biblioteke budu kreirane, bit će prikazane ovdje"
@@ -2673,7 +2582,6 @@
         "seeAll": "Prikažite sve"
       },
       "libraryOptions": {
-        "scanLibrary": "Skenirajte",
         "manageLibrary": "Postavke",
         "deleteLibrary": "Izbrišite"
       }
@@ -2689,26 +2597,22 @@
       "placeholder": "Odaberite ili kreirajte oznaku",
       "placeholderNoTags": "Nema dostupnih oznaka"
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Odaberite sličicu",
-      "options": {
-        "selectFromBooks": "Odaberite iz knjiga",
-        "uploadImage": "Učitajte sliku"
+      "chooseFromBooks": "Odaberite iz knjiga",
+      "uploadImage": "Učitajte sliku",
+      "title": "Odaberite sličicu",
+      "descriptions": {
+        "chooseBookPage": "Odaberite stranicu iz ove knjige kao novu sličicu",
+        "chooseSeriesBook": "Odaberite knjigu iz serijala"
       },
-      "uploadImage": {
+      "uploadDialog": {
         "emptyState": "Ovdje će se prikazati pretpregled vaše slike",
         "prompt": "Ispustite sliku ovdje ili kliknite da biste je odabrali",
         "remove": "Uklonite sliku",
         "fileTooLarge": "Datoteka je prevelika",
         "onlyOneFile": "Dopuštena je samo jedna datoteka",
         "noFile": "Nije dostavljena nijedna datoteka"
-      }
-    },
-    "thumbnailSelector": {
-      "title": "Odaberite sličicu",
-      "descriptions": {
-        "chooseBookPage": "Odaberite stranicu iz ove knjige kao novu sličicu",
-        "chooseSeriesBook": "Odaberite knjigu iz serijala"
       },
       "actions": {
         "confirmSelection": "Potvrdite odabir"
@@ -2964,6 +2868,7 @@
       "list": "Lista",
       "lastCompleted": "Posljednje završeno",
       "name": "Naziv",
+      "no": "Ne",
       "none": "Nijedno",
       "notAvailable": "Nije dostupno",
       "options": "Opcije",
@@ -2984,6 +2889,7 @@
       "select": "Odaberite",
       "settings": "Postavke",
       "servers": "Serveri",
+      "size": "Veličina",
       "thisBook": "ovu knjigu",
       "thisServer": "ovaj server",
       "unknownTitle": "Bez naslova",
@@ -3001,6 +2907,7 @@
       "files": "Datoteke",
       "search": "Pretraga",
       "preferences": "Postavke",
+      "yes": "Da",
       "global": "Globalno"
     },
     "libraryType": {
@@ -3316,6 +3223,9 @@
       "seeDetails": "Prikažite detalje",
       "goToLibrary": "Idite u biblioteku"
     },
+    "libraryActions": {
+      "scan": "Skenirajte"
+    },
     "sorting": {
       "labelEllipsis": "Sortiraj po...",
       "sortField": {
@@ -3398,15 +3308,15 @@
       },
       "showCurrentChapter": "Prikažite trenutno poglavlje"
     },
+    "textCase": {
+      "label": "Velika i mala slova",
+      "options": {
+        "lowerCase": "Mala slova",
+        "sentenceCase": "Rečenični oblik",
+        "titleCase": "Naslovni oblik"
+      }
+    },
     "addOrEditServer": {
-      "addServer": {
-        "title": "Dodajte server",
-        "subtitle": "Konfigurirajte novi server za pristup svom sadržaju"
-      },
-      "editServer": {
-        "title": "Uredite server",
-        "subtitle": "Uredite server"
-      },
       "kind": "Vrsta",
       "customHeaders": {
         "label": "Prilagođena zaglavlja",
@@ -3414,7 +3324,6 @@
         "invalidHeader": "Nevažeće zaglavlje"
       },
       "auth": {
-        "label": "Autentifikacija",
         "login": {
           "label": "Prijava",
           "description": "Po potrebi će se od vas zatražiti prijava pri pristupu sadržaju"
@@ -3475,21 +3384,8 @@
       "serverInfo": {
         "title": "Informacije o serveru",
         "description": "Osnovni podaci o vašoj instanci Stump servera",
-        "build": {
-          "label": "Kompilacija",
-          "description": "Pojedinosti o verziji i kompilaciji",
-          "version": {
-            "semver": "Verzija",
-            "commitHash": "Tačan commit",
-            "date": "Datum kompilacije"
-          }
-        },
         "nonStableChannel": {
-          "title": "Koristite nestabilnu verziju Stumpa",
-          "description": [
-            "Izgleda da koristite izdanje iz",
-            "kanala"
-          ]
+          "title": "Koristite nestabilnu verziju Stumpa"
         }
       },
       "helpfulLinks": {

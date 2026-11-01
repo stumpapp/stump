@@ -1,6 +1,6 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
-import type { ComponentPropsWithoutRef, ElementRef } from 'react'
+import type { ComponentPropsWithoutRef, ComponentRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -17,7 +17,7 @@ export type DialogOverlayProps = Omit<
 	'children'
 >
 const DialogOverlay = React.forwardRef<
-	ElementRef<typeof DialogPrimitive.Overlay>,
+	ComponentRef<typeof DialogPrimitive.Overlay>,
 	DialogOverlayProps
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Overlay
@@ -44,7 +44,7 @@ export type DialogContentProps = ComponentPropsWithoutRef<typeof DialogPrimitive
 	size?: keyof typeof DIALOG_CONTENT_SIZES
 }
 const DialogContent = React.forwardRef<
-	ElementRef<typeof DialogPrimitive.Content>,
+	ComponentRef<typeof DialogPrimitive.Content>,
 	DialogContentProps
 >(({ className, children, size = 'md', ...props }, ref) => (
 	<DialogPortal>
@@ -52,7 +52,7 @@ const DialogContent = React.forwardRef<
 		<DialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				'gap-6 p-6 text-sm fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-dialog text-dialog-foreground ring-1 ring-foreground/5 duration-100 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+				'gap-4 p-4 text-sm fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-dialog text-dialog-foreground ring-1 ring-foreground/10 duration-100 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
 				DIALOG_CONTENT_SIZES[size] ?? DIALOG_CONTENT_SIZES.md,
 				className,
 			)}
@@ -75,14 +75,17 @@ DialogHeader.displayName = 'DialogHeader'
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn('gap-2 sm:flex-row sm:justify-end flex flex-col-reverse', className)}
+		className={cn(
+			'-mx-4 -mb-4 gap-2 p-4 sm:flex-row sm:justify-end flex flex-col-reverse rounded-b-xl border-t border-border bg-muted/50',
+			className,
+		)}
 		{...props}
 	/>
 )
 DialogFooter.displayName = 'DialogFooter'
 
 const DialogTitle = React.forwardRef<
-	ElementRef<typeof DialogPrimitive.Title>,
+	ComponentRef<typeof DialogPrimitive.Title>,
 	ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Title
@@ -94,19 +97,22 @@ const DialogTitle = React.forwardRef<
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
-	ElementRef<typeof DialogPrimitive.Description>,
+	ComponentRef<typeof DialogPrimitive.Description>,
 	ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Description
 		ref={ref}
-		className={cn('text-sm text-muted-foreground', className)}
+		className={cn(
+			'text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground',
+			className,
+		)}
 		{...props}
 	/>
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 const DialogClose = React.forwardRef<
-	ElementRef<typeof DialogPrimitive.Close>,
+	ComponentRef<typeof DialogPrimitive.Close>,
 	ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Close

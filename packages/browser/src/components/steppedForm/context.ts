@@ -1,22 +1,22 @@
 import { createContext, useContext } from 'react'
 
+import type { SteppedFormStep, StepStatus } from './types'
+
 export type ISteppedFormContext = {
 	/**
 	 * The base path for the locale files, used for getting the correct translations
 	 */
 	localeBase: string
-	/**
-	 * The number of steps before the review step (so really the number of steps - 1)
-	 */
-	stepsBeforeReview: number
-	/**
-	 * The current step in the form
-	 */
-	currentStep: number
-	/**
-	 * A function to set the current step in the form
-	 */
-	setStep: (step: number) => void
+	steps: SteppedFormStep[]
+	currentIndex: number
+	/** the list of statuses for each step in the form */
+	statuses: StepStatus[]
+	isFirst: boolean
+	isReview: boolean
+	/** jump to the provided index, validating for forward direction jumps */
+	goTo: (index: number) => Promise<void>
+	next: () => Promise<void>
+	back: () => void
 }
 
 /**
@@ -31,10 +31,8 @@ export const SteppedFormContext = createContext<ISteppedFormContext | undefined>
  */
 export const useSteppedFormContext = () => {
 	const context = useContext(SteppedFormContext)
-
 	if (!context) {
-		throw new Error('useSteppedFormContext must be used within a SteppedFormProvider')
+		throw new Error('useSteppedFormContext must be used within a SteppedForm.Provider')
 	}
-
 	return context
 }

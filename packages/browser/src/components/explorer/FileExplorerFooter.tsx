@@ -28,7 +28,7 @@ export default function FileExplorerFooter() {
 	}, [currentPath, rootPath])
 
 	return (
-		<footer className="bottom-0 h-10 px-4 fixed z-10 w-full border-t border-border bg-background">
+		<footer className="bottom-0 h-10 px-4 sticky z-10 w-full border-t border-border bg-background">
 			<div className="min-w-0 flex h-full items-center overflow-hidden">
 				{pathSegments.map((segment, i) => {
 					const isLast = i === pathSegments.length - 1

@@ -152,9 +152,6 @@
           }
         ],
         "review": {
-          "yes": "はい",
-          "no": "いいえ",
-          "none": "なし",
           "labels": {
             "name": "名前",
             "description": "説明"
@@ -273,13 +270,10 @@
             "label": "有効",
             "description": "このライブラリのサムネイル画像を生成"
           },
-          "format": {
-            "label": "画像の形式",
-            "description": "生成されたサムネイル画像の形式"
-          },
-          "quality": {
-            "label": "品質",
-            "description": "生成されたサムネイル画像の品質（0～1.0）"
+          "output": {
+            "description": "生成されたサムネイル画像の形式",
+            "format": "画像の形式",
+            "quality": "品質"
           }
         },
         "ignoreRules": {
@@ -345,27 +339,14 @@
             "description": "KoReaderを使用する場合は、期待される形式で追加のハッシュを生成します。"
           }
         },
-        "libraryPattern": {
-          "section": {
-            "heading": "組織",
-            "description": "ライブラリの構成に最も近いパターンを特定します",
-            "docs": [
-              "どれを選べばいいかわかりませんか？クリック",
-              "ここ",
-              "で詳細情報を確認してください。",
-              "この設定は後で変更できません"
-            ],
-            "disabled": "この設定は後で変更できません"
-          },
-          "options": {
+        "organization": {
+          "label": "組織",
+          "filesystemPattern": {
             "label": "ライブラリのパターン",
-            "description": "Stumpがライブラリをどのように整理するかを決定する設定",
-            "collectionPriority": {
-              "label": "コレクションの優先順位",
+            "COLLECTION_BASED": {
               "description": "ライブラリルートの最上位にある各フォルダは単一のシリーズです"
             },
-            "seriesPriority": {
-              "label": "シリーズの優先順位",
+            "SERIES_BASED": {
               "description": "どのレベルのフォルダも再帰的に単一のシリーズです"
             }
           }
@@ -385,7 +366,6 @@
     },
     "createLibraryScene": {
       "heading": "Create New Library",
-      "subtitleLink": "関連ドキュメント",
       "form": {
         "steps": [
           {
@@ -410,9 +390,6 @@
           }
         ],
         "review": {
-          "yes": "はい",
-          "no": "いいえ",
-          "none": "なし",
           "labels": {
             "generateThumbnails": "サムネイルを生成",
             "mode": "モード",
@@ -498,13 +475,7 @@
       },
       "options/thumbnails": {
         "title": "サムネイル",
-        "description": "このライブラリのサムネイルの設定と管理オプション",
-        "sections": {
-          "management": {
-            "heading": "管理",
-            "description": "このライブラリの既存のサムネイルを管理します"
-          }
-        }
+        "description": "このライブラリのサムネイルの設定と管理オプション"
       },
       "integrations/analysis": {
         "title": "分析",
@@ -756,9 +727,6 @@
           }
         ],
         "review": {
-          "yes": "はい",
-          "no": "いいえ",
-          "none": "なし",
           "labels": {
             "name": "名前",
             "description": "説明",
@@ -988,17 +956,6 @@
             "buttons": {
               "confirm": "変更を保存"
             }
-          },
-          "locale": {
-            "localeSelector": {
-              "label": "言語"
-            },
-            "heading": "言語とロケール",
-            "subtitle": [
-              "Stumpは複数の言語とロケールをサポートしています。以下の設定を行ってください。品質向上のためにご検討ください",
-              "Stumpの翻訳",
-              "できれば！"
-            ]
           }
         }
       },
@@ -1202,7 +1159,7 @@
         "manageLibrary": "Manage"
       }
     },
-    "thumbnailDropdown": {
+    "thumbnailSelector": {
       "label": "Edit thumbnail"
     }
   },
@@ -1253,8 +1210,11 @@
       }
     },
     "common": {
+      "none": "なし",
+      "no": "いいえ",
       "smartLists": "スマートリスト",
-      "files": "ファイル"
+      "files": "ファイル",
+      "yes": "はい"
     }
   }
 }

@@ -1,3 +1,4 @@
+export { AlertDialog } from './alert-dialog'
 export { ConfirmationModal, type ConfirmationModalProps } from './ConfirmationModal'
 export {
 	Dialog,

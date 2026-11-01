@@ -9,6 +9,7 @@ import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import paths from '@/paths'
 
+import { CollapsedSidebarSection, useIsSidebarIconMode } from '../../CollapsedSidebarItems'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import { SectionEmptyMessage } from '../SectionEmptyMessage'
 import BookClubEmoji from './BookClubEmoji'
@@ -47,6 +48,7 @@ export default function BookClubSideBarSection({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs', ['sidebar']))
 
 	const isCurrentBookClub = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
+	const isIconMode = useIsSidebarIconMode()
 
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
@@ -86,6 +88,42 @@ export default function BookClubSideBarSection({
 	const canCreateBookClub = checkPermission(UserPermission.CreateBookClub)
 	const showCreateLink = canCreateBookClub && links.includes(FilterableArrangementEntityLink.Create)
 	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
+
+	// TODO(ui): i GOTTA find a new icon for clubs lol maybe Users?
+	if (isIconMode) {
+		return (
+			<CollapsedSidebarSection
+				label={t('sidebar.buttons.bookClubs')}
+				icon={Club}
+				emptyMessage={t('sidebar.buttons.noBookClubs')}
+				items={(bookClubs ?? []).map((bookClub) => ({
+					key: bookClub.id,
+					label: bookClub.name,
+					to: paths.bookClub(bookClub.slug),
+					isActive: isCurrentBookClub(bookClub.id),
+					icon: bookClub.emoji ? (
+						<span className="w-4 text-center">{bookClub.emoji}</span>
+					) : (
+						<Club />
+					),
+				}))}
+				actions={[
+					...(showLinkToAll
+						? [{ key: 'all', label: t('sidebar.buttons.seeAll'), to: paths.bookClubs() }]
+						: []),
+					...(showCreateLink
+						? [
+								{
+									key: 'create',
+									label: t('sidebar.buttons.createBookClub'),
+									to: paths.bookClubCreate(),
+								},
+							]
+						: []),
+				]}
+			/>
+		)
+	}
 
 	return (
 		<Accordion type="single" collapsible className="py-1 w-full" defaultValue="bookClubs">

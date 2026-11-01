@@ -81,14 +81,14 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 				items: [
 					{
 						label: 'Inspect',
-						leftIcon: <Search className="mr-2 h-4 w-4" />,
+						leftIcon: <Search />,
 						onClick: () => onSelectForInspect(user),
 					},
 					{
 						disabled: user.loginSessionsCount === 0,
 						label: 'Clear sessions',
 						isDestructive: true,
-						leftIcon: <Database className="mr-2 h-4 w-4" />,
+						leftIcon: <Database />,
 						onClick: handleClearUserSessions,
 					},
 				],
@@ -100,14 +100,14 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 								{
 									label: 'Edit',
 									disabled: isSelf,
-									leftIcon: <Pencil className="mr-2 h-4 w-4" />,
+									leftIcon: <Pencil />,
 									onClick: () => navigate(paths.updateUser(user.id)),
 								} as const,
 								{
 									disabled: isSelf,
 									label: 'Delete',
 									isDestructive: true,
-									leftIcon: <Trash className="mr-2 h-4 w-4" />,
+									leftIcon: <Trash />,
 									onClick: () => onSelectForDeletion(user),
 								} as const,
 								{

@@ -1,11 +1,10 @@
-import { Heading, Label, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/graphql'
 import pluralize from 'pluralize'
-import { PropsWithChildren } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { ReviewItem, ReviewSection } from '@/components/steppedForm'
 import { useTranslate } from '@/hooks/useTranslate'
 
 export default function LibraryReview() {
@@ -18,233 +17,161 @@ export default function LibraryReview() {
 		if (!state.thumbnailConfig?.enabled || !state.thumbnailConfig?.resizeMethod) {
 			return (
 				<>
-					<div>
-						<Label>{t(getLabelKey('generateThumbnails'))}</Label>
-						<Text variant="muted" size="sm">
-							{t(getKey('no'))}
-						</Text>
-					</div>
+					<ReviewItem
+						label={t(getLabelKey('generateThumbnails'))}
+						value={translate('shared.common.no')}
+					/>
 
-					<div>
-						<Label>{t(getLabelKey('processThumbnailColors'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.processThumbnailColorsEvenWithoutConfig ? t(getKey('yes')) : t(getKey('no'))}
-						</Text>
-					</div>
-				</>
-			)
-		} else {
-			const dimensionUnit =
-				state.thumbnailConfig.resizeMethod.mode === 'scaleEvenlyByFactor' ? 'x' : 'px'
-
-			const renderResizeModeDetails = () =>
-				match(state.thumbnailConfig?.resizeMethod)
-					.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => `${factor}${dimensionUnit}`)
-					.with(
-						{ mode: 'exact' },
-						({ width, height }) => `${width}${dimensionUnit}:${height}${dimensionUnit}`,
-					)
-					.with({ mode: 'scaleDimension' }, ({ dimension, size }) =>
-						dimension === 'WIDTH' ? `${size}${dimensionUnit}:auto` : `auto:${size}${dimensionUnit}`,
-					)
-					.otherwise(() => '')
-
-			return (
-				<>
-					<div>
-						<Label>{t(getLabelKey('generateThumbnails'))}</Label>
-						<Text variant="muted" size="sm">
-							{t(getKey('yes'))}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('mode'))}</Label>
-						<Text variant="muted" size="sm">
-							{t(getLabelKey(state.thumbnailConfig.resizeMethod.mode || 'scaleEvenlyByFactor'))} (
-							{renderResizeModeDetails()})
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('format'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.thumbnailConfig.format}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('quality'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.thumbnailConfig.quality || 'Default'}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('processThumbnailColors'))}</Label>
-						<Text variant="muted" size="sm">
-							{t(getKey('yes'))}
-						</Text>
-					</div>
+					<ReviewItem
+						label={t(getLabelKey('processThumbnailColors'))}
+						value={
+							state.processThumbnailColorsEvenWithoutConfig
+								? translate('shared.common.yes')
+								: translate('shared.common.no')
+						}
+					/>
 				</>
 			)
 		}
+
+		const dimensionUnit =
+			state.thumbnailConfig.resizeMethod.mode === 'scaleEvenlyByFactor' ? 'x' : 'px'
+
+		const renderResizeModeDetails = () =>
+			match(state.thumbnailConfig?.resizeMethod)
+				.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => `${factor}${dimensionUnit}`)
+				.with(
+					{ mode: 'exact' },
+					({ width, height }) => `${width}${dimensionUnit}:${height}${dimensionUnit}`,
+				)
+				.with({ mode: 'scaleDimension' }, ({ dimension, size }) =>
+					dimension === 'WIDTH' ? `${size}${dimensionUnit}:auto` : `auto:${size}${dimensionUnit}`,
+				)
+				.otherwise(() => '')
+
+		return (
+			<>
+				<ReviewItem
+					label={t(getLabelKey('generateThumbnails'))}
+					value={translate('shared.common.yes')}
+				/>
+
+				<ReviewItem
+					label={t(getLabelKey('mode'))}
+					value={`${t(
+						getLabelKey(state.thumbnailConfig.resizeMethod.mode || 'scaleEvenlyByFactor'),
+					)} (${renderResizeModeDetails()})`}
+				/>
+
+				<ReviewItem label={t(getLabelKey('format'))} value={state.thumbnailConfig.format} />
+
+				<ReviewItem
+					label={t(getLabelKey('quality'))}
+					value={state.thumbnailConfig.quality || 'Default'}
+				/>
+
+				<ReviewItem
+					label={t(getLabelKey('processThumbnailColors'))}
+					value={translate('shared.common.yes')}
+				/>
+			</>
+		)
 	}
 
 	return (
-		<div className="space-y-8 flex flex-col">
-			<StepContainer
-				label={t(getStepKey(1, 'heading'))}
-				description={t(getStepKey(1, 'description'))}
-			>
-				<div>
-					<Label>{t(getLabelKey('name'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.name}
-					</Text>
-				</div>
+		<>
+			<ReviewSection stepIndex={0}>
+				<ReviewItem label={t(getLabelKey('name'))} value={state.name} />
+				<ReviewItem label={t(getLabelKey('path'))} value={state.path} />
+				<ReviewItem label={t(getLabelKey('oneshotsDirectory'))} value={state.oneshotsDirectory} />
+				<ReviewItem label={t(getLabelKey('description'))} value={state.description} />
+				<ReviewItem
+					label={t(getLabelKey('tags'))}
+					value={
+						state.tags?.length ? (
+							<span className="gap-1 flex flex-wrap">
+								{state.tags.map(({ label }, index) => (
+									<span key={index}>#{label}</span>
+								))}
+							</span>
+						) : undefined
+					}
+				/>
+			</ReviewSection>
 
-				<div>
-					<Label>{t(getLabelKey('path'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.path}
-					</Text>
-				</div>
+			<ReviewSection stepIndex={1}>
+				<ReviewItem
+					label={t(getLabelKey('pattern'))}
+					value={t(
+						state.libraryPattern === LibraryPattern.CollectionBased
+							? getPatternKey('COLLECTION_BASED')
+							: getPatternKey('SERIES_BASED'),
+					)}
+				/>
 
-				<div>
-					<Label>{t(getLabelKey('oneshotsDirectory'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.oneshotsDirectory || translate('shared.common.none')}
-					</Text>
-				</div>
+				<ReviewItem
+					label={t(getLabelKey('ignoreRules'))}
+					value={
+						state.ignoreRules?.length
+							? `${state.ignoreRules.length} ${pluralize('rule', state.ignoreRules.length)}`
+							: undefined
+					}
+				/>
 
-				<div>
-					<Label>{t(getLabelKey('description'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.description || translate('shared.common.none')}
-					</Text>
-				</div>
+				<ReviewItem
+					label={t(getLabelKey('processMetadata'))}
+					value={
+						state.processMetadata ? translate('shared.common.yes') : translate('shared.common.no')
+					}
+				/>
 
-				<div>
-					<Label>{t(getLabelKey('tags'))}</Label>
-					<div className="gap-1 flex flex-wrap">
-						{!state.tags?.length && (
-							<Text variant="muted" size="sm">
-								{t(getKey('none'))}
-							</Text>
-						)}
-						{state.tags?.map(({ label }, index) => (
-							<Text variant="muted" size="sm" key={index}>
-								#{label}
-							</Text>
-						))}
-					</div>
-				</div>
-			</StepContainer>
+				<ReviewItem
+					label={t(getLabelKey('watch'))}
+					value={state.watch ? translate('shared.common.yes') : translate('shared.common.no')}
+				/>
 
-			<StepContainer
-				label={t(getStepKey(2, 'heading'))}
-				description={t(getStepKey(2, 'description'))}
-			>
-				<div>
-					<Label>{t(getLabelKey('pattern'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.libraryPattern === LibraryPattern.CollectionBased
-							? t(getPatternKey('collectionPriority.label'))
-							: t(getPatternKey('seriesPriority.label'))}
-					</Text>
-				</div>
+				<ReviewItem
+					label={t(getLabelKey('generateFileHashes'))}
+					value={
+						state.generateFileHashes
+							? translate('shared.common.yes')
+							: translate('shared.common.no')
+					}
+				/>
 
-				<div>
-					<Label>{t(getLabelKey('ignoreRules'))}</Label>
-					<div className="gap-1 flex flex-wrap">
-						{!state.ignoreRules?.length && (
-							<Text variant="muted" size="sm">
-								{t(getKey('none'))}
-							</Text>
-						)}
-						{!!state.ignoreRules?.length && (
-							<Text variant="muted" size="sm">
-								{state.ignoreRules.length} {pluralize('rule', state.ignoreRules.length)}
-							</Text>
-						)}
-					</div>
+				<ReviewItem
+					label={t(getLabelKey('generateKoreaderHashes'))}
+					value={
+						state.generateKoreaderHashes
+							? translate('shared.common.yes')
+							: translate('shared.common.no')
+					}
+				/>
 
-					<div>
-						<Label>{t(getLabelKey('processMetadata'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.processMetadata ? 'Yes' : 'No'}
-						</Text>
-					</div>
+				<ReviewItem
+					label={t(getLabelKey('convertRar'))}
+					value={
+						state.convertRarToZip ? translate('shared.common.yes') : translate('shared.common.no')
+					}
+				/>
 
-					<div>
-						<Label>{t(getLabelKey('watch'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.watch ? 'Yes' : 'No'}
-						</Text>
-					</div>
+				<ReviewItem
+					label={t(getLabelKey('deleteConversions'))}
+					value={
+						state.hardDeleteConversions
+							? translate('shared.common.yes')
+							: translate('shared.common.no')
+					}
+				/>
+			</ReviewSection>
 
-					<div>
-						<Label>{t(getLabelKey('generateFileHashes'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.generateFileHashes ? 'Yes' : 'No'}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('generateKoreaderHashes'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.generateKoreaderHashes ? 'Yes' : 'No'}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('convertRar'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.convertRarToZip ? 'Yes' : 'No'}
-						</Text>
-					</div>
-
-					<div>
-						<Label>{t(getLabelKey('deleteConversions'))}</Label>
-						<Text variant="muted" size="sm">
-							{state.hardDeleteConversions ? 'Yes' : 'No'}
-						</Text>
-					</div>
-				</div>
-			</StepContainer>
-
-			<StepContainer
-				label={t(getStepKey(3, 'heading'))}
-				description={t(getStepKey(3, 'description'))}
-			>
-				{renderThumbnailSettings()}
-			</StepContainer>
-		</div>
+			<ReviewSection stepIndex={2}>{renderThumbnailSettings()}</ReviewSection>
+		</>
 	)
 }
 
 const LOCALE_KEY = 'createLibraryScene.form'
 const getPatternKey = (key: string) =>
-	`createOrUpdateLibraryForm.fields.libraryPattern.options.${key}`
-const getStepKey = (step: number, key: string) => `${LOCALE_KEY}.steps.${step - 1}.${key}`
+	`createOrUpdateLibraryForm.fields.organization.filesystemPattern.${key}.label`
 const getKey = (key: string) => `${LOCALE_KEY}.review.${key}`
 const getLabelKey = (key: string) => getKey(`labels.${key}`)
-
-type StepContainerProps = PropsWithChildren<{
-	label: string
-	description: string
-}>
-
-const StepContainer = ({ label, description, children }: StepContainerProps) => (
-	<div className="space-y-4 md:space-y-0 grid grid-cols-7 justify-between">
-		<div className="md:col-span-4 col-span-7">
-			<Heading size="sm">{label}</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				{description}
-			</Text>
-		</div>
-
-		<div className="space-y-2 md:col-span-3 col-span-7 flex flex-col">{children}</div>
-	</div>
-)

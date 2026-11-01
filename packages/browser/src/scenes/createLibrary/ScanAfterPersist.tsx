@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
@@ -15,12 +15,19 @@ export default function ScanAfterPersist() {
 	const isCreatingLibrary = !ctx?.library
 
 	return (
-		<WideSwitch
-			label={t(getKey(`label.${isCreatingLibrary ? 'create' : 'update'}`))}
-			description={t(getKey('description'))}
-			checked={scanAfterPersist}
-			onCheckedChange={() => form.setValue('scanAfterPersist', !scanAfterPersist)}
-		/>
+		<NewCard>
+			<NewCard.Row
+				htmlFor="scanAfterPersist"
+				label={t(getKey(`label.${isCreatingLibrary ? 'create' : 'update'}`))}
+				description={t(getKey('description'))}
+			>
+				<RawSwitch
+					id="scanAfterPersist"
+					checked={scanAfterPersist}
+					onCheckedChange={() => form.setValue('scanAfterPersist', !scanAfterPersist)}
+				/>
+			</NewCard.Row>
+		</NewCard>
 	)
 }
 

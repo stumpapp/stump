@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use async_graphql::{Context, Object, Result, Upload, ID};
 use models::{entity::custom_emoji, shared::enums::UserPermission};
 use sea_orm::{prelude::*, ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter};
@@ -10,6 +8,8 @@ use crate::{
 	input::book_club::{CreateCustomEmojiInput, UpdateCustomEmojiInput},
 	object::custom_emoji::CustomEmoji,
 };
+
+use super::upload::read_uploaded_image;
 
 #[derive(Default)]
 pub struct CustomEmojiMutation;
@@ -41,19 +41,10 @@ impl CustomEmojiMutation {
 			);
 		}
 
-		let mut value = upload.value(ctx)?;
+		let value = upload.value(ctx)?;
 
-		let extension = std::path::Path::new(&value.filename)
-			.extension()
-			.and_then(|ext| ext.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Uploaded file must have a file extension")?;
-
-		let mut image_bytes = Vec::new();
-		value
-			.content
-			.read_to_end(&mut image_bytes)
-			.map_err(|e| format!("Failed to read upload data: {e}"))?;
+		let (image_bytes, extension) =
+			read_uploaded_image(value, core.config.max_image_upload_size)?;
 
 		let emoji = custom_emoji::ActiveModel {
 			name: Set(input.name),

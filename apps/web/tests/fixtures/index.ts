@@ -1,9 +1,9 @@
 import { type Page, test as base } from '@playwright/test'
 
-import { authStatePath, type PersonaName } from '../users/personas'
+import { authStatePath, type Persona } from '../users/personas'
 
 type PersonaFixtures = {
-	[K in PersonaName as `${K}Page`]: Page
+	[K in Persona as `${K}Page`]: Page
 }
 
 /**

@@ -28,13 +28,8 @@ export const personas = {
 	librarian: {
 		username: 'librarian',
 		password: 'librarian',
-		permissions: [UserPermission.ManageLibrary],
+		permissions: [UserPermission.ManageLibrary, UserPermission.ReadUsers],
 	},
-	// libraryAdmin: {
-	// 	username: 'libraryAdmin',
-	// 	password: 'libraryAdmin',
-	// 	permissions: [UserPermission.ManageLibrary, UserPermission.ReadUsers],
-	// },
 } satisfies Record<string, TestUser>
 
 export type Persona = keyof typeof personas

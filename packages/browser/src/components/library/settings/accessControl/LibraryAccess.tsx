@@ -137,6 +137,7 @@ export function LibraryAccess() {
 								checked={row.getIsSelected()}
 								disabled={!row.getCanSelect()}
 								onCheckedChange={(checked) => row.toggleSelected(checked === true)}
+								data-testid={`library-access-checkbox-${row.original.username}`}
 							/>
 							<div className={cn({ 'opacity-50': !row.getCanSelect() })}>
 								<UsernameRow {...row.original} />
@@ -149,7 +150,11 @@ export function LibraryAccess() {
 					cell: ({ row: { original } }) => {
 						const granted = grantedIds.has(original.id)
 						return (
-							<Badge size="sm" variant={granted ? 'success' : 'warning'}>
+							<Badge
+								size="sm"
+								variant={granted ? 'success' : 'warning'}
+								data-testid={`library-access-badge-${original.username}-${granted ? 'granted' : 'not-granted'}`}
+							>
 								{t(getKey(granted ? 'table.granted' : 'table.notGranted'))}
 							</Badge>
 						)
@@ -191,10 +196,16 @@ export function LibraryAccess() {
 							variant="outline"
 							disabled={!canRevoke || isPending}
 							onClick={revokeSelected}
+							data-testid="library-access-revoke-selected-button"
 						>
 							{t(getKey('actions.revoke'))}
 						</Button>
-						<Button size="sm" disabled={!canGrant || isPending} onClick={grantSelected}>
+						<Button
+							size="sm"
+							disabled={!canGrant || isPending}
+							onClick={grantSelected}
+							data-testid="library-access-grant-selected-button"
+						>
 							{t(getKey('actions.grant'))}
 						</Button>
 					</div>

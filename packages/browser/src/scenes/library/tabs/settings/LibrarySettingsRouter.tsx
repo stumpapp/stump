@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
+import { usePaths } from '@/paths'
 
 import { useLibraryContext } from '../../../../components/library/context'
 import { LibraryManagementContext, LibraryPatchParams } from './context'
@@ -137,6 +138,7 @@ export default function LibrarySettingsRouter() {
 
 	const canScan = checkPermission(UserPermission.ScanLibrary)
 	const canAccessMetadata = checkPermission(UserPermission.MetadataFetchRecordRead)
+	const canReadUsers = checkPermission(UserPermission.ReadUsers)
 
 	// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 	/**
@@ -164,6 +166,8 @@ export default function LibrarySettingsRouter() {
 		[editLibrary, library, config, isPending],
 	)
 
+	const redirectTo = usePaths().libraryManage(library.id)
+
 	return (
 		<LibraryManagementContext.Provider
 			value={{
@@ -186,9 +190,11 @@ export default function LibrarySettingsRouter() {
 					<Route path="analysis" element={<LibraryAnalysisScene />} />
 					{canAccessMetadata && <Route path="metadata" element={<LibraryMetadataScene />} />}
 
-					<Route path="" element={<Navigate to="access-control" replace />} />
-					<Route path="access-control" element={<AccessControlScene />} />
+					{canReadUsers && <Route path="access-control" element={<AccessControlScene />} />}
 					<Route path="delete" element={<DeletionScene />} />
+
+					{/* must be absolute or it will append `/basics` infinite */}
+					<Route path="*" element={<Navigate to={`${redirectTo}/basics`} replace />} />
 				</Routes>
 			</Suspense>
 		</LibraryManagementContext.Provider>

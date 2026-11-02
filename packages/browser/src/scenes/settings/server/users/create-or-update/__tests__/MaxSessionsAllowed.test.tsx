@@ -14,7 +14,7 @@ type SubjectProps = {
 }
 
 const Subject = ({ formState }: SubjectProps) => {
-	const form = useForm<Pick<CreateOrUpdateUserSchema, 'maxSessionsAllowed'>>({
+	const form = useForm({
 		defaultValues: formDefaults(formState as any),
 		resolver: zodResolver(buildSchema((t) => t, [], formState as any)),
 	})

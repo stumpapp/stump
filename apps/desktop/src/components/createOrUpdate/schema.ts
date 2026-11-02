@@ -47,6 +47,7 @@ export const buildSchema = (
 	})
 }
 export type CreateOrUpdateServerSchema = z.infer<ReturnType<typeof buildSchema>>
+export type CreateOrUpdateServerInput = z.input<ReturnType<typeof buildSchema>>
 
 const LOCALE_KEY = 'shared.addOrEditServer.validation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

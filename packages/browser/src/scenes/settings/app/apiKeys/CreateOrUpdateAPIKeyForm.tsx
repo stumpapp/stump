@@ -59,7 +59,7 @@ export default function CreateOrUpdateAPIKeyForm({
 	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
-	const form = useForm<CreateOrUpdateAPIKeyFormValues>({
+	const form = useForm({
 		defaultValues: formDefaults(editingKey),
 		resolver: zodResolver(createSchema(t)),
 	})

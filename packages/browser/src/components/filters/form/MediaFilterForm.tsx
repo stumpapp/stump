@@ -97,7 +97,9 @@ export default function MediaFilterForm() {
 		return {
 			extension: filters?.extension?.eq as string,
 			metadata: flattenMetadata,
-			read_status: filters?.readingStatus?.isAnyOf?.map((elem) => (elem as string).toLowerCase()),
+			read_status: filters?.readingStatus?.isAnyOf?.map(
+				(elem) => (elem as string).toLowerCase() as 'finished' | 'reading' | 'not_started',
+			),
 		}
 	}, [filters])
 

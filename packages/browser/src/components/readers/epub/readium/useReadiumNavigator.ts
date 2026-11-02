@@ -233,6 +233,7 @@ export function useReadiumNavigator({
 
 				const listeners: EpubNavigatorListeners = {
 					frameLoaded: () => {},
+					viewportChanged: () => {},
 					timelineItemChanged: () => {},
 					positionChanged: (locator: Locator) => {
 						setCurrentLocator(locator)
@@ -310,6 +311,7 @@ export function useReadiumNavigator({
 							],
 							allowedDomains,
 						},
+						upgradeInsecureRequests: window.location.protocol === 'https:' ? 'always' : 'never',
 					},
 				)
 

@@ -5936,43 +5936,67 @@
     invariant "^2.2.4"
     nullthrows "^1.1.1"
 
-"@readium/decorator@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@readium/decorator/-/decorator-1.0.2.tgz#799760406422ac8b622cc581d5203d29c551270e"
-  integrity sha512-bod7LemtcZR+rANs8hmpxG5bTxFn9Dqa3gJ4XS5oV0tB23NatVDyFa3DZhELwvW6JUhmduZd8EGxhGkU1NZ0mw==
+"@readium/decorator@1.3.2", "@readium/decorator@^1.2.5":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@readium/decorator/-/decorator-1.3.2.tgz#68f86be9c196dd25238d2758e1bd6bed379742a3"
+  integrity sha512-0ECYCgPwvXna97Zk38x3FfjF35903OL/yLhp6W8lWQSRXoUReMcU2KzTqwZIehuI28w1F97oNW07nd1g7b/SSA==
   dependencies:
-    "@readium/navigator-html-injectables" "2.6.3"
-    "@readium/shared" "2.4.0"
+    "@readium/navigator-html-injectables" "2.9.2"
+    "@readium/shared" "2.8.0"
 
-"@readium/helpers@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@readium/helpers/-/helpers-1.0.0.tgz#e5ef684769d85bd90bf202bba7489a142155e15a"
-  integrity sha512-7q1ZZhY6/drlSyJvcNweWZlbqv4yfr5fLgM+UF4sf1qa7EJJ+yPmVcuhui1ntPbiS3Wae0mh0kL4AFsyOXyrbQ==
+"@readium/guided-navigation@1.2.2", "@readium/guided-navigation@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@readium/guided-navigation/-/guided-navigation-1.2.2.tgz#b4e31bd5fa8427a3edcc3e430ce3c19795b9cacb"
+  integrity sha512-Ad1JE3mxsj8cN8ccNv+tIGI93ITyplEgiep4SNA2UappSOEsh5Tfjt1hLw1aL1q/fnCWxigi0WzXCpl/l9KX+w==
+  dependencies:
+    "@readium/helpers" "1.2.1"
+    "@readium/shared" "2.8.0"
+    css-selector-generator "^3.9.4"
+
+"@readium/helpers@1.2.1", "@readium/helpers@^1.2.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@readium/helpers/-/helpers-1.2.1.tgz#21d5e9e8cacf8e4c9fba0b1aa9737894347061da"
+  integrity sha512-QLqduapOxERYl8qr0yL8o8WhjCVcU4Hgu72xhrai3Ph3tXLA7BRXKbL1g7+wTFKEBtmkkXM1gVWdTpBQZZ3/CA==
   dependencies:
     user-agent-data-types "^0.4.2"
 
-"@readium/navigator-html-injectables@2.6.3":
-  version "2.6.3"
-  resolved "https://registry.yarnpkg.com/@readium/navigator-html-injectables/-/navigator-html-injectables-2.6.3.tgz#e76122029d1445c45f98c0de941dd908b7da6f04"
-  integrity sha512-9txUqqQ2pJ6UJvnVFFrCsxCf9qujAi99sP6DeyCGBF3WIKVP2UGC63El35A8im68aDMbFOmeGLY+HXCOaxvviw==
+"@readium/navigator-html-injectables@2.9.2":
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/@readium/navigator-html-injectables/-/navigator-html-injectables-2.9.2.tgz#c4a00f2f1d5a7f15b9e6d8b18be4813513276b85"
+  integrity sha512-Ynr7ey1JGSNmiiZ/hTFB3DtOdGy7sUowmApLfipIMspTbDoocppMfq2jj7g78hIj+pBSpRsuew7A9RFml/f84g==
   dependencies:
-    "@readium/helpers" "1.0.0"
-    "@readium/shared" "2.4.0"
+    "@readium/helpers" "1.2.1"
+    "@readium/shared" "2.8.0"
 
-"@readium/navigator@2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@readium/navigator/-/navigator-2.8.2.tgz#53b34fbdec1606b5d5d5d4049ec64c66d56c0bdf"
-  integrity sha512-lZ12/HnkuP8B3xiGBCvLWZZQiKEIBbEVKqqfHznuyOKebSKyNqkrDNXZ2oYcVe0lSLXmisB5FIezPTZwGoTDIw==
+"@readium/navigator@2.14.0":
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/@readium/navigator/-/navigator-2.14.0.tgz#6684f1e26ab5f66f43490262d70fd73af9c2921b"
+  integrity sha512-+drMndjNmRFhnEefbr4EfVAcLD8kEG925qNU1saxfydGTjjxnxJas1QgcykgRSdiIKiBLHyJt0KJRVOq7/iGFA==
   dependencies:
-    "@readium/decorator" "1.0.2"
-    "@readium/helpers" "1.0.0"
-    "@readium/navigator-html-injectables" "2.6.3"
-    "@readium/shared" "2.4.0"
+    "@readium/decorator" "1.3.2"
+    "@readium/guided-navigation" "1.2.2"
+    "@readium/helpers" "1.2.1"
+    "@readium/navigator-html-injectables" "2.9.2"
+    "@readium/shared" "2.8.0"
+    "@readium/speech" "^0.18.0"
 
-"@readium/shared@2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@readium/shared/-/shared-2.4.0.tgz#b02d3a8041860fa16dc314f7d68b434a5db35cf2"
-  integrity sha512-j3N2dqCuFja5ToksYr+G4uKg5vnzNVSLlZy9C071jSkQeRUSIIdREPYo5Gx/XOptkvPwip9O28oaG/JXCW4Z1g==
+"@readium/shared@2.8.0", "@readium/shared@^2.8.0":
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@readium/shared/-/shared-2.8.0.tgz#f7977d392cecd742595736dda0806201d5e0d9ef"
+  integrity sha512-PQ31XF+FZmh4JIHoi6zVi4bCKalQXGD3F2ssiFb2iFKlM7dse2S3EEYZpnTQPdsYV/UN5mEpQmG3EIlgn7Mjuw==
+  dependencies:
+    "@readium/helpers" "1.2.1"
+
+"@readium/speech@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@readium/speech/-/speech-0.18.0.tgz#5d2a7e79102934543027060f615afa241be1026f"
+  integrity sha512-NG/htmcWCIZLfKYofVFz8pLP0/Y4X4UJOhfUPvJDoy1PvwrjzWWXK/MXirVlh7Y1EJAjDdhLhbESZ1CJG+/OFQ==
+  dependencies:
+    "@readium/decorator" "^1.2.5"
+    "@readium/guided-navigation" "^1.2.2"
+    "@readium/helpers" "^1.2.0"
+    "@readium/shared" "^2.8.0"
+    i18next "^26.4.0"
 
 "@repeaterjs/repeater@^3.0.4", "@repeaterjs/repeater@^3.0.6":
   version "3.0.6"
@@ -11453,6 +11477,11 @@ css-select@^5.1.0:
     domutils "^3.0.1"
     nth-check "^2.0.1"
 
+css-selector-generator@^3.9.4:
+  version "3.9.4"
+  resolved "https://registry.yarnpkg.com/css-selector-generator/-/css-selector-generator-3.9.4.tgz#153483e3c010fc22084c5df0e42d4e1a06ff3681"
+  integrity sha512-UGmb2Llm6TZB3UYu0enMCqJZna1xNPFYujde5yQml6e7Igm/fBaeDYph8rE35C1/gGjaB8HRbwVsN8v+d3P30g==
+
 css-tree@^1.1.2, css-tree@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-1.1.3.tgz#eb4870fb6fd7707327ec95c2ff2ab09b5e8db91d"
@@ -15068,6 +15097,11 @@ i18next@^26.0.1:
   integrity sha512-vtz5sXU4+nkCm8yEU+JJ6yYIx0mkg9e68W0G0PXpnOsmzLajNsW5o28DJMqbajxfsfq0gV3XdrBudsDQnwxfsQ==
   dependencies:
     "@babel/runtime" "^7.29.2"
+
+i18next@^26.4.0:
+  version "26.7.1"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-26.7.1.tgz#33bc0c45e6be754f0141cbb9289187db27aac485"
+  integrity sha512-cX+3RRVczel/V2kCMTACckSGSpqgtWYEA6beXNYVms7dOQiHojdPYHD26lT4IKimNeoGWrLvtPgjftbRvmZJVw==
 
 iconv-lite@0.6.3, iconv-lite@^0.6.2:
   version "0.6.3"

@@ -55,8 +55,7 @@ export default function ReadingDefaultsScene() {
 			}),
 		[library],
 	)
-
-	const form = useForm<PatchParams>({
+	const form = useForm({
 		defaultValues: formDefaults(library),
 		resolver: zodResolver(schema),
 	})

@@ -1,6 +1,6 @@
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 
-import { CreateOrUpdateEmailerSchema, createSchema } from '../schema'
+import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from '../schema'
 
 const translateFn = vi.fn()
 
@@ -25,14 +25,17 @@ const createEmailer = (
 
 describe('CreateOrUpdateEmailerSchema', () => {
 	describe('formDefaults', () => {
-		it('should default isPrimary to true when no existing emailers', () => {
-			const schema = createSchema([], translateFn, true)
-			expect(schema.parse(createEmailer({ isPrimary: undefined })).isPrimary).toBe(true)
+		it('should default isPrimary to true when no existing emailer', () => {
+			expect(formDefaults().isPrimary).toBe(true)
 		})
 
-		it('should default isPrimary to false when existing emailers', () => {
-			const schema = createSchema(['existingName'], translateFn, true)
-			expect(schema.parse(createEmailer({ isPrimary: undefined })).isPrimary).toBe(false)
+		it('should use the existing emailer isPrimary value', () => {
+			expect(formDefaults({ isPrimary: false } as any).isPrimary).toBe(false)
+		})
+
+		it('schema requires isPrimary', () => {
+			const schema = createSchema([], translateFn, true)
+			expect(schema.safeParse(createEmailer({ isPrimary: undefined })).success).toBe(false)
 		})
 
 		it('should build form defaults from an emailer', () => {

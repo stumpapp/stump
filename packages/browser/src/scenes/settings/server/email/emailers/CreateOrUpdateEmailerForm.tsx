@@ -48,7 +48,7 @@ export default function CreateOrUpdateEmailerForm({
 			),
 		[t, emailer, existingNames],
 	)
-	const form = useForm<CreateOrUpdateEmailerSchema>({
+	const form = useForm({
 		defaultValues: formDefaults(emailer),
 		resolver: zodResolver(schema),
 	})

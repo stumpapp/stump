@@ -59,7 +59,7 @@ const auth = z
 	.optional()
 
 const serverConfig = z.object({
-	customHeaders: z.record(z.string()).optional(),
+	customHeaders: z.record(z.string(), z.string()).optional(),
 	auth: auth.optional(),
 })
 export type ServerConfig = z.infer<typeof serverConfig>

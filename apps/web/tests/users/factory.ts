@@ -48,13 +48,13 @@ export async function createTestUser(browser: Browser, input: TestUser): Promise
 	const userCtx = await browser.newContext()
 	const userPage = await userCtx.newPage()
 
-	login(userPage, input)
+	await login(userPage, input)
 
 	async function cleanup() {
 		await runAsAdmin(browser, async (adminPage) => {
 			await executeGql(
 				adminPage,
-				`mutation E2EDeleteUser($id: ID!) { deleteUser(id: $id, hardDelete: true) }`,
+				`mutation E2EDeleteUser($id: ID!) { deleteUser(id: $id, hardDelete: true) { id } }`,
 				{ id },
 			)
 		})
@@ -84,7 +84,7 @@ export async function ensureUser(adminPage: Page, input: TestUser): Promise<stri
 			adminPage,
 			`
 					mutation E2EDeleteUser($id: ID!) {
-						deleteUser(id: $id, hardDelete: true)
+						deleteUser(id: $id, hardDelete: true) { id }
 					}
 				`,
 			{ id: existing.id },
@@ -120,6 +120,24 @@ export async function login(page: Page, user: Omit<TestUser, 'permissions'>) {
 	if (!loginRes.ok()) {
 		throw new Error(`Login failed for test user "${user.username}": ${await loginRes.text()}`)
 	}
+}
+
+/** get the user id for a given username using provided auth ctx, assumes required permissions */
+export async function getUserId(page: Page, username: string): Promise<string> {
+	// TODO(gql): consider adding a userByUsername query
+	const data = await executeGql<{ users: { nodes: { id: string; username: string }[] } }>(
+		page,
+		`query E2EListUsers {
+			users(pagination: { none: { unpaginated: true } }) {
+				nodes { id username }
+			}
+		}`,
+	)
+	const user = data.users.nodes.find((u) => u.username === username)
+	if (!user) {
+		throw new Error(`User "${username}" not found`)
+	}
+	return user.id
 }
 
 /**

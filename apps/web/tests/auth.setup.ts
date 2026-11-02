@@ -38,7 +38,7 @@ for (const [persona, user] of Object.entries(personas)) {
 		const ctx = await browser.newContext()
 		const page = await ctx.newPage()
 
-		login(page, user)
+		await login(page, user)
 
 		await page.request.storageState({ path: authStatePath(persona) })
 		await ctx.close()

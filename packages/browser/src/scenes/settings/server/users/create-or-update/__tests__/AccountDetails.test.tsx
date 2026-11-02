@@ -15,7 +15,7 @@ type SubjectProps = {
 }
 
 const Subject = ({ formState, existingUsers = [] }: SubjectProps) => {
-	const form = useForm<Pick<CreateOrUpdateUserSchema, 'username' | 'password'>>({
+	const form = useForm({
 		defaultValues: formDefaults(formState as ExistingUser | undefined),
 		resolver: zodResolver(
 			buildSchema(

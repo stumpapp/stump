@@ -21,20 +21,6 @@ import { ILibraryContext } from '@/components/library/context'
 type Library = ILibraryContext['library']
 
 /**
- * A type guard to check if the input is a valid {@link LibraryPattern}
- */
-const isLibraryPattern = (input: string): input is LibraryPattern => {
-	return input === LibraryPattern.SeriesBased || input === LibraryPattern.CollectionBased
-}
-
-/**
- * A type guard to check if the input is a valid {@link LibraryViewMode}
- */
-const isLibraryViewMode = (input: string): input is LibraryViewMode => {
-	return input === LibraryViewMode.Series || input === LibraryViewMode.Books
-}
-
-/**
  * A function to normalise paths (remove all trailing slashes)
  */
 export const normalizePath = (path: string) => {
@@ -88,18 +74,15 @@ const scaledDimension = z.object({
 const resizeOptionsSchema = z.union([exactResize, scaledEventlyByFactor, scaledDimension])
 
 const thumbnailConfig = z.object({
-	enabled: z.boolean().default(false),
-	format: imageFormatSchema.default(SupportedImageFormat.Webp),
+	enabled: z.boolean(),
+	format: imageFormatSchema,
 	quality: z
 		.number()
 		.int()
 		.nullish()
-		.refine(
-			(value) => value == undefined || (value > 0 && value <= 100),
-			() => ({
-				message: 'Thumbnail quality must be between 0 and 100',
-			}),
-		),
+		.refine((value) => value == undefined || (value > 0 && value <= 100), {
+			message: 'Thumbnail quality must be between 0 and 100',
+		}),
 	resizeMethod: resizeOptionsSchema.nullish(),
 })
 
@@ -111,51 +94,45 @@ export const buildSchema = (
 	library?: Library,
 ) =>
 	z.object({
-		convertRarToZip: z.boolean().default(false),
-		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),
-		defaultReadingImageScaleFit: z
-			.enum(['AUTO', 'HEIGHT', 'WIDTH', 'NONE'])
-			.default('HEIGHT')
-			.optional(),
+		convertRarToZip: z.boolean(),
+		defaultReadingDir: z.enum(['LTR', 'RTL']).optional(),
+		defaultReadingImageScaleFit: z.enum(['AUTO', 'HEIGHT', 'WIDTH', 'NONE']).optional(),
 		defaultReadingMode: z
 			.enum(['PAGED', 'CONTINUOUS_VERTICAL', 'CONTINUOUS_HORIZONTAL'])
-			.default('PAGED')
 			.optional(),
 		description: z.string().nullable().optional(),
-		generateFileHashes: z.boolean().default(false),
-		generateKoreaderHashes: z.boolean().default(false),
-		hardDeleteConversions: z.boolean().default(false),
-		watch: z.boolean().default(true),
-		ignoreRules: z
-			.array(
-				z.object({
-					glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
-					ignore_parents: z.boolean().default(false),
-					ignore_subdirs: z.boolean().default(false),
-				}),
-			)
-			.default([]),
-		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
-		libraryType: z.nativeEnum(LibraryType).default(LibraryType.Mixed),
-		defaultLibraryViewMode: z.string().refine(isLibraryViewMode).default('SERIES'),
-		hideSeriesView: z.boolean().default(false),
-		skipBookOverview: z.boolean().default(false),
+		generateFileHashes: z.boolean(),
+		generateKoreaderHashes: z.boolean(),
+		hardDeleteConversions: z.boolean(),
+		watch: z.boolean(),
+		ignoreRules: z.array(
+			z.object({
+				glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
+				ignore_parents: z.boolean(),
+				ignore_subdirs: z.boolean(),
+			}),
+		),
+		libraryPattern: z.enum(LibraryPattern),
+		libraryType: z.enum(LibraryType),
+		defaultLibraryViewMode: z.enum(LibraryViewMode),
+		hideSeriesView: z.boolean(),
+		skipBookOverview: z.boolean(),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
-			.refine(
+			.superRefine((val, ctx) => {
 				// return falsy value to indicate failure.
 				// If the library name is already taken -> fail
 				// If the name is not changing -> pass (override the fail)
-				(val) => {
-					const isTaken = existingLibraries.some((l) => l.name === val)
-					const isUnchanged = library?.name === val
-					return !isTaken || isUnchanged
-				},
-				(val) => ({
+				const isTaken = existingLibraries.some((l) => l.name === val)
+				const isUnchanged = library?.name === val
+				if (!isTaken || isUnchanged) return
+
+				ctx.addIssue({
+					code: 'custom',
 					message: `You already have a library named ${val}.`,
-				}),
-			),
+				})
+			}),
 		path: z
 			.string()
 			.min(1, { message: 'Library path is required' })
@@ -195,8 +172,8 @@ export const buildSchema = (
 				}
 			}),
 		oneshotsDirectory: z.string().nullish(), // will be relative to path, if provided
-		processMetadata: z.boolean().default(true),
-		scanAfterPersist: z.boolean().default(true),
+		processMetadata: z.boolean(),
+		scanAfterPersist: z.boolean(),
 		tags: z
 			.array(
 				z.object({
@@ -207,7 +184,7 @@ export const buildSchema = (
 			.optional(),
 		thumbnailConfig,
 		oidcGroups: z.array(z.string()).nullish(),
-		processThumbnailColorsEvenWithoutConfig: z.boolean().default(false),
+		processThumbnailColorsEvenWithoutConfig: z.boolean(),
 	})
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 

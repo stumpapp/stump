@@ -35,9 +35,9 @@ export default function PagePopoverForm({
 
 				return num > 0 && num <= totalPages
 			},
-			() => ({
+			{
 				message: `Please enter a number from 1 to ${totalPages}.`,
-			}),
+			},
 		),
 	})
 

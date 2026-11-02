@@ -11,6 +11,7 @@ import {
 	BookClubMembershipOptions,
 	BookClubRoleMappingForm,
 	buildSchema,
+	createFormDefaults,
 	CreateOrUpdateBookClubSchema,
 } from '@/components/bookClub/createOrUpdateForm'
 import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
@@ -41,7 +42,8 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	const existingNames = useMemo(() => bookClubs.map(({ name }) => name), [bookClubs])
 
 	const schema = useMemo(() => buildSchema(t, existingNames, true), [t, existingNames])
-	const form = useForm<CreateOrUpdateBookClubSchema>({
+	const form = useForm({
+		defaultValues: createFormDefaults(),
 		resolver: zodResolver(schema),
 	})
 

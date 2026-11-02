@@ -12,6 +12,7 @@ import { SavedServerWithConfig } from '~/stores/savedServer'
 import { CreateOrUpdateServerForm } from './CreateOrUpdateServerForm'
 import {
 	CreateOrUpdateServerData,
+	CreateOrUpdateServerInput,
 	createSchema,
 	getUpdateServerDefaults,
 	intoCreateServer,
@@ -51,7 +52,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 		[editingServer, updateServer],
 	)
 
-	const form = useForm<CreateOrUpdateServerData>({
+	const form = useForm<CreateOrUpdateServerInput, unknown, CreateOrUpdateServerData>({
 		defaultValues: getUpdateServerDefaults(editingServer),
 		resolver: zodResolver(
 			createSchema(

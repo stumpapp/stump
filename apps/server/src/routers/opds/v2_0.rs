@@ -48,6 +48,7 @@ use stump_core::{
 	Ctx,
 };
 
+use super::opds_strings;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
@@ -299,6 +300,7 @@ async fn catalog(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let libraries = library::Entity::find_for_user(&user)
@@ -311,7 +313,7 @@ async fn catalog(
 	let library_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Libraries".to_string())
+				.title(i18n.libraries.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_count)
@@ -354,7 +356,7 @@ async fn catalog(
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Latest Books".to_string())
+				.title(i18n.latest_books_feed.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(latest_books_count)
@@ -397,7 +399,7 @@ async fn catalog(
 	let keep_reading_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Keep Reading".to_string())
+				.title(i18n.keep_reading_feed.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(continue_reading_count)
@@ -420,7 +422,7 @@ async fn catalog(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title("Stump OPDS V2 Catalog".to_string())
+					.title(i18n.catalog_v2.to_string())
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
@@ -441,7 +443,7 @@ async fn catalog(
 					.build()?.as_link(),
 			]))
 			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title("Libraries".to_string())
+				.title(i18n.libraries.to_string())
 				.base_link(
 					OPDSBaseLinkBuilder::default()
 						.href(link_finalizer.format_link("/opds/v2.0/libraries"))
@@ -462,6 +464,7 @@ async fn search(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 	let query = query.ok_or(APIError::BadRequest(
 		"Query parameter is required".to_string(),
@@ -480,7 +483,7 @@ async fn search(
 	let library_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Libraries".to_string())
+				.title(i18n.libraries.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_count)
@@ -523,7 +526,7 @@ async fn search(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Series".to_string())
+				.title(i18n.series.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(series_count)
@@ -569,7 +572,7 @@ async fn search(
 	let books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Books".to_string())
+				.title(i18n.books.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(books_count)
@@ -592,7 +595,7 @@ async fn search(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(format!("Search - {}", query.clone()))
+					.title(format!("{} - {}", i18n.search, query.clone()))
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
@@ -623,6 +626,7 @@ async fn browse_libraries(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	let take = pagination.limit();
 
@@ -648,7 +652,7 @@ async fn browse_libraries(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Series".to_string())
+				.title(i18n.series.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(series_count)
@@ -705,7 +709,7 @@ async fn browse_libraries(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title("Browse Libraries".to_string())
+					.title(i18n.browse_libraries.to_string())
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(library_count)
@@ -752,6 +756,7 @@ async fn browse_library_by_id(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	let library = library::Entity::find_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
@@ -774,7 +779,7 @@ async fn browse_library_by_id(
 	let books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Library Books - All".to_string())
+				.title(i18n.library_books_all.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_books_count)
@@ -810,7 +815,7 @@ async fn browse_library_by_id(
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Library Books - Latest".to_string())
+				.title(i18n.library_books_latest.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_books_count)
@@ -850,7 +855,7 @@ async fn browse_library_by_id(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title("Library Series".to_string())
+				.title(i18n.library_series.to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_series_count)
@@ -885,7 +890,7 @@ async fn browse_library_by_id(
 					.build()?,
 			)]))
 			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title("All Series".to_string())
+				.title(i18n.all_series_feed.to_string())
 				.base_link(
 					OPDSBaseLinkBuilder::default()
 						.href(
@@ -1031,6 +1036,7 @@ async fn browse_library_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1039,7 +1045,7 @@ async fn browse_library_books(
 		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
 		pagination.0,
-		"Library Books - All",
+		i18n.library_books_all,
 		None,
 		format!("/opds/v2.0/libraries/{id}/books").as_str(),
 	)
@@ -1055,6 +1061,7 @@ async fn latest_library_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1063,7 +1070,7 @@ async fn latest_library_books(
 		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
 		(media::Column::CreatedAt, Order::Desc),
 		pagination.0,
-		"Library Books - Latest",
+		i18n.library_books_latest,
 		None,
 		format!("/opds/v2.0/libraries/{id}/books/latest").as_str(),
 	)
@@ -1079,6 +1086,7 @@ async fn browse_library_series(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 	let library = library::Entity::find_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
 		.one(ctx.conn.as_ref())
@@ -1130,7 +1138,7 @@ async fn browse_library_series(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(format!("{} Series", library.name))
+					.title(format!("{} {}", library.name, i18n.series_suffix))
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(series_count)
@@ -1182,6 +1190,7 @@ async fn browse_series(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	let take = pagination.limit();
 	let series = series::Entity::find_for_user(&user)
@@ -1244,7 +1253,7 @@ async fn browse_series(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title("Browse Series".to_string())
+					.title(i18n.browse_series.to_string())
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(series_count)
@@ -1275,6 +1284,7 @@ async fn browse_series_by_id(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	let series::ModelWithMetadata { series, metadata } =
 		series::ModelWithMetadata::find_for_user(&user)
@@ -1288,7 +1298,7 @@ async fn browse_series_by_id(
 	let title = metadata
 		.and_then(|m| m.title)
 		.or(Some(name))
-		.unwrap_or_else(|| format!("Series {}", id));
+		.unwrap_or_else(|| format!("{}{}", i18n.series_fallback_prefix, id));
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1313,6 +1323,7 @@ async fn browse_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	let filter_query_string = params.filter.to_query_string();
 	let subtitle = params.filter.subtitle();
@@ -1332,7 +1343,7 @@ async fn browse_books(
 		condition,
 		(media::Column::Name, Order::Asc),
 		params.pagination,
-		"Browse Books",
+		i18n.browse_books,
 		subtitle,
 		&base_url,
 	)
@@ -1348,6 +1359,7 @@ async fn latest_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1356,7 +1368,7 @@ async fn latest_books(
 		None,
 		(media::Column::CreatedAt, Order::Desc),
 		pagination.0,
-		"Latest Books",
+		i18n.latest_books_feed,
 		None,
 		"/opds/v2.0/books/latest",
 	)
@@ -1375,6 +1387,7 @@ async fn keep_reading(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let i18n = opds_strings(&req);
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	fetch_books_and_generate_feed(
@@ -1389,7 +1402,7 @@ async fn keep_reading(
 		),
 		(reading_session::Column::UpdatedAt, Order::Desc),
 		pagination.0,
-		"Currently Reading",
+		i18n.currently_reading,
 		None,
 		"/opds/v2.0/books/keep-reading",
 	)

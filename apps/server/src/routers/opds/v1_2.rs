@@ -37,6 +37,7 @@ use stump_core::{
 	},
 };
 
+use super::opds_strings;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
@@ -150,13 +151,14 @@ fn service_url(req_ctx: &AuthContext) -> String {
 }
 
 async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
 			Utc::now().into(),
-			"Keep reading".to_string(),
+			i18n.keep_reading.title.to_string(),
 			None,
-			Some(String::from("Continue reading your in progress books")),
+			Some(String::from(i18n.keep_reading.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -168,9 +170,9 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsEntry::new(
 			"allSeries".to_string(),
 			Utc::now().into(),
-			"All series".to_string(),
+			i18n.all_series.title.to_string(),
 			None,
-			Some(String::from("Browse by series")),
+			Some(String::from(i18n.all_series.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -182,9 +184,9 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsEntry::new(
 			"latestSeries".to_string(),
 			Utc::now().into(),
-			"Latest series".to_string(),
+			i18n.latest_series.title.to_string(),
 			None,
-			Some(String::from("Browse latest series")),
+			Some(String::from(i18n.latest_series.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -196,9 +198,9 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsEntry::new(
 			"allLibraries".to_string(),
 			Utc::now().into(),
-			"All libraries".to_string(),
+			i18n.all_libraries.title.to_string(),
 			None,
-			Some(String::from("Browse by library")),
+			Some(String::from(i18n.all_libraries.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -210,9 +212,9 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsEntry::new(
 			"allBooks".to_string(),
 			Utc::now().into(),
-			"All books".to_string(),
+			i18n.all_books.title.to_string(),
 			None,
-			Some(String::from("Browse all books")),
+			Some(String::from(i18n.all_books.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -224,9 +226,9 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsEntry::new(
 			"latestBooks".to_string(),
 			Utc::now().into(),
-			"Latest books".to_string(),
+			i18n.latest_books.title.to_string(),
 			None,
-			Some(String::from("Browse latest books")),
+			Some(String::from(i18n.latest_books.description)),
 			None,
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -257,7 +259,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 
 	let feed = OpdsFeed::new(
 		"root".to_string(),
-		"Stump OPDS catalog".to_string(),
+		i18n.catalog.to_string(),
 		Some(links),
 		entries,
 	);
@@ -275,6 +277,7 @@ async fn keep_reading(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let books = OPDSPublicationEntity::find_for_user(&req.user())
 		.filter(reading_session::Column::UserId.eq(req.id()))
 		.order_by_desc(reading_session::Column::UpdatedAt)
@@ -289,7 +292,7 @@ async fn keep_reading(
 
 	let feed = OpdsFeed::new(
 		"keepReading".to_string(),
-		"Keep Reading".to_string(),
+		i18n.keep_reading_feed.to_string(),
 		Some(vec![
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -314,6 +317,7 @@ async fn get_libraries(
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let user = req.user();
 
 	let libraries = library::Entity::find_for_user(&user)
@@ -330,7 +334,7 @@ async fn get_libraries(
 
 	let feed = OpdsFeed::new(
 		"allLibraries".to_string(),
-		"All libraries".to_string(),
+		i18n.all_libraries.title.to_string(),
 		Some(vec![
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -416,6 +420,7 @@ async fn get_series(
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let user = req.user();
 	let search_cpy = search.clone();
 	let series = series::Entity::find_for_user(&user)
@@ -450,7 +455,7 @@ async fn get_series(
 
 	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
 		id: "allSeries".to_string(),
-		title: "All Series".to_string(),
+		title: i18n.all_series_feed.to_string(),
 		entries,
 		href_postfix: "series".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
@@ -468,6 +473,7 @@ async fn get_latest_series(
 	pagination: Query<OffsetPagination>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let user = req.user();
 	let series = series::Entity::find_for_user(&user)
 		.order_by_desc(series::Column::UpdatedAt)
@@ -486,7 +492,7 @@ async fn get_latest_series(
 
 	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
 		id: "latestSeries".to_string(),
-		title: "Latest Series".to_string(),
+		title: i18n.latest_series_feed.to_string(),
 		entries,
 		href_postfix: "series/latest".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
@@ -560,11 +566,12 @@ async fn search_feed(
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let search = search.unwrap_or_default();
 	if search.is_empty() {
 		let feed = OpdsFeed::new(
 			"searchFeed".to_string(),
-			"Search Results".to_string(),
+			i18n.search_results.to_string(),
 			Some(vec![
 				OpdsLink {
 					link_type: OpdsLinkType::Navigation,
@@ -641,7 +648,7 @@ async fn search_feed(
 
 	let feed = OpdsFeed::new(
 		"searchFeed".to_string(),
-		"Search Results".to_string(),
+		i18n.search_results.to_string(),
 		Some(vec![
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -667,6 +674,7 @@ async fn get_books(
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let user = req.user();
 	let search_cpy = search.clone();
 
@@ -708,7 +716,7 @@ async fn get_books(
 
 	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
 		id: "allBooks".to_string(),
-		title: "All Books".to_string(),
+		title: i18n.all_books_feed.to_string(),
 		entries,
 		href_postfix: "books".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
@@ -727,6 +735,7 @@ async fn get_latest_books(
 	pagination: Query<OffsetPagination>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
+	let i18n = opds_strings(&req);
 	let user = req.user();
 
 	let books = OPDSPublicationEntity::find_for_user(&user)
@@ -748,7 +757,7 @@ async fn get_latest_books(
 
 	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
 		id: "latestBooks".to_string(),
-		title: "Latest Books".to_string(),
+		title: i18n.latest_books_feed.to_string(),
 		entries,
 		href_postfix: "books/latest".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {

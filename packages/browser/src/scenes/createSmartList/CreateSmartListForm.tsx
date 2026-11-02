@@ -36,7 +36,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 		data: { smartLists: lists },
 	} = useSuspenseGraphQL(query, [sdk.cacheKeys.smartListNames])
 
-	const form = useForm<SmartListFormSchema>({
+	const form = useForm({
 		defaultValues: {
 			filters: {
 				groups: [],

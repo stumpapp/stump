@@ -309,7 +309,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		open()
 
 		return () => abort.abort()
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id, sdk, isIncognito, t])
 
@@ -412,7 +411,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				queryClient.invalidateQueries({ queryKey: ['keepReading'], exact: false }),
 			])
 		}
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id, isIncognito])
 

@@ -6,7 +6,7 @@
 	"private": true,
 	"main": "src/index.ts",
 	"scripts": {
-		"check-types": "tsc -b tsconfig.json",
+		"check-types": "tsc --noEmit",
 		"lint": "eslint .",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"test": "vitest run",
@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@dnd-kit/core": "^6.1.0",
 		"@dnd-kit/sortable": "^8.0.0",
-		"@hookform/resolvers": "^3.9.0",
+		"@hookform/resolvers": "^7.0.1",
 		"@panzoom/panzoom": "^4.6.0",
 		"@readium/navigator": "2.8.2",
 		"@readium/navigator-html-injectables": "2.6.3",
@@ -80,7 +80,7 @@
 		"ts-pattern": "^5.1.1",
 		"url-join": "^5.0.0",
 		"use-count-up": "^3.0.1",
-		"zod": "^3.23.8",
+		"zod": "^4.6.7",
 		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
@@ -99,7 +99,7 @@
 		"cross-fetch": "^4.0.0",
 		"jsdom": "^26.0.0",
 		"typescript": "^5.4.5",
-		"vite": "^8.2.2",
+		"vite": "^8.3.5",
 		"vitest": "^4.1.11"
 	}
 }

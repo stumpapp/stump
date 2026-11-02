@@ -32,7 +32,7 @@ export default function ReaderHeader() {
 	return (
 		<motion.nav
 			// @ts-expect-error: It does have className?
-			className={cn('left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-foreground', {
+			className={cn('left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-gray-450', {
 				'top-9': platform !== 'browser',
 			})}
 			initial={false}
@@ -43,7 +43,7 @@ export default function ReaderHeader() {
 			<div className="flex w-full items-center justify-between">
 				<div className="space-x-4 flex items-center">
 					<Link
-						className="flex items-center text-foreground hover:text-foreground/80"
+						className="flex items-center text-gray-450 hover:text-gray-450/80"
 						title={translate('shared.imageReader.header.goToMediaOverview')}
 						to={paths.bookOverview(id)}
 					>
@@ -51,11 +51,11 @@ export default function ReaderHeader() {
 					</Link>
 				</div>
 
-				<Text className="text-foreground">{resolvedName}</Text>
+				<Text className="text-gray-450">{resolvedName}</Text>
 
 				<div className="space-x-1.5 flex items-center">
 					{isFullscreenAvailable && (
-						<ControlButton onClick={toggleFullscreen}>
+						<ControlButton onClick={toggleFullscreen} variant="on-overlay">
 							<FullScreenIcon className="h-4 w-4" />
 						</ControlButton>
 					)}

@@ -788,7 +788,14 @@ fn parse_opf_xml(
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
-	let mut adjusted_path = path.clone();
+	// EPUB resources are stored in the zip archive with `/` separators, but callers
+	// may hand us Windows-style `\` separators on any platform (e.g. a path joined by
+	// `PathBuf` on Windows and later round-tripped as a string). On non-Windows
+	// platforms `\` is not a separator, so without this conversion the entire string
+	// would be a single component and `starts_with(root)` below would never match.
+	// (epub-rs's `convert_path_seps` performs the same normalization.)
+	let path_str = path.to_string_lossy().replace('\\', "/");
+	let mut adjusted_path = PathBuf::from(path_str);
 
 	if !adjusted_path.starts_with(root) {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
@@ -811,6 +818,14 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 		}
 	}
 
+	// EPUB resources are stored in the zip archive with `/` separators. On Windows,
+	// `PathBuf::join` produces `\` separators, which breaks exact-name lookup in the
+	// archive (epub-rs's `convert_path_seps` performs the same normalization). Convert
+	// Windows separators to `/` so resource paths match archive entry names.
+	if cfg!(windows) {
+		normalized = PathBuf::from(normalized.to_string_lossy().replace('\\', "/"));
+	}
+
 	normalized
 }
 
@@ -821,10 +836,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_svg_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -834,10 +846,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book_image_cover.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -851,10 +860,8 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover_last_chapter() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover_last_chapter.epub");
+		let epub_path =
+			::tests::fixtures::test_data_dir().join("book_image_cover_last_chapter.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -1066,6 +1073,22 @@ mod tests {
 		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		// Windows-style separators (as produced by `PathBuf::join` on Windows) must be
+		// normalized to POSIX separators, since zip archive entry names always use `/`.
+		let path = PathBuf::from(r"OEBPS\Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
+
+		let path = PathBuf::from(r"Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
 	}
 
 	#[test]
@@ -1105,10 +1128,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre.opf test file");
@@ -1207,10 +1227,8 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_html_description_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-html-descriptions.opf");
+		let opf_path =
+			::tests::fixtures::test_data_dir().join("calibre-html-descriptions.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-html-descriptions.opf test file");
@@ -1255,10 +1273,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_3_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-2.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre-2.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-2.opf test file");

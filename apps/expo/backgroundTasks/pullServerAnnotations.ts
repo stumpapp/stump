@@ -3,6 +3,7 @@ import { graphql, PullServerAnnotationsQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import isEqual from 'lodash/isEqual'
+import { z } from 'zod'
 
 import { annotationLocator, annotations, db, downloadedFiles, syncStatus } from '~/db'
 import { ReadiumLocator } from '~/modules/readium'
@@ -47,7 +48,7 @@ const findMatchingLocator = (
 	remoteLocator: ReadiumLocator,
 	local: (typeof annotations.$inferSelect)[],
 ): typeof annotations.$inferSelect | null => {
-	const isLocatorEqual = (parsedLocator?: typeof annotationLocator._type) =>
+	const isLocatorEqual = (parsedLocator?: z.infer<typeof annotationLocator>) =>
 		parsedLocator ? isEqual(remoteLocator, parsedLocator) : false
 
 	const found = local.find(

@@ -41,7 +41,6 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 			duration: 250,
 			easing: Easing.out(Easing.quad),
 		})
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isVisible])
 

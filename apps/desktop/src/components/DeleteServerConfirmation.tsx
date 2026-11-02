@@ -27,7 +27,7 @@ export default function DeleteServerConfirmation({
 			onConfirm={onConfirm}
 			confirmVariant="destructive"
 			trigger={null}
-			size="md"
+			size="sm"
 		/>
 	)
 }

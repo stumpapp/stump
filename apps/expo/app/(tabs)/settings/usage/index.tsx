@@ -49,7 +49,9 @@ export default function Screen() {
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
 				className="flex-1 bg-background"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				refreshControl={
+					<RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} />
+				}
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="gap-8 px-4 pt-8 flex-1 bg-background">

@@ -39,7 +39,7 @@ export default function ProfileForm() {
 	})
 	type Schema = z.infer<typeof schema>
 
-	const form = useForm<Schema>({
+	const form = useForm({
 		defaultValues: {
 			username: user!.username,
 		},

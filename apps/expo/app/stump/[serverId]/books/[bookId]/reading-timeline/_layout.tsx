@@ -1,4 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Stack } from 'expo-router'
+import get from 'lodash/get'
 import { Platform, View } from 'react-native'
 
 import {
@@ -13,7 +14,6 @@ import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const { from } = useLocalSearchParams<{ sessionId: string; from?: string }>()
 	const { translate } = useTranslate()
 	const { imageMetadata } = useDerivedColorPalette()
 	const colors = useColors()
@@ -53,7 +53,7 @@ export default function Screen() {
 
 				<Stack.Screen
 					name="[sessionId]"
-					options={{
+					options={({ route }) => ({
 						headerTitle: '',
 						headerShown: true,
 						headerTransparent: Platform.OS === 'ios',
@@ -69,11 +69,15 @@ export default function Screen() {
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 						// when jumped to here from root timeline the stack doesn't inject a back so
 						// we add it manually
-						headerLeft: from != null ? () => <BackLink /> : undefined,
+						// FIXME: this really through me for a loop, but at least on android when we
+						// jump here from root the native back doesn't work as expected, i don't
+						// quite understand why yet but i assume something about the routing is
+						// tripping it up. for now, i've just swapped to the js backlink
+						headerLeft: get(route.params, 'from') != null ? () => <BackLink /> : undefined,
 						contentStyle: {
 							backgroundColor: sessionBackgroundColor,
 						},
-					}}
+					})}
 				/>
 			</Stack>
 		</View>

@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { BlurTargetView, BlurView } from 'expo-blur'
 import { Check } from 'lucide-react-native'
 import { useRef } from 'react'
-import { Pressable, View } from 'react-native'
+import { type HostInstance, Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -52,7 +52,7 @@ export default function GridImageItem({
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
 
-	const blurTargetRef = useRef<View>(null)
+	const blurTargetRef = useRef<HostInstance>(null)
 
 	return (
 		<Pressable onPress={onPress}>

@@ -1,4 +1,4 @@
-// data types used in the Kobo sync API.
+//! data types used in the Kobo sync API.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

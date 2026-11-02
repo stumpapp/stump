@@ -1,5 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useGraphQL } from '@stump/client'
 import {
 	BookClubBookInput,
@@ -52,6 +52,7 @@ type Suggestion = SuggestionsPickerSheetQuery['bookClubSuggestions'][number]
 export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Props>(
 	({ onAddBook }, ref) => {
 		const sheetRef = useRef<TrueSheet>(null)
+		const listRef = useRef<FlashListRef<Suggestion>>(null)
 		const { clubId } = useBookClubContext()
 
 		const colors = useColors()
@@ -101,10 +102,13 @@ export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Prop
 					ref={sheetRef}
 					detents={[1]}
 					grabber
-					scrollable
+					scrollableRef={listRef}
 					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 					grabberOptions={{ color: colors.sheet.grabber }}
-					style={{ paddingBottom: insets.bottom }}
+					style={{
+						flex: 1,
+						paddingBottom: insets.bottom,
+					}}
 					insetAdjustment="automatic"
 					header={
 						<SheetHeader title="Member suggestions" onClose={() => sheetRef.current?.dismiss()} />
@@ -113,6 +117,7 @@ export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Prop
 					onDidDismiss={() => setIsOpen(false)}
 				>
 					<FlashList
+						ref={listRef}
 						data={suggestions}
 						renderItem={({ item }) => (
 							<SuggestionRow suggestion={item} onSelect={() => handleSelectSuggestion(item)} />

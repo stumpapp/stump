@@ -12,6 +12,8 @@
 		"typescript": "^5.8.3"
 	},
 	"scripts": {
-		"codegen": "graphql-codegen"
+		"codegen": "graphql-codegen",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint ."
 	}
 }

@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal'
 import { createContext, useContext, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { type HostInstance, View } from 'react-native'
 
 type PortalHostContextValue = {
 	name: string
@@ -24,7 +24,7 @@ type PortalHostProviderProps = {
  * inside a sheet
  */
 export function PortalHostProvider({ name, children }: PortalHostProviderProps) {
-	const portalRef = useRef<View>(null)
+	const portalRef = useRef<HostInstance>(null)
 
 	const [sideOffset, setSideOffset] = useState(0)
 	const onPortalLayout = () => {

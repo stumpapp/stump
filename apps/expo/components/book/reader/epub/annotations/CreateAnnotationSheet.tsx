@@ -63,7 +63,6 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 			<SheetWithHeader
 				ref={sheetRef}
 				detents={[0.5, 1]}
-				scrollable
 				backgroundColor={colors.sheet.background}
 				onDidDismiss={handleDismiss}
 				headerLabel="New Annotation"
@@ -73,7 +72,6 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 			>
 				<View className="gap-4">
 					{selectedText && <AnnotatedText text={selectedText} />}
-
 					<AnnotationInput value={annotation} onChangeText={setAnnotation} />
 				</View>
 			</SheetWithHeader>

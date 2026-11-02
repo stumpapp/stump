@@ -41,7 +41,7 @@ export default function BasicSettingsScene() {
 	const { checkPermission } = useAppContext()
 
 	const schema = useMemo(() => buildSchema(libraries, library), [libraries, library])
-	const form = useForm<CreateOrUpdateLibrarySchema>({
+	const form = useForm({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),

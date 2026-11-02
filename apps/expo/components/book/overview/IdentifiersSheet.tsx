@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { GlassView } from 'expo-glass-effect'
 import { Fragment, useRef, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Card, Text } from '~/components/ui'
@@ -29,6 +29,7 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 	const { translate } = useTranslate()
 
 	const sheetRef = useRef<TrueSheet | null>(null)
+	const scrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
@@ -59,13 +60,14 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 				ref={sheetRef}
 				detents={[0.5, 1]}
 				grabber
-				scrollable
+				scrollableRef={scrollRef}
+				style={{ flex: 1 }}
 				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="gap-2 px-4 py-6 flex-1">
+				<ScrollView ref={scrollRef} className="gap-2 px-4 py-6 flex-1">
 					<Card label={translate('shared.bookMetadata.identifiers')}>
 						{identifiers.stumpId && <Card.Row label="Stump" value={identifiers.stumpId} />}
 						{identifiers.identifier && (

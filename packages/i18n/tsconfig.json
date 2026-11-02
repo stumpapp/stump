@@ -1,13 +1,4 @@
 {
-	"extends": "../../tsconfig.options.json",
-	"include": ["src", "src/**/*.json"],
-	"references": [],
-	"compilerOptions": {
-		"outDir": "./dist",
-		"jsx": "preserve",
-		"esModuleInterop": true,
-		"module": "es2022",
-		"moduleResolution": "Node",
-		"resolveJsonModule": true
-	}
+	"extends": "../../tsconfig.base.json",
+	"include": ["src"]
 }

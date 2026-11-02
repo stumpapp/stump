@@ -1,5 +1,5 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
+import { type DropdownItemGroup } from '@stump/components'
 import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
 import {
 	BookMinus,

@@ -7,7 +7,8 @@
 		".": "./src/index.ts"
 	},
 	"scripts": {
-		"check-types": "tsc -b tsconfig.json",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint .",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"test": "vitest run",
 		"clean": "yarn exec rimraf node_modules"
@@ -27,7 +28,6 @@
 		"@types/node": "^20.12.7",
 		"@types/react": "^19.0.0",
 		"prettier": "^3.2.5",
-		"tsconfig": "^7.0.0",
 		"typescript": "^5.4.5",
 		"vitest": "^4.1.11"
 	},

@@ -33,7 +33,31 @@ pub struct Media {
 #[derive(Default, Clone)]
 pub struct MediaMetadata {
 	pub number: Option<f64>,
+	pub title: Option<String>,
 	pub media_id: Option<String>,
+}
+
+impl MediaMetadata {
+	pub async fn insert(&self, db: &DbConn) -> media_metadata::Model {
+		let media_id = self
+			.media_id
+			.clone()
+			.unwrap_or_else(|| Uuid::new_v4().to_string());
+
+		let model = media_metadata::ActiveModel {
+			media_id: sea_orm::Set(Some(media_id)),
+			title: sea_orm::Set(self.title.clone()),
+			number: self.number.map_or(ActiveValue::NotSet, |num| {
+				sea_orm::Set(Some(Decimal::try_from(num).expect("invalid number")))
+			}),
+			..Default::default()
+		}
+		.insert(db)
+		.await
+		.expect("could not insert media metadata");
+
+		model
+	}
 }
 
 impl Media {
@@ -86,16 +110,12 @@ impl Media {
 		};
 
 		if let Some(metadata) = metadata {
-			let _meta_model = media_metadata::ActiveModel {
-				media_id: sea_orm::Set(Some(book.id.clone())),
-				number: metadata.number.map_or(ActiveValue::NotSet, |num| {
-					sea_orm::Set(Some(Decimal::try_from(num).expect("invalid number")))
-				}),
-				..Default::default()
+			let _meta_model = MediaMetadata {
+				media_id: Some(book.id.clone()),
+				..metadata
 			}
 			.insert(db)
-			.await
-			.expect("could not insert media metadata");
+			.await;
 		}
 
 		book

@@ -1,5 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { useState } from 'react'
+import { FlashListRef } from '@shopify/flash-list'
+import { useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import { KeyboardController } from 'react-native-keyboard-controller'
 
@@ -12,7 +13,9 @@ import { useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { useEpubReaderContext } from './context'
-import TableOfContentsSheetContent from './TableOfContentsSheetContent'
+import TableOfContentsSheetContent, {
+	type TableOfContentsItemWithLevel,
+} from './TableOfContentsSheetContent'
 
 const SHEET_PORTAL_HOST = 'table-of-contents-sheet'
 
@@ -23,6 +26,8 @@ export default function TableOfContentsSheet() {
 	const { t } = useTranslate()
 
 	const colors = useColors()
+
+	const scrollableRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -53,7 +58,7 @@ export default function TableOfContentsSheet() {
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				scrollable
+				scrollableRef={scrollableRef}
 				grabber
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
@@ -78,7 +83,7 @@ export default function TableOfContentsSheet() {
 				}
 			>
 				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
-					<TableOfContentsSheetContent isOpen={isOpen} goToPage={goToPage} />
+					<TableOfContentsSheetContent ref={scrollableRef} isOpen={isOpen} goToPage={goToPage} />
 				</PortalHostProvider>
 			</TrueSheet>
 

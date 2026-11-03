@@ -14,7 +14,7 @@ export type ContextMenuItem = {
 }
 
 export type ContextMenuProps = {
-	children: React.ReactNode
+	children: React.ReactNode | ((params: { pressed: boolean }) => React.ReactNode)
 	groups: {
 		items: ContextMenuItem[]
 	}[]

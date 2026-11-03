@@ -3,7 +3,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { BookClubBookInput } from '@stump/graphql'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { Controller, useForm, useFormState } from 'react-hook-form'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, type ScrollViewInstance, View } from 'react-native'
 import { z } from 'zod'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
@@ -32,6 +32,7 @@ type Props = {
 export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 	({ onAddBook }, ref) => {
 		const sheetRef = useRef<TrueSheet>(null)
+		const innerScrollRef = useRef<ScrollViewInstance>(null)
 
 		const colors = useColors()
 
@@ -82,7 +83,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 					ref={sheetRef}
 					detents={['auto', 1]}
 					grabber
-					scrollable
+					scrollableRef={innerScrollRef}
 					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 					grabberOptions={{ color: colors.sheet.grabber }}
 					onDidPresent={() => setIsOpen(true)}
@@ -96,6 +97,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 					}
 				>
 					<ScrollView
+						ref={innerScrollRef}
 						contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
 						keyboardShouldPersistTaps="handled"
 					>

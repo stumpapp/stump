@@ -78,12 +78,13 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 				ref={sheetRef}
 				detents={[1]}
 				grabber
-				scrollable
+				scrollableRef={animatedScrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
@@ -103,7 +104,11 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 									uri: thumbnailData?.url || '',
 									headers: thumbnailData?.headers,
 								}}
-								style={{ width: '100%', height: '100%' }}
+								style={{
+									flex: 1,
+									width: '100%',
+									height: '100%',
+								}}
 								resizeMode="cover"
 								fadeDuration={2000}
 								// android only supports up to blur={25} which doesn't look good,

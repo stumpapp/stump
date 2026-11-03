@@ -1,6 +1,13 @@
 import { Lock, Send, X } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Keyboard, Platform, Pressable, TextInput, View } from 'react-native'
+import {
+	Keyboard,
+	Platform,
+	Pressable,
+	TextInput,
+	type TextInputInstance,
+	View,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Icon, Text } from '~/components/ui'
@@ -34,7 +41,7 @@ export default function MessageComposer({
 	replyingTo,
 	onCancelReply,
 }: MessageComposerProps) {
-	const inputRef = useRef<TextInput>(null)
+	const inputRef = useRef<TextInputInstance>(null)
 
 	const [text, setText] = useState('')
 	const [keyboardVisible, setKeyboardVisible] = useState(false)

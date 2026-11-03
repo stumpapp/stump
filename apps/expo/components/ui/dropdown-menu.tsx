@@ -7,6 +7,7 @@ import {
 	type StyleProp,
 	StyleSheet,
 	Text,
+	type TextInstance,
 	type TextProps,
 	View,
 	type ViewStyle,
@@ -306,7 +307,10 @@ function DropdownMenuSeparator({ className, variant = 'item', ...props }: Separa
 	)
 }
 
-function DropdownMenuShortcut({ className, ...props }: TextProps & React.RefAttributes<Text>) {
+function DropdownMenuShortcut({
+	className,
+	...props
+}: TextProps & React.RefAttributes<TextInstance>) {
 	return (
 		<Text
 			className={cn('text-xs tracking-widest text-foreground-muted ml-auto', className)}

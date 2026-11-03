@@ -1,33 +1,7 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"composite": true,
 		"types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom"],
-		"skipLibCheck": true,
-		"allowImportingTsExtensions": true,
-		"jsx": "react-jsx",
-		"module": "ES2022",
-		"moduleResolution": "Bundler",
-		"emitDeclarationOnly": true,
-		"outDir": "dist",
-		"paths": {
-			"@stump/sdk": ["../sdk/src/index.ts"],
-			"@stump/sdk/*": ["../sdk/src/*"],
-			"@stump/client": ["../client/src/index.ts"],
-			"@stump/client/*": ["../client/src/*"],
-			"@stump/components": ["../components/src/index.ts"],
-			"@stump/components/*": ["../components/src/*"],
-			"@stump/graphql": ["../graphql/src/index.ts"],
-			"@/components/*": ["./src/components/*"],
-			"@/hooks/*": ["./src/hooks/*"],
-			"@/i18n": ["./src/i18n/index.ts"],
-			"@/i18n/*": ["./src/i18n/*"],
-			"@/utils/*": ["./src/utils/*"],
-			"@/context": ["./src/context"],
-			"@/paths": ["./src/paths.ts"],
-			"@/*": ["./src/*"]
-		},
-		"resolveJsonModule": true,
 		"plugins": [
 			{
 				"name": "@0no-co/graphqlsp",
@@ -36,19 +10,5 @@
 			}
 		]
 	},
-	"include": ["src", "src/**/*.json"],
-	"references": [
-		{
-			"path": "../sdk"
-		},
-		{
-			"path": "../client"
-		},
-		{
-			"path": "../components"
-		},
-		{
-			"path": "../graphql"
-		}
-	]
+	"include": ["src"]
 }

@@ -239,7 +239,6 @@ export default function ReadiumReader({
 				store.setBookmarks(bookmarks.map(intoBookmarkRef))
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.ebook?.bookmarks],
 	)
@@ -261,7 +260,6 @@ export default function ReadiumReader({
 				})),
 			)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.ebook?.annotations, highlightColor],
 	)
@@ -277,7 +275,6 @@ export default function ReadiumReader({
 				setLocalUri(null)
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)

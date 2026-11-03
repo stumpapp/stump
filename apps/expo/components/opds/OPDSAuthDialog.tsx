@@ -144,6 +144,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 				}}
 				onDidDismiss={handleDismiss}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				header={
@@ -215,8 +216,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 						)}
 						name="password"
 					/>
-					{/* eslint-disable-next-line react-hooks/refs */}
-					<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" variant="brand">
+					<Button onPress={() => handleSubmit(onSubmit)()} className="mt-4 w-full" variant="brand">
 						<Text>Login</Text>
 					</Button>
 				</View>

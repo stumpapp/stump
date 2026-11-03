@@ -77,7 +77,6 @@ export default function Screen() {
 					resetSelection()
 				}
 			},
-			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 			[increment],
 		),
@@ -144,7 +143,6 @@ export default function Screen() {
 			setItemIdents(allIds)
 			registerCustomActions(customSelectionActions)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[data],
 	)

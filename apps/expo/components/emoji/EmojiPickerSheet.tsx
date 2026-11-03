@@ -1,5 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Image, Pressable, View } from 'react-native'
@@ -88,6 +88,7 @@ const emojiMatchesQuery = (emoji: Emoji, queryTokens: string[]) => {
 
 export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmojiSelect }, ref) => {
 	const sheetRef = useRef<TrueSheet>(null)
+	const listRef = useRef<FlashListRef<ListItem>>(null)
 	const colors = useColors()
 	const emojisByCategory = useEmojis()
 	const [searchQuery, setSearchQuery] = useState('')
@@ -214,6 +215,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				onPress={handlePress}
 				className="items-center justify-center rounded-xl"
 				style={{
+					flex: 1,
 					width: itemSize,
 					height: itemSize,
 					marginRight: index < rowLength - 1 ? 6 : 0,
@@ -222,10 +224,15 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				{isUnicodeEmoji ? (
 					<View
 						className="items-center justify-center"
-						style={{ width: itemSize, height: itemSize }}
+						style={{
+							flex: 1,
+							width: itemSize,
+							height: itemSize,
+						}}
 					>
 						<Text
 							style={{
+								flex: 1,
 								fontSize: glyphSize,
 								lineHeight: glyphSize + 2,
 								textAlign: 'center',
@@ -237,7 +244,11 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				) : (
 					<View
 						className="items-center justify-center"
-						style={{ width: itemSize, height: itemSize }}
+						style={{
+							flex: 1,
+							width: itemSize,
+							height: itemSize,
+						}}
 					>
 						{/* Note: TurboImage allegedly supports GIF but I couldn't get animation to work */}
 						<Image
@@ -247,7 +258,11 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
-							style={{ width: glyphSize, height: glyphSize }}
+							style={{
+								flex: 1,
+								width: glyphSize,
+								height: glyphSize,
+							}}
 							resizeMode="contain"
 						/>
 					</View>
@@ -264,7 +279,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
 			header={<SheetHeader title="Emojis" onClose={dismissSheet} />}
-			scrollable
+			scrollableRef={listRef}
 		>
 			<View className="px-4 py-2">
 				<Input
@@ -277,6 +292,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				/>
 			</View>
 			<FlashList
+				ref={listRef}
 				data={listData}
 				keyExtractor={(item) => item.key}
 				ListEmptyComponent={

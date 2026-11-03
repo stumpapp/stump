@@ -1,3 +1,50 @@
+<a name="0.1.12"></a>
+## 0.1.12 (2026-10-31)
+
+### Added
+
+- ✨ Add scanAllLibraries mutation [[bcda78d](https://github.com/stumpapp/stump/commit/bcda78db77f588721f632945521d2bb87f9adc95)]
+- ✨ (expo): Basic reading stats ([#1483](https://github.com/stumpapp/stump/issues/1483)) [[fd33122](https://github.com/stumpapp/stump/commit/fd33122a87ad195a5776ad0a64459e71c348f8f1)]
+
+### Changed
+
+- 💄 Fix light-mode styles on image reader controls [[76fd453](https://github.com/stumpapp/stump/commit/76fd4531f6b9a3bee1926dc3ea0391392553889e)]
+- 💄 (expo): Fix alignment of session event timestamps [[566b24b](https://github.com/stumpapp/stump/commit/566b24b4f7391875c9fff8ce24953fa7b50c5d01)]
+- 💄 Align job overlay with toast styles [[009b87a](https://github.com/stumpapp/stump/commit/009b87a67d81a4f257c9e40fb56e61ed5870cf2c)]
+- 🗃️ Add migration to drop topbar and related preferences [[ec0fb23](https://github.com/stumpapp/stump/commit/ec0fb233c13ea24dc555bbca6e1e109292112da3)]
+- ⬆️ Upgrade sea orm to v2 ([#1475](https://github.com/stumpapp/stump/issues/1475)) [[67dbed0](https://github.com/stumpapp/stump/commit/67dbed05546801f109e6339af6da7aa818b171d4)]
+
+### Fixed
+
+- 🐛 Fix path normalization for EPUB resources on Windows ([#1437](https://github.com/stumpapp/stump/issues/1437)) [[7997b22](https://github.com/stumpapp/stump/commit/7997b225bb24012564c0f6db695ebca5a0948e5d)]
+- 🐛 Fix empty public_url breaking OIDC auth [[906c1a4](https://github.com/stumpapp/stump/commit/906c1a497f06caa1fcea264ab7c81b8ea48dd07f)]
+- 🐛 Hide unusable cover options in thumbnail selectors ([#1491](https://github.com/stumpapp/stump/issues/1491)) [[9f5452b](https://github.com/stumpapp/stump/commit/9f5452bdb2737dd25e6e2f2c596bb4a36f023712)]
+- 🐛 Fix links to library router not respecting default view [[db6521f](https://github.com/stumpapp/stump/commit/db6521ffe88a99bc8e2dd01788f1ff5c236708e4)]
+- 🐛 (expo): Fix small collection of timeline bugs ([#1485](https://github.com/stumpapp/stump/issues/1485)) [[f436c22](https://github.com/stumpapp/stump/commit/f436c225922043d42338dab98d7241aab1200f55)]
+- 🐛 Set user on KOReader reading device upsert ([#1481](https://github.com/stumpapp/stump/issues/1481)) [[d7399df](https://github.com/stumpapp/stump/commit/d7399dfc21d9107f2efdd6a86501e49a3f0f38bf)]
+
+### Security
+
+- 🔒 Validate image uploads by content and enforce valid image responses [[1fa47aa](https://github.com/stumpapp/stump/commit/1fa47aaf5d9ab5647dac3c71844ffeb187a64eae)]
+- 🔒 Fix upload path traversal in book/series upload mutations [[398c911](https://github.com/stumpapp/stump/commit/398c91168c9030fe3307bc4bd2ba1e6a20d79c70)]
+
+### Miscellaneous
+
+- 🧑‍💻 Monorepo cleanup and consolidation ([#1494](https://github.com/stumpapp/stump/issues/1494)) [[cfc140e](https://github.com/stumpapp/stump/commit/cfc140eb5a5ea8c4ea9ae0eaf44c59cd50f34666)]
+- 🌐 Update Simplified Chinese translations ([#1488](https://github.com/stumpapp/stump/issues/1488)) [[ba8db1b](https://github.com/stumpapp/stump/commit/ba8db1b4e4b733f40f7d35b912cdc370006410f4)]
+- 🩹 Fix annoying stutter navigating between series [[6b6581f](https://github.com/stumpapp/stump/commit/6b6581f0d9495480501cf8497f6afa010ac61e96)]
+- 🩹 (expo): Fix my activity tint background [[ad0989e](https://github.com/stumpapp/stump/commit/ad0989eecfa18da41767268aee4daf6411106e1e)]
+- 🔀 Merge remote-tracking branch &#x27;origin/nightly&#x27; into web-polish [[0b323eb](https://github.com/stumpapp/stump/commit/0b323eb3a912c3dd1d7ea72b96c9b2b580b8ce18)]
+- 📝 Update documentation [[0a747f6](https://github.com/stumpapp/stump/commit/0a747f63d4d0f4db0ed66a593fd76d5f1e89e54b)]
+- 🌐 Reorganize existing translations to new homes [[2d0df54](https://github.com/stumpapp/stump/commit/2d0df54dd0e91c7ec7bd1ccf64dfb9fa8eb6cbd2)]
+- 🚧 Update create emailer layout, align dialog styles, fix lints, fix tests [[0b71f4f](https://github.com/stumpapp/stump/commit/0b71f4f7fc23b5cca018a4254c5439314b5b513b)]
+- 🔀 Merge remote-tracking branch &#x27;origin/nightly&#x27; into web-polish [[476ebb2](https://github.com/stumpapp/stump/commit/476ebb2caf3b2d4d9b86b0bd1a10b203cbadf2d0)]
+- 🚧 refactor book overview and many misc changes while moving through ui [[e62242f](https://github.com/stumpapp/stump/commit/e62242f196cc9a040ce6d6925e46a47dc15664c9)]
+- 🚧 refactor sidebar and page layout components to more consistent system [[47bf507](https://github.com/stumpapp/stump/commit/47bf507fb5705f89bee031df2b226b891c6400c2)]
+- 🚧 refactor stepped forms, card-ify chunk of library settings [[1097ebf](https://github.com/stumpapp/stump/commit/1097ebf76a4cd6cd419c35151848c4e681762a8c)]
+- 🔀 Merge remote-tracking branch &#x27;origin/main&#x27; into nightly [[5051ccc](https://github.com/stumpapp/stump/commit/5051ccc362d9aa41236f996bd6034a6baea811cb)]
+
+
 <a name="0.1.11"></a>
 ## 0.1.11 (2026-10-18)
 

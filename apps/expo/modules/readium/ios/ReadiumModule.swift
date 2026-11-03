@@ -39,7 +39,9 @@ public class ReadiumModule: Module {
             guard let jsonValue = JSONValue(linkJson) else {
                 throw ReadiumModuleError.invalidLink
             }
-            let link = try ReadiumShared.Link(json: jsonValue)
+            guard let link = try? ReadiumShared.Link(json: jsonValue) else {
+                throw ReadiumModuleError.invalidLink
+            }
             let resource = try await BookService.instance.getResource(for: bookId, link: link)
             if link.mediaType?.type.starts(with: "image/") == true {
                 let data = try await resource.read().get()

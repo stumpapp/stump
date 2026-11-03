@@ -142,6 +142,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			],
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
+			['./plugins/withReadiumPods.ts'],
 			[
 				'./plugins/withCustomSFSymbols.ts',
 				{
@@ -200,29 +201,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						// Note: For i18next and date-fns intlFormat
 						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
 						deploymentTarget: '16.4',
-						extraPods: [
-							{ name: 'Minizip', modular_headers: true },
-							{
-								name: 'ReadiumShared',
-								version: '~> 3.11.1',
-								source: 'https://github.com/readium/podspecs',
-							},
-							{
-								name: 'ReadiumStreamer',
-								version: '~> 3.11.1',
-								source: 'https://github.com/readium/podspecs',
-							},
-							{
-								name: 'ReadiumNavigator',
-								version: '~> 3.11.1',
-								source: 'https://github.com/readium/podspecs',
-							},
-							{
-								name: 'ReadiumOPDS',
-								version: '~> 3.11.1',
-								source: 'https://github.com/readium/podspecs',
-							},
-						],
+						// Note: the readium pods are added via my custom withReadiumPods plugin, i was
+						// keen on trimming my plugins but it seems extraPods applies to both the app
+						// and the widgets, with no way for me to specify a target, and that causes
+						// build failures
 					},
 				},
 			],

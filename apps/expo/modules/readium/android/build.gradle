@@ -51,6 +51,7 @@ dependencies {
   implementation "org.readium.kotlin-toolkit:readium-lcp:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-document:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-navigator:$readium_version"
+  implementation 'com.github.marain87:AndroidPdfViewer:3.2.8'
   implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
   implementation 'androidx.fragment:fragment-ktx:1.8.5'
   implementation 'androidx.browser:browser:1.10.0'

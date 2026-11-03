@@ -189,6 +189,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						usesCleartextTraffic: true,
 						compileSdkVersion: 37,
 						targetSdkVersion: 36,
+						// >= 2.4.20 for readium
+						kotlinVersion: '2.4.20',
 						// Note: I've needed this since expo@^54.0.13
 						gradleProperties: {
 							'org.gradle.jvmargs':

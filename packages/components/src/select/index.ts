@@ -1,5 +1,6 @@
 export { ComboBox, type ComboBoxProps } from './ComboBox'
 export { NativeSelect, type NativeSelectProps } from './NativeSelect'
+export { Select } from './select'
 
 export type SelectOption = {
 	label: string

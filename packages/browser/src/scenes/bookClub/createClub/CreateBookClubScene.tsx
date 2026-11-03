@@ -1,7 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
 import { CreateBookClubInput, graphql } from '@stump/graphql'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
-import { Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback } from 'react'
 import { Helmet } from 'react-helmet'
 import { useNavigate } from 'react-router'
 
@@ -9,9 +9,8 @@ import {
 	CreateOrUpdateBookClubSchema,
 	defaultMemberSpec,
 } from '@/components/bookClub/createOrUpdateForm/schema'
-import { SceneContainer } from '@/components/container'
-import { SteppedFormContext } from '@/components/steppedForm'
-import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
+import { CreateSceneHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import CreateBookClubForm from './CreateBookClubForm'
@@ -27,9 +26,8 @@ const mutation = graphql(`
 
 export default function CreateBookClubScene() {
 	const paths = usePaths()
-	const [formStep, setFormStep] = useState(1)
-
 	const navigate = useNavigate()
+	const { t } = useTranslate()
 
 	const { mutate: createClub } = useGraphQLMutation(mutation, {
 		onSuccess: ({ createBookClub: { slug } }) => {
@@ -71,26 +69,14 @@ export default function CreateBookClubScene() {
 				<title>Stump | Create a book club</title>
 			</Helmet>
 
-			<SteppedFormContext.Provider
-				value={{
-					currentStep: formStep,
-					localeBase: 'createBookClubScene',
-					setStep: setFormStep,
-					stepsBeforeReview: 3,
-				}}
-			>
-				<SteppedFormSceneHeader />
+			<CreateSceneHeader
+				parent={{ label: t('sidebar.buttons.bookClubs'), to: paths.bookClubs() }}
+				title={t('sidebar.buttons.createBookClub')}
+			/>
 
-				<SceneContainer>
-					<div className="gap-12 flex flex-col">
-						<Suspense>
-							<CreateBookClubForm onSubmit={handleSubmit} />
-						</Suspense>
-					</div>
-				</SceneContainer>
-			</SteppedFormContext.Provider>
+			<Suspense>
+				<CreateBookClubForm onSubmit={handleSubmit} />
+			</Suspense>
 		</div>
 	)
-
-	return null
 }

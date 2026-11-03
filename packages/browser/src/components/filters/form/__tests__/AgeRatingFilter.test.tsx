@@ -1,9 +1,12 @@
-import { LocaleProvider } from '@stump/i18n'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 
 import AgeRatingFilter from '../AgeRatingFilter'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
+}))
 
 type FormValues = {
 	metadata: {
@@ -16,12 +19,10 @@ function TestSubject({ variant = 'media' }: { variant?: 'media' | 'series' }) {
 	const value = useWatch({ control: form.control, name: 'metadata.ageRating' })
 
 	return (
-		<LocaleProvider locale="en-US">
-			<FormProvider {...form}>
-				<AgeRatingFilter variant={variant} />
-				<output data-testid="age-rating-value">{value ?? 'none'}</output>
-			</FormProvider>
-		</LocaleProvider>
+		<FormProvider {...form}>
+			<AgeRatingFilter variant={variant} />
+			<output data-testid="age-rating-value">{value ?? 'none'}</output>
+		</FormProvider>
 	)
 }
 
@@ -30,18 +31,22 @@ describe('AgeRatingFilter', () => {
 		const user = userEvent.setup()
 		render(<TestSubject />)
 
-		expect(screen.getByText('Age Rating')).toBeInTheDocument()
-		expect(screen.getByText('No age rating filter will be applied')).toBeInTheDocument()
+		expect(screen.getByText('shared.bookMetadata.ageRating')).toBeInTheDocument()
 		expect(
-			screen.getByText(
-				'Only media with an age rating of N or lower will be shown, where N is the number you enter below',
-			),
+			screen.getByText('mediaFilterForm.ageRatingFilter.anyAge.description'),
+		).toBeInTheDocument()
+		expect(
+			screen.getByText('mediaFilterForm.ageRatingFilter.custom.description.media'),
 		).toBeInTheDocument()
 
-		await user.click(screen.getByRole('radio', { name: /Aged N and below/ }))
+		await user.click(
+			screen.getByRole('radio', { name: /mediaFilterForm.ageRatingFilter.custom.label/ }),
+		)
 		expect(screen.getByTestId('age-rating-value')).toHaveTextContent('8')
 
-		await user.click(screen.getByRole('radio', { name: /Any age/ }))
+		await user.click(
+			screen.getByRole('radio', { name: /mediaFilterForm.ageRatingFilter.anyAge.label/ }),
+		)
 		expect(screen.getByTestId('age-rating-value')).toHaveTextContent('none')
 	})
 
@@ -49,9 +54,7 @@ describe('AgeRatingFilter', () => {
 		render(<TestSubject variant="series" />)
 
 		expect(
-			screen.getByText(
-				'Only series with an age rating of N or lower will be shown, where N is the number you enter below',
-			),
+			screen.getByText('mediaFilterForm.ageRatingFilter.custom.description.series'),
 		).toBeInTheDocument()
 	})
 })

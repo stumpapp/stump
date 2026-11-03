@@ -11,7 +11,7 @@ use models::entity::{
 	media,
 	series::{self, SeriesIdentSelect},
 };
-use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
+use sea_orm::{prelude::*, DatabaseConnection, ExprTrait, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{

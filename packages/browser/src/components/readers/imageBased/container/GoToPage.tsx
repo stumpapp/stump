@@ -1,6 +1,7 @@
 import { Button, Input, Label, Popover } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ChangeEvent, KeyboardEvent, useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 export type GoToPageProps = {
 	/**
@@ -50,14 +51,14 @@ export default function GoToPage({
 	submitLabel,
 	triggerLabel,
 }: GoToPageProps) {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const [open, setOpen] = useState(false)
 	const [value, setValue] = useState(() => String(currentPage))
-	const resolvedLabel = label ?? t('imageReader.goToPage.label')
-	const resolvedSubmitLabel = submitLabel ?? t('imageReader.goToPage.submit')
+	const resolvedLabel = label ?? translate('shared.imageReader.goToPage.label')
+	const resolvedSubmitLabel = submitLabel ?? translate('shared.imageReader.goToPage.submit')
 	const resolvedTriggerLabel =
 		triggerLabel ??
-		t('imageReader.footer.pageOf', {
+		translate('shared.common.pageXOfY', {
 			current: currentPage,
 			total: totalPages,
 		})
@@ -104,6 +105,7 @@ export default function GoToPage({
 					type="button"
 					className="text-sm text-gray-450 underline-offset-2 hover:underline"
 					aria-label={resolvedLabel}
+					data-testid="goto-page-trigger"
 				>
 					{resolvedTriggerLabel}
 				</button>
@@ -125,7 +127,7 @@ export default function GoToPage({
 						fullWidth
 						autoFocus
 					/>
-					<Button size="sm" onClick={handleSubmit}>
+					<Button size="sm" onClick={handleSubmit} data-testid="goto-page-submit">
 						{resolvedSubmitLabel}
 					</Button>
 				</div>

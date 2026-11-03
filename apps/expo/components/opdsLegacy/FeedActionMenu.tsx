@@ -1,9 +1,9 @@
-import { Host, Image } from '@expo/ui/swift-ui'
+import { Host, Image, Label, Menu, Picker } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { Ellipsis, Grid3x2, List } from 'lucide-react-native'
 import { useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
 import {
 	Button,
@@ -35,60 +35,31 @@ export default function FeedActionMenu() {
 	// TODO: Refactor to make Android align with iOS subtitle design, I am too lazy right now
 	const Component = Platform.select({
 		ios: (
-			<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-				<NativeDropdownMenu.Trigger>
-					<Pressable>
-						<View
-							className="squircle items-center justify-center rounded-full"
-							style={{
-								height: 35,
-								width: 35,
-							}}
+			<View
+				accessibilityLabel="options"
+				style={{
+					height: 35,
+					width: 35,
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<Host matchContents>
+					<Menu label={<Image systemName="ellipsis" />}>
+						<Picker
+							selection={layout}
+							onSelectionChange={(selection) => setPreferences({ opdsLayout: selection })}
+							modifiers={[pickerStyle('inline')]}
 						>
-							<View
-								accessibilityLabel="options"
-								style={{
-									height: 35,
-									width: 35,
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}
-							>
-								<Host matchContents>
-									<Image systemName="ellipsis" />
-								</Host>
-							</View>
-						</View>
-					</Pressable>
-				</NativeDropdownMenu.Trigger>
-
-				<NativeDropdownMenu.Content>
-					<NativeDropdownMenu.Group>
-						<NativeDropdownMenu.CheckboxItem
-							value={layout === 'grid'}
-							key="displayAsGrid"
-							onSelect={() => setPreferences({ opdsLayout: 'grid' })}
-						>
-							<NativeDropdownMenu.ItemTitle>Grid</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'square.grid.3x2' }} />
-							<NativeDropdownMenu.ItemSubtitle>Grid</NativeDropdownMenu.ItemSubtitle>,
-						</NativeDropdownMenu.CheckboxItem>
-
-						<NativeDropdownMenu.CheckboxItem
-							value={layout === 'list'}
-							key="displayAsList"
-							onSelect={() => setPreferences({ opdsLayout: 'list' })}
-						>
-							<NativeDropdownMenu.ItemTitle>List</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'list.bullet' }} />
-							<NativeDropdownMenu.ItemSubtitle>List</NativeDropdownMenu.ItemSubtitle>,
-						</NativeDropdownMenu.CheckboxItem>
-					</NativeDropdownMenu.Group>
-				</NativeDropdownMenu.Content>
-			</NativeDropdownMenu.Root>
+							<Label title="Grid" systemImage="square.grid.3x2" modifiers={[tag('grid')]} />
+							<Label title="List" systemImage="list.bullet" modifiers={[tag('list')]} />
+						</Picker>
+					</Menu>
+				</Host>
+			</View>
 		),
 		android: (
-			<DropdownMenu>
+			<DropdownMenu onOpenChange={setIsOpen}>
 				<DropdownMenuTrigger asChild>
 					<Button
 						className="squircle ml-2 mr-2 h-12 w-12 border-edge rounded-full border"

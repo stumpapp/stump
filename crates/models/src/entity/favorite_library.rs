@@ -2,6 +2,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{prelude::*, ActiveValue, FromQueryResult};
 
+use super::{library, user};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "favorite_libraries")]
 pub struct Model {
@@ -11,44 +14,27 @@ pub struct Model {
 	pub library_id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub favorited_at: DateTimeWithTimeZone,
+	#[sea_orm(
+		belongs_to,
+		from = "user_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	pub user: BelongsTo<user::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "library_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	pub library: BelongsTo<library::Entity>,
 }
 
 #[derive(Clone, Debug, FromQueryResult)]
 pub struct FavoriteLibraryFavoritedAtCmpSelect {
 	pub favorited_at: DateTimeWithTimeZone,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	User,
-
-	#[sea_orm(
-		belongs_to = "super::library::Entity",
-		from = "Column::LibraryId",
-		to = "super::library::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	Library,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
-}
-
-impl Related<super::library::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Library.def()
-	}
 }
 
 #[async_trait]

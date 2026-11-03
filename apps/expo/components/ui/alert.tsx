@@ -1,3 +1,4 @@
+import { cva } from 'class-variance-authority'
 import type { LucideIcon } from 'lucide-react-native'
 import * as React from 'react'
 import { View } from 'react-native'
@@ -10,6 +11,47 @@ import { cn } from '~/lib/utils'
 // it looks stinky still, should put more consideration into it + more color variants
 // i did the bare minimum to get it _closer_ to cards
 
+type AlertVariantClasses = {
+	default: string
+	destructive: string
+	warning: string
+}
+
+const alertVariants = cva(
+	'squircle ios:rounded-[2rem] p-4 tablet:py-5 flex overflow-hidden rounded-3xl',
+	{
+		variants: {
+			variant: {
+				default: 'bg-black/5 dark:bg-white/10',
+				destructive: 'bg-fill-danger-secondary',
+				warning: 'bg-fill-warning-secondary',
+			} satisfies AlertVariantClasses,
+		},
+		defaultVariants: {
+			variant: 'default',
+		},
+	},
+)
+
+const alertTextVariants = cva('text-foreground', {
+	variants: {
+		variant: {
+			default: 'text-foreground',
+			destructive: 'text-fill-danger',
+			warning: 'text-fill-warning',
+		} satisfies AlertVariantClasses,
+	},
+	defaultVariants: {
+		variant: 'default',
+	},
+})
+
+type Props = {
+	icon?: LucideIcon
+	variant?: 'default' | 'destructive' | 'warning'
+	iconClassName?: string
+}
+
 function Alert({
 	className,
 	variant,
@@ -17,38 +59,22 @@ function Alert({
 	icon,
 	iconClassName,
 	...props
-}: React.ComponentProps<typeof View> &
-	React.RefAttributes<View> & {
-		icon: LucideIcon
-		variant?: 'default' | 'destructive'
-		iconClassName?: string
-	}) {
+}: React.ComponentProps<typeof View> & React.RefAttributes<View> & Props) {
 	return (
 		<TextClassContext.Provider
-			value={cn(
-				'text-sm text-foreground',
-				variant === 'destructive' && 'text-destructive',
-				className,
-			)}
+			value={alertTextVariants({
+				variant,
+			})}
 		>
-			<View
-				role="alert"
-				className={cn(
-					'squircle ios:rounded-[2rem] bg-black/5 dark:bg-white/10 px-4 py-3.5 tablet:py-5 flex overflow-hidden rounded-3xl',
-					className,
+			<View role="alert" className={cn(alertVariants({ variant }), className)} {...props}>
+				{icon && (
+					<View className="left-3.5 top-3 absolute">
+						<Icon
+							as={icon}
+							className={cn('w-6 h-6', alertTextVariants({ variant }), iconClassName)}
+						/>
+					</View>
 				)}
-				{...props}
-			>
-				<View className="left-3.5 top-5 absolute">
-					<Icon
-						as={icon}
-						className={cn(
-							'w-5 h-5 mt-0.5',
-							variant === 'destructive' && 'text-destructive',
-							iconClassName,
-						)}
-					/>
-				</View>
 				{children}
 			</View>
 		</TextClassContext.Provider>
@@ -58,10 +84,7 @@ function Alert({
 function AlertTitle({ className, ...props }: React.ComponentProps<typeof Text>) {
 	return (
 		<Text
-			className={cn(
-				'mb-1 ml-0.5 pl-6 font-medium tracking-tight text-base leading-none',
-				className,
-			)}
+			className={cn('mb-1 ml-1.5 pl-6 font-medium tracking-tight text-lg leading-none', className)}
 			{...props}
 		/>
 	)
@@ -69,11 +92,18 @@ function AlertTitle({ className, ...props }: React.ComponentProps<typeof Text>) 
 
 function AlertDescription({ className, ...props }: React.ComponentProps<typeof Text>) {
 	const textClass = React.useContext(TextClassContext)
+	const variant = textClass?.includes('danger')
+		? 'destructive'
+		: textClass?.includes('warning')
+			? 'warning'
+			: 'default'
+
 	return (
 		<Text
 			className={cn(
-				'ml-0.5 pb-1.5 pl-6 text-sm leading-relaxed text-foreground-muted',
-				textClass?.includes('text-destructive') && 'text-destructive/90',
+				alertTextVariants({ variant }),
+				'ml-1.5 pl-6 text-base leading-relaxed',
+				{ 'text-foreground-muted': variant === 'default' },
 				className,
 			)}
 			{...props}

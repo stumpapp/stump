@@ -7,7 +7,7 @@ import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function ColumnCount() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			columnCount: state.globalSettings.columnCount ?? 'auto',
@@ -16,9 +16,9 @@ export default function ColumnCount() {
 	)
 
 	const columnOptions: PickerOption[] = [
-		{ label: t(getKey('options.auto')), value: 'auto' },
-		{ label: t(getKey('options.single')), value: '1' },
-		{ label: t(getKey('options.double')), value: '2' },
+		{ label: translate(getKey('options.auto')), value: 'auto' },
+		{ label: translate(getKey('options.single')), value: '1' },
+		{ label: translate(getKey('options.double')), value: '2' },
 	]
 
 	const handleChange = (value: string) => {
@@ -37,5 +37,5 @@ export default function ColumnCount() {
 	)
 }
 
-const LOCALE_BASE = 'epubSettings.columns'
+const LOCALE_BASE = 'shared.epubSettings.columns'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

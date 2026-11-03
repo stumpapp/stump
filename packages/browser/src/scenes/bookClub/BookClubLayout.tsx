@@ -14,7 +14,6 @@ import { useUserStore } from '@/stores'
 import { noop } from '@/utils/misc'
 
 import BookClubHeader from './BookClubHeader'
-import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
 import { createRouteGroups } from './tabs/settings/routes'
 
@@ -102,19 +101,13 @@ export default function BookClubLayout() {
 	const location = useLocation()
 	const user = useUserStore((store) => store.user)
 	const {
-		preferences: {
-			enableDoubleSidebar,
-			primaryNavigationMode,
-			layoutMaxWidthPx,
-			enableHideScrollbar,
-		},
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+	const displaySideBar = !isMobile && isSettings
 
 	const viewerMember = useMemo(() => bookClub?.membership, [bookClub])
 	const viewerCanManage =
@@ -126,12 +119,10 @@ export default function BookClubLayout() {
 			<GenericSettingsHeader
 				localeBase="bookClubSettingsScene"
 				routeGroups={createRouteGroups(slug ?? '')}
+				entityName={bookClub?.name}
 			/>
 		) : (
-			<>
-				<BookClubHeader />
-				<BookClubNavigation />
-			</>
+			<BookClubHeader />
 		)
 
 	useEffect(() => {
@@ -163,29 +154,22 @@ export default function BookClubLayout() {
 					: noop,
 			}}
 		>
-			<div
-				className={cn('relative flex flex-1 flex-col', {
-					'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
-				})}
-				style={{
-					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-				}}
-			>
-				{renderHeader()}
-
+			<div className={cn('relative flex flex-1', {})}>
 				{displaySideBar && <BookClubSettingsSideBar />}
 
-				<SceneContainer
-					className={cn('gap-4 md:pb-0 relative flex flex-1 flex-col', {
-						'md:hide-scrollbar': !!enableHideScrollbar,
-						// pl-48 is for the sidebar, plus pl-4 for the padding
-						'pl-52': displaySideBar,
-					})}
-				>
-					<Suspense fallback={null}>
-						<Outlet />
-					</Suspense>
-				</SceneContainer>
+				<div className="min-w-0 flex flex-1 flex-col">
+					{renderHeader()}
+
+					<SceneContainer
+						className={cn('gap-4 md:pb-0 relative flex flex-1 flex-col', {
+							'md:hide-scrollbar': !!enableHideScrollbar,
+						})}
+					>
+						<Suspense fallback={null}>
+							<Outlet />
+						</Suspense>
+					</SceneContainer>
+				</div>
 			</div>
 		</BookClubContext.Provider>
 	)

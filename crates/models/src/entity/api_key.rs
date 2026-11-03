@@ -15,6 +15,7 @@ use super::{
 	user_preferences,
 };
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "APIKeyModel")]
 #[sea_orm(table_name = "api_keys")]
@@ -38,6 +39,15 @@ pub struct Model {
 	pub expires_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
+	#[sea_orm(
+		belongs_to,
+		from = "user_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 impl Entity {
@@ -90,24 +100,6 @@ impl FromQueryResult for APIKeyWithUser {
 			api_key: model,
 			user,
 		})
-	}
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
 	}
 }
 

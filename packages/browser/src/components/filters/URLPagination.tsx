@@ -79,7 +79,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					of {pages}
 				</Text>
 			</form>
-			<div className="space-x-1 flex items-center">
+			<div className="gap-x-1 flex items-center">
 				<ToolTip content="Previous page" size="sm" align="end">
 					<IconButton
 						size="xs"

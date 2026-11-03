@@ -1,9 +1,8 @@
 import { Button, Sheet } from '@stump/components'
-import { BookCardFragment } from '@stump/graphql'
 import { Search } from 'lucide-react'
 import { useState } from 'react'
 
-import BookSearch from './BookSearch'
+import BookSearch, { type BookSearchSelection } from './BookSearch'
 
 type SheetProps = {
 	trigger?: React.ReactNode
@@ -12,7 +11,7 @@ type SheetProps = {
 }
 
 type Props = {
-	onBookSelect: (book: BookCardFragment) => void
+	onBookSelect: (book: BookSearchSelection) => void
 	sheetProps?: SheetProps
 }
 
@@ -32,7 +31,7 @@ export default function BookSearchOverlay({ onBookSelect, sheetProps }: Props) {
 		)
 	}
 
-	const handleSelectBook = (book: BookCardFragment) => {
+	const handleSelectBook = (book: BookSearchSelection) => {
 		onBookSelect(book)
 		setIsOpen(false)
 	}

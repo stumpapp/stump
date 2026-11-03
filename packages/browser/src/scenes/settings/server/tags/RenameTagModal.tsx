@@ -1,10 +1,11 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Input } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation RenameTagModal($id: Int!, $name: String!) {
@@ -24,7 +25,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 	const [name, setName] = useState('')
 
 	const client = useQueryClient()
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const { sdk } = useSDK()
 
 	const { mutate: renameTag, isPending } = useGraphQLMutation(mutation, {
@@ -68,7 +69,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 					}}
 				>
 					<Input
-						label={t(getKey('name.label'))}
+						label={translate('shared.common.name')}
 						placeholder={t(getKey('name.placeholder'))}
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -78,7 +79,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 
 				<Dialog.Footer>
 					<Button variant="outline" disabled={isPending} onClick={onClose} size="sm">
-						{t('common.cancel')}
+						{translate('shared.common.cancel')}
 					</Button>
 
 					<Button
@@ -86,7 +87,7 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 						size="sm"
 						onClick={handleRename}
 					>
-						{t(getKey('submit'))}
+						{translate('shared.common.rename')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

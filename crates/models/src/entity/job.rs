@@ -5,6 +5,9 @@ use sea_orm::{entity::prelude::*, ActiveValue::Set, FromQueryResult};
 
 use crate::shared::enums::JobStatus;
 
+use super::{library_scan_record, log};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "JobModel")]
 #[sea_orm(table_name = "jobs")]
@@ -28,6 +31,12 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub completed_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(has_one)]
+	#[graphql(skip)]
+	pub library_scan_record: HasOne<library_scan_record::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub logs: HasMany<log::Entity>,
 }
 
 #[derive(FromQueryResult)]
@@ -45,26 +54,6 @@ pub struct JobStatusSelect {
 #[derive(FromQueryResult)]
 pub struct SaveStateSelect {
 	pub save_state: Option<Vec<u8>>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_one = "super::library_scan_record::Entity")]
-	LibraryScanRecord,
-	#[sea_orm(has_many = "super::log::Entity")]
-	Log,
-}
-
-impl Related<super::library_scan_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::LibraryScanRecord.def()
-	}
-}
-
-impl Related<super::log::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Log.def()
-	}
 }
 
 #[async_trait]

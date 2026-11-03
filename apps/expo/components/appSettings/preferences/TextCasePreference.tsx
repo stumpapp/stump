@@ -10,7 +10,7 @@ import { TextCase } from '~/stores/user'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function TextCasePreference() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { textCase, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			textCase: state.textCase,
@@ -22,14 +22,14 @@ export default function TextCasePreference() {
 		<AppSettingsRow
 			icon={CaseSensitive}
 			iconBackgroundColor={SETTINGS_COLORS.interactive}
-			title={t(getKey('label'), { textCase: textCase })}
+			title={translate(getKey('label'), { textCase: textCase })}
 		>
 			<Picker<TextCase>
 				value={textCase}
 				options={[
-					{ label: t(getKey('options.titleCase')), value: 'titleCase' },
-					{ label: t(getKey('options.sentenceCase')), value: 'sentenceCase' },
-					{ label: t(getKey('options.lowerCase')), value: 'lowerCase' },
+					{ label: translate(getKey('options.titleCase')), value: 'titleCase' },
+					{ label: translate(getKey('options.sentenceCase')), value: 'sentenceCase' },
+					{ label: translate(getKey('options.lowerCase')), value: 'lowerCase' },
 				]}
 				onValueChange={(value) => patch({ textCase: value })}
 			/>
@@ -37,5 +37,4 @@ export default function TextCasePreference() {
 	)
 }
 
-const LOCALE_BASE = 'settings.textCase'
-const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+const getKey = (key: string) => `shared.textCase.${key}`

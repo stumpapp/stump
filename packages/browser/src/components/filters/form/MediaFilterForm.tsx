@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { useSeriesContextSafe } from '@/scenes/series/context'
+import { useSeriesContextSafe } from '@/components/series/context'
 
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'
@@ -97,7 +97,9 @@ export default function MediaFilterForm() {
 		return {
 			extension: filters?.extension?.eq as string,
 			metadata: flattenMetadata,
-			read_status: filters?.readingStatus?.isAnyOf?.map((elem) => (elem as string).toLowerCase()),
+			read_status: filters?.readingStatus?.isAnyOf?.map(
+				(elem) => (elem as string).toLowerCase() as 'finished' | 'reading' | 'not_started',
+			),
 		}
 	}, [filters])
 

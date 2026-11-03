@@ -1,9 +1,9 @@
-import { Host, Image } from '@expo/ui/swift-ui'
+import { Button as SwiftButton, Divider, Host, Image, Label, Menu, Picker } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { Ellipsis, Grid3x2, List, ListMinus, ListPlus } from 'lucide-react-native'
 import { useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
 import {
 	Button,
@@ -43,72 +43,47 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 
 	const Component = Platform.select({
 		ios: (
-			<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-				<NativeDropdownMenu.Trigger>
-					<Pressable>
-						<View
-							className="squircle items-center justify-center rounded-full"
-							style={{
-								height: 35,
-								width: 35,
-							}}
+			<View
+				accessibilityLabel="options"
+				style={{
+					height: 35,
+					width: 35,
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<Host matchContents>
+					<Menu label={<Image systemName="ellipsis" />}>
+						<Picker
+							selection={layout}
+							onSelectionChange={(selection) => setPreferences({ smartListLayout: selection })}
+							modifiers={[pickerStyle('inline')]}
 						>
-							<View
-								accessibilityLabel="options"
-								style={{
-									height: 35,
-									width: 35,
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}
-							>
-								<Host matchContents>
-									<Image systemName="ellipsis" />
-								</Host>
-							</View>
-						</View>
-					</Pressable>
-				</NativeDropdownMenu.Trigger>
+							<Label title="Grid" systemImage="square.grid.3x2" modifiers={[tag('grid')]} />
+							<Label title="List" systemImage="list.bullet" modifiers={[tag('list')]} />
+						</Picker>
 
-				<NativeDropdownMenu.Content>
-					<NativeDropdownMenu.Group>
-						<NativeDropdownMenu.CheckboxItem
-							value={layout === 'grid'}
-							key="displayAsGrid"
-							onSelect={() => setPreferences({ smartListLayout: 'grid' })}
-						>
-							<NativeDropdownMenu.ItemTitle>Grid</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'square.grid.3x2' }} />
-						</NativeDropdownMenu.CheckboxItem>
-
-						<NativeDropdownMenu.CheckboxItem
-							value={layout === 'list'}
-							key="displayAsList"
-							onSelect={() => setPreferences({ smartListLayout: 'list' })}
-						>
-							<NativeDropdownMenu.ItemTitle>List</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'list.bullet' }} />
-						</NativeDropdownMenu.CheckboxItem>
-					</NativeDropdownMenu.Group>
-
-					{onCollapseAll && onExpandAll && (
-						<NativeDropdownMenu.Group>
-							<NativeDropdownMenu.Item key="collapseAll" onSelect={onCollapseAll}>
-								<NativeDropdownMenu.ItemTitle>Collapse All</NativeDropdownMenu.ItemTitle>
-								<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />
-							</NativeDropdownMenu.Item>
-
-							<NativeDropdownMenu.Item key="expandAll" onSelect={onExpandAll}>
-								<NativeDropdownMenu.ItemTitle>Expand All</NativeDropdownMenu.ItemTitle>
-								<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.plus' }} />
-							</NativeDropdownMenu.Item>
-						</NativeDropdownMenu.Group>
-					)}
-				</NativeDropdownMenu.Content>
-			</NativeDropdownMenu.Root>
+						{onCollapseAll && onExpandAll && (
+							<>
+								<Divider />
+								<SwiftButton
+									label="Collapse All"
+									systemImage="rectangle.stack.badge.minus"
+									onPress={onCollapseAll}
+								/>
+								<SwiftButton
+									label="Expand All"
+									systemImage="rectangle.stack.badge.plus"
+									onPress={onExpandAll}
+								/>
+							</>
+						)}
+					</Menu>
+				</Host>
+			</View>
 		),
 		android: (
-			<DropdownMenu>
+			<DropdownMenu onOpenChange={setIsOpen}>
 				<DropdownMenuTrigger asChild>
 					<Button
 						className="squircle ml-2 mr-2 h-12 w-12 border-edge rounded-full border"

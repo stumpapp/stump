@@ -6,7 +6,7 @@ use models::{
 use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
 	prelude::*,
-	sea_query::{Condition, Expr, Query, SimpleExpr, SubQueryStatement},
+	sea_query::{Condition, Expr, ExprTrait, Query, SimpleExpr, SubQueryStatement},
 	FromQueryResult, JoinType, QuerySelect, Select,
 };
 

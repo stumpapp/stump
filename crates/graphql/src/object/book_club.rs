@@ -11,7 +11,7 @@ use models::entity::{
 use models::shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec};
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Query;
-use sea_orm::QueryOrder;
+use sea_orm::{ExprTrait, QueryOrder};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]

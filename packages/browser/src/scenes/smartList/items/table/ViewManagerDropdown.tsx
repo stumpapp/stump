@@ -1,7 +1,8 @@
 import { Button, ConfirmationModal, Dropdown } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useDeleteSelectedView } from '../../hooks'
 import { useSmartListViewStore } from '../../store'
@@ -13,7 +14,7 @@ const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 export default function ViewManagerDropdown() {
 	const [managerState, setManagerState] = useState<'create' | 'update' | 'delete' | 'none'>('none')
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 	const workingView = useSmartListViewStore((state) => state.workingView)
 	const selectedView = useSmartListViewStore((state) => state.selectedView)
 	const { deleteSelectedView, isDeleting } = useDeleteSelectedView()
@@ -32,7 +33,9 @@ export default function ViewManagerDropdown() {
 						className="h-10 divide-opacity-30 px-0 py-0 shrink-0 bg-muted/50 hover:bg-muted/80 data-[state=open]:bg-muted"
 					>
 						<div className="inline-flex h-full items-center divide-x divide-border">
-							<span className="px-3 py-2 flex h-full items-center">{t('common.save')}</span>
+							<span className="px-3 py-2 flex h-full items-center">
+								{translate('shared.common.save')}
+							</span>
 							<span className="px-1 py-2 flex h-full items-center">
 								<ChevronDown className="h-4 w-4" />
 							</span>
@@ -70,7 +73,7 @@ export default function ViewManagerDropdown() {
 				confirmIsLoading={isDeleting}
 				title={t(withLocaleKey('deleteModal.title'))}
 				description={`${t(withLocaleKey('deleteModal.description'))} "${selectedView?.name}"`}
-				confirmText={t('common.delete')}
+				confirmText={translate('shared.common.delete')}
 			/>
 		</>
 	)

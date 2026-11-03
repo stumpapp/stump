@@ -15,7 +15,8 @@ use models::{
 };
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
-	IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
+	ExprTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
+	TransactionTrait,
 };
 
 use crate::{

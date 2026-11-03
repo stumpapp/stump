@@ -1,7 +1,6 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { BookX } from 'lucide-react'
@@ -13,6 +12,7 @@ import { ThumbnailImage } from '@/components/thumbnail/ThumbnailImage'
 import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceholder'
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 const IMAGE_WIDTH_MOBILE = 112
@@ -78,7 +78,7 @@ export const usePrefetchRecentlyAddedMedia = () => {
 }
 
 function RecentlyAddedMedia() {
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -109,9 +109,9 @@ function RecentlyAddedMedia() {
 				<BookX className="h-8 w-8 text-muted-foreground" />
 			</span>
 			<div>
-				<Text>{t('homeScene.recentlyAddedBooks.emptyState.heading')}</Text>
+				<Text>{translate('shared.homeSections.recentlyAddedBooks.emptyText')}</Text>
 				<Text size="sm" variant="muted">
-					{t('homeScene.recentlyAddedBooks.emptyState.message')}
+					{translate('shared.homeSections.recentlyAddedBooks.emptyMessage')}
 				</Text>
 			</div>
 		</div>
@@ -119,7 +119,7 @@ function RecentlyAddedMedia() {
 
 	return (
 		<MultiRowHorizontalCardList
-			title={t('homeScene.recentlyAddedBooks.title')}
+			title={translate('shared.homeSections.recentlyAddedBooks.label')}
 			items={nodes}
 			keyExtractor={(node) => node.id}
 			renderItem={(node) => <RecentlyAddedBookCard fragment={node} cardWidth={cardWidth} />}

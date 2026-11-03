@@ -14,7 +14,7 @@ export const BADGE_VARIANTS = {
 }
 
 const badgeVariants = cva(
-	'group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden border border-transparent text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-field-error-border aria-invalid:ring-field-error-ring',
+	'group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden border border-transparent text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-field-error-border aria-invalid:ring-field-error-ring cursor-default',
 	{
 		defaultVariants: {
 			rounded: 'default',
@@ -27,8 +27,8 @@ const badgeVariants = cva(
 				full: 'rounded-full',
 			},
 			size: {
-				lg: 'h-6 px-2.5 py-1 text-sm',
-				md: 'h-5 px-2 py-0.5 text-xs',
+				lg: 'h-6 px-2.5 py-1.5 text-sm',
+				md: 'h-5 px-2 py-1.5 text-xs',
 				sm: 'h-5 px-2 py-0.5 text-xs',
 				xs: 'h-4 px-1.5 py-0 text-[10px]',
 			},

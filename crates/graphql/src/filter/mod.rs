@@ -3,8 +3,8 @@ use filter_gen::IntoFilter;
 use models::shared::enums::{FileStatus, LibraryType, ReadingStatus};
 use sea_orm::{
 	prelude::DateTimeWithTimeZone,
-	sea_query::{ConditionExpression, Expr as QExpr, Func},
-	Condition, Value,
+	sea_query::{Expr as QExpr, Func},
+	Condition, ExprTrait, Value,
 };
 use serde::{Deserialize, Serialize};
 
@@ -170,7 +170,7 @@ where
 pub(crate) fn apply_numeric_filter<C, T>(
 	column: C,
 	filter: NumericFilter<T>,
-) -> impl Into<ConditionExpression>
+) -> impl Into<Condition>
 where
 	C: sea_orm::ColumnTrait,
 	T: InputType + Into<Value>,

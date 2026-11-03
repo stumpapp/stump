@@ -1,7 +1,8 @@
-import { CheckBox, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+import { NewCard } from '@stump/components'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
@@ -22,7 +23,7 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 		name: ['convertRarToZip', 'hardDeleteConversions'],
 	})
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	useEffect(() => {
 		if (!convertRarToZip && hardDeleteConversions) {
@@ -51,15 +52,8 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 	}, [form, convertRarToZip, hardDeleteConversions, onDidChange])
 
 	return (
-		<div className="gap-y-6 flex flex-col">
-			<div className="gap-y-1.5 flex flex-col">
-				<Heading size="sm">{t(getKey('section.heading'))}</Heading>
-				<Text size="sm" variant="muted">
-					{t(getKey('section.description'))}
-				</Text>
-			</div>
-
-			<CheckBox
+		<NewCard label={t(getKey('section.heading'))} description={t(getKey('section.description'))}>
+			<NewCard.CheckboxRow
 				id="convertRarToZip"
 				label={t(getKey('rarToZip.label'))}
 				description={t(getKey('rarToZip.description'))}
@@ -68,7 +62,7 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 				{...form.register('convertRarToZip')}
 			/>
 
-			<CheckBox
+			<NewCard.CheckboxRow
 				id="hardDeleteConversions"
 				label={t(getKey('deleteRarAfter.label'))}
 				description={t(getKey('deleteRarAfter.description'))}
@@ -77,7 +71,7 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 				onClick={handleChangeHardDelete}
 				{...form.register('hardDeleteConversions')}
 			/>
-		</div>
+		</NewCard>
 	)
 }
 

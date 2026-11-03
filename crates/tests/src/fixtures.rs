@@ -9,7 +9,7 @@ pub fn workspace_root() -> PathBuf {
 }
 
 pub fn test_data_dir() -> PathBuf {
-	workspace_root().join("core/integration-tests/data")
+	workspace_root().join("packages/fixtures")
 }
 
 pub fn get_test_zip_path() -> String {

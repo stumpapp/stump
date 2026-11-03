@@ -409,7 +409,7 @@ mod tests {
 			];
 			for (value, expected) in cases {
 				let row = db
-					.query_one(Statement::from_sql_and_values(
+					.query_one_raw(Statement::from_sql_and_values(
 						DatabaseBackend::Sqlite,
 						"SELECT ? AS arrangement",
 						[value],

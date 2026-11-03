@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 
 import TagSelect, { TagOption } from '@/components/TagSelect'
 
+// TODO(ui): i dislike the current ui for editing tags in general, there's gotta be something better than a
+// combo box. spacedrive did a sort of grid but that doesn't quite scale either ig
+
 const mutation = graphql(`
 	mutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {
 		setMediaTags(id: $id, tags: $tags) {

@@ -132,9 +132,7 @@ export default function ReadiumReader({
 			ligatures: state.globalSettings.ligatures,
 			textNormalization: state.globalSettings.textNormalization,
 			verticalText: state.globalSettings.verticalText,
-			readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
-				? 'ltr'
-				: 'rtl') as 'ltr' | 'rtl',
+			readingDirection: state.globalSettings.readingDirection,
 		})),
 	)
 	const { colors } = useEpubTheme()
@@ -147,6 +145,7 @@ export default function ReadiumReader({
 
 	const config = {
 		...preferences,
+		readingDirection: preferences.readingDirection?.toLowerCase() as 'ltr' | 'rtl',
 		fontWeight,
 		columnCount,
 		colors,
@@ -240,7 +239,6 @@ export default function ReadiumReader({
 				store.setBookmarks(bookmarks.map(intoBookmarkRef))
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.ebook?.bookmarks],
 	)
@@ -262,7 +260,6 @@ export default function ReadiumReader({
 				})),
 			)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.ebook?.annotations, highlightColor],
 	)
@@ -278,7 +275,6 @@ export default function ReadiumReader({
 				setLocalUri(null)
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)

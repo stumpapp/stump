@@ -1,12 +1,12 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
 import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { Slash, Smartphone } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useEmailerSettingsContext } from '../context'
 import DeleteDeviceConfirmation from './DeleteDeviceConfirmation'
@@ -30,7 +30,7 @@ type Props = {
 }
 
 export default function DevicesTable({ onSelectForUpdate }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { canEditEmailer } = useEmailerSettingsContext()
 	const { sdk } = useSDK()
 

@@ -1,14 +1,13 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Alert } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
-import { SceneContainer } from '@/components/container'
-import { SteppedFormContext } from '@/components/steppedForm'
-import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
+import { CreateSceneHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { intoAPI, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
@@ -27,6 +26,7 @@ export default function CreateSmartListScene() {
 	const paths = usePaths()
 	const client = useQueryClient()
 	const { sdk } = useSDK()
+	const { t, translate } = useTranslate()
 	const navigate = useNavigate()
 
 	const {
@@ -42,12 +42,6 @@ export default function CreateSmartListScene() {
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
 
-	const [formStep, setFormStep] = useState(1)
-
-	/**
-	 * A function which will handle the submission of the form, creating a new library
-	 * provided the form values. Note the transformation of certain values.
-	 */
 	const handleSubmit = useCallback(
 		(values: SmartListFormSchema) => {
 			const payload = intoAPI(values)
@@ -56,28 +50,24 @@ export default function CreateSmartListScene() {
 		[mutate],
 	)
 
+	useEffect(() => {
+		if (createError) {
+			toast.error(t('createSmartListScene.failedToCreateSmartList'), {
+				description: createError,
+			})
+		}
+	}, [createError, t])
+
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<SteppedFormContext.Provider
-				value={{
-					currentStep: formStep,
-					localeBase: 'createSmartListScene',
-					setStep: setFormStep,
-					stepsBeforeReview: 3,
-				}}
-			>
-				<SteppedFormSceneHeader />
+			<CreateSceneHeader
+				parent={{ label: translate('shared.common.smartLists'), to: paths.smartLists() }}
+				title={t('sidebar.buttons.createSmartlist')}
+			/>
 
-				<SceneContainer>
-					<div className="gap-12 flex flex-col">
-						{createError && <Alert variant="destructive">{createError}</Alert>}
-
-						<Suspense>
-							<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
-						</Suspense>
-					</div>
-				</SceneContainer>
-			</SteppedFormContext.Provider>
+			<Suspense>
+				<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
+			</Suspense>
 		</div>
 	)
 }

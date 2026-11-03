@@ -2,11 +2,11 @@
 title: File Scanner
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Step, Steps } from 'fumadocs-ui/components/steps'
 
 A scan is the process of indexing your filesystem to detect new media files and file changes/updates. Scans are essential for keeping your media libraries up-to-date in Stump. The _scanner_ is a queueable process which will perform these scans for you.
 
-Scans can be isolated to either the library level or the series level. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series.
+Scans can be isolated to either the library level or the series level. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series. You can also scan all of your libraries at once using the `Scan All` action on the libraries page.
 
 ## How does it work?
 
@@ -71,8 +71,6 @@ All of which are done in chunks, to both provide speedup and to avoid resource e
 
 </Step>
 
-
-
 #### New media
 
 Stump will take a chunk of paths and process/build their DB representations **in parallel**.
@@ -82,7 +80,6 @@ Once all paths in the chunk have been processed, they are inserted into the data
 #### Updated media
 
 The process for updated media is exactly the same, except that stump diffs the newly built media representation with what already exists. The result of this diff is then used to update the database.
-
 
 #### Missing media
 
@@ -95,7 +92,7 @@ Stump issues a single `UPDATE` query for the entire set of missing media. This i
 Stump will perform some cleanup operations, such as:
 
 1. Inserting any runtime logs (errors, warnings, etc) into the database
-2. Updating the library's last scan time **TODO**: This is not yet implemented
+2. Updating the library's last scan time
 
 </Step>
 

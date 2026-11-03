@@ -35,7 +35,7 @@ function OnDeck() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['onDeck', serverID],
@@ -61,7 +61,7 @@ function OnDeck() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				{t('stumpServer.onDeck.label')}
+				{translate('shared.homeSections.onDeck.label')}
 			</Heading>
 
 			<FlashList
@@ -76,7 +76,9 @@ function OnDeck() {
 				showsHorizontalScrollIndicator={false}
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				ListEmptyComponent={
-					<Text className="text-foreground-muted">{t('stumpServer.onDeck.emptyText')}</Text>
+					<Text className="text-foreground-muted">
+						{translate('shared.homeSections.onDeck.emptyText')}
+					</Text>
 				}
 			/>
 		</View>

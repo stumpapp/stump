@@ -79,20 +79,14 @@ export default function LibraryLayout() {
 		id,
 	})
 	const {
-		preferences: {
-			enableDoubleSidebar,
-			primaryNavigationMode,
-			layoutMaxWidthPx,
-			enableHideScrollbar,
-		},
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 	const { mutate: visitLibrary } = useGraphQLMutation(visitMutation)
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+	const displaySideBar = !isMobile && isSettings
 
 	useEffect(() => {
 		if (!library) {
@@ -114,28 +108,22 @@ export default function LibraryLayout() {
 
 	return (
 		<LibraryContext.Provider value={{ library }}>
-			<div
-				className={cn('relative flex flex-1 flex-col', {
-					'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
-				})}
-				style={{
-					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-				}}
-			>
-				{renderHeader()}
-
+			<div className="relative flex flex-1">
 				{displaySideBar && <LibrarySettingsSidebar />}
 
-				<SceneContainer
-					className={cn('gap-4 p-0 md:pb-0 relative flex flex-1 flex-col', {
-						'md:hide-scrollbar': !!enableHideScrollbar,
-						'pl-48': displaySideBar,
-					})}
-				>
-					<Suspense fallback={null}>
-						<Outlet />
-					</Suspense>
-				</SceneContainer>
+				<div className="min-w-0 flex flex-1 flex-col">
+					{renderHeader()}
+
+					<SceneContainer
+						className={cn('gap-4 p-0 md:pb-0 relative flex flex-1 flex-col', {
+							'md:hide-scrollbar': !!enableHideScrollbar,
+						})}
+					>
+						<Suspense fallback={null}>
+							<Outlet />
+						</Suspense>
+					</SceneContainer>
+				</div>
 			</div>
 		</LibraryContext.Provider>
 	)

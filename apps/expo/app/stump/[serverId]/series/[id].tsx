@@ -22,7 +22,12 @@ import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
+import {
+	BookFilterContext,
+	createBookFilterStore,
+	resolveBookOrderBy,
+	SERIES_POSITION_SORT,
+} from '~/stores/filters'
 import { useBooksLayout } from '~/stores/layout'
 
 const query = graphql(`
@@ -108,7 +113,7 @@ export default function Screen() {
 	)
 
 	// eslint-disable-next-line react-hooks/refs
-	const store = useRef(createBookFilterStore()).current
+	const store = useRef(createBookFilterStore({}, SERIES_POSITION_SORT)).current
 	const { filters, sort, resetFilters } = useStore(
 		store,
 		useShallow((state) => ({
@@ -126,7 +131,7 @@ export default function Screen() {
 				...filters,
 				seriesId: { eq: id },
 			},
-			orderBy: [sort],
+			orderBy: resolveBookOrderBy(sort),
 			pagination: { offset: { page: 1 } },
 		},
 		{

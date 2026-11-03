@@ -2,6 +2,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{prelude::*, ActiveValue, FromQueryResult};
 
+use super::{media, user};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "favorite_media")]
 pub struct Model {
@@ -11,44 +14,27 @@ pub struct Model {
 	pub media_id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub favorited_at: DateTimeWithTimeZone,
+	#[sea_orm(
+		belongs_to,
+		from = "user_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	pub user: BelongsTo<user::Entity>,
+	#[sea_orm(
+		belongs_to,
+		from = "media_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	pub media: BelongsTo<media::Entity>,
 }
 
 #[derive(Clone, Debug, FromQueryResult)]
 pub struct FavoriteMediaFavoritedAtCmpSelect {
 	pub favorited_at: DateTimeWithTimeZone,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	User,
-
-	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::MediaId",
-		to = "super::media::Column::Id",
-		on_update = "Cascade",
-		on_delete = "Cascade"
-	)]
-	Media,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
 }
 
 #[async_trait]

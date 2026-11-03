@@ -1,17 +1,17 @@
 import { CheckBox, Heading, Link, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { CreateOrUpdateUserSchema } from './schema'
 
 export default function UserPermissionsTable() {
 	const paths = usePaths()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 
@@ -110,7 +110,8 @@ export default function UserPermissionsTable() {
 					{renderDescription()}
 				</Text>
 			</div>
-			<div className="h-96 overflow-auto rounded-lg border border-border">
+			{/*relative position fixes a really old bug which drives the screen to be super duper long*/}
+			<div className="h-96 relative overflow-auto rounded-lg border border-border">
 				<table className="w-full">
 					<tbody>
 						{table.getRowModel().rows.map((row) => {

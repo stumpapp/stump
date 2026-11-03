@@ -1,8 +1,9 @@
 import { Badge, Button, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, ScheduledJobKind, useFragment } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { BadgeCheck, BadgeX, Cog, Trash2 } from 'lucide-react'
 import { useMemo } from 'react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { KIND_OPTIONS, LibraryOption, parseScheduledJobConfig } from './utils'
 
@@ -27,7 +28,7 @@ type Props = {
 }
 
 export function ScheduledJobRow({ job, libraries, onEdit, onDelete }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const data = useFragment(scheduledJobRowFragment, job)
 
 	const configSummary = useMemo(() => {

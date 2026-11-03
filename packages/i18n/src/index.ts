@@ -10,6 +10,7 @@ export {
 } from './dateFnsLocale'
 export { default as LocaleProvider } from './LocaleProvider'
 export type { AllowedLocale }
+export { useCreateTranslate } from './useCreateTranslate'
 
 export const localeNames: Record<AllowedLocale, string> = {
 	bs: 'Bosanski',

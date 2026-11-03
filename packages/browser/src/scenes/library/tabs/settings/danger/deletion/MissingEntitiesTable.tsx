@@ -1,7 +1,6 @@
 import { useGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Link, Text } from '@stump/components'
 import { graphql, LogModelOrdering, MissingEntity, MissingEntityType } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { keepPreviousData } from '@tanstack/react-query'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
@@ -9,6 +8,7 @@ import { useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { Table } from '@/components/table'
+import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
 import { useLibraryManagement } from '../../context'
@@ -38,7 +38,7 @@ const query = graphql(`
 `)
 
 export default function MisisngEntitiesTable() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		library: { id },
 	} = useLibraryManagement()

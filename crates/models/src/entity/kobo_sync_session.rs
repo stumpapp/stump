@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct MediaIds(pub Vec<String>);
 
+use super::user;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "kobo_sync_sessions")]
 pub struct Model {
@@ -29,24 +32,15 @@ pub struct Model {
 	/// the time that the sync session before this one began.
 	/// or None if there was no sync session before this one.
 	pub previous_sync_at: Option<DateTimeWithTimeZone>,
-}
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	pub user: BelongsTo<user::Entity>,
 }
 
 #[async_trait]

@@ -20,6 +20,7 @@ mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
 mod reading_session;
+mod reading_stats;
 mod reading_timeline;
 mod series;
 mod server_config;
@@ -51,6 +52,7 @@ use metadata_provider::MetadataProviderQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use reading_session::ReadingSessionQuery;
+use reading_stats::ReadingStatsQuery;
 use reading_timeline::ReadingTimelineQuery;
 use series::SeriesQuery;
 use server_config::ServerConfigQuery;
@@ -83,6 +85,7 @@ struct ContentQueries(
 	MediaMetadataOverviewQuery,
 	ReadingSessionQuery,
 	ReadingTimelineQuery,
+	ReadingStatsQuery,
 );
 
 #[derive(async_graphql::MergedObject, Default)]

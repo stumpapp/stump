@@ -8,6 +8,7 @@ use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
+	ExprTrait,
 };
 use stump_core::{
 	image::{bump_series_thumbnail_fallbacks, generate_thumbnail_from_book},
@@ -144,11 +145,7 @@ impl SeriesMutation {
 			.await?
 			.ok_or("Media not found")?;
 
-		let page = input.params.page();
-
-		if book.extension == "epub" && page > 1 {
-			return Err("Cannot set thumbnail from EPUB chapter".into());
-		}
+		let page = input.params.page_for(&book.extension)?;
 
 		let image_options = config
 			.ok_or("Library config not found")?

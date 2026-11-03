@@ -1,15 +1,4 @@
 {
-	"extends": "../../tsconfig.options.json",
-	"references": [],
-	"compilerOptions": {
-		"composite": true,
-		"skipLibCheck": true,
-		"emitDeclarationOnly": true,
-		"outDir": "dist",
-		"jsx": "react-jsx",
-		"esModuleInterop": true,
-		"module": "es2022",
-		"moduleResolution": "Bundler"
-	},
-	"include": ["src", "tailwind.config.ts", "tailwind/**/*"]
+	"extends": "../../tsconfig.base.json",
+	"include": ["src", "tailwind"]
 }

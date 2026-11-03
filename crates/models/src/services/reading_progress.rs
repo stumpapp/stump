@@ -1,7 +1,8 @@
 use chrono::Utc;
 use sea_orm::{
 	prelude::Decimal, sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait,
-	ConnectionTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
+	ConnectionTrait, EntityTrait, ExprTrait, IntoActiveModel, QueryFilter, QueryOrder,
+	QuerySelect,
 };
 
 use crate::{
@@ -25,7 +26,7 @@ pub struct NormalizedProgression {
 impl NormalizedProgression {
 	fn apply(&self, session: reading_session::Model) -> reading_session::ActiveModel {
 		let new_elapsed = session.elapsed_seconds.unwrap_or(0)
-			+ self.elapsed_seconds_delta.unwrap_or(0).max(0);
+			+ Ord::max(self.elapsed_seconds_delta.unwrap_or(0), 0);
 
 		let preserved_end_page = session.end_page;
 		let preserved_end_locator = session.end_locator.clone();
@@ -117,9 +118,10 @@ pub async fn upsert_reading_session(
 				start_percentage: Set(input.percentage.or(Some(Decimal::new(0, 2)))),
 				end_percentage: Set(input.percentage),
 				// set bc there's no existing session to extend
-				elapsed_seconds: Set(Some(
-					input.elapsed_seconds_delta.unwrap_or(0).max(0),
-				)),
+				elapsed_seconds: Set(Some(Ord::max(
+					input.elapsed_seconds_delta.unwrap_or(0),
+					0,
+				))),
 				readthrough_number: Set(readthrough_number),
 				status: Set(if input.did_complete {
 					ReadingStatus::Finished

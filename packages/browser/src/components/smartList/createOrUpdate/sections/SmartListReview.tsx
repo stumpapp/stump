@@ -1,8 +1,8 @@
-import { Label, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+import { NewCard } from '@stump/components'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { ReviewStepContainer } from '@/components/steppedForm'
+import { ReviewItem, ReviewSection } from '@/components/steppedForm'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { SmartListFormSchema } from '../schema'
 import FilterConfigJSON from './FilterConfigJSON'
@@ -11,58 +11,31 @@ export default function SmartListReview() {
 	const form = useFormContext<SmartListFormSchema>()
 	const state = useWatch({ control: form.control })
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
-		<div className="space-y-8 flex flex-col">
-			<ReviewStepContainer
-				label={t(getStepKey(1, 'heading'))}
-				description={t(getStepKey(1, 'description'))}
-			>
-				<div>
-					<Label>{t(getLabelKey('name'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.name}
-					</Text>
-				</div>
+		<>
+			<ReviewSection stepIndex={0}>
+				<ReviewItem label={t(getLabelKey('name'))} value={state.name} />
 
-				<div>
-					<Label>{t(getLabelKey('description'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.description || 'None'}
-					</Text>
-				</div>
+				<ReviewItem label={t(getLabelKey('description'))} value={state.description} />
 
-				<div>
-					<Label>{t(getLabelKey('visibility'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.visibility}
-					</Text>
-				</div>
-			</ReviewStepContainer>
+				<ReviewItem label={t(getLabelKey('visibility'))} value={state.visibility} />
+			</ReviewSection>
 
-			<ReviewStepContainer
-				label={t(getStepKey(2, 'heading'))}
-				description={t(getStepKey(2, 'description'))}
-			>
-				<div>
-					<Label>{t(getLabelKey('grouping'))}</Label>
-					<Text variant="muted" size="sm">
-						{state.grouping}
-					</Text>
-				</div>
-			</ReviewStepContainer>
+			<ReviewSection stepIndex={1}>
+				<ReviewItem label={t(getLabelKey('grouping'))} value={state.grouping} />
+			</ReviewSection>
 
-			<div className="grid grid-cols-9">
-				<div className="md:col-span-6 col-span-9">
+			<NewCard>
+				<div className="px-4">
 					<FilterConfigJSON />
 				</div>
-			</div>
-		</div>
+			</NewCard>
+		</>
 	)
 }
 
 const LOCALE_KEY = 'createSmartListScene.form'
-const getStepKey = (step: number, key: string) => `${LOCALE_KEY}.steps.${step - 1}.${key}`
 const getKey = (key: string) => `${LOCALE_KEY}.review.${key}`
 const getLabelKey = (key: string) => getKey(`labels.${key}`)

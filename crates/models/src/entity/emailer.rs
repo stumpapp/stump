@@ -1,6 +1,9 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
+use super::emailer_send_record;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "EmailerModel")]
 #[sea_orm(table_name = "emailers")]
@@ -27,18 +30,9 @@ pub struct Model {
 	pub max_num_attachments: Option<i32>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_used_at: Option<DateTimeWithTimeZone>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::emailer_send_record::Entity")]
-	EmailerSendRecord,
-}
-
-impl Related<super::emailer_send_record::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::EmailerSendRecord.def()
-	}
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub send_records: HasMany<emailer_send_record::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -9,11 +9,12 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql, LibraryMissingEntitiesQuery } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryManagement } from '../../context'
 import MisisngEntitiesTable from './MissingEntitiesTable'
@@ -32,7 +33,7 @@ export default function CleanLibrary() {
 	const {
 		library: { id },
 	} = useLibraryManagement()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { mutateAsync: cleanLibrary, isPending } = useGraphQLMutation(mutation)
 
 	const [showConfirmation, setShowConfirmation] = useState(false)

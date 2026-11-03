@@ -6,7 +6,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{Expr, JoinType, Query, SelectStatement},
-	Condition,
+	Condition, ExprTrait,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;

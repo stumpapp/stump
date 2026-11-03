@@ -1,4 +1,4 @@
-import { EmailerListItemFragment } from '@stump/graphql'
+import { CreateOrUpdateEmailerFormFragment } from '@stump/graphql'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
@@ -11,7 +11,7 @@ export const createSchema = (
 	isCreating: boolean,
 ) =>
 	z.object({
-		isPrimary: z.boolean().default(existingNames.length === 0),
+		isPrimary: z.boolean(),
 		maxAttachmentSizeBytes: z.number().optional().nullable(),
 		name: z
 			.string()
@@ -24,23 +24,25 @@ export const createSchema = (
 			}),
 		password: isCreating ? z.string().min(1) : z.string().optional(),
 		senderDisplayName: z.string().min(1),
-		senderEmail: z.string().email(),
+		senderEmail: z.email(),
 		smtpHost: z.string().min(1),
-		smtpPort: z.number(),
-		tlsEnabled: z.boolean().default(false),
+		smtpPort: z.number().int().min(1),
+		tlsEnabled: z.boolean(),
 		username: z.string().min(1),
 	})
 export type CreateOrUpdateEmailerSchema = z.infer<ReturnType<typeof createSchema>>
 
-export const formDefaults = (emailer?: EmailerListItemFragment) => ({
-	isPrimary: emailer?.isPrimary || true,
+export const formDefaults = (
+	emailer?: CreateOrUpdateEmailerFormFragment | null,
+): CreateOrUpdateEmailerSchema => ({
+	isPrimary: emailer?.isPrimary ?? true,
 	maxAttachmentSizeBytes: emailer?.maxAttachmentSizeBytes ?? null,
-	name: emailer?.name,
+	name: emailer?.name ?? '',
 	password: undefined,
-	senderDisplayName: emailer?.senderDisplayName,
-	senderEmail: emailer?.senderEmail,
-	smtpHost: emailer?.smtpHost,
-	smtpPort: emailer?.smtpPort,
-	tlsEnabled: emailer?.tlsEnabled || false,
-	username: emailer?.username,
+	senderDisplayName: emailer?.senderDisplayName ?? '',
+	senderEmail: emailer?.senderEmail ?? '',
+	smtpHost: emailer?.smtpHost ?? '',
+	smtpPort: emailer?.smtpPort ?? 0,
+	tlsEnabled: emailer?.tlsEnabled ?? false,
+	username: emailer?.username ?? '',
 })

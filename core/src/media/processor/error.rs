@@ -4,6 +4,8 @@ pub enum MediaProcessorError {
 	ArchiveEmpty,
 	#[error("A blocking task panicked or was canceled: {0}")]
 	BlockingTask(#[from] tokio::task::JoinError),
+	#[error("The media file does not contain a cover image")]
+	CoverNotFound,
 	#[error("Failed to read epub document: {0}")]
 	EpubDoc(#[from] epub::doc::DocError),
 	#[error("Failed to read epub file: {0}")]

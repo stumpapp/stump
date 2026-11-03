@@ -1,26 +1,24 @@
-import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
-import { ContentContainer, SceneContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { DevicesSection } from './devices'
 import { EmailersSection } from './emailers'
 
 export default function EmailSettingsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	return (
-		<SceneContainer>
+		<SceneContainer variant="settings">
 			<Helmet>
 				<title>Stump | {t('settingsScene.server/email.helmet')}</title>
 			</Helmet>
 
-			<ContentContainer>
-				<div className="gap-12 flex flex-col">
-					<EmailersSection />
-					<DevicesSection />
-				</div>
-			</ContentContainer>
+			<div className="gap-12 flex flex-col">
+				<EmailersSection />
+				<DevicesSection />
+			</div>
 		</SceneContainer>
 	)
 }

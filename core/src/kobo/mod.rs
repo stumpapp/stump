@@ -1,3 +1,7 @@
+//! Support for Kobo e-reader devices.
+//!
+//! The implementation for the actual sync is in the server application
+
 pub mod entity;
 pub mod sync_types;
 

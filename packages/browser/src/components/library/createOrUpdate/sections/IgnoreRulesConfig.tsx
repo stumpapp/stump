@@ -9,13 +9,13 @@ import {
 	Text,
 	ToolTip,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
 import { Check, Edit, Lock, Slash, SquareAsterisk, Trash, Unlock, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -31,7 +31,7 @@ export default function IgnoreRulesConfig() {
 		append,
 		remove,
 	} = useFieldArray({ control: form.control, name: 'ignoreRules' })
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const isCreatingLibrary = !ctx?.library
 
@@ -114,7 +114,7 @@ export default function IgnoreRulesConfig() {
 		return (
 			<div>
 				<Button
-					title={hasChanges ? undefined : t('common.noChanges')}
+					title={hasChanges ? undefined : translate('shared.common.noChanges')}
 					type="submit"
 					disabled={!hasChanges}
 					className="mt-4"
@@ -123,7 +123,7 @@ export default function IgnoreRulesConfig() {
 				</Button>
 			</div>
 		)
-	}, [ctx, ignoreRules, t])
+	}, [ctx, ignoreRules, t, translate])
 
 	return (
 		<div className="max-w-2xl gap-6 flex grow flex-col">
@@ -244,7 +244,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 	const [isEditing, setIsEditing] = useState(false)
 	const [originalIgnoreRule] = useState(() => ignoreRule)
 
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const handleCancelEdit = useCallback(() => {
 		form.setValue(`ignoreRules.${index}`, originalIgnoreRule)
@@ -329,7 +329,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 				{renderGlob()}
 
 				<div
-					className={cn('transition-opacity-[opacity_0.3s] space-x-2 flex items-center', {
+					className={cn('transition-opacity-[opacity_0.3s] gap-x-2 flex items-center', {
 						'opacity-0 group-hover:opacity-100': !isEditing,
 					})}
 				>

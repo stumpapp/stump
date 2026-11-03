@@ -1,6 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "RegisteredEmailDeviceModel")]
 #[sea_orm(table_name = "registered_email_devices")]
@@ -13,8 +14,5 @@ pub struct Model {
 	pub email: String,
 	pub forbidden: bool,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

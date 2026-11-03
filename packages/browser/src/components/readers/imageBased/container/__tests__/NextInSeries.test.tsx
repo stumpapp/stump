@@ -1,5 +1,4 @@
 import { ReadingDirection } from '@stump/graphql'
-import { LocaleProvider } from '@stump/i18n'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -10,6 +9,10 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { IImageBaseReaderContext, useImageBaseReaderContext } from '../../context'
 import NextInSeries from '../NextInSeries'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
+}))
 
 vi.mock('rooks', () => ({
 	useMediaMatch: vi.fn(),
@@ -77,9 +80,7 @@ describe('NextInSeries', () => {
 		const user = userEvent.setup()
 		const { container } = render(
 			<MemoryRouter>
-				<LocaleProvider locale="en-US">
-					<NextInSeries />
-				</LocaleProvider>
+				<NextInSeries />
 			</MemoryRouter>,
 		)
 
@@ -87,9 +88,9 @@ describe('NextInSeries', () => {
 		expect(trigger).not.toBeNull()
 		await user.click(trigger!)
 
-		expect(await screen.findByText('Next Up:')).toBeInTheDocument()
+		expect(await screen.findByText('shared.imageReader.nextInSeries.title')).toBeInTheDocument()
 		expect(screen.getByText('Next Book')).toBeInTheDocument()
-		expect(screen.getByRole('link', { name: 'Read' })).toHaveAttribute(
+		expect(screen.getByRole('link', { name: 'shared.common.read' })).toHaveAttribute(
 			'href',
 			'/books/next-book/read',
 		)

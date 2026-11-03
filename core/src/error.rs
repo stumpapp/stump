@@ -65,6 +65,15 @@ pub enum CoreError {
 	Unknown(String),
 }
 
+impl From<schematic::ConfigError> for CoreError {
+	fn from(error: schematic::ConfigError) -> Self {
+		// schematic::ConfigError display impl only includes a generic message,
+		// so we manually impl from and use its to_full_string to get something
+		// actually helpful
+		Self::InitializationError(error.to_full_string())
+	}
+}
+
 impl From<chrono::ParseError> for CoreError {
 	fn from(error: chrono::ParseError) -> Self {
 		Self::InternalError(error.to_string())

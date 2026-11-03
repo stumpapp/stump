@@ -1,5 +1,5 @@
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
+import { useCreateTranslate } from '@stump/i18n'
 import { addDays, subDays } from 'date-fns'
 
 import { useAppContext } from '@/context'
@@ -14,7 +14,7 @@ const useAppContextRet = {
 } as any
 
 vi.mock('@stump/i18n', () => ({
-	useLocaleContext: vi.fn(),
+	useCreateTranslate: vi.fn(),
 }))
 const translate = vi.fn().mockImplementation((key: string) => key)
 
@@ -23,7 +23,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 		vi.clearAllMocks()
 
 		vi.mocked(useAppContext).mockReturnValue(useAppContextRet)
-		vi.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
+		vi.mocked(useCreateTranslate).mockReturnValue({ t: translate, translate } as any)
 	})
 
 	describe('schema', () => {

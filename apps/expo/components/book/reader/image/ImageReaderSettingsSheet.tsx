@@ -3,6 +3,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated, {
 	interpolateColor,
+	useAnimatedRef,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
@@ -21,7 +22,7 @@ import { ImageBasedReaderContext } from './context'
 
 export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 	const context = useContext(ImageBasedReaderContext)
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const colors = useColors()
 
 	const accentColor = usePalette({ light: 300, dark: 900, opacity: 0.4 })
@@ -49,6 +50,8 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 		}
 	})
 
+	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
@@ -58,16 +61,18 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 				ref={ref}
 				detents={[0.5, 1]}
 				grabber
-				scrollable
+				scrollableRef={animatedScrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				insetAdjustment="automatic"
 				{...props}
+				style={{ flex: 1, ...props.style }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
 				<PortalHostProvider name={Platform.OS === 'android' ? 'imageReaderSettings' : undefined}>
 					<Animated.ScrollView
+						ref={animatedScrollRef}
 						className="p-6 flex-1"
 						contentContainerStyle={{ alignItems: 'flex-start' }}
 						nestedScrollEnabled
@@ -75,12 +80,12 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 					>
 						<View className="gap-8 w-full flex-1">
 							<View className="flex flex-row items-center justify-between">
-								<Heading size="lg">{t('common.settings')}</Heading>
+								<Heading size="lg">{translate('shared.common.settings')}</Heading>
 
 								{!!context && (
 									<View className="gap-1 flex-row items-center">
 										<Text className="text-foreground-muted">
-											{t('readerSettings.overrideGlobalSettings')}
+											{translate('shared.readerSettings.overrideGlobalSettings')}
 										</Text>
 										<Switch
 											checked={overrideGlobalSettings}

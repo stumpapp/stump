@@ -1,25 +1,21 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Alert, AlertDescription, Button, Heading, Text } from '@stump/components'
 import { graphql, MetadataResetImpact, UserPermission } from '@stump/graphql'
-import { Construction } from 'lucide-react'
 import { Suspense, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import { ResetMetadata } from '@/components/metadata/metadataEditor'
+import { useSeriesContext } from '@/components/series/context'
 import { SeriesMetadataEditor } from '@/components/series/metadata'
+import SeriesTagEditor from '@/components/series/SeriesTagEditor'
+import { SettingsSection } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-
-import { useSeriesContext } from '../../context'
-import SeriesTagEditor from './SeriesTagEditor'
-import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 
 const query = graphql(`
 	query SeriesSettingsScene($id: ID!) {
 		seriesById(id: $id) {
 			id
-			...SeriesThumbnailSelector
 			tags {
 				id
 				name
@@ -28,12 +24,6 @@ const query = graphql(`
 				...SeriesMetadataEditor
 			}
 		}
-	}
-`)
-
-const analyzeMutation = graphql(`
-	mutation SeriesSettingsSceneAnalyze($id: ID!) {
-		analyzeSeries(id: $id)
 	}
 `)
 
@@ -58,10 +48,8 @@ export default function SeriesSettingsScene() {
 		id: series.id ?? '',
 	})
 
-	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
 	const { mutate: resetMetadata } = useGraphQLMutation(resetMetadataMutation)
 
-	const handleAnalyze = useCallback(() => analyze({ id: series.id }), [analyze, series.id])
 	const handleResetMetadata = useCallback(
 		(impact: MetadataResetImpact) => resetMetadata({ id: series.id, impact }),
 		[resetMetadata, series.id],
@@ -78,64 +66,24 @@ export default function SeriesSettingsScene() {
 	}
 
 	return (
-		<SceneContainer>
-			<div className="gap-y-6 flex flex-col items-start text-left">
-				<Alert variant="warning">
-					<Construction />
-					<AlertDescription>
-						Series management is currently under development and has very limited functionality
-					</AlertDescription>
-				</Alert>
+		<SceneContainer variant="settings" className="max-w-[unset]">
+			{checkPermission(UserPermission.EditMetadata) && (
+				<Suspense>
+					<SeriesTagEditor seriesId={seriesById.id} tags={seriesById.tags} />
+				</Suspense>
+			)}
 
-				<div className="gap-y-2 flex flex-col">
-					<div>
-						<Heading size="sm">Analysis</Heading>
-						<Text size="sm" variant="muted">
-							Re-analyze this series to update metadata from its files
-						</Text>
-					</div>
-
-					<div>
-						<Button
-							title={data ? 'Analysis already in progress' : 'Analyze this series'}
-							onClick={handleAnalyze}
-							disabled={!!data || isPending}
-						>
-							Analyze series
-						</Button>
-					</div>
-				</div>
-
-				{checkPermission(UserPermission.EditMetadata) && (
-					<Suspense>
-						<SeriesTagEditor seriesId={seriesById.id} tags={seriesById.tags} />
-					</Suspense>
-				)}
-
-				<div className="gap-y-2 flex flex-col">
-					<div>
-						<Heading size="sm">Thumbnail</Heading>
-						<Text size="sm" variant="muted">
-							Change the cover image for this series
-						</Text>
-					</div>
-
-					<SeriesThumbnailSelector fragment={seriesById} />
-				</div>
-
-				<div className="gap-y-2 flex w-full flex-col">
-					<div className="flex items-end justify-between">
-						<div>
-							<Heading size="sm">Metadata</Heading>
-							<Text variant="muted">Extra information about your series</Text>
-						</div>
-						{checkPermission(UserPermission.EditMetadata) && (
-							<ResetMetadata onConfirmReset={handleResetMetadata} />
-						)}
-					</div>
-					<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />
-				</div>
-			</div>
+			<SettingsSection
+				title="Metadata"
+				description="Extra information about your series"
+				actions={
+					checkPermission(UserPermission.EditMetadata) && (
+						<ResetMetadata onConfirmReset={handleResetMetadata} />
+					)
+				}
+			>
+				<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />
+			</SettingsSection>
 		</SceneContainer>
 	)
 }

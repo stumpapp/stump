@@ -6,7 +6,7 @@ import Bookmarks from '../Bookmarks'
 
 vi.mock('@stump/i18n', () => ({
 	...vi.importActual('@stump/i18n'),
-	useLocaleContext: () => ({ t: (key: string) => key }),
+	useCreateTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
 }))
 
 vi.mock('../../context', () => ({

@@ -55,8 +55,7 @@ export default function ReadingDefaultsScene() {
 			}),
 		[library],
 	)
-
-	const form = useForm<PatchParams>({
+	const form = useForm({
 		defaultValues: formDefaults(library),
 		resolver: zodResolver(schema),
 	})
@@ -98,7 +97,7 @@ export default function ReadingDefaultsScene() {
 	return (
 		<Form
 			id="reading-defaults"
-			fieldsetClassName="flex flex-col gap-12 md:max-w-xl"
+			fieldsetClassName="flex flex-col gap-12"
 			form={form}
 			onSubmit={handleSubmit}
 		>

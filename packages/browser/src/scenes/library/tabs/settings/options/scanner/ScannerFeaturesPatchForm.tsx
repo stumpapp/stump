@@ -16,7 +16,7 @@ export default function ScannerFeaturesPatchForm() {
 	const { library, patch } = useLibraryManagement()
 
 	const schema = useMemo(() => buildSchema([], library), [library])
-	const form = useForm<CreateOrUpdateLibrarySchema>({
+	const form = useForm({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),

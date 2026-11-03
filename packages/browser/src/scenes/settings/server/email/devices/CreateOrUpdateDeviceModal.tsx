@@ -2,11 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const createMutation = graphql(`
 	mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
@@ -39,7 +40,7 @@ type Props = {
 // TODO: fix types here
 export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const client = useQueryClient()
 

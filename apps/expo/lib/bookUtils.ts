@@ -6,7 +6,7 @@ type FormatSeriesPositionParams = {
 	seriesName?: string | null
 	// null = no prefix, undefined = default prefix (book)
 	prefix?: KnownPrefix | null
-	t: (key: string, args?: Record<string, unknown>) => string
+	translate: (fullKey: string, options?: Record<string, unknown>) => string
 }
 
 // TODO(metadata): Fix this at the core
@@ -46,7 +46,7 @@ const decodeHtmlEntities = (str: string): string =>
 export const formatSeriesPosition = (
 	position: number | null | undefined,
 	totalBooks: number | null | undefined,
-	{ t, ...params }: FormatSeriesPositionParams,
+	{ translate, ...params }: FormatSeriesPositionParams,
 ): string | null => {
 	if (position == null) return null
 
@@ -61,14 +61,14 @@ export const formatSeriesPosition = (
 	// i.e. a bunch of almost identical positionWithTotal/position keys, but since languages
 	// differ in grammar this was just easiest
 	const primaryClauseKey = showOfY
-		? `formatSeriesPosition.${resolvedPrefix}.positionWithTotal`
-		: `formatSeriesPosition.${resolvedPrefix}.position`
+		? `${resolvedPrefix}.positionWithTotal`
+		: `${resolvedPrefix}.position`
 
-	return t(primaryClauseKey, {
+	return translate(`shared.formatSeriesPosition.${primaryClauseKey}`, {
 		position,
 		total: totalBooks || undefined,
 		seriesName: params.seriesName
 			? decodeHtmlEntities(params.seriesName)
-			: t('formatSeriesPosition.unknownSeriesName'),
+			: translate('shared.formatSeriesPosition.unknownSeriesName'),
 	})
 }

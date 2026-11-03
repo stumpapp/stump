@@ -1,8 +1,11 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
+use super::{book_club, book_club_book_suggestion_like, book_club_member, media};
+
 use crate::shared::book_club::BookClubSuggestionStatus;
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubBookSuggestionModel")]
 #[sea_orm(table_name = "book_club_book_suggestions")]
@@ -30,68 +33,57 @@ pub struct Model {
 	pub suggested_by_id: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub book_id: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::book_club_book_suggestion_like::Entity")]
-	BookClubBookSuggestionLike,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub likes: HasMany<book_club_book_suggestion_like::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClub,
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club_member::Entity",
-		from = "Column::SuggestedById",
-		to = "super::book_club_member::Column::Id",
+		belongs_to,
+		relation_enum = "SuggestedBy",
+		from = "suggested_by_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	SuggestedBy,
+	#[graphql(skip)]
+	pub suggested_by: BelongsTo<book_club_member::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club_member::Entity",
-		from = "Column::ResolvedById",
-		to = "super::book_club_member::Column::Id",
+		belongs_to,
+		relation_enum = "ResolvedBy",
+		from = "resolved_by_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "SetNull"
 	)]
-	ResolvedBy,
+	#[graphql(skip)]
+	pub resolved_by: BelongsTo<Option<book_club_member::Entity>>,
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::BookId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "book_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
+	#[graphql(skip)]
+	pub book: BelongsTo<Option<media::Entity>>,
 }
 
-impl Related<super::book_club_book_suggestion_like::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubBookSuggestionLike.def()
-	}
-}
+impl ActiveModelBehavior for ActiveModel {}
 
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
+// NOTE: this apparently had to be manually-added bc the new entity format
+// will only generate related impls when only one relation targets an entity.
+// since we have two (suggested_by, resolved_by) pointing at member, it
+// won't do it for us
+impl Related<book_club_member::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::SuggestedBy.def()
 	}
 }
-
-impl ActiveModelBehavior for ActiveModel {}

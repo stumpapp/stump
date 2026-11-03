@@ -1,8 +1,11 @@
 import { ReadingImageScaleFit } from '@stump/graphql'
-import { LocaleProvider } from '@stump/i18n'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import ImageScalingSelect from '../ImageScalingSelect'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
+}))
 
 vi.mock('@/scenes/book/reader/useBookPreferences', () => ({
 	useBookPreferences: vi.fn(),
@@ -10,19 +13,7 @@ vi.mock('@/scenes/book/reader/useBookPreferences', () => ({
 
 describe('ImageScalingSelect', () => {
 	const renderSubject = (onChange = vi.fn()) =>
-		render(
-			<LocaleProvider locale="en-US">
-				<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={onChange} />
-			</LocaleProvider>,
-		)
-
-	const originalWarn = console.warn
-	beforeAll(() => {
-		console.warn = vi.fn()
-	})
-	afterAll(() => {
-		console.warn = originalWarn
-	})
+		render(<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={onChange} />)
 
 	it('should render', () => {
 		expect(renderSubject().container).not.toBeEmptyDOMElement()

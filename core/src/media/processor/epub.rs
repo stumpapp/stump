@@ -367,10 +367,9 @@ fn get_cover_internal(
 		}
 	}
 
-	tracing::error!("Failed to find cover for epub file");
-	Err(MediaProcessorError::EpubRead(
-		"Failed to find cover for epub file".to_string(),
-	))
+	// A cover is optional in EPUB, so a book without one is valid input rather than an error
+	tracing::debug!("Epub file does not contain a cover image");
+	Err(MediaProcessorError::CoverNotFound)
 }
 
 /// Returns the cover image for the epub file. If a cover image cannot be extracted via the
@@ -789,7 +788,14 @@ fn parse_opf_xml(
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
-	let mut adjusted_path = path.clone();
+	// EPUB resources are stored in the zip archive with `/` separators, but callers
+	// may hand us Windows-style `\` separators on any platform (e.g. a path joined by
+	// `PathBuf` on Windows and later round-tripped as a string). On non-Windows
+	// platforms `\` is not a separator, so without this conversion the entire string
+	// would be a single component and `starts_with(root)` below would never match.
+	// (epub-rs's `convert_path_seps` performs the same normalization.)
+	let path_str = path.to_string_lossy().replace('\\', "/");
+	let mut adjusted_path = PathBuf::from(path_str);
 
 	if !adjusted_path.starts_with(root) {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
@@ -812,6 +818,14 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 		}
 	}
 
+	// EPUB resources are stored in the zip archive with `/` separators. On Windows,
+	// `PathBuf::join` produces `\` separators, which breaks exact-name lookup in the
+	// archive (epub-rs's `convert_path_seps` performs the same normalization). Convert
+	// Windows separators to `/` so resource paths match archive entry names.
+	if cfg!(windows) {
+		normalized = PathBuf::from(normalized.to_string_lossy().replace('\\', "/"));
+	}
+
 	normalized
 }
 
@@ -822,10 +836,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_svg_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -835,10 +846,7 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover.epub");
+		let epub_path = ::tests::fixtures::test_data_dir().join("book_image_cover.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -852,10 +860,8 @@ mod tests {
 
 	#[test]
 	fn test_get_cover_from_xhtml_img_cover_last_chapter() {
-		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("book_image_cover_last_chapter.epub");
+		let epub_path =
+			::tests::fixtures::test_data_dir().join("book_image_cover_last_chapter.epub");
 
 		let mut epub = EpubDoc::new(epub_path).unwrap();
 
@@ -1067,6 +1073,22 @@ mod tests {
 		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		// Windows-style separators (as produced by `PathBuf::join` on Windows) must be
+		// normalized to POSIX separators, since zip archive entry names always use `/`.
+		let path = PathBuf::from(r"OEBPS\Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
+
+		let path = PathBuf::from(r"Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
 	}
 
 	#[test]
@@ -1106,10 +1128,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre.opf test file");
@@ -1208,10 +1227,8 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_html_description_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-html-descriptions.opf");
+		let opf_path =
+			::tests::fixtures::test_data_dir().join("calibre-html-descriptions.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-html-descriptions.opf test file");
@@ -1256,10 +1273,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_calibre_3_opf() {
-		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests")
-			.join("data")
-			.join("calibre-2.opf");
+		let opf_path = ::tests::fixtures::test_data_dir().join("calibre-2.opf");
 
 		let opf_content = std::fs::read_to_string(&opf_path)
 			.expect("Failed to read calibre-2.opf test file");
@@ -1366,6 +1380,101 @@ mod tests {
 
 		let chapter = get_chapter(path, 1);
 		assert!(chapter.is_ok());
+	}
+
+	/// Build a minimal EPUB 3 with a single chapter and no image resources or cover
+	/// metadata, keeping the backing temp directory alive alongside its path.
+	fn build_test_epub_without_cover() -> (tempfile::TempDir, PathBuf) {
+		use std::io::Write;
+
+		let temp = tempfile::tempdir().expect("tempdir");
+		let path = temp.path().join("book.epub");
+		let file = File::create(&path).expect("create epub");
+		let mut zip = zip::ZipWriter::new(file);
+		let zip_options = zip::write::FileOptions::<()>::default();
+		// The EPUB OCF spec requires the mimetype entry to be stored uncompressed
+		let mimetype_options = zip::write::FileOptions::<()>::default()
+			.compression_method(zip::CompressionMethod::Stored);
+
+		zip.start_file("mimetype", mimetype_options)
+			.expect("mimetype");
+		zip.write_all(b"application/epub+zip")
+			.expect("mimetype bytes");
+		zip.start_file("META-INF/container.xml", zip_options)
+			.expect("container");
+		zip.write_all(
+			br#"<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+	<rootfiles>
+		<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+	</rootfiles>
+</container>"#,
+		)
+		.expect("container bytes");
+		zip.start_file("OEBPS/content.opf", zip_options)
+			.expect("opf");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+		<dc:identifier id="uid">urn:uuid:stump-no-cover-test</dc:identifier>
+		<dc:title>No Cover Test</dc:title>
+		<dc:language>en</dc:language>
+		<meta property="dcterms:modified">2026-01-01T00:00:00Z</meta>
+	</metadata>
+	<manifest>
+		<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+		<item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>
+	</manifest>
+	<spine><itemref idref="ch1"/></spine>
+</package>"#,
+		)
+		.expect("opf bytes");
+		zip.start_file("OEBPS/nav.xhtml", zip_options).expect("nav");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head><body><nav epub:type="toc"><ol><li><a href="ch1.xhtml">Chapter 1</a></li></ol></nav></body></html>"#,
+		)
+		.expect("nav bytes");
+		zip.start_file("OEBPS/ch1.xhtml", zip_options)
+			.expect("chapter");
+		zip.write_all(
+			br#"<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Chapter 1</title></head><body><p>Hello</p></body></html>"#,
+		)
+		.expect("chapter bytes");
+		zip.finish().expect("finish zip");
+
+		(temp, path)
+	}
+
+	#[test]
+	fn test_get_cover_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+
+		let cover = get_cover(&path);
+		assert!(matches!(cover, Err(MediaProcessorError::CoverNotFound)));
+	}
+
+	#[test]
+	fn test_get_first_page_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+		let processor = EpubProcessor;
+
+		let page = processor.get_page(&path, 1);
+		assert!(matches!(page, Err(MediaProcessorError::CoverNotFound)));
+	}
+
+	#[test]
+	fn test_get_page_content_types_without_cover_image() {
+		let (_temp, path) = build_test_epub_without_cover();
+		let processor = EpubProcessor;
+
+		let content_types = processor.get_page_content_types(&path, vec![1]);
+		assert!(matches!(
+			content_types,
+			Err(MediaProcessorError::CoverNotFound)
+		));
 	}
 
 	#[test]

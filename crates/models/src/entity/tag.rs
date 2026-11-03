@@ -1,10 +1,9 @@
-use super::media_tag;
+use super::{library_tag, media_tag, series_tag};
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, JoinType, QuerySelect};
 
-#[derive(
-	Clone, Debug, PartialEq, Eq, PartialOrd, Ord, DeriveEntityModel, SimpleObject,
-)]
+#[sea_orm::model]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, SimpleObject)]
 #[graphql(name = "TagModel")]
 #[sea_orm(table_name = "tags")]
 pub struct Model {
@@ -12,16 +11,15 @@ pub struct Model {
 	pub id: i32,
 	#[sea_orm(column_type = "Text", unique)]
 	pub name: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::media_tag::Entity")]
-	MediaTags,
-	#[sea_orm(has_many = "super::series_tag::Entity")]
-	SeriesTags,
-	#[sea_orm(has_many = "super::library_tag::Entity")]
-	LibraryTags,
+	#[sea_orm(has_many, relation_enum = "MediaTags")]
+	#[graphql(skip)]
+	pub media_tags: HasMany<media_tag::Entity>,
+	#[sea_orm(has_many, relation_enum = "SeriesTags")]
+	#[graphql(skip)]
+	pub series_tags: HasMany<series_tag::Entity>,
+	#[sea_orm(has_many, relation_enum = "LibraryTags")]
+	#[graphql(skip)]
+	pub library_tags: HasMany<library_tag::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

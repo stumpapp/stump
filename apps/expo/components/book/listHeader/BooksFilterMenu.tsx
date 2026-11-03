@@ -12,7 +12,7 @@ type Params = {
 }
 
 export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const filters = useBookFilterStore((store) => store.filters)
 	const setFilters = useBookFilterStore((store) => store.setFilters)
 
@@ -27,19 +27,19 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 					key: 'not-started',
 					value: ReadingStatus.NotStarted,
 					icon: { ios: 'clock.badge', android: ClockFading },
-					label: t('filtering.notStarted'),
+					label: translate('shared.readingStatus.NOT_STARTED'),
 				},
 				{
 					key: 'reading',
 					value: ReadingStatus.Reading,
 					icon: { ios: 'eyeglasses', android: Glasses },
-					label: t('filtering.currentlyReading'),
+					label: translate('shared.readingStatus.READING'),
 				},
 				{
 					key: 'finished',
 					value: ReadingStatus.Finished,
 					icon: { ios: 'checkmark.circle', android: CheckCircle },
-					label: t('filtering.finished'),
+					label: translate('shared.readingStatus.FINISHED'),
 				},
 			],
 		},
@@ -50,14 +50,14 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 			key: 'content-type',
 			mode: 'multi',
 			filterPath: 'series.libraryType.isAnyOf',
-			title: t('common.content'),
+			title: translate('shared.common.content'),
 			inline: true,
 			items: [
 				{
 					key: 'book',
 					value: LibraryType.Book,
 					icon: { ios: 'book', android: BookOpen },
-					label: t('libraryType.BOOK'),
+					label: translate('shared.libraryType.BOOK'),
 				},
 				{
 					key: 'comic',
@@ -66,7 +66,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 						android: ComicBubble,
 					},
 					value: LibraryType.Comic,
-					label: t('libraryType.COMIC'),
+					label: translate('shared.libraryType.COMIC'),
 				},
 				{
 					key: 'manga',
@@ -75,7 +75,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 						android: Manga,
 					},
 					value: LibraryType.Manga,
-					label: t('libraryType.MANGA'),
+					label: translate('shared.libraryType.MANGA'),
 				},
 			],
 		})

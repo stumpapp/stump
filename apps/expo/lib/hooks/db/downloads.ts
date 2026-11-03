@@ -68,7 +68,7 @@ export type UseDownloadParams = {
 }
 
 export function useDownload({ serverId }: UseDownloadParams = {}) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
@@ -265,14 +265,14 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			} catch (error) {
 				Sentry.captureException(error)
 				toast.error(
-					t('bookActions.markAsRead.failure', {
-						description: extractErrorMessage(error, t('common.unknownError')),
+					translate('shared.bookActions.markAsRead.failure', {
+						description: extractErrorMessage(error, translate('shared.common.unknownError')),
 					}),
 				)
 				throw error
 			}
 		},
-		[serverID, queryClient, t],
+		[serverID, queryClient, translate],
 	)
 
 	const clearProgress = useCallback(
@@ -288,14 +288,14 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			} catch (error) {
 				Sentry.captureException(error)
 				toast.error(
-					t('bookActions.clearProgress.failure', {
-						description: extractErrorMessage(error, t('common.unknownError')),
+					translate('shared.bookActions.clearProgress.failure', {
+						description: extractErrorMessage(error, translate('shared.common.unknownError')),
 					}),
 				)
 				throw error
 			}
 		},
-		[serverID, queryClient, t],
+		[serverID, queryClient, translate],
 	)
 
 	const downloadImmediate = useCallback(

@@ -1,10 +1,11 @@
 import { useGraphQLMutation } from '@stump/client'
 import { Button, Input } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useMemo, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import type { CreateOrUpdateEmailerSchema } from './schema'
 
@@ -15,7 +16,7 @@ const testEmailerMutation = graphql(`
 `)
 
 export default function TestEmailerButton() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { control } = useFormContext<CreateOrUpdateEmailerSchema>()
 
 	const [recipient, setRecipient] = useState('')

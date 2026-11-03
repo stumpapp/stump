@@ -26,6 +26,7 @@ import {
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { PageHeader } from '@/components/sharedLayout'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -343,13 +344,16 @@ function BookSearchScene() {
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-				<FilterHeader
-					isSearching={isLoading}
-					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-					orderControls={<URLOrdering entity="media" />}
-					sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
-					filterControls={<URLFilterDrawer entity="media" />}
-				/>
+				<PageHeader>
+					<FilterHeader
+						isInPageHeader
+						isSearching={isLoading}
+						layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+						orderControls={<URLOrdering entity="media" />}
+						sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
+						filterControls={<URLFilterDrawer entity="media" />}
+					/>
+				</PageHeader>
 
 				{enableAlphabetSelect && (
 					<BooksAlphabet

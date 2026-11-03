@@ -5,7 +5,9 @@ import {
 	TextButton,
 } from '@expo/ui/jetpack-compose'
 import { useEffect, useState } from 'react'
-import { Alert, AlertButton, AlertOptions, AlertStatic } from 'react-native'
+import { Alert, AlertButton, AlertOptions } from 'react-native'
+
+type AlertStatic = Pick<typeof Alert, 'alert' | 'prompt'>
 
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -36,8 +38,8 @@ function presentAlert(alert: PendingAlert) {
 export const SystemAlert: AlertStatic = {
 	alert: (title, message, buttons = [], options) => {
 		presentAlert({
-			title,
-			message,
+			title: title ?? '',
+			message: message ?? undefined,
 			buttons,
 			options,
 		})
@@ -49,8 +51,8 @@ export const SystemAlert: AlertStatic = {
 		}
 
 		presentAlert({
-			title,
-			message,
+			title: title ?? '',
+			message: message ?? undefined,
 			buttons: Array.isArray(callbackOrButtons) ? callbackOrButtons : [],
 			// ^ i don't want to bother with the callback, it's fine
 			options,
@@ -133,7 +135,7 @@ type SystemAlertButtonProps = {
 }
 
 function SystemAlertButton({ button, onPress }: SystemAlertButtonProps) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { isDarkColorScheme } = useColorScheme()
 
 	const colors = useColors()
@@ -153,7 +155,7 @@ function SystemAlertButton({ button, onPress }: SystemAlertButtonProps) {
 						button.style === 'destructive' ? colors.fill.danger.DEFAULT : colors.foreground.DEFAULT,
 				}}
 			>
-				<AndroidText>{button.text ?? t('common.ok')}</AndroidText>
+				<AndroidText>{button.text ?? translate('shared.common.ok')}</AndroidText>
 			</TextButton>
 		</ButtonContainer>
 	)

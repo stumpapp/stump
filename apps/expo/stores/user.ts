@@ -20,7 +20,10 @@ export type DisplayLanguageKeysType = 'none' | 'abbreviated' | 'full'
 
 export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
 
+export type ThemePreference = 'light' | 'dark' | 'system'
+
 type MobilePreferencesStore = {
+	themePreference: ThemePreference
 	showTabLabels: boolean
 	storeLastRead: boolean
 	reduceAnimations: boolean
@@ -47,6 +50,7 @@ type MobilePreferencesStore = {
 	tintListBackground: boolean
 	textCase: TextCase
 	maxPageViewingSeconds: number
+	deviceName?: string | null
 	/**
 	 * Patch the store with new values.
 	 */
@@ -60,6 +64,7 @@ type MobilePreferencesStore = {
 export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
 		(set) => ({
+			themePreference: 'system',
 			showTabLabels: true,
 			storeLastRead: false,
 			reduceAnimations: false,

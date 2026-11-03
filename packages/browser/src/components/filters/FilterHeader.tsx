@@ -2,8 +2,6 @@ import { cn, useSticky } from '@stump/components'
 import { useCallback } from 'react'
 import { useMediaMatch } from 'rooks'
 
-import { usePreferences } from '@/hooks/usePreferences'
-
 import { useFilterContext } from './context'
 import Search from './Search'
 
@@ -37,6 +35,10 @@ type Props = {
 	 */
 	sizeControls?: React.ReactNode
 	navOffset?: boolean
+	/**
+	 * Whether this is rendered inside a page header
+	 */
+	isInPageHeader?: boolean
 }
 
 // TODO: transparent until sticky hits, then bg-background
@@ -49,13 +51,11 @@ export default function FilterHeader({
 	filterControls,
 	sizeControls,
 	navOffset,
+	isInPageHeader,
 }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const {
-		preferences: { primaryNavigationMode },
-	} = usePreferences()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
-		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,
+		extraOffset: isMobile ? 56 : 0,
 	})
 
 	const { search, setSearch, removeSearch } = useFilterContext()
@@ -79,11 +79,15 @@ export default function FilterHeader({
 		<header
 			ref={ref}
 			className={cn(
-				'h-12 gap-2 px-4 md:top-0 sticky z-50 flex w-full shrink-0 items-center justify-between border-b border-border',
-				{
-					'bg-background': isSticky || !isMobile,
-				},
-				navOffset ? 'top-12' : 'top-0',
+				'gap-2 flex items-center justify-between',
+				isInPageHeader
+					? 'min-w-0 flex-1'
+					: // ^ don't conflict with header styles
+						cn(
+							'h-12 px-4 md:top-0 sticky z-50 w-full shrink-0 border-b border-border',
+							{ 'bg-background': isSticky || !isMobile },
+							navOffset ? 'top-12' : 'top-0',
+						),
 			)}
 		>
 			<Search

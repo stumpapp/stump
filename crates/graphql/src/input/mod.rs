@@ -1,5 +1,6 @@
 pub mod api_key;
 pub mod book_club;
+pub mod date_range;
 pub mod email_device;
 pub mod emailer;
 pub mod filesystem;

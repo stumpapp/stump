@@ -1,5 +1,5 @@
 import { useSDKSafe } from '@stump/client'
-import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
@@ -99,8 +99,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				scroll: bookPreferences.readingMode !== ReadingMode.Paged,
 				// TODO(pdf): Implement this preference
 				backgroundColor: '#000000',
-				readingProgression:
-					bookPreferences.readingDirection === ReadingDirection.Rtl ? 'rtl' : 'ltr',
+				readingProgression: bookPreferences.readingDirection?.toLowerCase() as 'ltr' | 'rtl',
 				spread:
 					bookPreferences.doublePageBehavior === 'off'
 						? 'never' // Stump uses 'off' readium uses 'never' but same otherwsie
@@ -189,7 +188,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				setLocalUri(null)
 			}
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -198,7 +196,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		() => {
 			store.storeBook(book)
 		},
-		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.id],
 	)

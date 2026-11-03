@@ -8,7 +8,7 @@ const baseLink = z.object({
 	href: z.string(),
 	type: z.string().nullish(),
 	templated: z.boolean().nullish(),
-	properties: z.record(z.unknown()).nullish(),
+	properties: z.record(z.string(), z.unknown()).nullish(),
 })
 export type OPDSBaseLink = z.infer<typeof baseLink>
 
@@ -35,6 +35,7 @@ export type OPDSLink = z.infer<typeof link>
 const languageMap = z.union([
 	z.string(),
 	z.record(
+		z.string(),
 		z
 			.string()
 			.regex(
@@ -162,7 +163,7 @@ const metadata = z
 		subject: subject.nullish(),
 	})
 	.merge(paginationMeta)
-	.and(z.record(z.unknown()))
+	.and(z.record(z.string(), z.unknown()))
 	.transform((data) => {
 		if (data.title.match(/\.[a-z0-9]+$/)) {
 			data.title = data.title.replace(/\.[a-z0-9]+$/, '')

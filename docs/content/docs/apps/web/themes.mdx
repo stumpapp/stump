@@ -16,13 +16,13 @@ To add a new theme, you'll need to follow these steps:
 
 Add your theme to the [`packages/components/tailwind/themes.css`](https://github.com/stumpapp/stump/tree/nightly/packages/components/tailwind/themes.css) file. Each theme is defined as a CSS class with all the required color variables.
 
-For example, let's create a "midnight" theme that is based on the dark theme, but with a pure black background:
+For example, let's create a "mytheme" theme that is based on the dark theme, but with a warmer tint background:
 
 ```css filename="packages/components/tailwind/themes.css" copy
-.midnight {
+.mytheme {
 	/* MARK: backgrounds */
-	--color-background: #000000;
-	--color-background-inverse: #ffffff;
+	--background: #1a0f08;
+	--foreground: #f5ede4;
 
 	/* ... other theme colors ... */
 }
@@ -41,7 +41,7 @@ Update the [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/nigh
 		{ label: t(`${localeKey}.options.system`), value: 'system' },
 		{ label: t(`${localeKey}.options.light`), value: 'light' },
 		// ... existing themes ...
-		{ label: t(`${localeKey}.options.midnight`), value: 'midnight' }, // <- our new theme
+		{ label: t(`${localeKey}.options.mytheme`), value: 'mytheme' }, // <- our new theme
 	]}
 	onChange={(e) => changeTheme(e.target.value)}
 />
@@ -62,7 +62,7 @@ Add the theme name to the translation files. The main English locale file is at 
 						"light": "Light",
 						"dark": "Dark",
 						// ... other themes ...
-						"midnight": "Midnight"
+						"mytheme": "My Theme"
 					}
 				}
 			}
@@ -86,7 +86,7 @@ This ensures that the theme is recognized as a dark variant for proper UI adjust
 If your theme supports gradient backgrounds, add it to the `THEMES_WITH_GRADIENTS` array in the same file:
 
 ```ts filename="packages/browser/src/hooks/useTheme.ts" copy
-export const THEMES_WITH_GRADIENTS = ['cosmic', 'midnight']
+export const THEMES_WITH_GRADIENTS = ['cosmic', 'mytheme']
 ```
 
 ## Fonts

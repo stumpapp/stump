@@ -4,12 +4,13 @@ import { Picker } from '~/components/ui/picker/picker'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import type { ThemePreference } from '~/stores/user'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function AppTheme() {
 	const { t } = useTranslate()
-	const { colorScheme, setColorScheme } = useColorScheme()
+	const { themePreference, setColorScheme } = useColorScheme()
 
 	return (
 		<AppSettingsRow
@@ -17,8 +18,8 @@ export default function AppTheme() {
 			iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
 			title={t(getKey('label'))}
 		>
-			<Picker<'light' | 'dark'>
-				value={colorScheme}
+			<Picker<ThemePreference>
+				value={themePreference}
 				options={[
 					{
 						label: t(getKey('options.light')),
@@ -27,6 +28,10 @@ export default function AppTheme() {
 					{
 						label: t(getKey('options.dark')),
 						value: 'dark',
+					},
+					{
+						label: t(getKey('options.system')),
+						value: 'system',
 					},
 				]}
 				onValueChange={setColorScheme}

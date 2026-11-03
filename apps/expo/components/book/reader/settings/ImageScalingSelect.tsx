@@ -9,12 +9,12 @@ type Props = {
 }
 
 export default function ImageScalingSelect({ behavior, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<Picker
 			options={[
-				{ label: t(getKey(ReadingImageScaleFit.Auto)), value: ReadingImageScaleFit.Auto },
+				{ label: translate(getKey(ReadingImageScaleFit.Auto)), value: ReadingImageScaleFit.Auto },
 				// TODO: support these
 				// {
 				// 	label: t(getKey(ReadingImageScaleFit.Height)),
@@ -36,5 +36,5 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.imageScaling'
+const LOCALE_BASE = 'shared.readerSettings.imageScaling'
 const getKey = (key: ReadingImageScaleFit) => `${LOCALE_BASE}.options.${key}`

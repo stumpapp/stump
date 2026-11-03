@@ -1,11 +1,11 @@
 import { NewCard, RawSwitch } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function LiveRefetchToggle() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { enableLiveRefetch },
 		update,

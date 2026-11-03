@@ -12,6 +12,7 @@ import { SavedServerWithConfig } from '~/stores/savedServer'
 import { CreateOrUpdateServerForm } from './CreateOrUpdateServerForm'
 import {
 	CreateOrUpdateServerData,
+	CreateOrUpdateServerInput,
 	createSchema,
 	getUpdateServerDefaults,
 	intoCreateServer,
@@ -25,7 +26,7 @@ type Props = {
 export function UpdateServerSheet({ editingServer, onClose }: Props) {
 	const sheetRef = useRef<TrueSheet>(null)
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, updateServer } = useSavedServers()
 
 	const hasBeenPresentedRef = useRef(false)
@@ -51,12 +52,12 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 		[editingServer, updateServer],
 	)
 
-	const form = useForm<CreateOrUpdateServerData>({
+	const form = useForm<CreateOrUpdateServerInput, unknown, CreateOrUpdateServerData>({
 		defaultValues: getUpdateServerDefaults(editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
-				t,
+				translate,
 			),
 		),
 	})
@@ -80,8 +81,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 					name="updateServerSheet"
 					ref={sheetRef}
 					detents={[1]}
-					scrollable
-					headerLabel={t('addOrEditServer.updateServer')}
+					headerLabel={translate('shared.addOrEditServer.updateServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
 						type: 'check',

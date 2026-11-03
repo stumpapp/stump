@@ -3,16 +3,14 @@ use crate::{
 	filter::{log::LogFilterInput, IntoFilter},
 	guard::PermissionGuard,
 	object::log::{Log, LogFileInfo},
+	order::OrderSpec,
 	pagination::{
 		get_paginated_results, PaginatedResponse, Pagination, PaginationValidator,
 	},
 };
 use async_graphql::{Context, Object, Result};
-use models::{
-	entity::log,
-	shared::{enums::UserPermission, ordering::OrderBy},
-};
-use sea_orm::prelude::*;
+use models::{entity::log, shared::enums::UserPermission};
+use sea_orm::{prelude::*, Order};
 
 #[derive(Default)]
 pub struct LogQuery;
@@ -31,8 +29,11 @@ impl LogQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let filter = filter.into_filter();
-		let query = log::Entity::find().filter(filter);
-		let query = log::LogModelOrderBy::add_order_by(&order_by, query)?;
+		let query = order_by
+			.iter()
+			.fold(OrderSpec::new(), |spec, o| spec.by(&o.field, o.direction))
+			.then(log::Column::Id, Order::Asc)
+			.apply(log::Entity::find().filter(filter));
 
 		let get_cursor = |m: &log::Model| m.id.to_string();
 		get_paginated_results(query, log::Column::Id, conn, pagination, get_cursor).await

@@ -1,5 +1,4 @@
 import { cn, DatePicker, Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { endOfDay } from 'date-fns'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
@@ -12,6 +11,7 @@ import {
 	isNumberOperator,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useFilterGroupContext } from '../context'
 import EnumValue from './EnumValue'
@@ -25,7 +25,7 @@ type Props = {
 export type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
 export default function FilterValue({ idx }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()

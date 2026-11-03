@@ -3,8 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation, useRouter } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
-import { Platform, TextInputChangeEventData, View } from 'react-native'
-import { NativeSyntheticEvent } from 'react-native'
+import { Platform, TextInputChangeEvent, View } from 'react-native'
 
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
@@ -21,7 +20,7 @@ export default function Screen() {
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { t } = useTranslate()
+	const { t, translate } = useTranslate()
 	const trackSearch = useSearchStore((store) => store.trackSearch)
 
 	const client = useQueryClient()
@@ -63,9 +62,8 @@ export default function Screen() {
 			headerTransparent: Platform.OS === 'ios',
 			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
-				placeholder: t('search.placeholder'),
-				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
-					setQuery(e.nativeEvent.text),
+				placeholder: translate('shared.common.search'),
+				onChangeText: (e: TextInputChangeEvent) => setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
 				onSearchButtonPress: () => onSearch(),
 				onFocus: () => setIsInputFocused(true),
@@ -77,7 +75,7 @@ export default function Screen() {
 				textColor: colors.foreground.DEFAULT,
 			},
 		})
-	}, [navigation, setQuery, onSearch, colors, t])
+	}, [navigation, setQuery, onSearch, colors, t, translate])
 
 	if (!isInputFocused) {
 		return (

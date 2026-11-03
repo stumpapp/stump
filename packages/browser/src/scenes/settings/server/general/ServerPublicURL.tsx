@@ -1,11 +1,12 @@
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import { Input } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { useDebouncedValue } from 'rooks'
+import debounce from 'lodash/debounce'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation ServerPublicURLUpdate($publicUrl: String!) {
@@ -24,7 +25,7 @@ const query = graphql(`
 `)
 
 export default function ServerPublicURL() {
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const client = useQueryClient()
 	const {
@@ -43,23 +44,39 @@ export default function ServerPublicURL() {
 		},
 		onError: (error) => {
 			toast.error(t(getKey('updateFailed')), {
-				description: error instanceof Error ? error.message : t('common.unknownError'),
+				description:
+					error instanceof Error ? error.message : translate('shared.common.unknownError'),
 			})
 		},
 	})
-	const [debouncedValue] = useDebouncedValue(publicUrl, 1000)
 
-	useEffect(() => {
-		if (debouncedValue !== serverConfig.publicUrl) {
-			updatePublicUrl({ publicUrl: debouncedValue })
-		}
-	}, [debouncedValue, serverConfig.publicUrl, updatePublicUrl])
+	const debouncedSave = useMemo(
+		() =>
+			debounce((value: string) => {
+				const trimmed = value.trim()
+
+				if (!trimmed && !serverConfig.publicUrl) return
+
+				if (trimmed !== serverConfig.publicUrl) {
+					updatePublicUrl({ publicUrl: trimmed })
+				}
+			}, 1000),
+		[serverConfig.publicUrl, updatePublicUrl],
+	)
+
+	const onValueChange = (url: string) => {
+		setPublicUrl(url)
+		debouncedSave(url)
+	}
+
+	useEffect(() => () => debouncedSave.flush(), [debouncedSave])
+	// ^ if pending txn when unmounting ensure we run it immediately
 
 	return (
 		<Input
 			placeholder="https://my-stump-instance.cloud"
 			value={publicUrl}
-			onChange={(e) => setPublicUrl(e.target.value)}
+			onChange={(event) => onValueChange(event.target.value)}
 			containerClassName="md:max-w-sm max-w-[unset]"
 		/>
 	)

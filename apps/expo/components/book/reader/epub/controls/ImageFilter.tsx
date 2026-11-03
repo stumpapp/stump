@@ -8,7 +8,7 @@ import { ImageFilter as ImageFilterType } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 
 export default function ImageFilter() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			imageFilter: state.globalSettings.imageFilter,
@@ -17,9 +17,9 @@ export default function ImageFilter() {
 	)
 
 	const imageFilterOptions: PickerOption[] = [
-		{ label: t(getKey('options.none')), value: 'none' },
-		{ label: t(getKey('options.darken')), value: 'darken' },
-		{ label: t(getKey('options.invert')), value: 'invert' },
+		{ label: translate(getKey('options.none')), value: 'none' },
+		{ label: translate(getKey('options.darken')), value: 'darken' },
+		{ label: translate(getKey('options.invert')), value: 'invert' },
 	]
 
 	const handleChange = (value: string) => {
@@ -28,7 +28,7 @@ export default function ImageFilter() {
 	}
 
 	return (
-		<Card.Row label={t(getKey('label'))}>
+		<Card.Row label={translate(getKey('label'))}>
 			<Picker
 				value={store.imageFilter ?? 'none'}
 				options={imageFilterOptions}
@@ -38,5 +38,5 @@ export default function ImageFilter() {
 	)
 }
 
-const LOCALE_BASE = 'epubSettings.imageFilter'
+const LOCALE_BASE = 'shared.epubSettings.imageFilter'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

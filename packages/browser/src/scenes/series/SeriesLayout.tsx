@@ -1,71 +1,14 @@
-import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
-import { graphql } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import { usePreferences } from '@/hooks'
 
-import { SeriesContext } from './context'
-import SeriesHeader from './SeriesHeader'
-
-const query = graphql(`
-	query SeriesLayout($id: ID!) {
-		seriesById(id: $id) {
-			id
-			path
-			library {
-				id
-				name
-			}
-			resolvedName
-			resolvedDescription
-			stats {
-				bookCount
-				completedBooks
-				inProgressBooks
-				totalBytes
-				totalReadingTimeSeconds
-			}
-			tags {
-				id
-				name
-			}
-			thumbnail {
-				url
-				metadata {
-					averageColor
-					thumbhash
-					colors {
-						color
-						percentage
-					}
-				}
-			}
-			createdAt
-			updatedAt
-		}
-	}
-`)
-
-export const usePrefetchSeries = () => {
-	const { sdk } = useSDK()
-
-	const client = useQueryClient()
-	return (id: string) =>
-		client.prefetchQuery({
-			queryKey: ['seriesById', id],
-			queryFn: async () => {
-				const response = await sdk.execute(query, {
-					id,
-				})
-				return response
-			},
-			staleTime: PREFETCH_STALE_TIME,
-		})
-}
+import { SeriesContext } from '../../components/series/context'
+import { seriesLayoutQuery } from '../../components/series/queries'
+import { SeriesHeader } from '../../components/series/SeriesHeader'
 
 export default function SeriesLayout() {
 	const navigate = useNavigate()
@@ -73,7 +16,7 @@ export default function SeriesLayout() {
 	const { id } = useParams()
 	const {
 		data: { seriesById: series },
-	} = useSuspenseGraphQL(query, ['seriesById'], { id: id || '' })
+	} = useSuspenseGraphQL(seriesLayoutQuery, ['seriesById', id], { id: id || '' })
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()

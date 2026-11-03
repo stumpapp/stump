@@ -1,4 +1,4 @@
-/* eslint-disable react-compiler/react-compiler */
+/* eslint-disable react-hooks/incompatible-library */
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql, LibrarySeriesGridQuery } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -67,7 +67,8 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 		}
 	}, [isAtLeastSmall, isAtLeastMedium])
 
-	const rowCount = nodes.length > 4 ? nodes.length / 4 : 1
+	// virtualizer requires an int, otherwise throws an error
+	const rowCount = Math.ceil(nodes.length / 4)
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		// for thumbnailRatio e.g. 2:3 (thumbnailRatio = 2/3), we take the result of estimateWidth and multiply by 3/2

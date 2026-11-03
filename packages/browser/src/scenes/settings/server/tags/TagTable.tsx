@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Card, Dropdown, Text } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,
@@ -12,6 +11,7 @@ import { Ellipsis, Slash, Tag as TagIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import DeleteTagConfirmModal from './DeleteTagConfirmModal'
 import RenameTagModal from './RenameTagModal'
@@ -32,7 +32,7 @@ export default function TagTable() {
 		data: { tags },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('tags'))
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const sortedTags = useMemo(
 		() => [...(tags || [])].sort((a, b) => a.name.localeCompare(b.name)),
@@ -47,7 +47,7 @@ export default function TagTable() {
 			columnHelper.accessor('name', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						{t(getColumnKey('name'))}
+						{translate('shared.common.name')}
 					</Text>
 				),
 				cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
@@ -67,10 +67,10 @@ export default function TagTable() {
 							<Dropdown.Content align="end">
 								<Dropdown.Group>
 									<Dropdown.Item onClick={() => setRenamingTag(tag)}>
-										<span>{t(getActionKey('rename'))}</span>
+										<span>{translate('shared.common.rename')}</span>
 									</Dropdown.Item>
 									<Dropdown.Item onClick={() => setDeletingTag(tag)}>
-										<span>{t('common.delete')}</span>
+										<span>{translate('shared.common.delete')}</span>
 									</Dropdown.Item>
 								</Dropdown.Group>
 							</Dropdown.Content>
@@ -80,7 +80,7 @@ export default function TagTable() {
 				size: 20,
 			}),
 		],
-		[t],
+		[translate],
 	)
 
 	const table = useReactTable({
@@ -132,7 +132,7 @@ export default function TagTable() {
 							{table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
-									className="!top-0 h-10 px-2 shadow-sm sticky z-[2] bg-muted/50"
+									className="top-0! h-10 px-2 shadow-sm sticky z-2 bg-muted/50"
 									style={getCommonPinningStyles(header.column)}
 								>
 									<div
@@ -175,6 +175,5 @@ export default function TagTable() {
 const columnHelper = createColumnHelper<Tag>()
 
 const LOCALE_BASE = 'settingsScene.server/tags.sections.table'
-const getColumnKey = (key: string) => `${LOCALE_BASE}.columns.${key}`
-const getActionKey = (key: string) => `${LOCALE_BASE}.actionMenu.${key}`
+
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

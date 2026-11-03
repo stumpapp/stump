@@ -1,9 +1,10 @@
 import { formatBytesSeparate } from '@stump/client'
 import { STAT_COLORS } from '@stump/components'
-import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 
 import { EntityOverviewSheet } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useLibraryContext } from './context'
 
@@ -16,7 +17,7 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 	const {
 		library: { name, description, stats, tags, config },
 	} = useLibraryContext()
-	const { t } = useLocaleContext()
+	const { translate } = useTranslate()
 	const hideSeriesView = config?.hideSeriesView ?? false
 	const formattedSize = stats?.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 	const formattedTime = stats?.totalReadingTimeSeconds
@@ -28,7 +29,7 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 				...(!hideSeriesView
 					? [
 							{
-								label: t('common.infoSheetStats.series'),
+								label: translate('shared.common.infoSheetStats.series'),
 								icon: Layers,
 								value: stats.seriesCount,
 								colors: STAT_COLORS.series,
@@ -36,13 +37,13 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 						]
 					: []),
 				{
-					label: t('common.infoSheetStats.inProgress'),
+					label: translate('shared.common.infoSheetStats.inProgress'),
 					icon: BookOpen,
 					value: stats.inProgressBooks,
 					colors: STAT_COLORS.inProgress,
 				},
 				{
-					label: t('common.infoSheetStats.completedBooks'),
+					label: translate('shared.common.infoSheetStats.completedBooks'),
 					icon: BookCheck,
 					value: stats.completedBooks,
 					suffix: ` / ${stats.bookCount}`,
@@ -51,7 +52,7 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 				...(formattedTime
 					? [
 							{
-								label: t('common.infoSheetStats.readingTime'),
+								label: translate('shared.common.infoSheetStats.readingTime'),
 								icon: Clock,
 								value: formattedTime[0]?.value ?? '??',
 								suffix: formattedTime[0]?.unit ?? undefined,
@@ -62,7 +63,7 @@ export function LibraryOverviewSheet({ isOpen, onClose }: Props) {
 				...(formattedSize
 					? [
 							{
-								label: t('common.infoSheetStats.size'),
+								label: translate('shared.common.infoSheetStats.size'),
 								icon: HardDrive,
 								value: formattedSize.value,
 								suffix: formattedSize.unit,

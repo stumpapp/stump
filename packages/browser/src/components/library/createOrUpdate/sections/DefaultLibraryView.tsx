@@ -1,19 +1,19 @@
-import { Heading, RadioGroup, Text, WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch, Select } from '@stump/components'
 import { LibraryViewMode } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useTranslate } from '@/hooks/useTranslate'
+
 export default function DefaultLibraryView() {
 	const form = useFormContext()
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const [viewMode, hideSeriesView, skipBookOverview]: [LibraryViewMode, boolean, boolean] =
 		useWatch({
 			control: form.control,
 			name: ['defaultLibraryViewMode', 'hideSeriesView', 'skipBookOverview'],
 		})
-	const isSeriesSelected = viewMode === LibraryViewMode.Series
 
 	const handleViewModeChange = useCallback(
 		(mode: LibraryViewMode) => {
@@ -43,60 +43,47 @@ export default function DefaultLibraryView() {
 	}, [hideSeriesView, viewMode, form])
 
 	return (
-		<div className="gap-6 flex flex-col">
-			<div>
-				<Heading size="sm">{t(getKey('label'))}</Heading>
-				<Text size="sm" variant="muted">
-					{t(getKey('description'))}
-				</Text>
-			</div>
+		<NewCard label={t(getKey('label'))}>
+			<NewCard.Row
+				label={t(getKey('defaultTab.label'))}
+				description={t(getKey('defaultTab.description'))}
+			>
+				<div>
+					<Select value={viewMode} onValueChange={handleViewModeChange}>
+						<Select.Trigger size="sm">
+							<Select.Value />
+						</Select.Trigger>
+						<Select.Content>
+							{[LibraryViewMode.Books, LibraryViewMode.Series].map((mode) => (
+								<Select.Item
+									key={mode}
+									value={mode}
+									disabled={mode === LibraryViewMode.Series && hideSeriesView}
+								>
+									{t(getKey(`defaultTab.options.${mode}`))}
+								</Select.Item>
+							))}
+						</Select.Content>
+					</Select>
+				</div>
+			</NewCard.Row>
 
-			<div className="gap-y-4 flex flex-col">
-				<input type="hidden" {...form.register('defaultLibraryViewMode')} />
+			<NewCard.Row
+				label={t(getKey('hideSeries.label'))}
+				description={t(getKey('hideSeries.description'))}
+			>
+				<RawSwitch checked={hideSeriesView} onCheckedChange={handleHideSeriesChange} />
+			</NewCard.Row>
 
-				<RadioGroup
-					value={viewMode}
-					onValueChange={handleViewModeChange}
-					className="sm:flex-row flex flex-col"
-					disabled={hideSeriesView}
-					defaultValue={LibraryViewMode.Series}
-				>
-					<RadioGroup.CardItem
-						label={t(getKey('options.series.label'))}
-						description={t(getKey('options.series.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={isSeriesSelected && !hideSeriesView}
-						value={LibraryViewMode.Series}
-						className="md:w-1/2"
-					/>
-
-					<RadioGroup.CardItem
-						label={t(getKey('options.books.label'))}
-						description={t(getKey('options.books.description'))}
-						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-						isActive={!isSeriesSelected || hideSeriesView}
-						value={LibraryViewMode.Books}
-						className="md:w-1/2"
-					/>
-				</RadioGroup>
-
-				<WideSwitch
-					checked={hideSeriesView}
-					onCheckedChange={handleHideSeriesChange}
-					label={t(getKey('hideSeriesView.label'))}
-					description={t(getKey('hideSeriesView.description'))}
-				/>
-
-				<WideSwitch
-					checked={skipBookOverview}
-					onCheckedChange={handleSkipBookOverviewChange}
-					label={t(getKey('skipBookOverview.label'))}
-					description={t(getKey('skipBookOverview.description'))}
-				/>
-			</div>
-		</div>
+			<NewCard.Row
+				label={t(getKey('skipBookOverview.label'))}
+				description={t(getKey('skipBookOverview.description'))}
+			>
+				<RawSwitch checked={skipBookOverview} onCheckedChange={handleSkipBookOverviewChange} />
+			</NewCard.Row>
+		</NewCard>
 	)
 }
 
-const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.defaultLibraryView'
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.viewOptions'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

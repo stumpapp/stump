@@ -17,7 +17,7 @@ chrono.workspace = true
 clap.workspace = true
 croner.workspace = true
 epub.workspace = true
-heck.workspace = true
+
 filter-gen = { path = "../macros/filter-gen" }
 futures-util.workspace = true
 infer.workspace = true

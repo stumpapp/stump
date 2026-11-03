@@ -1,2 +1,2 @@
-export { BookReadingTimeline } from './BookReadingTimeline'
-export { MyReadingTimeline } from './MyReadingTimeline'
+export { BookReadingTimeline } from './bookTimeline'
+export { MyReadingTimeline } from './myTimeline'

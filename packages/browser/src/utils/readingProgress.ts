@@ -1,4 +1,4 @@
-import { EBOOK_EXTENSION } from '@stump/client'
+import { EBOOK_EXTENSION, parseGraphQLPercentageDecimal } from '@stump/client'
 
 export type ReadProgressLike =
 	| {
@@ -40,8 +40,9 @@ export function readProgressPercent(
 	const { percentageCompleted, page } = readProgress
 	const isEbook = isEbookReadProgress(readProgress, extension)
 
-	if (isEbook && percentageCompleted != null) {
-		return Math.round(Number(percentageCompleted) * 100)
+	const percentage = parseGraphQLPercentageDecimal(percentageCompleted)
+	if (isEbook && percentage != null) {
+		return Math.round(percentage)
 	}
 
 	if (page && page > 0 && pages > 0) {

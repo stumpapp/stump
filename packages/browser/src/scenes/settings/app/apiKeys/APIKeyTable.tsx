@@ -1,7 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, cn, Text } from '@stump/components'
 import { ApiKeyTableQuery, graphql } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,
@@ -13,6 +12,7 @@ import { KeyRound, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
@@ -45,7 +45,7 @@ export default function APIKeyTable() {
 		data: { apiKeys },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('apiKeys'))
 
-	const { t } = useLocaleContext()
+	const { t, translate } = useTranslate()
 
 	const [deletingKey, setDeletingKey] = useState<APIKey | null>(null)
 	const [inspectingKey, setInspectingKey] = useState<APIKey | null>(null)
@@ -117,10 +117,12 @@ export default function APIKeyTable() {
 											hour: 'numeric',
 											minute: '2-digit',
 										})
-									: t('common.notUsedYet')
+									: translate('shared.common.notUsedYet')
 							}
 						>
-							{valid ? formatDistanceToNow(parsed, { addSuffix: true }) : t('common.never')}
+							{valid
+								? formatDistanceToNow(parsed, { addSuffix: true })
+								: translate('shared.common.never')}
 						</Text>
 					)
 				},
@@ -171,7 +173,7 @@ export default function APIKeyTable() {
 				size: 20,
 			}),
 		],
-		[t],
+		[translate, t],
 	)
 
 	const table = useReactTable({

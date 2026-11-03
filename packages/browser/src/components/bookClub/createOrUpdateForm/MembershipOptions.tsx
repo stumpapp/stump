@@ -1,6 +1,7 @@
 import { CheckBox, Input } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { CreateOrUpdateBookClubSchema } from './schema'
 
@@ -8,7 +9,7 @@ const LOCALE_KEY = 'createOrUpdateBookClubForm.fields.membershipOptions'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
 export default function MembershipOptions() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()
 	const creatorHideProgress = form.watch('creatorHideProgress')

@@ -73,23 +73,23 @@ function parseMissingKeyHandler(missingKey: string) {
 type RecursiveResource = string | RecursiveResource[] | { [key: string]: RecursiveResource }
 
 function sentenceCase(obj: RecursiveResource): ResourceKey {
-	const preservedWords = new Set(['Stump', 'OPDS', 'URL', 'URLs', 'PDF'])
+	const preservedWords = new Set(['Stump', 'OPDS', 'URL', 'URLs', 'PDF', 'UI'])
 
 	if (typeof obj === 'string') {
-		let isFirstMatch = true
+		let isStartOfSentence = true
 		return obj.replace(/\{\{.*?\}\}|\S+/g, (match) => {
 			let result
 			if (match.includes('{{') && match.includes('}}')) {
 				result = match
-			} else if (preservedWords.has(match)) {
+			} else if (preservedWords.has(match.replace(/[^\w]+$/, ''))) {
 				result = match
-			} else if (isFirstMatch === true) {
+			} else if (isStartOfSentence === true) {
 				result = match
 			} else {
 				result = match.toLowerCase()
 			}
 
-			isFirstMatch = false
+			isStartOfSentence = /[.!?]$/.test(match)
 			return result
 		})
 	}

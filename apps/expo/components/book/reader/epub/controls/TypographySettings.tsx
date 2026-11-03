@@ -10,7 +10,7 @@ import { useReaderStore } from '~/stores'
 import PublisherStyles from './PublisherStyles'
 
 export default function TypographySettings() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			allowPublisherStyles: state.globalSettings.allowPublisherStyles ?? true,
@@ -28,11 +28,11 @@ export default function TypographySettings() {
 	)
 
 	const textAlignOptions: PickerOption<TextAlignment>[] = [
-		{ label: t(getKey('textAlignment.options.start')), value: 'start' },
-		{ label: t(getKey('textAlignment.options.left')), value: 'left' },
-		{ label: t(getKey('textAlignment.options.center')), value: 'center' },
-		{ label: t(getKey('textAlignment.options.right')), value: 'right' },
-		{ label: t(getKey('textAlignment.options.justify')), value: 'justify' },
+		{ label: translate(getKey('textAlignment.options.start')), value: 'start' },
+		{ label: translate(getKey('textAlignment.options.left')), value: 'left' },
+		{ label: translate(getKey('textAlignment.options.center')), value: 'center' },
+		{ label: translate(getKey('textAlignment.options.right')), value: 'right' },
+		{ label: translate(getKey('textAlignment.options.justify')), value: 'justify' },
 	]
 
 	const isDisabled = store.allowPublisherStyles
@@ -41,7 +41,7 @@ export default function TypographySettings() {
 		<Card>
 			<PublisherStyles />
 
-			<Card.Row label={t(getKey('textAlignment.label'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('textAlignment.label'))} disabled={isDisabled}>
 				<Picker
 					value={store.textAlign}
 					options={textAlignOptions}
@@ -50,7 +50,7 @@ export default function TypographySettings() {
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('typeScale'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('typeScale'))} disabled={isDisabled}>
 				<Stepper
 					value={store.typeScale}
 					onChange={(val) => store.setSettings({ typeScale: val === 1.0 ? undefined : val })}
@@ -59,11 +59,11 @@ export default function TypographySettings() {
 					step={0.1}
 					disabled={isDisabled}
 					formatValue={(val) => val.toFixed(1)}
-					accessibilityLabel={t(getKey('typeScale'))}
+					accessibilityLabel={translate(getKey('typeScale'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('lineHeight'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('lineHeight.label'))} disabled={isDisabled}>
 				<Stepper
 					value={store.lineHeight}
 					onChange={(val) => store.setSettings({ lineHeight: val === 1.5 ? undefined : val })}
@@ -72,11 +72,11 @@ export default function TypographySettings() {
 					step={0.1}
 					disabled={isDisabled}
 					formatValue={(val) => val.toFixed(1)}
-					accessibilityLabel={t(getKey('lineHeight'))}
+					accessibilityLabel={translate(getKey('lineHeight.label'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('paragraphIndent'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('paragraphIndent'))} disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphIndent ?? 0}
 					onChange={(val) => store.setSettings({ paragraphIndent: val === 0 ? undefined : val })}
@@ -86,11 +86,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel={t(getKey('paragraphIndent'))}
+					accessibilityLabel={translate(getKey('paragraphIndent'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('paragraphSpacing'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('paragraphSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphSpacing ?? 0}
 					onChange={(val) => store.setSettings({ paragraphSpacing: val === 0 ? undefined : val })}
@@ -100,11 +100,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel={t(getKey('paragraphSpacing'))}
+					accessibilityLabel={translate(getKey('paragraphSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('wordSpacing'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('wordSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.wordSpacing ?? 0}
 					onChange={(val) => store.setSettings({ wordSpacing: val === 0 ? undefined : val })}
@@ -114,11 +114,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel={t(getKey('wordSpacing'))}
+					accessibilityLabel={translate(getKey('wordSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('letterSpacing'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('letterSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.letterSpacing ?? 0}
 					onChange={(val) => store.setSettings({ letterSpacing: val === 0 ? undefined : val })}
@@ -128,26 +128,26 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel={t(getKey('letterSpacing'))}
+					accessibilityLabel={translate(getKey('letterSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('hyphens'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('hyphens'))} disabled={isDisabled}>
 				<Switch
 					checked={store.hyphens ?? false}
 					onCheckedChange={(checked) => store.setSettings({ hyphens: checked ? true : undefined })}
-					accessibilityLabel={t(getKey('hyphens'))}
+					accessibilityLabel={translate(getKey('hyphens'))}
 					disabled={isDisabled}
 				/>
 			</Card.Row>
 
-			<Card.Row label={t(getKey('ligatures'))} disabled={isDisabled}>
+			<Card.Row label={translate(getKey('ligatures'))} disabled={isDisabled}>
 				<Switch
 					checked={store.ligatures ?? false}
 					onCheckedChange={(checked) =>
 						store.setSettings({ ligatures: checked ? true : undefined })
 					}
-					accessibilityLabel={t(getKey('ligatures'))}
+					accessibilityLabel={translate(getKey('ligatures'))}
 					disabled={isDisabled}
 				/>
 			</Card.Row>
@@ -155,5 +155,5 @@ export default function TypographySettings() {
 	)
 }
 
-const LOCALE_BASE = 'epubSettings'
+const LOCALE_BASE = 'shared.epubSettings'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

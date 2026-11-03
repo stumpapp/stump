@@ -1,5 +1,5 @@
 import { UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
+import { useCreateTranslate } from '@stump/i18n'
 import { AuthUser } from '@stump/sdk'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
@@ -24,7 +24,7 @@ const useAppContextRet = {
 } as any
 
 vi.mock('@stump/i18n', () => ({
-	useLocaleContext: vi.fn(),
+	useCreateTranslate: vi.fn(),
 }))
 const translate = vi.fn().mockImplementation((key: string) => key)
 
@@ -57,7 +57,7 @@ describe('APIKeyInspector', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		vi.mocked(useAppContext).mockReturnValue(useAppContextRet)
-		vi.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
+		vi.mocked(useCreateTranslate).mockReturnValue({ t: translate, translate } as any)
 	})
 
 	it('should render a key with explicit permissions properly', () => {

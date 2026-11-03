@@ -2,6 +2,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{entity::prelude::*, ActiveValue};
 
+use super::user;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "refresh_tokens")]
 pub struct Model {
@@ -13,24 +16,14 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub expires_at: DateTimeWithTimeZone,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	pub user: BelongsTo<user::Entity>,
 }
 
 #[async_trait]

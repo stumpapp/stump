@@ -199,7 +199,7 @@ impl Library {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT
@@ -273,7 +273,7 @@ impl Library {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(db_statement(
+			.query_all_raw(db_statement(
 				conn,
 				r"
 				SELECT

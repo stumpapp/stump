@@ -58,7 +58,7 @@ function OnDeckBookItem({ book }: Props) {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { height, width } = useListItemSize()
 
 	const router = useRouter()
@@ -83,7 +83,7 @@ function OnDeckBookItem({ book }: Props) {
 		Number(data.metadata?.number) || data.seriesPosition,
 		data.series.metadata?.totalIssues ?? null,
 		{
-			t,
+			translate,
 			seriesName: data.series.resolvedName,
 			prefix: 'hashtag',
 		},

@@ -14,11 +14,13 @@ import {
 import { useLibraryManagement } from '../../context'
 import ThumbnailManagementSection from './ThumbnailManagementSection'
 
+// TODO(chore): this page is so ugly :'(
+
 export default function ThumbnailSettingsScene() {
 	const { library, patch } = useLibraryManagement()
 
 	const schema = useMemo(() => buildSchema([], library), [library])
-	const form = useForm<CreateOrUpdateLibrarySchema>({
+	const form = useForm({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),

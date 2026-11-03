@@ -14,7 +14,7 @@ impl MigrationTrait for Migration {
 
 		match conn.get_database_backend() {
 			DbBackend::Postgres => {
-				conn.execute(Statement::from_string(
+				conn.execute_raw(Statement::from_string(
 					DbBackend::Postgres,
 					r#"
 						ALTER TABLE smart_list_access_rules
@@ -30,7 +30,7 @@ impl MigrationTrait for Migration {
 				.await?;
 			},
 			DbBackend::Sqlite => {
-				conn.execute(Statement::from_string(
+				conn.execute_raw(Statement::from_string(
 					DbBackend::Sqlite,
 					r#"
 						UPDATE smart_list_access_rules
@@ -55,7 +55,7 @@ impl MigrationTrait for Migration {
 
 		match conn.get_database_backend() {
 			DbBackend::Postgres => {
-				conn.execute(Statement::from_string(
+				conn.execute_raw(Statement::from_string(
 					DbBackend::Postgres,
 					r#"
 						ALTER TABLE smart_list_access_rules
@@ -71,7 +71,7 @@ impl MigrationTrait for Migration {
 				.await?;
 			},
 			DbBackend::Sqlite => {
-				conn.execute(Statement::from_string(
+				conn.execute_raw(Statement::from_string(
 					DbBackend::Sqlite,
 					r#"
 						UPDATE smart_list_access_rules

@@ -9,8 +9,9 @@ import {
 	Text,
 	ToolTip,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { Construction, Filter } from 'lucide-react'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSmartListContext } from '../../context'
 
@@ -18,7 +19,7 @@ const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.filterDrawer
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function FilterBottomDrawer() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		list: { filters },
 	} = useSmartListContext()

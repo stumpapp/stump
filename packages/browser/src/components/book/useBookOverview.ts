@@ -6,30 +6,26 @@ const query = graphql(`
 	query BookOverviewScene($id: ID!) {
 		mediaById(id: $id) {
 			id
-			...BookCard
-			...BookFileInformation
 			resolvedName
-			extension
-			seriesId
-			pages
-			size
-			metadata {
-				links
-				summary
-				ageRating
-				genres
-				language
-				publisher
-				writers
-				year
-				...MediaMetadataEditor
+			...BookHeader
+			...BookOverviewDetails
+			...BookInfoSheet
+			...BookReadingActions
+			library {
+				config {
+					libraryType
+				}
 			}
-			tags {
-				id
-				name
-			}
-			readHistory {
-				completedAt
+			thumbnail {
+				url
+				metadata {
+					averageColor
+					colors {
+						color
+						percentage
+					}
+					thumbhash
+				}
 			}
 		}
 	}

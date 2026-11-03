@@ -1,17 +1,19 @@
 import '@/__mocks__/resizeObserver'
 
-import { Emailer } from '@stump/graphql'
+import { makeFragmentData } from '@stump/graphql'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ComponentProps } from 'react'
 
-import CreateOrUpdateEmailerForm from '../CreateOrUpdateEmailerForm'
+import CreateOrUpdateEmailerForm, {
+	CreateOrUpdateEmailerFormFragment,
+} from '../CreateOrUpdateEmailerForm'
 import { CreateOrUpdateEmailerSchema } from '../schema'
 
 vi.mock('../TestEmailerButton', () => ({ default: () => <div>TestEmailerButton</div> }))
 
 vi.mock('@stump/i18n', () => ({
-	useLocaleContext: () => ({ t: (s: string) => s }),
+	useCreateTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
 }))
 
 const validEmailer: CreateOrUpdateEmailerSchema = {
@@ -140,7 +142,9 @@ describe('CreateOrUpdateEmailerForm', () => {
 			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 
 			// Error message should be displayed
-			await waitFor(() => expect(screen.getByText(/password/i)).toBeInTheDocument())
+			await waitFor(() =>
+				expect(screen.getByTestId('password')).toHaveAttribute('aria-invalid', 'true'),
+			)
 
 			expect(onSubmit).not.toHaveBeenCalled()
 		})
@@ -158,15 +162,10 @@ describe('CreateOrUpdateEmailerForm', () => {
 		it('should require a non-empty password when update includes password', async () => {
 			render(
 				<Subject
-					emailer={
-						{
-							...validEmailer,
-							config: {
-								...validEmailer,
-							},
-							id: 1,
-						} as unknown as Emailer
-					}
+					emailer={makeFragmentData(
+						{ ...validEmailer, maxAttachmentSizeBytes: null },
+						CreateOrUpdateEmailerFormFragment,
+					)}
 				/>,
 			)
 

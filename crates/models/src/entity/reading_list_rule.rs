@@ -1,5 +1,8 @@
 use sea_orm::entity::prelude::*;
 
+use super::reading_list;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "reading_list_rules")]
 pub struct Model {
@@ -10,24 +13,14 @@ pub struct Model {
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub reading_list_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::reading_list::Entity",
-		from = "Column::ReadingListId",
-		to = "super::reading_list::Column::Id",
+		belongs_to,
+		from = "reading_list_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Restrict"
 	)]
-	ReadingList,
-}
-
-impl Related<super::reading_list::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingList.def()
-	}
+	pub reading_list: BelongsTo<reading_list::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -8,14 +8,14 @@ type Props = {
 }
 
 export default function DoublePageSelect({ behavior, onChange }: Props) {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 
 	return (
 		<Picker
 			options={[
-				{ label: t(getKey('auto')), value: 'auto' },
-				{ label: t(getKey('always')), value: 'always' },
-				{ label: t(getKey('off')), value: 'off' },
+				{ label: translate(getKey('auto')), value: 'auto' },
+				{ label: translate(getKey('always')), value: 'always' },
+				{ label: translate(getKey('off')), value: 'off' },
 			]}
 			value={behavior}
 			onValueChange={onChange}
@@ -23,5 +23,5 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.doublePageBehavior'
+const LOCALE_BASE = 'shared.readerSettings.doublePageBehavior'
 const getKey = (key: DoublePageBehavior) => `${LOCALE_BASE}.options.${key}`

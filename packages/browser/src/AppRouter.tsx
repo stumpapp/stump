@@ -29,6 +29,16 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 		throw new Error('Base URL is not set')
 	}
 
+	// TODO(ux):
+	// - explore needs to either go away or transform into some kind of suggestion system
+	//    - e.g., explore most commonly-read genres, least-common, recently added, old-but-unread,
+	//      popular for other users on server (who opt in to sharing), etc
+	//    - basically looking at https://dribbble.com/shots/23501959-Goodreads-Redesign-Interface
+	//    - i imagine this could eventually be customizable
+	// - dedicated books/series/libraries pages, the former-two being basically what exists today for explore
+	// - root-level reading timeline
+	// - root-level stats? could also have a home section for stats, with a few aggregates?
+	// - root-level authors, once i revisit proper author tracking via db table(s)
 	return (
 		<RouterProvider basePath={basePath}>
 			<Routes>

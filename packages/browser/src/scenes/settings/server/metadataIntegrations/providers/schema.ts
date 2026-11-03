@@ -1,33 +1,23 @@
-import {
-	CreateMetadataProviderConfigInput,
-	ExistingProviderCardFragment,
-	MergeStrategy,
-	MetadataProvider,
-	PatchMetadataProviderConfigInput,
-} from '@stump/graphql'
+import { EditProviderDialogFragment, MergeStrategy, MetadataProvider } from '@stump/graphql'
 import z from 'zod'
 
-const providerType = z.nativeEnum(MetadataProvider)
-const mergeStrategy = z.nativeEnum(MergeStrategy)
+const providerType = z.enum(MetadataProvider)
+const mergeStrategy = z.enum(MergeStrategy)
 
 const autoApplyConfig = z.object({
-	enabled: z.boolean().default(false),
-	threshold: z.number().min(0).max(1).default(0.95),
-	strategy: mergeStrategy.default(MergeStrategy.FillGaps),
-	excludeFields: z.array(z.string()).default([]),
+	enabled: z.boolean(),
+	threshold: z.number().min(0).max(1),
+	strategy: mergeStrategy,
+	excludeFields: z.array(z.string()),
 })
 
-export const createConfig = z
-	.object({
-		providerType,
-		enabled: z.boolean().default(true),
-		apiToken: z.string().min(1),
-		apiTokenExpiresAt: z.date().nullish(),
-		autoApplyConfig,
-	})
-	//  Note: I don't _think_ this has perf implications, but ensures the form
-	// will stay in sync with CreateMetadataProviderConfigInput
-	.transform((data) => data satisfies CreateMetadataProviderConfigInput)
+export const createConfig = z.object({
+	providerType,
+	enabled: z.boolean(),
+	apiToken: z.string().min(1),
+	apiTokenExpiresAt: z.date().nullish(),
+	autoApplyConfig,
+})
 export type CreateProviderConfigSchema = z.infer<typeof createConfig>
 
 export const patchConfig = z
@@ -38,9 +28,6 @@ export const patchConfig = z
 		autoApplyConfig: autoApplyConfig.nullish(),
 	})
 	.partial()
-	// Note: I don't _think_ this has perf implications, but ensures the form
-	// will stay in sync with PatchMetadataProviderConfigInput
-	.transform((data) => data satisfies PatchMetadataProviderConfigInput)
 export type PatchProviderConfigSchema = z.infer<typeof patchConfig>
 
 export const getCommonDefaults = () => ({
@@ -55,9 +42,9 @@ export const getCommonDefaults = () => ({
 	},
 })
 
-export const getPatchDefaults = (
-	provider: ExistingProviderCardFragment,
-): PatchProviderConfigSchema & { providerType: MetadataProvider } => ({
+export const getEditFormDefaults = (
+	provider: EditProviderDialogFragment,
+): PatchProviderConfigSchema => ({
 	enabled: provider.enabled,
 	apiToken: null,
 	apiTokenExpiresAt: provider.apiTokenExpiresAt,
@@ -67,6 +54,4 @@ export const getPatchDefaults = (
 		strategy: provider.autoApplyConfig?.strategy ?? MergeStrategy.FillGaps,
 		excludeFields: provider.autoApplyConfig?.excludeFields ?? [],
 	},
-	// Note: A bit lazy but adding here to inform the form the provider type and skip context etc
-	providerType: provider.providerType,
 })

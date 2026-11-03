@@ -1,19 +1,20 @@
-import { useGraphQLMutation } from '@stump/client'
-import { Button, Dialog, Label, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { useGraphQLMutation, useGraphQLUploadMutation, useUploadConfig } from '@stump/client'
+import { Button, Dialog, DropdownMenu, NewCard } from '@stump/components'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { ChevronDown, ImagePlus, ImageUp } from 'lucide-react'
+import { Suspense, useState } from 'react'
 import { toast } from 'sonner'
 
-import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
-import BookPageGrid from '@/scenes/book/settings/BookPageGrid'
+import BookPageGrid from '@/components/book/BookPageGrid'
+import SeriesBookGrid, { SelectedBook } from '@/components/series/SeriesBookGrid'
+import UploadImageModal from '@/components/thumbnail/UploadImageModal'
+import { useAppContext } from '@/context'
+import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
-import SeriesBookGrid, { SelectedBook } from '@/scenes/series/tabs/settings/SeriesBookGrid'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'
-
-// TODO: Redesign this ugly shit
 
 const updateMutation = graphql(`
 	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
@@ -43,157 +44,162 @@ export default function LibraryThumbnailSelector() {
 	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
 	const [page, setPage] = useState<number>()
 
-	const [isOpen, setIsOpen] = useState(false)
+	const [isSelectorOpen, setIsSelectorOpen] = useState(false)
+	const [isUploadOpen, setIsUploadOpen] = useState(false)
 
 	const { library } = useLibraryContext()
+	const { checkPermission } = useAppContext()
+	const { t, translate } = useTranslate()
 
-	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
+	const hasUploadPermission = checkPermission(UserPermission.UploadFile)
+	const { uploadConfig } = useUploadConfig({ enabled: hasUploadPermission })
+	const canUpload = hasUploadPermission && !!uploadConfig?.enabled
 
-	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
+	const onSuccess = () => invalidateThumbnailQueries(queryClient)
+
+	const { mutateAsync: patchThumbnail, isPending: isPatching } = useGraphQLMutation(
 		updateMutation,
 		{ onSuccess },
 	)
+	const { mutateAsync: uploadThumbnail } = useGraphQLUploadMutation(uploadMutation, {
+		onSuccess,
+	})
 
-	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } = useGraphQLMutation(
-		uploadMutation,
-		{ onSuccess },
-	)
-
-	const handleOpenChange = (nowOpen: boolean) => {
-		if (!nowOpen) {
-			setIsOpen(false)
-		}
+	const closeSelector = () => {
+		setSelectedSeries(undefined)
+		setSelectedBook(undefined)
+		setPage(undefined)
+		setIsSelectorOpen(false)
 	}
 
-	const handleCancel = () => {
-		if (page) {
-			setPage(undefined)
-		}
-		setIsOpen(false)
-	}
-
-	const handleUploadImage = useCallback(
-		async (file: File) => {
-			try {
-				await uploadThumbnail({ id: library.id, file })
-				setIsOpen(false)
-			} catch (error) {
-				console.error(error)
-				toast.error('Failed to upload image')
-			}
-		},
-		[library.id, uploadThumbnail],
-	)
-
-	const handleConfirm = useCallback(async () => {
-		if (!selectedBook || !page) return
-
+	const handleUploadImage = async (file: File) => {
 		try {
-			await patchThumbnail({ id: library.id, input: { mediaId: selectedBook.id, page } })
-			setIsOpen(false)
+			await uploadThumbnail({ id: library.id, file })
+			setIsUploadOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('thumbnailSelector.errors.uploadFailed'))
 		}
-	}, [patchThumbnail, selectedBook, page, library.id])
+	}
 
-	useEffect(() => {
-		return () => {
-			setSelectedSeries(undefined)
+	const handleConfirm = async () => {
+		if (!selectedBook || page == null) return
+		try {
+			await patchThumbnail({ id: library.id, input: { mediaId: selectedBook.id, page } })
+			closeSelector()
+		} catch (error) {
+			console.error(error)
+			toast.error(t('thumbnailSelector.errors.updateFailed'))
+		}
+	}
+
+	const goBack = () => {
+		setPage(undefined)
+		if (selectedBook) {
 			setSelectedBook(undefined)
-			setPage(undefined)
-		}
-	}, [isOpen])
-
-	const renderContent = () => {
-		if (selectedBook) {
-			return (
-				<BookPageGrid
-					bookId={selectedBook.id}
-					pages={selectedBook.pages}
-					selectedPage={page}
-					onSelectPage={setPage}
-				/>
-			)
-		} else if (selectedSeries) {
-			return <SeriesBookGrid seriesId={selectedSeries.id} onSelectBook={setSelectedBook} />
 		} else {
-			return <LibrarySeriesGrid libraryId={library.id} onSelectSeries={setSelectedSeries} />
+			setSelectedSeries(undefined)
 		}
 	}
 
-	const renderDescription = () => {
-		if (selectedBook) {
-			return 'Choose a page from this book to use as the new thumbnail'
-		} else if (selectedSeries) {
-			return 'Select a book from the series'
-		} else {
-			return 'Select a series from the library'
-		}
-	}
-
-	const renderGoBack = () => {
-		if (!selectedBook && !selectedSeries) return null
-
-		return (
-			<span
-				className="ml-2 cursor-pointer underline"
-				onClick={() => {
-					setPage(undefined)
-					if (selectedBook) {
-						setSelectedBook(undefined)
-					} else if (selectedSeries) {
-						setSelectedSeries(undefined)
-					}
-				}}
-			>
-				Go back
-			</span>
-		)
-	}
+	const description = selectedBook
+		? t('thumbnailSelector.descriptions.chooseBookPage')
+		: selectedSeries
+			? t('thumbnailSelector.descriptions.chooseSeriesBook')
+			: t('thumbnailSelector.descriptions.chooseLibrarySeries')
 
 	return (
-		<div className="gap-4 flex flex-col">
+		<NewCard.Row
+			className="gap-4 flex flex-col"
+			label={t('thumbnailManagement.changeThumbnail.label')}
+			description={t('thumbnailManagement.changeThumbnail.descriptionLibrary')}
+		>
 			<div>
-				<Label>Select thumbnail</Label>
-				<Text size="sm" variant="muted">
-					Choose a different thumbnail for this library, either from a book or upload a custom one
-				</Text>
-			</div>
-
-			<div>
-				<EditThumbnailDropdown
-					onChooseSelector={() => setIsOpen(true)}
-					onUploadImage={handleUploadImage}
+				<DropdownMenu
+					align="start"
+					trigger={
+						<Button className="border border-border" variant="outline">
+							{t('thumbnailSelector.label')}
+							<ChevronDown className="ml-2 h-4 w-4" />
+						</Button>
+					}
+					groups={[
+						{
+							items: [
+								{
+									label: t('thumbnailSelector.chooseAPage'),
+									leftIcon: <ImagePlus />,
+									onClick: () => setIsSelectorOpen(true),
+								},
+								...(canUpload
+									? [
+											{
+												label: t('thumbnailSelector.uploadImage'),
+												leftIcon: <ImageUp />,
+												onClick: () => setIsUploadOpen(true),
+											},
+										]
+									: []),
+							],
+						},
+					]}
 				/>
 			</div>
 
-			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+			<Dialog open={isSelectorOpen} onOpenChange={(open) => !open && closeSelector()}>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('thumbnailSelector.title')}</Dialog.Title>
 						<Dialog.Description>
-							{renderDescription()}
-							{renderGoBack()}
+							{description}
+							{(selectedBook || selectedSeries) && (
+								<button type="button" className="ml-2 underline" onClick={goBack}>
+									{translate('shared.common.goBack')}
+								</button>
+							)}
 						</Dialog.Description>
-						<Dialog.Close onClick={() => setIsOpen(false)} />
+						<Dialog.Close onClick={closeSelector} />
 					</Dialog.Header>
 
-					<Suspense>{renderContent()}</Suspense>
+					<Suspense>
+						{selectedBook ? (
+							<BookPageGrid
+								bookId={selectedBook.id}
+								pages={selectedBook.pages}
+								extension={selectedBook.extension}
+								selectedPage={page}
+								onSelectPage={setPage}
+							/>
+						) : selectedSeries ? (
+							<SeriesBookGrid seriesId={selectedSeries.id} onSelectBook={setSelectedBook} />
+						) : (
+							<LibrarySeriesGrid libraryId={library.id} onSelectSeries={setSelectedSeries} />
+						)}
+					</Suspense>
+
 					<Dialog.Footer>
-						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+						<Button variant="outline" onClick={closeSelector}>
+							{translate('shared.common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
-							disabled={!selectedSeries || !selectedBook || !page}
-							isLoading={isPatchingThumbnail || isUploadingThumbnail}
+							disabled={!selectedBook || !page}
+							isLoading={isPatching}
 						>
-							Confirm selection
+							{t('thumbnailSelector.actions.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
 			</Dialog>
-		</div>
+
+			{canUpload && (
+				<UploadImageModal
+					isOpen={isUploadOpen}
+					onClose={() => setIsUploadOpen(false)}
+					onUploadImage={handleUploadImage}
+					maxSize={uploadConfig.maxFileUploadSize}
+				/>
+			)}
+		</NewCard.Row>
 	)
 }

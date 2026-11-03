@@ -26,7 +26,14 @@ impl ServerConfigMutation {
 			.ok_or("Server configuration not found")?;
 
 		let mut config = config.into_active_model();
-		config.public_url = Set(Some(public_url));
+		let trimmed = public_url.trim();
+		config.public_url = Set(if trimmed.is_empty() {
+			None
+		} else {
+			Some(trimmed.to_string())
+		});
+		// ^ empty urls would be invalid, but see also:
+		// https://discord.com/channels/972593831172272148/1565087706252447865/1565087706252447865
 
 		let updated_config = config.update(conn).await?;
 		Ok(updated_config)

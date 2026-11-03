@@ -5,7 +5,7 @@ import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function PageMargins() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			pageMargins: state.globalSettings.pageMargins ?? 1.0,
@@ -14,7 +14,7 @@ export default function PageMargins() {
 	)
 
 	return (
-		<Card.Row label={t('epubSettings.pageMargins')}>
+		<Card.Row label={translate('shared.epubSettings.pageMargins')}>
 			<Stepper
 				value={store.pageMargins}
 				onChange={(val) => store.setSettings({ pageMargins: val })}
@@ -23,7 +23,7 @@ export default function PageMargins() {
 				step={0.1}
 				unit="%"
 				formatValue={(val) => Math.round(val * 100).toString()}
-				accessibilityLabel={t('epubSettings.pageMargins')}
+				accessibilityLabel={translate('shared.epubSettings.pageMargins')}
 			/>
 		</Card.Row>
 	)

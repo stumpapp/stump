@@ -1,8 +1,11 @@
-import { LocaleProvider } from '@stump/i18n'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 
 import ReaderSettings from '../ReaderSettings'
+
+vi.mock('@/hooks/useTranslate', () => ({
+	useTranslate: () => ({ t: (s: string) => s, translate: (s: string) => s }),
+}))
 
 const readerState = vi.hoisted(() => ({
 	bookPreferences: {},
@@ -32,18 +35,16 @@ describe('ReaderSettings', () => {
 	it('renders localized stable settings copy', () => {
 		render(
 			<MemoryRouter>
-				<LocaleProvider locale="en-US">
-					<ReaderSettings />
-				</LocaleProvider>
+				<ReaderSettings />
 			</MemoryRouter>,
 		)
 
-		expect(screen.getByText('Mode')).toBeInTheDocument()
-		expect(screen.getByText('Image Options')).toBeInTheDocument()
-		expect(screen.getByText('Preferences')).toBeInTheDocument()
-		expect(screen.getByText('Separate second page')).toBeInTheDocument()
-		expect(screen.getByText('Pan and zoom without Ctrl / Cmd')).toBeInTheDocument()
-		expect(screen.getByText('Tap sides to navigate')).toBeInTheDocument()
-		expect(screen.getByText('Reading timer')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.sections.mode')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.sections.imageOptions')).toBeInTheDocument()
+		expect(screen.getByText('shared.common.preferences')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.separateSecondPage')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.panZoomWithoutCtrl')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.tapSidesToNavigate')).toBeInTheDocument()
+		expect(screen.getByText('shared.readerSettings.readingTimer.label')).toBeInTheDocument()
 	})
 })

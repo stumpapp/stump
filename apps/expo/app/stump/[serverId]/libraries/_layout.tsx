@@ -7,7 +7,7 @@ import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -16,7 +16,7 @@ export default function Screen() {
 				name="index"
 				options={{
 					headerShown: true,
-					title: t('stumpServer.browse.libraries'),
+					title: translate('shared.common.libraries'),
 					headerTransparent: Platform.OS === 'ios',
 					headerLargeTitleStyle: {
 						fontSize: 30,

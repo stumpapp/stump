@@ -1,5 +1,8 @@
+// TODO!: i desperately want to kill this file. i will try to submit all of these as prs upstream
+// over the next few weeks
+
 /**
- * Pinned to `@readium/navigator@2.6.1` / `@readium/navigator-html-injectables@2.5.0`.
+ * Pinned to `@readium/navigator@2.14.0` / `@readium/navigator-html-injectables@2.9.2`.
  *
  * This module monkeypatches and reaches into **private/unexported** Readium internals that
  * are not part of its public API contract. Re-verify every one of these against the release
@@ -30,12 +33,15 @@ import { Loader, type ModuleName } from '@readium/navigator-html-injectables'
 
 type FrameManagerInternal = {
 	iframe: HTMLIFrameElement
+	isDestroyed: boolean
 	source: string
 	loader?: Loader
 	comms?: { halt: () => void; ready?: boolean } | null
 	currModules: ModuleName[]
+	serialize?: <T>(op: () => Promise<T>) => Promise<T>
 	load: (modules: ModuleName[]) => Promise<Window>
 	show: (atProgress?: number) => Promise<void>
+	showNow?: (atProgress?: number) => Promise<void>
 }
 
 /** Tracks which Window a FrameManager's Loader was bound to. */
@@ -60,10 +66,24 @@ export function patchDurableIframeSrc(): void {
 	proto.__stumpDurableSrc = true
 
 	proto.load = function loadWithDurableSrc(this: FrameManagerInternal, modules: ModuleName[]) {
-		return new Promise((resolve, reject) => {
-			if (this.loader) {
-				const wnd = this.iframe.contentWindow!
-				if ([...this.currModules].sort().join('|') === [...modules].sort().join('|')) {
+		const run = () =>
+			new Promise<Window>((resolve, reject) => {
+				if (this.loader) {
+					const wnd = this.iframe.contentWindow!
+					if ([...this.currModules].sort().join('|') === [...modules].sort().join('|')) {
+						try {
+							resolve(wnd)
+						} catch {
+							// useless comment to avoid lint
+						}
+						return
+					}
+					this.comms?.halt()
+					this.loader.destroy()
+					this.loader = new Loader(wnd as never, modules)
+					this.currModules = modules
+					this.comms = undefined
+					loaderWindows.set(this, wnd)
 					try {
 						resolve(wnd)
 					} catch {
@@ -71,42 +91,31 @@ export function patchDurableIframeSrc(): void {
 					}
 					return
 				}
-				this.comms?.halt()
-				this.loader.destroy()
-				this.loader = new Loader(wnd as never, modules)
-				this.currModules = modules
-				this.comms = undefined
-				loaderWindows.set(this, wnd)
-				try {
-					resolve(wnd)
-				} catch {
-					/* ignore */
-				}
-				return
-			}
 
-			this.iframe.onload = () => {
-				const wnd = this.iframe.contentWindow!
-				this.loader = new Loader(wnd as never, modules)
-				this.currModules = modules
-				loaderWindows.set(this, wnd)
-				try {
-					resolve(wnd)
-				} catch {
-					/* ignore */
+				this.iframe.onload = () => {
+					const wnd = this.iframe.contentWindow!
+					this.loader = new Loader(wnd as never, modules)
+					this.currModules = modules
+					loaderWindows.set(this, wnd)
+					try {
+						resolve(wnd)
+					} catch {
+						// useless comment to avoid lint
+					}
 				}
-			}
-			this.iframe.onerror = (err) => {
-				try {
-					reject(err)
-				} catch {
-					/* ignore */
+				this.iframe.onerror = (err) => {
+					try {
+						reject(err)
+					} catch {
+						// useless comment to avoid lint
+					}
 				}
-			}
 
-			// Durable navigation — survives document reloads.
-			this.iframe.src = this.source
-		})
+				// Durable navigation — survives document reloads.
+				this.iframe.src = this.source
+			})
+
+		return this.serialize ? this.serialize(run) : run()
 	}
 }
 
@@ -128,8 +137,9 @@ export function patchHiddenFrameAnimationFrames(): void {
 	if (proto.__stumpFrameAnimationFrames) return
 	proto.__stumpFrameAnimationFrames = true
 
-	const show = proto.show
-	proto.show = async function showWithRenderableFrame(
+	const key = typeof proto.showNow === 'function' ? 'showNow' : 'show'
+	const original = proto[key]!
+	proto[key] = async function showWithRenderableFrame(
 		this: FrameManagerInternal,
 		atProgress?: number,
 	) {
@@ -139,7 +149,7 @@ export function patchHiddenFrameAnimationFrames(): void {
 		}
 
 		try {
-			await show.call(this, atProgress)
+			await original.call(this, atProgress)
 		} catch (error) {
 			this.iframe.style.visibility = previousVisibility
 			throw error
@@ -159,7 +169,7 @@ function allFrameManagers(navigator: EpubNavigator): FrameManagerInternal[] {
 	const seen = new Set<FrameManagerInternal>()
 	const out: FrameManagerInternal[] = []
 	for (const frame of [...fromPool, ...fromCframes]) {
-		if (seen.has(frame)) continue
+		if (seen.has(frame) || frame.isDestroyed) continue
 		seen.add(frame)
 		out.push(frame)
 	}

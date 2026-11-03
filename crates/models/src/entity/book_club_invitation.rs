@@ -1,8 +1,11 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+use super::{book_club, user};
+
 use crate::{entity::user::AuthUser, shared::book_club::BookClubMemberRole};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubInvitationModel")]
 #[sea_orm(table_name = "book_club_invitations")]
@@ -14,38 +17,24 @@ pub struct Model {
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub book_club_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::book_club::Entity",
-		from = "Column::BookClubId",
-		to = "super::book_club::Column::Id",
+		belongs_to,
+		from = "book_club_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClub,
+	#[graphql(skip)]
+	pub book_club: BelongsTo<book_club::Entity>,
 	#[sea_orm(
-		belongs_to = "super::user::Entity",
-		from = "Column::UserId",
-		to = "super::user::Column::Id",
+		belongs_to,
+		from = "user_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	User,
-}
-
-impl Related<super::book_club::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClub.def()
-	}
-}
-
-impl Related<super::user::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::User.def()
-	}
+	#[graphql(skip)]
+	pub user: BelongsTo<user::Entity>,
 }
 
 #[async_trait]

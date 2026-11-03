@@ -26,7 +26,7 @@ export const buildSchema = (
 			.string()
 			.min(1)
 			.refine((value) => !adjustedExistingServers.some((server) => server.name === value), {
-				message: t(getKey('nameExists')),
+				message: t(getKey('nameAlreadyExists')),
 			})
 			.refine((value) => !FORBIDDEN_ENTITY_NAMES.includes(value), {
 				message: t(getKey('nameForbidden')),
@@ -47,6 +47,7 @@ export const buildSchema = (
 	})
 }
 export type CreateOrUpdateServerSchema = z.infer<ReturnType<typeof buildSchema>>
+export type CreateOrUpdateServerInput = z.input<ReturnType<typeof buildSchema>>
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.addServer.validation'
+const LOCALE_KEY = 'shared.addOrEditServer.validation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

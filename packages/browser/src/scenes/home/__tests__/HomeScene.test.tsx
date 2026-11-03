@@ -38,7 +38,8 @@ vi.mock('../RecentlyAddedSeries', () => ({
 	default: () => <h2>Series section</h2>,
 	usePrefetchRecentlyAddedSeries: () => prefetch.series,
 }))
-vi.mock('../NoLibraries', () => ({ default: () => <p>No libraries</p> }))
+vi.mock('@/components/library', () => ({ NoLibraries: () => <p>No libraries</p> }))
+vi.mock('@/components/sharedLayout', () => ({ PageHeader: () => null }))
 
 const original: HomeSection[] = [
 	{ visible: true, config: { __typename: 'InProgressBooks', name: null } },

@@ -1,28 +1,31 @@
-import { cn, Heading, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+import { Breadcrumb } from '@stump/components'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
-import { useMediaMatch } from 'rooks'
 
-import { usePreferences } from '@/hooks/usePreferences'
+import { BreadcrumbPageSwitcher } from '@/components/navigation/BreadcrumbPageSwitcher'
+import { usePageSwitcherGroups } from '@/components/navigation/usePageSwitcherGroups'
+import { PageHeader } from '@/components/sharedLayout'
 import { RouteGroup } from '@/hooks/useRouteGroups'
-
-import GenericSettingsSelectNavigation from './GenericSettingsSelectNavigation'
+import { useTranslate } from '@/hooks/useTranslate'
 
 type Props = {
 	localeBase: string
 	routeGroups: RouteGroup[]
+	/** used for the first breadcrumb segment */
+	entityName?: string
 }
 
-export default function GenericSettingsHeader({ localeBase, routeGroups }: Props) {
-	const location = useLocation()
-	const {
-		preferences: { primaryNavigationMode, layoutMaxWidthPx },
-	} = usePreferences()
-	const { t } = useLocaleContext()
+const isActiveRoute = (to: string, pathname: string) => pathname.endsWith(to)
 
-	const isMobile = useMediaMatch('(max-width: 768px)')
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+export default function GenericSettingsHeader({ localeBase, routeGroups, entityName }: Props) {
+	const location = useLocation()
+	const { t } = useTranslate()
+
+	const switcherGroups = usePageSwitcherGroups({
+		localeBase,
+		routeGroups,
+		isActive: isActiveRoute,
+	})
 
 	/**
 	 * The active route based on the current location
@@ -53,31 +56,22 @@ export default function GenericSettingsHeader({ localeBase, routeGroups }: Props
 	}, [activeRouteGroup, location.pathname])
 
 	const translatedHeader = t(`${localeBase}.${activeRouteKey}.title`)
-	const translatedDescription = t(`${localeBase}.${activeRouteKey}.description`)
 
 	return (
-		<header
-			className={cn('space-y-4 p-4 md:pl-52 flex w-full flex-col border-b border-b-border', {
-				// Note: We make the border transparent because the width constraint when using a top bar
-				'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
-			})}
-			style={{
-				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-			}}
-		>
-			<div>
-				<Heading size="lg" className="font-bold">
-					{translatedHeader}
-				</Heading>
-
-				<Text variant="muted" className="mt-1.5" size="sm">
-					{translatedDescription}
-				</Text>
-			</div>
-
-			{isMobile && (
-				<GenericSettingsSelectNavigation localeBase={localeBase} routeGroups={routeGroups} />
-			)}
-		</header>
+		<PageHeader>
+			<Breadcrumb>
+				<Breadcrumb.List>
+					{entityName && (
+						<>
+							<Breadcrumb.Item>{entityName}</Breadcrumb.Item>
+							<Breadcrumb.Separator />
+						</>
+					)}
+					<Breadcrumb.Item>
+						<BreadcrumbPageSwitcher title={translatedHeader} groups={switcherGroups} />
+					</Breadcrumb.Item>
+				</Breadcrumb.List>
+			</Breadcrumb>
+		</PageHeader>
 	)
 }

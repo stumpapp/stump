@@ -52,7 +52,7 @@ describe('CreateOrUpdateUserSchema', () => {
 			const schema = buildSchema(() => '', [], createUser())
 
 			Object.values(UserPermission).forEach((permission) => {
-				const result = schema.safeParse({ permissions: [permission] })
+				const result = schema.safeParse({ username: 'test', permissions: [permission] })
 				expect(result.success).toBe(true)
 			})
 		})
@@ -60,7 +60,7 @@ describe('CreateOrUpdateUserSchema', () => {
 		it('should not allow invalid permissions', () => {
 			const schema = buildSchema(() => '', [], createUser())
 
-			const result = schema.safeParse({ permissions: ['invalid'] })
+			const result = schema.safeParse({ username: 'test', permissions: ['invalid'] })
 			expect(result.success).toBe(false)
 		})
 	})

@@ -44,7 +44,7 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 	];
 
 	for stmt in tables {
-		db.execute(db.get_database_backend().build(&stmt)).await?;
+		db.execute(&stmt).await?;
 	}
 
 	Ok(())

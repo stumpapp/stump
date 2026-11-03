@@ -1,12 +1,12 @@
 import { Input, NewCard } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import type { ChangeEvent } from 'react'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
+import { useTranslate } from '@/hooks/useTranslate'
 
 export default function ReadingSessionGracePeriodPreference() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		preferences: { readingSessionGracePeriodSecs },
 		update,

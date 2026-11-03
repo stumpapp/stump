@@ -1,5 +1,6 @@
 import { Badge } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+
+import { useTranslate } from '@/hooks/useTranslate'
 
 type Props = {
 	confidence: number
@@ -7,7 +8,7 @@ type Props = {
 }
 
 export function ConfidenceBadge({ confidence, showLabel }: Props) {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 
 	const pct = Math.round(confidence * 100)
 	const variant = pct >= 90 ? 'success' : pct >= 70 ? 'warning' : 'error'

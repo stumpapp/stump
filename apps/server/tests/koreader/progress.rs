@@ -2,13 +2,17 @@ use crate::common::{
 	api_key::create_api_key_for_user, series::setup_single_series_with_n_books, TestApp,
 };
 use models::{
-	entity::{media, user},
+	entity::{media, reading_device, reading_session, user},
 	shared::{
 		api_key::APIKeyPermissions,
 		enums::{ReadingStatus, UserPermission},
 	},
 };
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{
+	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
+	IntoActiveModel, PaginatorTrait, QueryFilter,
+};
+use serde_json::json;
 use tests::fake_data;
 
 async fn setup() -> (TestApp, String, media::Model, user::Model) {
@@ -153,4 +157,87 @@ async fn test_get_progress_completed_session() {
 		"expected 100% completion"
 	);
 	assert!(body["timestamp"].is_number(), "timestamp should be set");
+}
+
+#[tokio::test]
+async fn test_put_progress_creates_device_for_user() {
+	let (app, api_key, media, user) = setup().await;
+	let db = app.conn();
+
+	let koreader_hash = media.koreader_hash.clone().expect("should be set");
+	let path = format!("/koreader/{}/syncs/progress", api_key);
+
+	let response = app
+		.server
+		.put(&path)
+		.json(&json!({
+			"document": koreader_hash,
+			"progress": "12",
+			"percentage": 0.5,
+			"device": "Kindle",
+			"device_id": "koreader-device",
+		}))
+		.await;
+
+	response.assert_status_ok();
+
+	let device = reading_device::Entity::find_by_id((
+		"koreader-device".to_string(),
+		user.id.clone(),
+	))
+	.one(db)
+	.await
+	.expect("failed to query reading device")
+	.expect("reading device should be created for the user");
+	assert_eq!(device.name, "Kindle");
+
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::UserId.eq(user.id.clone()))
+		.filter(reading_session::Column::MediaId.eq(media.id.clone()))
+		.one(db)
+		.await
+		.expect("failed to query reading session")
+		.expect("reading session should be created");
+	assert_eq!(session.end_percentage, Some(Decimal::new(5, 1)));
+	assert_eq!(session.koreader_progress.as_deref(), Some("12"));
+}
+
+#[tokio::test]
+async fn test_put_progress_updates_existing_device_name() {
+	let (app, api_key, media, user) = setup().await;
+	let db = app.conn();
+
+	let koreader_hash = media.koreader_hash.clone().expect("should be set");
+	let path = format!("/koreader/{}/syncs/progress", api_key);
+
+	for (device_name, progress) in [("Kindle", "12"), ("Kindle Paperwhite", "13")] {
+		app.server
+			.put(&path)
+			.json(&json!({
+				"document": koreader_hash,
+				"progress": progress,
+				"percentage": 0.5,
+				"device": device_name,
+				"device_id": "koreader-device",
+			}))
+			.await
+			.assert_status_ok();
+	}
+
+	let device_count = reading_device::Entity::find()
+		.filter(reading_device::Column::UserId.eq(user.id.clone()))
+		.count(db)
+		.await
+		.expect("failed to count reading devices");
+	assert_eq!(device_count, 1, "the existing device should be updated");
+
+	let device = reading_device::Entity::find_by_id((
+		"koreader-device".to_string(),
+		user.id.clone(),
+	))
+	.one(db)
+	.await
+	.expect("failed to query reading device")
+	.expect("reading device should exist");
+	assert_eq!(device.name, "Kindle Paperwhite");
 }

@@ -44,7 +44,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 					setShowConfirmation(false)
 				}}
 				onClose={() => setShowConfirmation(false)}
-				size="md"
+				size="lg"
 			>
 				<RadioGroup
 					value={impact}

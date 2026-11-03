@@ -15,6 +15,7 @@ import { useSavedServers } from '~/stores'
 import { CreateOrUpdateServerForm } from './CreateOrUpdateServerForm'
 import {
 	CreateOrUpdateServerData,
+	CreateOrUpdateServerInput,
 	createSchema,
 	defaultCreateData,
 	intoCreateServer,
@@ -23,7 +24,7 @@ import {
 export function CreateServerSheet() {
 	const sheetRef = useRef<TrueSheet>(null)
 
-	const { t } = useTranslate()
+	const { translate } = useTranslate()
 	const { savedServers, createServer } = useSavedServers()
 
 	const didSuccessfullyCreate = useRef(false)
@@ -36,12 +37,12 @@ export function CreateServerSheet() {
 		[createServer],
 	)
 
-	const form = useForm<CreateOrUpdateServerData>({
+	const form = useForm<CreateOrUpdateServerInput, unknown, CreateOrUpdateServerData>({
 		defaultValues: defaultCreateData,
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name),
-				t,
+				translate,
 			),
 		),
 		// doesn't work >:(
@@ -88,8 +89,7 @@ export function CreateServerSheet() {
 					name="createServerSheet"
 					ref={sheetRef}
 					detents={[1]}
-					scrollable
-					headerLabel={t('addOrEditServer.createServer')}
+					headerLabel={translate('shared.addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
 						type: 'check',

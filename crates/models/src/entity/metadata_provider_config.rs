@@ -7,6 +7,7 @@ use sea_orm::{
 
 use crate::shared::enums::MetadataProvider;
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "MetadataProviderConfigModel")]
 #[sea_orm(table_name = "metadata_provider_configs")]
@@ -28,9 +29,6 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub updated_at: Option<DateTimeWithTimeZone>,
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {

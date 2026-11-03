@@ -1,8 +1,14 @@
 import { useGraphQLMutation } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
-import { graphql, LibrarySideBarSectionQuery } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+
+export const LibraryEmojiFragment = graphql(`
+	fragment LibraryEmoji on Library {
+		id
+	}
+`)
 
 const mutation = graphql(`
 	mutation UpdateLibraryEmoji($id: ID!, $emoji: String) {
@@ -15,11 +21,12 @@ const mutation = graphql(`
 type Props = {
 	emoji?: string
 	placeholder?: string | React.ReactNode
-	library: LibrarySideBarSectionQuery['libraries']['nodes'][number]
+	library: FragmentType<typeof LibraryEmojiFragment>
 	disabled?: boolean
 }
 
-export default function LibraryEmoji({ emoji, placeholder, library, disabled }: Props) {
+export default function LibraryEmoji({ emoji, placeholder, library: fragment, disabled }: Props) {
+	const library = useFragment(LibraryEmojiFragment, fragment)
 	const client = useQueryClient()
 
 	const { mutate: updateEmoji } = useGraphQLMutation(mutation, {

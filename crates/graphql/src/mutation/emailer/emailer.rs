@@ -63,9 +63,7 @@ impl EmailerMutation {
 		let model = emailer::Entity::delete_by_id(id)
 			.exec_with_returning(conn)
 			.await?
-			.first()
-			.ok_or("Failed to delete emailer".to_string())?
-			.clone();
+			.ok_or("Failed to delete emailer".to_string())?;
 		Ok(Emailer::from(model))
 	}
 

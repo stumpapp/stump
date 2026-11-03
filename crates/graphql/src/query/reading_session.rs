@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result};
 use models::entity::{book_club_member, reading_session};
-use sea_orm::{prelude::*, sea_query::Query};
+use sea_orm::{prelude::*, sea_query::Query, ExprTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},

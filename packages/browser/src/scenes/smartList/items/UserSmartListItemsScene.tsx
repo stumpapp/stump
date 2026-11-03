@@ -1,8 +1,8 @@
 import { cn } from '@stump/components'
 import { Media, SmartListGroupedItem } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
 
 import { SceneContainer } from '@/components/container'
+import { useTranslate } from '@/hooks/useTranslate'
 
 import { useSmartListContext } from '../context'
 import { useSmartListItems } from '../graphql'
@@ -10,7 +10,7 @@ import GroupedVirtualSmartListTable from './table/GroupedVirtualSmartListTable'
 import VirtualSmartListTable from './table/VirtualSmartListTable'
 
 export default function UserSmartListItemsScene() {
-	const { t } = useLocaleContext()
+	const { t } = useTranslate()
 	const {
 		list: { id },
 	} = useSmartListContext()

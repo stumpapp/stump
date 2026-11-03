@@ -8,6 +8,9 @@ use serde_json::Value as JsonValue;
 
 use crate::shared::enums::MetadataFetchStatus;
 
+use super::{media, series};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "MetadataFetchRecordModel")]
 #[sea_orm(table_name = "metadata_fetch_records")]
@@ -33,38 +36,24 @@ pub struct Model {
 	pub added_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub updated_at: Option<DateTimeWithTimeZone>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::MediaId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "media_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
+	#[graphql(skip)]
+	pub media: BelongsTo<Option<media::Entity>>,
 	#[sea_orm(
-		belongs_to = "super::series::Entity",
-		from = "Column::SeriesId",
-		to = "super::series::Column::Id",
+		belongs_to,
+		from = "series_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Series,
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
-}
-
-impl Related<super::series::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Series.def()
-	}
+	#[graphql(skip)]
+	pub series: BelongsTo<Option<series::Entity>>,
 }
 
 #[async_trait]

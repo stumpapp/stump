@@ -1,70 +1,63 @@
-import { Avatar, Card, cn, Heading, Text } from '@stump/components'
-import { intlFormat } from 'date-fns'
-import pluralize from 'pluralize'
+import { Users } from 'lucide-react'
+import { useMemo } from 'react'
+import { useLocation } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
-import { usePreferences } from '@/hooks'
+import { EntityHeader } from '@/components/sharedLayout'
+import { useTranslate } from '@/hooks/useTranslate'
+import { usePaths } from '@/paths'
 
 export default function BookClubHeader() {
+	const location = useLocation()
+	const paths = usePaths()
+	const { t, translate } = useTranslate()
 	const {
-		preferences: { primaryNavigationMode, layoutMaxWidthPx },
-	} = usePreferences()
-	const {
-		bookClub: { creator, name, description, roleSpec, membersCount, createdAt },
+		viewerIsMember,
+		bookClub: { name, slug, membersCount },
 	} = useBookClubContext()
 
-	const renderCreator = () => {
-		if (!creator.displayName) {
-			return null
-		}
+	const tabs = useMemo(
+		() => [
+			{
+				isActive: !!location.pathname.match(/\/clubs\/[^/]+\/?(home)?$/),
+				label: 'Home',
+				to: paths.bookClub(slug),
+			},
+			...(viewerIsMember
+				? [
+						{
+							isActive: !!location.pathname.match(/\/clubs\/[^/]+\/discussion(\/.*)?$/),
+							label: 'Discussion',
+							// onHover: () => prefetch(),
+							to: paths.bookClub(slug, 'discussion'),
+						} as const,
+						{
+							isActive: !!location.pathname.match(/\/clubs\/[^/]+\/members(\/.*)?$/),
+							label: 'Members',
+							to: paths.bookClub(slug, 'members'),
+						} as const,
+					]
+				: []),
+		],
+		[location, viewerIsMember, slug, paths],
+	)
 
-		const displayName = creator.displayName
-		const avatarUrl = creator.avatarUrl ?? undefined
-
-		return (
-			<Card className="gap-4 p-2.5 flex items-center justify-between">
-				<Text size="sm" variant="muted">
-					Created by
-				</Text>
-
-				<div className="gap-2 flex items-center">
-					<Avatar src={avatarUrl} fallback={displayName} className="h-8 w-8" />
-					<Text size="sm">{displayName}</Text>
-				</div>
-			</Card>
-		)
-	}
-
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+	const stats = [
+		{
+			key: 'membersCount',
+			icon: Users,
+			value: membersCount,
+			suffix: translate('shared.common.members', { count: membersCount }),
+		},
+	]
 
 	return (
-		<header
-			className={cn(
-				'gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0 flex w-full flex-col',
-				{
-					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
-				},
-			)}
-			style={{
-				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-			}}
-		>
-			<div className="gap-1 md:max-w-xl flex flex-col">
-				<Heading>{name}</Heading>
-				{/* TODO: read more text for long descriptions... */}
-				<Text size="md" variant="muted">
-					{description}
-				</Text>
-
-				<div className="mt-2">
-					<Text size="sm">
-						<b>{membersCount}</b> {pluralize(roleSpec['MEMBER'], membersCount)} • Created{' '}
-						<b>{intlFormat(new Date(createdAt), { month: 'long', year: 'numeric' })}</b>
-					</Text>
-				</div>
-			</div>
-
-			{renderCreator()}
-		</header>
+		<EntityHeader
+			name={name}
+			parents={[{ label: t('sidebar.buttons.bookClubs'), to: paths.bookClubs() }]}
+			tabs={tabs}
+			stats={stats}
+			settingsLink={viewerIsMember ? paths.bookClub(slug, 'settings') : undefined}
+		/>
 	)
 }

@@ -1,45 +1,25 @@
 import { cn } from '@stump/components'
-import { forwardRef, useMemo } from 'react'
+import { cva, VariantProps } from 'class-variance-authority'
+import { forwardRef } from 'react'
 
-import { usePreferences } from '@/hooks'
-
-type SceneContainerProps = {
-	unsetConstraints?: boolean
-} & React.HTMLAttributes<HTMLDivElement>
-const SceneContainer = forwardRef<HTMLDivElement, SceneContainerProps>(
-	({ className, unsetConstraints = false, ...props }, ref) => {
-		const {
-			preferences: { primaryNavigationMode, layoutMaxWidthPx },
-		} = usePreferences()
-
-		const preferTopBar = primaryNavigationMode === 'TOPBAR'
-		const maxWidth = useMemo(() => {
-			if (unsetConstraints) {
-				return undefined
-			}
-
-			return preferTopBar ? layoutMaxWidthPx || undefined : undefined
-		}, [preferTopBar, layoutMaxWidthPx, unsetConstraints])
-
-		return (
-			<div
-				ref={ref}
-				// NOTE: adding padding bottom because of the overflow-hidden on the html element and the fixed
-				// topbar. This is... annoying.
-				className={cn(
-					'p-4 pb-16 md:pb-4 relative flex w-full flex-col',
-					{
-						'mx-auto flex-1': preferTopBar && !unsetConstraints,
-					},
-					className,
-				)}
-				style={{
-					maxWidth,
-				}}
-				{...props}
-			/>
-		)
+const variants = cva('p-4 pb-16 md:pb-4 relative flex w-full flex-col', {
+	defaultVariants: {
+		variant: 'default',
 	},
+	variants: {
+		variant: {
+			default: '',
+			settings: 'gap-8 md:gap-12 max-w-4xl',
+		},
+	},
+})
+
+type SceneContainerProps = React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof variants>
+
+const SceneContainer = forwardRef<HTMLDivElement, SceneContainerProps>(
+	({ className, variant, ...props }, ref) => (
+		<div ref={ref} className={cn(variants({ variant }), className)} {...props} />
+	),
 )
 SceneContainer.displayName = 'SceneContainer'
 

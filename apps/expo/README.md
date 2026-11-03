@@ -56,6 +56,10 @@ To generate an APK for the app, just use the `apk` profile:
 eas build --profile apk --platform android --local
 ```
 
+### Helpful Tips
+
+- The [i18n package](../../packages/i18n) has locale-aware format helpers in [`dateFnsLocale.ts`](../../packages/i18n/src/dateFnsLocale.ts). Stump uses `date-fns` for date formatting and should inject the active locale via `initDateFnsLocale`
+
 ## License 📝
 
 The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

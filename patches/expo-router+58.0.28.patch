@@ -1,0 +1,76 @@
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
+index 2665349..b7132d0 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
+@@ -139,6 +139,7 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+         return undefined;
+     }
+     const sharedProps = (0, _shared.convertStackHeaderSharedPropsToRNSharedHeaderItem)(props);
++    const xcassetName = (0, _shared.extractXcassetName)(props);
+     const actions = _react().Children.toArray(props.children).filter((child)=>(0, _children.isChildOfType)(child, StackToolbarMenuAction) || (0, _children.isChildOfType)(child, StackToolbarMenu));
+     const item = {
+         type: 'submenu',
+@@ -161,7 +162,9 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+         item.destructive = props.destructive;
+     }
+     // TODO: Add elementSize to react-native-screens
+-    if (sharedProps.icon) {
++    if (xcassetName) {
++        item.icon = { type: 'xcasset', name: xcassetName };
++    } else if (sharedProps.icon) {
+         item.icon = sharedProps.icon;
+     }
+     return item;
+@@ -178,13 +181,15 @@ const StackToolbarMenuAction = (props)=>{
+         ...props,
+         icon: icon,
+         source: source,
++        xcassetName: props.xcassetName,
+         image: props.image,
+         imageRenderingMode: props.iconRenderingMode
+     });
+ };
+ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
+-    const { children, isOn, unstable_keepPresented, icon, ...rest } = props;
++    const { children, isOn, unstable_keepPresented, icon, xcassetName, ...rest } = props;
+     const sharedProps = (0, _shared.convertStackHeaderSharedPropsToRNSharedHeaderItem)(props);
++    const derivedXcassetName = xcassetName ?? (0, _shared.extractXcassetName)(props);
+     const item = {
+         ...rest,
+         description: props.subtitle,
+@@ -196,7 +201,9 @@ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
+     if (unstable_keepPresented !== undefined) {
+         item.keepsMenuPresented = unstable_keepPresented;
+     }
+-    if (sharedProps.icon) {
++    if (derivedXcassetName) {
++        item.icon = { type: 'xcasset', name: derivedXcassetName };
++    } else if (sharedProps.icon) {
+         item.icon = sharedProps.icon;
+     }
+     return item;
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
+index 93581e6..2627e93 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
+@@ -83,17 +83,14 @@ function convertStackHeaderSharedPropsToRNSharedHeaderItem(props, isBottomPlacem
+             return undefined;
+         }
+         // Bottom placement xcasset uses native xcasset type
+-        if ('xcasset' in iconComponentProps && isBottomPlacement) {
++        if ('xcasset' in iconComponentProps) {
+             return {
+                 type: 'xcasset',
+                 name: iconComponentProps.xcasset
+             };
+         }
+-        // Unified image path for src and xcasset (non-bottom)
+-        if ('src' in iconComponentProps || 'xcasset' in iconComponentProps) {
+-            const source = 'src' in iconComponentProps ? iconComponentProps.src : {
+-                uri: iconComponentProps.xcasset
+-            };
++        if ('src' in iconComponentProps) {
++            const source = iconComponentProps.src;
+             const explicitRenderingMode = 'renderingMode' in iconComponentProps ? iconComponentProps.renderingMode : undefined;
+             const effectiveRenderingMode = explicitRenderingMode ?? props.iconRenderingMode ?? (props.tintColor ? 'template' : 'original');
+             return {

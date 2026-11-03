@@ -192,7 +192,7 @@ pub(crate) async fn ensure_tags_linked(
 		Vec::new()
 	} else {
 		tag::Entity::insert_many(to_create)
-			.exec_with_returning_many(txn)
+			.exec_with_returning(txn)
 			.await?
 	};
 

@@ -61,7 +61,7 @@ export function resolvePublicationLinkLocator(
 	if (!position) return null
 
 	return position.copyWithLocations({
-		...(locator.locations.fragments.length ? { fragments: [...locator.locations.fragments] } : {}),
+		...(locator.locations.fragments?.length ? { fragments: [...locator.locations.fragments] } : {}),
 		...(locator.locations.progression != null
 			? { progression: locator.locations.progression }
 			: {}),
@@ -71,7 +71,7 @@ export function resolvePublicationLinkLocator(
 /** Recombine a Locator's normalized href and first fragment for browser navigation. */
 export function locatorToHref(locator: Locator, currentHref?: string): string {
 	const href = resolveUrl(locator.href, currentHref)
-	const fragment = locator.locations.fragments[0]
+	const fragment = locator.locations.fragments?.[0]
 	return fragment ? `${href}#${fragment}` : href
 }
 

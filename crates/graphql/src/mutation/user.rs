@@ -9,6 +9,8 @@ use crate::{
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
 };
+
+use super::upload::read_uploaded_image;
 use async_graphql::{Context, Object, Result, Upload, ID};
 use chrono::Utc;
 use models::{
@@ -17,6 +19,7 @@ use models::{
 		user::{self, AuthUser},
 		user_login_activity, user_preferences,
 	},
+	services::user::{create_user_with_preferences, NewAgeRestriction},
 	shared::{
 		arrangement::{Arrangement, HomeArrangement},
 		enums::UserPermission,
@@ -27,7 +30,7 @@ use sea_orm::{
 	prelude::*, ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel,
 	Set, TransactionTrait, TryIntoModel,
 };
-use std::{io::Read, path::Path};
+
 use stump_core::{
 	config::StumpConfig, image::thumbnail::generate_image_metadata_from_bytes,
 };
@@ -75,42 +78,10 @@ impl UserMutation {
 			None => user.id.clone(),
 		};
 
-		let mut value = upload.value(ctx)?;
+		let value = upload.value(ctx)?;
 
-		let content_type = value
-			.content_type
-			.clone()
-			.as_deref()
-			.and_then(|s| s.parse::<stump_core::fs_utils::ContentType>().ok())
-			.ok_or("Could not verify content type of uploaded file")?;
-
-		if !content_type.is_image() {
-			return Err("Uploaded file is not an image".into());
-		}
-
-		match value.size() {
-			Ok(size) if size as usize > core.config.max_image_upload_size => {
-				return Err(format!(
-					"File size exceeds maximum upload size of {} bytes",
-					core.config.max_image_upload_size
-				)
-				.into());
-			},
-			Err(e) => return Err(format!("Failed to get file size: {e}").into()),
-			_ => {},
-		}
-
-		let extension = Path::new(&value.filename)
-			.extension()
-			.and_then(|e| e.to_str())
-			.map(str::to_ascii_lowercase)
-			.ok_or("Uploaded file must have a file extension")?;
-
-		let mut image_bytes = Vec::new();
-		value
-			.content
-			.read_to_end(&mut image_bytes)
-			.map_err(|e| format!("Failed to read upload: {e}"))?;
+		let (image_bytes, extension) =
+			read_uploaded_image(value, core.config.max_image_upload_size)?;
 
 		let avatars_dir = core.config.avatars_directory();
 		if let Ok(mut entries) = tokio::fs::read_dir(&avatars_dir).await {
@@ -211,9 +182,7 @@ impl UserMutation {
 		let permissions = PermissionSet::new(input.permissions);
 
 		let user = user::ActiveModel {
-			id: NotSet,
 			is_server_owner: Set(false),
-			created_at: Set(chrono::Utc::now().into()),
 			username: Set(input.username),
 			hashed_password: Set(hashed_password),
 			permissions: Set(permissions.resolve_into_string()),
@@ -221,55 +190,19 @@ impl UserMutation {
 			..Default::default()
 		};
 
-		let txn = conn.begin().await?;
-		let user_model = user
-			.save(&txn)
+		let age_restriction = input.age_restriction.map(|ar| NewAgeRestriction {
+			age: ar.age,
+			restrict_on_unset: ar.restrict_on_unset,
+		});
+
+		let user_model = create_user_with_preferences(conn, user, age_restriction)
 			.await
 			.map_err(|error| {
 				tracing::error!(?error, "Failed to create user");
 				"Failed to create user"
-			})?
-			.try_into_model()?;
-		tracing::debug!(?user_model, "Created user");
-
-		if let Some(ar) = input.age_restriction {
-			let created_restriction = age_restriction::ActiveModel {
-				id: NotSet,
-				user_id: Set(user_model.id.clone()),
-				age: Set(ar.age),
-				restrict_on_unset: Set(ar.restrict_on_unset),
-			}
-			.save(&txn)
-			.await
-			.map_err(|error| {
-				tracing::error!(?error, "Failed to create age restriction");
-				"Failed to create age restriction"
 			})?;
-			tracing::trace!(?created_restriction, "Created age restriction");
-		}
 
-		let user_preferences = models::entity::user_preferences::ActiveModel {
-			id: NotSet,
-			user_id: Set(Some(user_model.id.clone())),
-			..Default::default()
-		};
-
-		let user_preferences = user_preferences
-			.save(&txn)
-			.await
-			.map_err(|e| {
-				tracing::error!(error = ?e, "Failed to create user preferences");
-				"Failed to create user preferences"
-			})?
-			.try_into_model()?;
-
-		let mut user_model = user_model.into_active_model();
-		user_model.user_preferences_id = Set(Some(user_preferences.id));
-		let user_model = user_model.update(&txn).await?;
-
-		txn.commit().await?;
-
-		Ok(User::from(user_model.try_into_model()?))
+		Ok(User::from(user_model))
 	}
 
 	async fn update_viewer(
@@ -402,9 +335,7 @@ impl UserMutation {
 			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
 				.await?
-				.first()
 				.ok_or("Failed to delete user".to_string())?
-				.clone()
 		} else {
 			let mut active_model = existing_user.into_active_model();
 			active_model.deleted_at = Set(Some(chrono::Utc::now().into()));
@@ -575,16 +506,9 @@ async fn update_user_preferences_by_id(
 		app_theme: Set(user_preferences.app_theme),
 		enable_gradients: Set(user_preferences.enable_gradients),
 		app_font: Set(user_preferences.app_font),
-		primary_navigation_mode: Set(user_preferences.primary_navigation_mode),
-		layout_max_width_px: Set(user_preferences.layout_max_width_px),
 		show_query_indicator: Set(user_preferences.show_query_indicator),
 		enable_live_refetch: Set(user_preferences.enable_live_refetch),
 		enable_discord_presence: Set(user_preferences.enable_discord_presence),
-		enable_compact_display: Set(user_preferences.enable_compact_display),
-		enable_double_sidebar: Set(user_preferences.enable_double_sidebar),
-		enable_replace_primary_sidebar: Set(
-			user_preferences.enable_replace_primary_sidebar
-		),
 		enable_hide_scrollbar: Set(user_preferences.enable_hide_scrollbar),
 		enable_job_overlay: Set(user_preferences.enable_job_overlay),
 		enable_fancy_animations: Set(user_preferences.enable_fancy_animations),

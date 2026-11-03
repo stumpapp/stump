@@ -16,7 +16,7 @@ use models::{
 	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 };
-use sea_orm::{prelude::*, QueryOrder, QuerySelect, QueryTrait};
+use sea_orm::{prelude::*, ExprTrait, QueryOrder, QuerySelect, QueryTrait};
 use serde::{Deserialize, Serialize};
 use stump_core::{
 	config::StumpConfig,

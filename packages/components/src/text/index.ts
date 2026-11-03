@@ -6,4 +6,5 @@ export {
 	type StatisticProps,
 	type StatisticSize,
 } from './Statistic'
+export { TemplatedTranslationText } from './TemplatedTranslationText'
 export { Text, TEXT_VARIANTS, type TextProps } from './Text'

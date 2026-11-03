@@ -1,5 +1,8 @@
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+use super::{book_club_discussion_message, book_club_member, custom_emoji};
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_discussion_message_reactions")]
 pub struct Model {
@@ -14,52 +17,30 @@ pub struct Model {
 	pub member_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub message_id: String,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::book_club_discussion_message::Entity",
-		from = "Column::MessageId",
-		to = "super::book_club_discussion_message::Column::Id",
+		belongs_to,
+		from = "message_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClubDiscussionMessage,
+	pub message: BelongsTo<book_club_discussion_message::Entity>,
 	#[sea_orm(
-		belongs_to = "super::book_club_member::Entity",
-		from = "Column::MemberId",
-		to = "super::book_club_member::Column::Id",
+		belongs_to,
+		from = "member_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	BookClubMember,
+	pub member: BelongsTo<book_club_member::Entity>,
 	#[sea_orm(
-		belongs_to = "super::custom_emoji::Entity",
-		from = "Column::CustomEmojiId",
-		to = "super::custom_emoji::Column::Id",
+		belongs_to,
+		from = "custom_emoji_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	CustomEmoji,
-}
-
-impl Related<super::book_club_discussion_message::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessage.def()
-	}
-}
-
-impl Related<super::book_club_member::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubMember.def()
-	}
-}
-
-impl Related<super::custom_emoji::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::CustomEmoji.def()
-	}
+	pub custom_emoji: BelongsTo<Option<custom_emoji::Entity>>,
 }
 
 #[async_trait]

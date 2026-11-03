@@ -12,9 +12,7 @@ use models::{
 	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::enums::{ReadingStatus, UserPermission},
 };
-use sea_orm::{
-	prelude::*, sea_query::OnConflict, Iterable, QueryOrder, Set, TransactionTrait,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, QueryOrder, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -251,17 +249,24 @@ async fn put_progress(
 
 	let tx = ctx.conn.as_ref().begin().await?;
 
-	let on_conflict = OnConflict::new()
-		.update_columns(
-			reading_device::Column::iter()
-				.filter(|col| matches!(col, reading_device::Column::Name)),
-		)
-		.to_owned();
+	// Reading devices are keyed by (id, user_id), so a device shared between users gets one
+	// record per user. Only the name and timestamp change for an existing record. Entity::insert
+	// bypasses ActiveModelBehavior::before_save, so the timestamps are set explicitly.
+	let now = Utc::now();
+	let on_conflict =
+		OnConflict::columns([reading_device::Column::Id, reading_device::Column::UserId])
+			.update_columns([
+				reading_device::Column::Name,
+				reading_device::Column::UpdatedAt,
+			])
+			.to_owned();
 
 	let _device_record = reading_device::Entity::insert(reading_device::ActiveModel {
 		id: Set(device_id.clone()),
+		user_id: Set(user.id.clone()),
 		name: Set(device.clone()),
-		..Default::default()
+		created_at: Set(now),
+		updated_at: Set(now),
 	})
 	.on_conflict(on_conflict)
 	.exec(&tx)

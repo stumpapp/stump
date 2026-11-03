@@ -2,6 +2,9 @@ use sea_orm::entity::prelude::*;
 
 use crate::shared::analysis::MediaAnalysisData;
 
+use super::media;
+
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "media_analysis")]
 pub struct Model {
@@ -13,24 +16,15 @@ pub struct Model {
 
 	#[sea_orm(unique, column_type = "Text")]
 	pub media_id: String,
-}
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::media::Entity",
-		from = "Column::MediaId",
-		to = "super::media::Column::Id",
+		belongs_to,
+		from = "media_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Media,
-}
-
-impl Related<super::media::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Media.def()
-	}
+	pub media: BelongsTo<media::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

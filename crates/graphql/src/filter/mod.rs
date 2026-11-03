@@ -8,6 +8,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
+pub mod author;
 pub mod keyword;
 pub mod library;
 pub mod log;

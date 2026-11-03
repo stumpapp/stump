@@ -6,8 +6,8 @@ use async_graphql::{
 
 use models::{
 	entity::{
-		library, library_config, library_exclusion, library_scan_record, library_tag,
-		media, media_metadata, series, tag, user,
+		author, library, library_config, library_exclusion, library_scan_record,
+		library_tag, media, media_metadata, series, tag, user,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -50,51 +50,20 @@ impl Library {
 	async fn authors(&self, ctx: &Context<'_>) -> Result<Vec<Author>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let writers: Vec<String> = media_metadata::Entity::find()
-			.select_only()
-			.column(media_metadata::Column::Writers)
-			.distinct()
-			.join_rev(
-				sea_orm::JoinType::InnerJoin,
-				media::Entity::belongs_to(media_metadata::Entity)
-					.from(media::Column::Id)
-					.to(media_metadata::Column::MediaId)
-					.into(),
-			)
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(self.model.id.clone()))
-						.to_owned(),
-				),
-			)
-			.filter(media_metadata::Column::Writers.is_not_null())
-			.into_tuple()
+		let models = author::Entity::find_for_library(self.model.id.clone())
+			.order_by_asc(author::Column::SortName)
 			.all(conn)
 			.await?;
 
-		let unique_names: std::collections::BTreeSet<String> = writers
+		let authors = models
 			.into_iter()
-			.flat_map(|w| {
-				w.split(',')
-					.map(|s| s.trim().to_string())
-					.filter(|s| !s.is_empty())
-					.collect::<Vec<String>>()
-			})
-			.collect();
-
-		let library_id = Some(self.model.id.clone());
-		let authors = unique_names
-			.into_iter()
-			.map(|name| Author {
-				name,
+			.map(|model| Author {
+				model,
 				// Note: This is a little fuzzy tbh and feels counterintuitive at a glance. My
 				// rationale here is that in the context of a library, an author has no role. We only
 				// care about surfacing all authors here.
 				role: None,
-				library_id: library_id.clone(),
+				library_id: Some(self.model.id.clone()),
 			})
 			.collect();
 

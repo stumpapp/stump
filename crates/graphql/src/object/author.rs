@@ -64,6 +64,12 @@ impl Author {
 	}
 }
 
+impl From<author::Model> for Author {
+	fn from(value: author::Model) -> Self {
+		Author::new(value, None)
+	}
+}
+
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
 pub struct AuthorSeries {
@@ -148,65 +154,69 @@ impl SharedWork {
 #[ComplexObject]
 impl AuthorSeries {
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<MetadataSeriesMediaLoader>>()?;
+		// 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// 		let loader = ctx.data::<DataLoader<MetadataSeriesMediaLoader>>()?;
+		//
+		// 		let key = MetadataSeriesMediaLoaderKey {
+		// 			series_title: self.title.clone(),
+		// 			library_id: self.library_id.clone(),
+		// 			user_id: user.id.clone(),
+		// 		};
+		//
+		// 		let media = loader.load_one(key).await?.unwrap_or_default();
+		// 		Ok(media)
 
-		let key = MetadataSeriesMediaLoaderKey {
-			series_title: self.title.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
-
-		let media = loader.load_one(key).await?.unwrap_or_default();
-		Ok(media)
+		unimplemented!()
 	}
 
 	/// Authors who contributed to this series
 	async fn authors(&self, ctx: &Context<'_>) -> Result<Vec<Author>> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<MetadataSeriesMediaLoader>>()?;
+		// 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// 		let loader = ctx.data::<DataLoader<MetadataSeriesMediaLoader>>()?;
+		//
+		// 		let key = MetadataSeriesMediaLoaderKey {
+		// 			series_title: self.title.clone(),
+		// 			library_id: self.library_id.clone(),
+		// 			user_id: user.id.clone(),
+		// 		};
+		//
+		// 		let models = loader.load_one(key).await?.unwrap_or_default();
+		//
+		// 		let mut author_appearances: HashMap<String, (usize, AuthorRole)> = HashMap::new();
+		//
+		// 		for media in models {
+		// 			if let Some(ref metadata) = media.metadata {
+		// 				if let Some(ref writers) = metadata.model.writers {
+		// 					for name in parse_writers(writers.as_str()) {
+		// 						let role = determine_role(writers.as_str(), &name);
+		// 						author_appearances
+		// 							.entry(name)
+		// 							.and_modify(|(count, existing_role)| {
+		// 								*count += 1;
+		// 								// Promote to Primary if they're primary in any work
+		// 								if role == AuthorRole::Primary {
+		// 									*existing_role = AuthorRole::Primary;
+		// 								}
+		// 							})
+		// 							.or_insert((1, role));
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		//
+		// 		let mut authors: Vec<_> = author_appearances.into_iter().collect();
+		// 		authors.sort_by_key(|b| std::cmp::Reverse(b.1 .0)); // descending by appearance count
+		//
+		// 		Ok(authors
+		// 			.into_iter()
+		// 			.map(|(name, (_, role))| Author {
+		// 				name,
+		// 				role: Some(role),
+		// 				library_id: self.library_id.clone(),
+		// 			})
+		// 			.collect())
 
-		let key = MetadataSeriesMediaLoaderKey {
-			series_title: self.title.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
-
-		let models = loader.load_one(key).await?.unwrap_or_default();
-
-		let mut author_appearances: HashMap<String, (usize, AuthorRole)> = HashMap::new();
-
-		for media in models {
-			if let Some(ref metadata) = media.metadata {
-				if let Some(ref writers) = metadata.model.writers {
-					for name in parse_writers(writers.as_str()) {
-						let role = determine_role(writers.as_str(), &name);
-						author_appearances
-							.entry(name)
-							.and_modify(|(count, existing_role)| {
-								*count += 1;
-								// Promote to Primary if they're primary in any work
-								if role == AuthorRole::Primary {
-									*existing_role = AuthorRole::Primary;
-								}
-							})
-							.or_insert((1, role));
-					}
-				}
-			}
-		}
-
-		let mut authors: Vec<_> = author_appearances.into_iter().collect();
-		authors.sort_by_key(|b| std::cmp::Reverse(b.1 .0)); // descending by appearance count
-
-		Ok(authors
-			.into_iter()
-			.map(|(name, (_, role))| Author {
-				name,
-				role: Some(role),
-				library_id: self.library_id.clone(),
-			})
-			.collect())
+		unimplemented!()
 	}
 }
 

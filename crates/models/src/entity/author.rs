@@ -5,9 +5,10 @@ use sea_orm::{
 
 use crate::{
 	domain::author::normalize_author_name,
-	entity::{media, media_author, series},
+	entity::{media, media_author, series, series_author},
 };
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, SimpleObject)]
 #[sea_orm(table_name = "authors")]
 #[graphql(name = "AuthorModel")]
@@ -28,31 +29,19 @@ pub struct Model {
 
 	pub created_at: DateTimeUtc,
 	pub updated_at: DateTimeUtc,
-}
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::media_author::Entity")]
-	MediaAuthor,
-	#[sea_orm(has_many = "super::series_author::Entity")]
-	SeriesAuthor,
-}
-
-impl Related<super::media_author::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::MediaAuthor.def()
-	}
-}
-
-impl Related<super::series_author::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::SeriesAuthor.def()
-	}
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub media: HasMany<media_author::Entity>,
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub series: HasMany<series_author::Entity>,
 }
 
 impl Entity {
 	// lmao this is actually awful!
-	// TODO(chore): add fks to library on media
+	// TODO: refactor once metadata library change lands for
+	// media.library_id fk
 
 	/// Authors that have at least one media link inside the given library
 	/// and therefore are part of the "authors in library" kind of query

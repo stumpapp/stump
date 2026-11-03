@@ -1,4 +1,7 @@
-use crate::{entity::age_restriction, shared::image::ImageMetadata};
+use crate::{
+	entity::{age_restriction, media_author},
+	shared::image::ImageMetadata,
+};
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use chrono::Utc;
@@ -79,6 +82,10 @@ pub struct Model {
 	/// The timestamp of when the media was **soft** deleted. This will act like a trash bin.
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,
+
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub authors: HasMany<media_author::Entity>,
 	#[sea_orm(has_many)]
 	#[graphql(skip)]
 	pub book_club_book_suggestions: HasMany<book_club_book_suggestion::Entity>,

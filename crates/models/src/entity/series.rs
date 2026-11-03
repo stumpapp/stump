@@ -7,6 +7,7 @@ use sea_orm::{
 };
 
 use crate::{
+	entity::series_author,
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
 		enums::FileStatus,
@@ -50,6 +51,10 @@ pub struct Model {
 	pub updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,
+
+	#[sea_orm(has_many)]
+	#[graphql(skip)]
+	pub authors: HasMany<series_author::Entity>,
 	#[sea_orm(
 		belongs_to,
 		from = "library_id",

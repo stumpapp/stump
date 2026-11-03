@@ -1,6 +1,10 @@
-use crate::shared::enums::AuthorRole;
+use crate::{
+	entity::{author, series},
+	shared::enums::AuthorRole,
+};
 use sea_orm::{entity::prelude::*, ActiveValue};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "series_authors")]
 pub struct Model {
@@ -12,38 +16,23 @@ pub struct Model {
 	pub role: AuthorRole,
 
 	pub created_at: DateTimeUtc,
-}
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
 	#[sea_orm(
-		belongs_to = "super::series::Entity",
-		from = "Column::SeriesId",
-		to = "super::series::Column::Id",
+		belongs_to,
+		from = "author_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Series,
+	pub author: BelongsTo<author::Entity>,
 	#[sea_orm(
-		belongs_to = "super::author::Entity",
-		from = "Column::AuthorId",
-		to = "super::author::Column::Id",
+		belongs_to,
+		from = "series_id",
+		to = "id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	Author,
-}
-
-impl Related<super::series::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Series.def()
-	}
-}
-
-impl Related<super::author::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Author.def()
-	}
+	pub series: BelongsTo<series::Entity>,
 }
 
 #[async_trait::async_trait]

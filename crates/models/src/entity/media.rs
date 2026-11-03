@@ -229,8 +229,10 @@ fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select
 
 impl Entity {
 	/// A selection to order media according to:
+	///
 	/// 1. series number (nulls last)
 	/// 2. name
+	///
 	/// This is the order regardless of whether its series are virtual
 	pub fn order_in_series(query: Select<Entity>) -> Select<Entity> {
 		query

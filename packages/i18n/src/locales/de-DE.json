@@ -683,7 +683,9 @@
 						"quality": "Qualität"
 					},
 					"thumbnailColors": {
-						"label": "Vorschaubildfarben"
+						"label": "Vorschaubildfarben",
+						"description": "Extrahiere die dominanten Farben aus den Vorschaubildern für die Ästhetik durch die ganze App",
+						"requiredWhenGenerationOn": "Dies ist erforderlich, wenn Generierung eingeschalten ist"
 					}
 				},
 				"ignoreRules": {
@@ -762,7 +764,8 @@
 							"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Reihe"
 						},
 						"SERIES_BASED": {
-							"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Reihe"
+							"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Reihe",
+							"label": "Rekursive Reihen"
 						}
 					}
 				},
@@ -782,7 +785,8 @@
 					"skipBookOverview": {
 						"label": "Buchübersicht überspringen",
 						"description": "Öffne den Reader direkt bei der Auswahl von Büchern in dieser Bibliotheken"
-					}
+					},
+					"label": "Optionen anschauen"
 				},
 				"oneshotsDirectory": {
 					"label": "Einzelband-Ordner",
@@ -1314,7 +1318,10 @@
 									}
 								},
 								"series_meta": {
-									"label": "Reihenmetadaten"
+									"label": "Reihenmetadaten",
+									"attributes": {
+										"year": "Anfangsjahr"
+									}
 								},
 								"library": {
 									"label": "Bibliothek",
@@ -1345,7 +1352,9 @@
 							"emptyState": "Keine Werte zum Anzeigen vorhanden"
 						},
 						"enumValue": {
-							"selectPlaceholder": "Wert auswählen"
+							"selectPlaceholder": "Wert auswählen",
+							"selectMultiplePlaceholder": "Werte auswählen",
+							"emptyState": "Keine Werte zum Anzeigen"
 						}
 					}
 				}
@@ -1846,6 +1855,23 @@
 						"unsupported": "Ungültige Konfiguration",
 						"unsupportedDescription": "Bitte setze es auf den Standard zurück und versuche es erneut",
 						"hint": "Ziehe und ordne Bereiche um oder verstecke sie komplett"
+					},
+					"sidebar": {
+						"sidebarStyle": {
+							"label": "Seitenleistenstil",
+							"options": {
+								"sidebar": "Normal",
+								"floating": "Schwebend",
+								"inset": "Eingesetzt"
+							}
+						},
+						"collapseBehavior": {
+							"label": "Zusammenklappenverhalten",
+							"options": {
+								"icon": "Zeige Icons",
+								"offcanvas": "Komplett Verstecken"
+							}
+						}
 					}
 				}
 			},
@@ -2354,7 +2380,8 @@
 						"ageRestrictionTooLow": "Altersbeschränkung darf nicht kleiner als 0 sein",
 						"missingUsername": "Benutzername ist erforderlich",
 						"missingPassword": "Passwort ist erforderlich",
-						"usernameAlreadyExists": "Benutzername existiert bereits"
+						"usernameAlreadyExists": "Benutzername existiert bereits",
+						"maxSessionsAllowedTooLow": "Die maximal zulässige Anzahl an Sitzungen darf nicht kleiner als 0 sein"
 					},
 					"createSubmitButton": "Benutzer erstellen",
 					"updateSubmitButton": "Benutzer aktualisieren"
@@ -2499,7 +2526,9 @@
 							"title": "Das Versenden der Test-E-Mail ist fehlgeschlagen",
 							"description": "Überprüfe deine SMTP-Einstellungen und versuche es erneut"
 						}
-					}
+					},
+					"nameAlreadyExists": "Ein Mailserver mit diesem Namen existiert bereits",
+					"nameIsForbidden": "Dieser Name ist reserviert"
 				},
 				"createEmailer": {
 					"helmet": "Mailserver erstellen",
@@ -2623,10 +2652,10 @@
 			"diskUsage": "Speichernutzung"
 		},
 		"noLibraries": {
-			"heading": "Ist ziemlich leer hier",
+			"heading": "Du hast keine Bibliotheken",
 			"message": {
-				"create": "Erstelle eine Bibliothek um loszulegen",
-				"wait": "Sobald Bibliotheken erstellt werden, werden sie hier angezeigt"
+				"create": "Sobald du eine Bibliothek erstellt hast, werden hier Inhalte angezeigt",
+				"wait": "Sobald eine Bibliothek erstellt wurde, werden hier Inhalte angezeigt"
 			},
 			"links": {
 				"create": "Bibliothek erstellen",
@@ -2839,7 +2868,8 @@
 			"title": "Wähle ein Vorschaubild aus",
 			"descriptions": {
 				"chooseBookPage": "Wähle eine Seite dieses Buches, die als neues Vorschaubild genutzt werden soll",
-				"chooseSeriesBook": "Wähle ein Buch aus der Reihe aus"
+				"chooseSeriesBook": "Wähle ein Buch aus der Reihe aus",
+				"chooseLibrarySeries": "Wähle eine Reihe aus der Bibliothek aus"
 			},
 			"uploadDialog": {
 				"emptyState": "Eine Vorschau des Bildes wird hier angezeigt",
@@ -2855,7 +2885,8 @@
 			"errors": {
 				"uploadFailed": "Fehler beim Hochladen des Bildes",
 				"updateFailed": "Fehler beim Aktualisieren des Vorschaubildes"
-			}
+			},
+			"chooseAPage": "Wähle eine Seite aus"
 		},
 		"mediaFilterForm": {
 			"ageRatingFilter": {
@@ -2883,6 +2914,28 @@
 					"unread": "Ungelesen"
 				}
 			}
+		},
+		"directoryPicker": {
+			"title": "Wähle einen Ordner aus",
+			"description": "Wähle den Ordner aus, wo sich deine Bibliothek befindet",
+			"unableToOpen": "Kann nicht geöffnet werden",
+			"noSubdirectories": "Keine Unterordner",
+			"inputPlaceholder": "/weg/zum/ordner",
+			"showHiddenFiles": "Zeige Versteckte"
+		},
+		"thumbnailManagement": {
+			"changeThumbnail": {
+				"label": "Vorschaubild verändern"
+			},
+			"processColors": {
+				"description": "Die dominante Farbe aus den Vorschaubildern für die Ästhetik durch die ganze App"
+			},
+			"generate": "Generiere",
+			"everything": "Alle",
+			"missingOnly": "Nur Fehlende"
+		},
+		"steppedForm": {
+			"sheetTitle": "Schritte"
 		}
 	},
 	"shared": {
@@ -3015,7 +3068,18 @@
 			"preferences": "Präferenzen",
 			"yes": "Ja",
 			"global": "Global",
-			"ok": "Okay"
+			"ok": "Okay",
+			"configure": "Konfiguriere",
+			"credits": "Credits",
+			"documentation": "Dokumentation",
+			"email": "E-Mail",
+			"extract": "Extrahieren",
+			"extend": "Erweitern",
+			"friendlyName": "Freundlicher Name",
+			"groupBy": "Gruppieren nach",
+			"notFullyImplemented": {
+				"label": "Nicht vollständig implementiert"
+			}
 		},
 		"libraryType": {
 			"BOOK": "Bücher",

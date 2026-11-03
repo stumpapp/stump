@@ -2729,6 +2729,14 @@
         "settings": "Go to Settings"
       }
     },
+    "readingStatsScene": {
+      "rangeLabel": "Stats range",
+      "error": "Your reading stats could not be loaded",
+      "emptyState": {
+        "title": "No reading activity",
+        "description": "Your stats will show up here once you start reading. Try another range, or open a book to get started"
+      }
+    },
     "signOutModal": {
       "title": "Sign Out",
       "message": "Are you sure you want to sign out?",

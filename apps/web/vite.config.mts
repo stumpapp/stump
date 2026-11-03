@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { constants as zlibConstants } from 'node:zlib'
 
 import babel from '@rolldown/plugin-babel'
@@ -51,6 +52,11 @@ export default defineConfig({
 					}
 				},
 			},
+		},
+	},
+	resolve: {
+		alias: {
+			'@/': fileURLToPath(new URL('../../packages/browser/src/', import.meta.url)),
 		},
 	},
 	clearScreen: false,

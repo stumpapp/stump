@@ -1,5 +1,5 @@
 import { Dimension, OrganizationMode, SupportedImageFormat } from '@stump/graphql'
-import { z } from 'zod'
+import { z, type ZodSafeParseResult } from 'zod'
 
 import { intoFormThumbnailConfig, intoThumbnailConfig, refineOrganization } from '../schema'
 
@@ -210,7 +210,7 @@ describe('refineOrganization', () => {
 			})
 			.superRefine(refineOrganization(library))
 
-	const issuePaths = (result: z.SafeParseReturnType<unknown, unknown>) =>
+	const issuePaths = (result: ZodSafeParseResult<unknown>) =>
 		result.success ? [] : result.error.issues.map((issue) => issue.path.join('.'))
 
 	const metadata = { organizationMode: OrganizationMode.Metadata, processMetadata: true }

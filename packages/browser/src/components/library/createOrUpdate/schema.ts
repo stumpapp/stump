@@ -127,106 +127,118 @@ export const refineOrganization =
 /**
  * A function which builds a schema used for validating form data when creating or updating a library
  */
+const buildBaseSchema = (
+	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
+	library?: Library,
+) =>
+	z.object({
+		convertRarToZip: z.boolean(),
+		defaultReadingDir: z.enum(['LTR', 'RTL']).optional(),
+		defaultReadingImageScaleFit: z.enum(['AUTO', 'HEIGHT', 'WIDTH', 'NONE']).optional(),
+		defaultReadingMode: z
+			.enum(['PAGED', 'CONTINUOUS_VERTICAL', 'CONTINUOUS_HORIZONTAL'])
+			.optional(),
+		description: z.string().nullable().optional(),
+		generateFileHashes: z.boolean(),
+		generateKoreaderHashes: z.boolean(),
+		hardDeleteConversions: z.boolean(),
+		watch: z.boolean(),
+		ignoreRules: z.array(
+			z.object({
+				glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
+				ignore_parents: z.boolean(),
+				ignore_subdirs: z.boolean(),
+			}),
+		),
+		organizationMode: z.enum(OrganizationMode),
+		libraryPattern: z.enum(LibraryPattern),
+		libraryType: z.enum(LibraryType),
+		defaultLibraryViewMode: z.enum(LibraryViewMode),
+		hideSeriesView: z.boolean(),
+		skipBookOverview: z.boolean(),
+		name: z
+			.string()
+			.min(1, { message: 'Library name is required' })
+			.superRefine((val, ctx) => {
+				// return falsy value to indicate failure.
+				// If the library name is already taken -> fail
+				// If the name is not changing -> pass (override the fail)
+				const isTaken = existingLibraries.some((l) => l.name === val)
+				const isUnchanged = library?.name === val
+				if (!isTaken || isUnchanged) return
+
+				ctx.addIssue({
+					code: 'custom',
+					message: `You already have a library named ${val}.`,
+				})
+			}),
+		path: z
+			.string()
+			.min(1, { message: 'Library path is required' })
+			.transform((val) => normalizePath(val))
+			.superRefine((val, ctx) => {
+				// If the path is unchanged -> pass
+				// If the path is already taken -> fail
+				// If the path is a parent to any other library -> fail
+				// If the path is a child to any other library -> fail
+				const isUnchanged = library?.path === val
+				if (isUnchanged) return
+
+				const isTaken = existingLibraries.some((l) => l.path === val)
+				if (isTaken) {
+					ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })
+					return
+				}
+
+				const filteredLibraries = existingLibraries.filter((l) => l.id !== library?.id)
+
+				const isParent = filteredLibraries.some((l) => l.path.startsWith(addTrailingSlash(val)))
+				if (isParent) {
+					ctx.addIssue({
+						code: 'custom',
+						message: 'This path is a parent directory of an existing library',
+					})
+					return
+				}
+
+				const isChild = filteredLibraries.some((l) => val.startsWith(addTrailingSlash(l.path)))
+				if (isChild) {
+					ctx.addIssue({
+						code: 'custom',
+						message: 'This path is a sub-directory of an existing library',
+					})
+					return
+				}
+			}),
+		oneshotsDirectory: z.string().nullish(), // will be relative to path, if provided
+		processMetadata: z.boolean(),
+		scanAfterPersist: z.boolean(),
+		tags: z
+			.array(
+				z.object({
+					label: z.string(),
+					value: z.string(),
+				}),
+			)
+			.optional(),
+		thumbnailConfig,
+		processThumbnailColorsEvenWithoutConfig: z.boolean(),
+	})
+
 export const buildSchema = (
 	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
 	library?: Library,
-) => {
-	return z
-		.object({
-			convertRarToZip: z.boolean(),
-			defaultReadingDir: z.enum(['LTR', 'RTL']).optional(),
-			defaultReadingImageScaleFit: z.enum(['AUTO', 'HEIGHT', 'WIDTH', 'NONE']).optional(),
-			defaultReadingMode: z
-				.enum(['PAGED', 'CONTINUOUS_VERTICAL', 'CONTINUOUS_HORIZONTAL'])
-				.optional(),
-			description: z.string().nullable().optional(),
-			generateFileHashes: z.boolean(),
-			generateKoreaderHashes: z.boolean(),
-			hardDeleteConversions: z.boolean(),
-			watch: z.boolean(),
-			ignoreRules: z.array(
-				z.object({
-					glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
-					ignore_parents: z.boolean(),
-					ignore_subdirs: z.boolean(),
-				}),
-			),
-			organizationMode: z.enum(OrganizationMode),
-			libraryPattern: z.enum(LibraryPattern),
-			libraryType: z.enum(LibraryType),
-			defaultLibraryViewMode: z.enum(LibraryViewMode),
-			hideSeriesView: z.boolean(),
-			skipBookOverview: z.boolean(),
-			name: z
-				.string()
-				.min(1, { message: 'Library name is required' })
-				.superRefine((val, ctx) => {
-					// return falsy value to indicate failure.
-					// If the library name is already taken -> fail
-					// If the name is not changing -> pass (override the fail)
-					const isTaken = existingLibraries.some((l) => l.name === val)
-					const isUnchanged = library?.name === val
-					if (!isTaken || isUnchanged) return
+) => buildBaseSchema(existingLibraries, library).superRefine(refineOrganization(library))
 
-					ctx.addIssue({
-						code: 'custom',
-						message: `You already have a library named ${val}.`,
-					})
-				}),
-			path: z
-				.string()
-				.min(1, { message: 'Library path is required' })
-				.transform((val) => normalizePath(val))
-				.superRefine((val, ctx) => {
-					// If the path is unchanged -> pass
-					// If the path is already taken -> fail
-					// If the path is a parent to any other library -> fail
-					// If the path is a child to any other library -> fail
-					const isUnchanged = library?.path === val
-					if (isUnchanged) return
-
-					const isTaken = existingLibraries.some((l) => l.path === val)
-					if (isTaken) {
-						ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })
-						return
-					}
-
-					const filteredLibraries = existingLibraries.filter((l) => l.id !== library?.id)
-
-					const isParent = filteredLibraries.some((l) => l.path.startsWith(addTrailingSlash(val)))
-					if (isParent) {
-						ctx.addIssue({
-							code: 'custom',
-							message: 'This path is a parent directory of an existing library',
-						})
-						return
-					}
-
-					const isChild = filteredLibraries.some((l) => val.startsWith(addTrailingSlash(l.path)))
-					if (isChild) {
-						ctx.addIssue({
-							code: 'custom',
-							message: 'This path is a sub-directory of an existing library',
-						})
-						return
-					}
-				}),
-			oneshotsDirectory: z.string().nullish(), // will be relative to path, if provided
-			processMetadata: z.boolean(),
-			scanAfterPersist: z.boolean(),
-			tags: z
-				.array(
-					z.object({
-						label: z.string(),
-						value: z.string(),
-					}),
-				)
-				.optional(),
-			thumbnailConfig,
-			processThumbnailColorsEvenWithoutConfig: z.boolean(),
-		})
-		.superRefine(refineOrganization(library))
-}
+export const buildReadingDefaultsSchema = (library?: Library) =>
+	buildBaseSchema([], library).pick({
+		defaultReadingDir: true,
+		defaultReadingImageScaleFit: true,
+		defaultReadingMode: true,
+		defaultLibraryViewMode: true,
+		hideSeriesView: true,
+		skipBookOverview: true,
+	})
 
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 

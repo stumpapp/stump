@@ -24,6 +24,9 @@ export const query = graphql(`
 				mediaCount
 				percentageCompleted
 				status
+				thumbnail {
+					url
+				}
 				stackedThumbnails {
 					url
 					metadata {

@@ -823,6 +823,32 @@ public class EPUBView: ExpoView {
 }
 
 extension EPUBView: EPUBNavigatorDelegate {
+    // Note: there was not a lot of docs on this, so i actually wound up using storyteller
+    // as a reference here. they don't quite do this exactly from what i could see, but
+    // they have a few other instances where they inject via `evaluateJavascript`:
+    // https://gitlab.com/storyteller-platform/storyteller/-/blob/main/applications/mobile/modules/readium/ios/EPUBView.swift?ref_type=heads#L1426
+
+    /// injects a custom script into the navigator to ensure text content within the
+    // rendered content is properly wrapped, so really absurdly-long words don't bleed
+    // into other pages
+    public func navigator(
+        _: EPUBNavigatorViewController,
+        setupUserScripts userContentController: WKUserContentController
+    ) {
+        let source = """
+        (function() {
+          if (document.getElementById('stump-long-word-wrap')) return;
+          var style = document.createElement('style');
+          style.id = 'stump-long-word-wrap';
+          style.textContent = 'html, html * { overflow-wrap: break-word !important; }';
+          (document.head || document.documentElement).appendChild(style);
+        })();
+        """
+        userContentController.addUserScript(
+            WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        )
+    }
+
     public func navigatorContentInset(_: VisualNavigator) -> UIEdgeInsets? {
         return .zero
     }

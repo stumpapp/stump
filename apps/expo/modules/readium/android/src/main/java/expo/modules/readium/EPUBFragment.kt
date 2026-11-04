@@ -110,6 +110,7 @@ class EPUBFragment(
             ).createFragmentFactory(
                 listener.props!!.locator,
                 listener = listener,
+                paginationListener = listener,
                 configuration =
                     EpubNavigatorFragment.Configuration {
                         // Note: This was an irritating issue. In the Readium source, they define CSS which TDLR;

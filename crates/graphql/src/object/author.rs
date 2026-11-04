@@ -5,12 +5,12 @@ use async_graphql::{
 };
 use models::{
 	entity::{author, media, media_author, series, series_author},
-	shared::enums::AuthorRole,
+	shared::{enums::AuthorRole, image::ImageRef},
 };
 use sea_orm::{prelude::*, QueryTrait};
 
 use crate::{
-	data::{AuthContext, CoreContext},
+	data::{AuthContext, CoreContext, ServiceContext},
 	loader::author::{
 		AuthorMediaLoader, AuthorMediaLoaderKey, MetadataSeriesMediaLoader,
 		MetadataSeriesMediaLoaderKey,
@@ -94,6 +94,7 @@ pub struct SharedWork {
 	/// (used to compute co_authors by excluding this author)
 	#[graphql(skip)]
 	pub viewing_author: String,
+	// TODO: ^ id?
 	#[graphql(skip)]
 	pub library_id: Option<String>,
 }
@@ -222,6 +223,16 @@ impl AuthorSeries {
 
 #[ComplexObject]
 impl Author {
+	async fn avatar(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+		Ok(ImageRef {
+			// TODO(graphql): make me
+			url: service
+				.format_url(format!("/api/v2/authors/{}/thumbnail", self.model.id)),
+			..Default::default()
+		})
+	}
+
 	// TODO: I think maybe there should be an AuthorBook object to wrap media + add the
 	// type of book? it kinda depends on how i make the ui to an extent
 	/// Books authored by this author (primary role)
@@ -250,35 +261,6 @@ impl Author {
 
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<AuthorSeries>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		// let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
-
-		// 		let key = AuthorMediaLoaderKey {
-		// 			author_name: self.name.clone(),
-		// 			library_id: self.library_id.clone(),
-		// 			user_id: user.id.clone(),
-		// 		};
-		//
-		// 		let media = loader.load_one(key).await?.unwrap_or_default();
-		//
-		// 		let mut series_titles: BTreeSet<String> = BTreeSet::new();
-		//
-		// 		for m in &media {
-		// 			if let Some(ref metadata) = m.metadata {
-		// 				if let Some(ref series_name) = metadata.model.series {
-		// 					series_titles.insert(series_name.clone());
-		// 				}
-		// 			}
-		// 		}
-		//
-		// 		let series = series_titles
-		// 			.into_iter()
-		// 			.map(|title| AuthorSeries {
-		// 				title,
-		// 				library_id: self.library_id.clone(),
-		// 			})
-		// 			.collect();
-		//
-		// 		Ok(series)
 
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -304,38 +286,7 @@ impl Author {
 		Ok(author_series)
 	}
 
-	/// Books where this author is the sole credited writer (no co-authors)
-	async fn standalones(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
-		// 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		// 		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
-		//
-		// 		let key = AuthorMediaLoaderKey {
-		// 			author_name: self.name.clone(),
-		// 			library_id: self.library_id.clone(),
-		// 			user_id: user.id.clone(),
-		// 		};
-		//
-		// 		let media = loader.load_one(key).await?.unwrap_or_default();
-		//
-		// 		let standalones = media
-		// 			.into_iter()
-		// 			.filter(|m| {
-		// 				m.metadata
-		// 					.as_ref()
-		// 					.and_then(|md| md.model.writers.as_ref())
-		// 					.map(|w| {
-		// 						let authors = parse_writers(w);
-		// 						authors.len() == 1
-		// 							&& authors[0].to_lowercase() == self.name.to_lowercase()
-		// 					})
-		// 					.unwrap_or(false)
-		// 			})
-		// 			.collect();
-		//
-		// 		Ok(standalones)
-
-		unimplemented!()
-	}
+	// TODO: resolver for books written only by author? depends on what i do with ui
 
 	/// Books where this author shares credit with other writers (co-authored works)
 	async fn shared_works(&self, ctx: &Context<'_>) -> Result<Vec<SharedWork>> {

@@ -150,8 +150,17 @@ export type AttachmentMeta = {
 
 export type Author = {
   __typename?: 'Author';
+  avatar: ImageRef;
+  biography?: Maybe<Scalars['String']['output']>;
+  /** Books authored by this author (primary role) */
   books: Array<Media>;
+  createdAt: Scalars['DateTime']['output'];
+  hardcoverId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  normalizedName: Scalars['String']['output'];
+  openlibraryId?: Maybe<Scalars['String']['output']>;
+  photoUrl?: Maybe<Scalars['String']['output']>;
   /**
    * The role of this author relative to the context they are queried in (e.g., a series).
    * This field will be None when queried outside of a context in which an author has a role,
@@ -161,8 +170,17 @@ export type Author = {
   series: Array<AuthorSeries>;
   /** Books where this author shares credit with other writers (co-authored works) */
   sharedWorks: Array<SharedWork>;
-  /** Books where this author is the sole credited writer (no co-authors) */
-  standalones: Array<Media>;
+  sortName?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type AuthorFilterInput = {
+  _not?: InputMaybe<Array<AuthorFilterInput>>;
+  _or?: InputMaybe<Array<AuthorFilterInput>>;
+  and?: InputMaybe<Array<AuthorFilterInput>>;
+  libraryId?: InputMaybe<FieldFilterString>;
+  name?: InputMaybe<FieldFilterString>;
+  seriesId?: InputMaybe<FieldFilterString>;
 };
 
 /** The role of an author in relation to a work or series */
@@ -176,7 +194,58 @@ export type AuthorSeries = {
   /** Authors who contributed to this series */
   authors: Array<Author>;
   books: Array<Media>;
-  title: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  isComplete: Scalars['Boolean']['output'];
+  isFavorite: Scalars['Boolean']['output'];
+  isOneshot: Scalars['Boolean']['output'];
+  library: Library;
+  libraryId?: Maybe<Scalars['String']['output']>;
+  /** Get media in this series */
+  media: Array<Media>;
+  mediaAlphabet: Scalars['JSONObject']['output'];
+  mediaCount: Scalars['Int']['output'];
+  metadata?: Maybe<SeriesMetadata>;
+  name: Scalars['String']['output'];
+  oneshotBook?: Maybe<Media>;
+  path: Scalars['String']['output'];
+  percentageCompleted: Scalars['Float']['output'];
+  readCount: Scalars['Int']['output'];
+  resolvedDescription?: Maybe<Scalars['String']['output']>;
+  resolvedName: Scalars['String']['output'];
+  role?: Maybe<AuthorRole>;
+  stats: SeriesStats;
+  status: FileStatus;
+  tags: Array<Tag>;
+  /**
+   * A reference to the thumbnail image for the thumbnail. This will be a fully
+   * qualified URL to the image.
+   */
+  thumbnail: ImageRef;
+  thumbnailMeta?: Maybe<ImageMetadata>;
+  thumbnailPath?: Maybe<Scalars['String']['output']>;
+  unreadCount: Scalars['Int']['output'];
+  upNext: Array<Media>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AuthorSeriesMediaArgs = {
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type AuthorSeriesStatsArgs = {
+  allUsers?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type AuthorSeriesUpNextArgs = {
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  take?: Scalars['Int']['input'];
 };
 
 export type BookClub = {
@@ -1452,6 +1521,8 @@ export type MatchCandidate = {
 export type Media = {
   __typename?: 'Media';
   analysisData?: Maybe<MediaAnalysisData>;
+  /** The authors of the media, if any */
+  authors: Array<Author>;
   /** The timestamp of the creation of the media */
   createdAt: Scalars['DateTime']['output'];
   /** The timestamp of when the media was **soft** deleted. This will act like a trash bin. */
@@ -3559,11 +3630,9 @@ export type Query = {
   annotationsByMediaId: Array<MediaAnnotation>;
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
-  /** Get a single author by name (case-insensitive exact match) */
+  /** Get a single author by name */
   authorByName?: Maybe<Author>;
-  /** Get a single author series by name (case-insensitive exact match) */
-  authorSeriesByName?: Maybe<AuthorSeries>;
-  /** Get a paginated list of authors with optional search filter */
+  /** Get a paginated list of authors */
   authors: PaginatedAuthorResponse;
   /** Get a club book by ID */
   bookClubBook: BookClubBook;
@@ -3704,21 +3773,13 @@ export type QueryApiKeyByIdArgs = {
 
 
 export type QueryAuthorByNameArgs = {
-  libraryId?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-};
-
-
-export type QueryAuthorSeriesByNameArgs = {
-  libraryId?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
 };
 
 
 export type QueryAuthorsArgs = {
-  libraryId?: InputMaybe<Scalars['String']['input']>;
+  filter?: AuthorFilterInput;
   pagination?: Pagination;
-  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -6625,6 +6686,11 @@ export type UsePreferencesMutationVariables = Exact<{
 
 
 export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
+
+export type AuthorsSceneWebQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AuthorsSceneWebQuery = { __typename?: 'Query', authors: { __typename?: 'PaginatedAuthorResponse', nodes: Array<{ __typename?: 'Author', id: string, name: string, avatar: { __typename?: 'ImageRef', url: string } }> } };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null, volume?: number | null, number?: any | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
@@ -13534,6 +13600,19 @@ export const UsePreferencesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
+export const AuthorsSceneWebDocument = new TypedDocumentString(`
+    query AuthorsSceneWeb {
+  authors {
+    nodes {
+      id
+      name
+      avatar {
+        url
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AuthorsSceneWebQuery, AuthorsSceneWebQueryVariables>;
 export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
   mediaById(id: $id) {

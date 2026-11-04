@@ -14,6 +14,9 @@ use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 #[serde(rename_all = "camelCase")]
 pub struct AuthorFilterInput {
 	#[graphql(default)]
+	pub name: Option<StringLikeFilter<String>>,
+
+	#[graphql(default)]
 	pub library_id: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
 	pub series_id: Option<StringLikeFilter<String>>,
@@ -49,6 +52,10 @@ impl IntoFilter for AuthorFilterInput {
 				}
 				or_condition
 			}))
+			.add_option(
+				self.name
+					.map(|f| apply_string_filter(author::Column::Name, f)),
+			)
 			.add_option(self.library_id.map(|f| {
 				sea_orm::Condition::all()
 					.add(author::Column::Id.in_subquery(library_author_subquery(f)))

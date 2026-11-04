@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router'
 
 import { AppLayout } from './AppLayout.tsx'
 import { RouterProvider } from './context/RouterContext.tsx'
+import { AuthorsRouter } from './scenes/authors'
 import { BookRouter } from './scenes/book'
 import { BookClubRouter } from './scenes/bookClub'
 import { LibraryRouter } from './scenes/library'
@@ -45,6 +46,7 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
 					<Route path="libraries/*" element={<LibraryRouter />} />
+					<Route path="authors/*" element={<AuthorsRouter />} />
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
 					<Route path="clubs/*" element={<BookClubRouter />} />

@@ -1,0 +1,1 @@
+export { AuthorsRouter } from './AuthorsRouter'

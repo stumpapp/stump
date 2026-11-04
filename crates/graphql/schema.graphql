@@ -103,19 +103,37 @@ type AttachmentMeta {
 }
 
 type Author {
+	id: String!
 	name: String!
+	normalizedName: String!
+	sortName: String
+	biography: String
+	photoUrl: String
+	hardcoverId: String
+	openlibraryId: String
+	createdAt: DateTime!
+	updatedAt: DateTime!
 	"""
 	The role of this author relative to the context they are queried in (e.g., a series).
 	This field will be None when queried outside of a context in which an author has a role,
 	like at a library-level query
 	"""
 	role: AuthorRole
+	avatar: ImageRef!
+	"Books authored by this author (primary role)"
 	books: [Media!]!
 	series: [AuthorSeries!]!
-	"Books where this author is the sole credited writer (no co-authors)"
-	standalones: [Media!]!
 	"Books where this author shares credit with other writers (co-authored works)"
 	sharedWorks: [SharedWork!]!
+}
+
+input AuthorFilterInput {
+	name: FieldFilterString = null
+	libraryId: FieldFilterString = null
+	seriesId: FieldFilterString = null
+	and: [AuthorFilterInput!]
+	_not: [AuthorFilterInput!] = null
+	_or: [AuthorFilterInput!] = null
 }
 
 "The role of an author in relation to a work or series"
@@ -125,7 +143,41 @@ enum AuthorRole {
 }
 
 type AuthorSeries {
-	title: String!
+	id: String!
+	name: String!
+	description: String
+	path: String!
+	status: FileStatus!
+	isOneshot: Boolean!
+	thumbnailMeta: ImageMetadata
+	thumbnailPath: String
+	libraryId: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deletedAt: DateTime
+	metadata: SeriesMetadata
+	isFavorite: Boolean!
+	resolvedName: String!
+	resolvedDescription: String
+	library: Library!
+	oneshotBook: Media
+	"Get media in this series"
+	media(take: Int = null, skip: Int = null): [Media!]!
+	mediaCount: Int!
+	mediaAlphabet: JSONObject!
+	upNext(take: Int! = 1, cursor: String): [Media!]!
+	isComplete: Boolean!
+	percentageCompleted: Float!
+	readCount: Int!
+	unreadCount: Int!
+	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
+	stats(allUsers: Boolean): SeriesStats!
+	role: AuthorRole
 	books: [Media!]!
 	"Authors who contributed to this series"
 	authors: [Author!]!
@@ -1389,6 +1441,8 @@ type Media {
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
+	"The authors of the media, if any"
+	authors: [Author!]!
 	"If the media is an epub, this will return the parsed epub data from the file"
 	ebook: Epub
 	"Whether the media is marked as a favorite by the current user"
@@ -2613,23 +2667,10 @@ type Query {
 	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
 	"Get a single suggestion by ID"
 	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
-	"Get a single author by name (case-insensitive exact match)"
-	authorByName(		name: String!,
-		"Optional library ID to scope the author search"
-		libraryId: String
-	): Author
-	"Get a paginated list of authors with optional search filter"
-	authors(
-		"Case-insensitive substring search filter"
-		search: String,
-		"Optional library ID to scope the author search"
-		libraryId: String,		pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}
-	): PaginatedAuthorResponse!
-	"Get a single author series by name (case-insensitive exact match)"
-	authorSeriesByName(		name: String!,
-		"Optional library ID to scope the series search"
-		libraryId: String
-	): AuthorSeries
+	"Get a single author by name"
+	authorByName(name: String!): Author
+	"Get a paginated list of authors"
+	authors(filter: AuthorFilterInput! = {name: null, libraryId: null, seriesId: null, and: null, _not: null, _or: null}, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedAuthorResponse!
 	mediaCount: Int!
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!

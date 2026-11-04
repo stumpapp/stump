@@ -6,6 +6,7 @@ use sea_orm::{
 use crate::{
 	domain::author::normalize_author_name,
 	entity::{media, media_author, series, series_author},
+	shared::image::ImageMetadata,
 };
 
 #[sea_orm::model]
@@ -22,7 +23,9 @@ pub struct Model {
 	// TODO: populated by metadata?
 	pub sort_name: Option<String>,
 	pub biography: Option<String>,
-	pub photo_url: Option<String>,
+	pub photo_path: Option<String>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub photo_meta: Option<ImageMetadata>,
 
 	pub hardcover_id: Option<String>,
 	pub openlibrary_id: Option<String>,

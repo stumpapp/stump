@@ -1,6 +1,7 @@
 //! The indexing modules for Stump, also referred to as the scanner. A lot of the indexing logic
 //! itself lives in the [`walk`] module
 
+mod cache;
 pub mod library;
 pub mod options;
 pub mod series;

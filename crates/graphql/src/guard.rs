@@ -169,3 +169,15 @@ impl Guard for BookClubRoleGuard {
 		}
 	}
 }
+
+pub struct UnreleasedFeatureGuard;
+
+impl Guard for UnreleasedFeatureGuard {
+	async fn check(&self, _ctx: &Context<'_>) -> Result<()> {
+		if cfg!(debug_assertions) {
+			Ok(())
+		} else {
+			Err("This feature is not yet developed and not available".into())
+		}
+	}
+}

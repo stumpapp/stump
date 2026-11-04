@@ -3630,6 +3630,8 @@ export type Query = {
   annotationsByMediaId: Array<MediaAnnotation>;
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
+  /** Get a single author by ID */
+  authorById: Author;
   /** Get a single author by name */
   authorByName?: Maybe<Author>;
   /** Get a paginated list of authors */
@@ -3769,6 +3771,11 @@ export type QueryAnnotationsByMediaIdArgs = {
 
 export type QueryApiKeyByIdArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryAuthorByIdArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -6686,6 +6693,13 @@ export type UsePreferencesMutationVariables = Exact<{
 
 
 export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
+
+export type AuthorByIdWebQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AuthorByIdWebQuery = { __typename?: 'Query', authorById: { __typename?: 'Author', name: string } };
 
 export type AuthorsSceneWebQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -13600,9 +13614,16 @@ export const UsePreferencesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
+export const AuthorByIdWebDocument = new TypedDocumentString(`
+    query AuthorByIdWeb($id: ID!) {
+  authorById(id: $id) {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<AuthorByIdWebQuery, AuthorByIdWebQueryVariables>;
 export const AuthorsSceneWebDocument = new TypedDocumentString(`
     query AuthorsSceneWeb {
-  authors {
+  authors(pagination: {none: {unpaginated: true}}) {
     nodes {
       id
       name

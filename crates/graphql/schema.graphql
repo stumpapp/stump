@@ -2667,6 +2667,8 @@ type Query {
 	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
 	"Get a single suggestion by ID"
 	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
+	"Get a single author by ID"
+	authorById(id: ID!): Author!
 	"Get a single author by name"
 	authorByName(name: String!): Author
 	"Get a paginated list of authors"

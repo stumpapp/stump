@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, ID};
 use models::{domain::author::normalize_author_name, entity::author};
 use sea_orm::{prelude::*, QueryOrder};
 
@@ -16,6 +16,18 @@ pub struct AuthorQuery;
 
 #[Object]
 impl AuthorQuery {
+	/// Get a single author by ID
+	async fn author_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Author> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let author = author::Entity::find_by_id(id.to_string())
+			.one(conn)
+			.await?
+			.ok_or("Author not found")?;
+
+		Ok(Author::new(author, None))
+	}
+
 	/// Get a single author by name
 	async fn author_by_name(
 		&self,

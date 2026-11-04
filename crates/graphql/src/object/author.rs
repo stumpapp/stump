@@ -1,42 +1,14 @@
-use std::collections::{BTreeSet, HashMap};
-
-use async_graphql::{
-	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
-};
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::{
 	entity::{author, media, media_author, series, series_author},
 	shared::{enums::AuthorRole, image::ImageRef},
 };
-use sea_orm::{prelude::*, QueryTrait};
+use sea_orm::{prelude::*, ExprTrait, QueryTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
-	loader::author::{
-		AuthorMediaLoader, AuthorMediaLoaderKey, MetadataSeriesMediaLoader,
-		MetadataSeriesMediaLoaderKey,
-	},
 	object::{media::Media, series::Series},
 };
-
-// This is basically the same as it has been for ages but it should go with another note
-// that this kind of parsing is super fragile. I wish metadata was WAY more standarized, because
-// "Last, First" will just break hard
-fn parse_writers(writers: &str) -> Vec<String> {
-	writers
-		.split(',')
-		.map(|s| s.trim().to_string())
-		.filter(|s| !s.is_empty())
-		.collect()
-}
-
-fn determine_role(writers: &str, author_name: &str) -> AuthorRole {
-	let authors = parse_writers(writers);
-	if authors.first().map(|a| a == author_name).unwrap_or(false) {
-		AuthorRole::Primary
-	} else {
-		AuthorRole::CoAuthor
-	}
-}
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -235,6 +207,8 @@ impl Author {
 
 	// TODO: I think maybe there should be an AuthorBook object to wrap media + add the
 	// type of book? it kinda depends on how i make the ui to an extent
+	// TODO: default order?? i htink most-recently added/released?
+
 	/// Books authored by this author (primary role)
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
@@ -242,7 +216,11 @@ impl Author {
 
 		let books_authored = media::ModelWithMetadata::find_for_user(user)
 			.inner_join(media_author::Entity)
-			.filter(media_author::Column::Role.eq(AuthorRole::Primary))
+			.filter(
+				media_author::Column::Role
+					.eq(AuthorRole::Primary)
+					.and(media_author::Column::AuthorId.eq(self.model.id.clone())),
+			)
 			// AHHHHHHHH
 			// TODO(chore): add fk to media
 			// .apply_if(self.library_id.is_some(), |query| {
@@ -265,6 +243,7 @@ impl Author {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let author_series = series::ModelWithMetadata::find_for_user(user)
+			.inner_join(series_author::Entity)
 			.select_also(series_author::Entity)
 			.filter(series_author::Column::AuthorId.eq(self.model.id.clone()))
 			.apply_if(self.library_id.as_deref(), |query, library_id| {

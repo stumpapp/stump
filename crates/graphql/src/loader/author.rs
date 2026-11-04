@@ -5,6 +5,8 @@ use std::{collections::HashMap, sync::Arc};
 
 use crate::object::media::Media;
 
+// TODO: a LOT of this is trash now, rm it prolly
+
 // This is basically the same as it has been for ages but it should go with another note
 // that this kind of parsing is super fragile. I wish metadata was WAY more standarized, because
 // "Last, First" will just break hard

@@ -7,8 +7,9 @@ use std::{
 
 use futures::StreamExt;
 use models::{
-	entity::{library_config, media, media_metadata, media_tag, tag},
-	shared::enums::FileStatus,
+	domain::author::normalize_author_name,
+	entity::{library_config, media, media_author, media_metadata, media_tag, tag},
+	shared::enums::{AuthorRole, FileStatus},
 };
 use sea_orm::{
 	prelude::*,
@@ -28,6 +29,7 @@ use crate::{
 		processor::{generate_hashes, process_metadata, MediaProcessorOptions},
 	},
 	scan::{
+		cache::AuthorCache,
 		options::{BookVisitOperation, BookVisitResult, CustomVisitResult},
 		tag_cache::TagCache,
 		utils::{BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},
@@ -66,6 +68,115 @@ fn build_tag_link_rows(
 		.collect()
 }
 
+fn resolve_media_author_roles(
+	writers: &[String],
+	cache: &AuthorCache,
+) -> CoreResult<Vec<(String, AuthorRole)>> {
+	let mut seen_author_ids = HashSet::new();
+	let mut roles = Vec::new();
+
+	for writer in writers {
+		if normalize_author_name(writer).is_empty() {
+			continue;
+		}
+
+		let Some(author_id) = cache.get(writer) else {
+			tracing::warn!(?writer, "Writer not resolved by author cache");
+			continue;
+		};
+
+		if !seen_author_ids.insert(author_id.clone()) {
+			continue;
+		}
+
+		let role = if roles.is_empty() {
+			AuthorRole::Primary
+		} else {
+			AuthorRole::CoAuthor
+		};
+		roles.push((author_id, role));
+	}
+
+	Ok(roles)
+}
+
+fn build_media_author_rows(
+	media_id: &str,
+	writers: &[String],
+	cache: &AuthorCache,
+) -> CoreResult<Vec<media_author::ActiveModel>> {
+	Ok(resolve_media_author_roles(writers, cache)?
+		.into_iter()
+		.map(|(author_id, role)| media_author::ActiveModel {
+			media_id: Set(media_id.to_string()),
+			author_id: Set(author_id),
+			role: Set(role),
+			..Default::default()
+		})
+		.collect())
+}
+
+pub(crate) async fn sync_media_authors(
+	txn: &DatabaseTransaction,
+	media_id: &str,
+	writers: &[String],
+	cache: &AuthorCache,
+) -> CoreResult<()> {
+	let mut desired_by_author = resolve_media_author_roles(writers, cache)?
+		.into_iter()
+		.collect::<HashMap<String, AuthorRole>>();
+	let existing = media_author::Entity::find()
+		.filter(media_author::Column::MediaId.eq(media_id))
+		.all(txn)
+		.await?;
+
+	let mut existing_by_author = HashMap::with_capacity(existing.len());
+	for edge in existing {
+		if let Some(duplicate) = existing_by_author.insert(edge.author_id.clone(), edge) {
+			media_author::Entity::delete_by_id(duplicate.id)
+				.exec(txn)
+				.await?;
+		}
+	}
+
+	for (author_id, edge) in existing_by_author {
+		match desired_by_author.remove(&author_id) {
+			Some(role) if role == edge.role => {},
+			Some(role) => {
+				let mut active = media_author::ActiveModel {
+					id: Set(edge.id),
+					..Default::default()
+				};
+				active.role = Set(role);
+				active.update(txn).await?;
+			},
+			None => {
+				media_author::Entity::delete_by_id(edge.id)
+					.exec(txn)
+					.await?;
+			},
+		}
+	}
+
+	let additions = desired_by_author
+		.into_iter()
+		.map(|(author_id, role)| media_author::ActiveModel {
+			media_id: Set(media_id.to_string()),
+			author_id: Set(author_id),
+			role: Set(role),
+			..Default::default()
+		})
+		.collect::<Vec<_>>();
+
+	if !additions.is_empty() {
+		media_author::Entity::insert_many(additions)
+			.exec(txn)
+			.await?;
+	}
+
+	Ok(())
+}
+
 /// executes batch inserts for one chunk of media within an **already-open**
 /// transaction. the caller is responsible for committing the txn
 pub(super) async fn insert_media_in_txn(
@@ -74,13 +185,12 @@ pub(super) async fn insert_media_in_txn(
 	meta_models: Vec<media_metadata::ActiveModel>,
 	tags_by_media: Vec<(String, Vec<String>)>,
 	tag_cache: &TagCache,
+	writers_by_media: Vec<(String, Vec<String>)>,
+	author_cache: &AuthorCache,
 ) -> CoreResult<()> {
 	let media_batch_size = get_insert_batch_size(media::Column::iter().count());
 	for batch in media_models.chunks(media_batch_size) {
-		media::Entity::insert_many(batch.to_vec())
-			.exec(txn)
-			.await
-			.map_err(CoreError::from)?;
+		media::Entity::insert_many(batch.to_vec()).exec(txn).await?;
 	}
 
 	if !meta_models.is_empty() {
@@ -89,8 +199,7 @@ pub(super) async fn insert_media_in_txn(
 		for batch in meta_models.chunks(meta_batch_size) {
 			media_metadata::Entity::insert_many(batch.to_vec())
 				.exec(txn)
-				.await
-				.map_err(CoreError::from)?;
+				.await?;
 		}
 	}
 
@@ -106,9 +215,24 @@ pub(super) async fn insert_media_in_txn(
 		for batch in tag_links.chunks(tag_batch_size) {
 			media_tag::Entity::insert_many(batch.to_vec())
 				.exec(txn)
-				.await
-				.map_err(CoreError::from)?;
+				.await?;
 		}
+	}
+
+	let author_links = writers_by_media
+		.iter()
+		.map(|(media_id, writers)| {
+			build_media_author_rows(media_id, writers, author_cache)
+		})
+		.collect::<CoreResult<Vec<_>>>()?
+		.into_iter()
+		.flatten()
+		.collect::<Vec<_>>();
+	let batch_size = get_insert_batch_size(media_author::Column::iter().count());
+	for batch in author_links.chunks(batch_size) {
+		media_author::Entity::insert_many(batch.to_vec())
+			.exec(txn)
+			.await?;
 	}
 
 	Ok(())
@@ -120,11 +244,14 @@ pub(crate) async fn update_media(
 		media,
 		metadata,
 		tags,
+		writers,
 	}: MediaDraft,
+	author_cache: &AuthorCache,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
 	let updated_media = media.update(&txn).await?;
+	let has_metadata = metadata.is_some();
 
 	if let Some(meta) = metadata {
 		let on_conflict = OnConflict::new()
@@ -137,6 +264,10 @@ pub(crate) async fn update_media(
 	}
 
 	ensure_tags_linked(&txn, &updated_media.id, &tags).await?;
+	if let Some(writers) = writers.or_else(|| has_metadata.then(Vec::new)) {
+		// ^ seems unintuitive, but basically the or_else ensure we wipe if needed
+		sync_media_authors(&txn, &updated_media.id, &writers, author_cache).await?;
+	}
 
 	txn.commit().await?;
 
@@ -401,6 +532,14 @@ async fn insert_media(
 		books.iter().flat_map(|b| b.tags.iter().cloned()).collect();
 	let tag_cache = TagCache::build(conn, all_tag_names).await?;
 
+	let all_writers: HashSet<String> = books
+		.iter()
+		.filter_map(|draft| draft.writers.as_ref())
+		.flatten()
+		.cloned()
+		.collect();
+	let author_cache = AuthorCache::build(conn, all_writers).await?;
+
 	let mut count = 0i32;
 
 	while !books.is_empty() {
@@ -411,12 +550,14 @@ async fn insert_media(
 		let mut media_models = Vec::with_capacity(chunk_count);
 		let mut meta_models: Vec<media_metadata::ActiveModel> = Vec::new();
 		let mut tags_by_media: Vec<(String, Vec<String>)> = Vec::new();
+		let mut writers_by_media = Vec::new();
 
 		for _ in 0..chunk_count {
 			let Some(MediaDraft {
 				media,
 				metadata,
 				tags,
+				writers,
 			}) = books.pop_front()
 			else {
 				break;
@@ -441,14 +582,24 @@ async fn insert_media(
 			if let Some(meta) = metadata {
 				meta_models.push(meta);
 			}
-
 			if !tags.is_empty() {
-				tags_by_media.push((media_id, tags));
+				tags_by_media.push((media_id.clone(), tags));
+			}
+			if let Some(writers) = writers {
+				writers_by_media.push((media_id, writers));
 			}
 		}
 
-		insert_media_in_txn(&txn, media_models, meta_models, tags_by_media, &tag_cache)
-			.await?;
+		insert_media_in_txn(
+			&txn,
+			media_models,
+			meta_models,
+			tags_by_media,
+			&tag_cache,
+			writers_by_media,
+			&author_cache,
+		)
+		.await?;
 		txn.commit().await?;
 
 		// TODO(metadata-fetching): Track media_ids as needing fetching (assuming enabled)
@@ -468,11 +619,13 @@ async fn insert_media(
 pub(crate) async fn handle_book_visit_operation(
 	db: &DatabaseConnection,
 	result: BookVisitResult,
+	author_cache: &AuthorCache,
 ) -> CoreResult<()> {
 	match result {
 		BookVisitResult::Custom(custom) => {
 			if let Some(mut meta) = custom.meta {
 				let tags = meta.tags.take().unwrap_or_default();
+				let writers = meta.writers.clone().unwrap_or_default();
 
 				let txn = db.begin().await?;
 				let active_model = media_metadata::ActiveModel {
@@ -488,6 +641,7 @@ pub(crate) async fn handle_book_visit_operation(
 					.exec_with_returning(&txn)
 					.await?;
 				ensure_tags_linked(&txn, &custom.id, &tags).await?;
+				sync_media_authors(&txn, &custom.id, &writers, author_cache).await?;
 				txn.commit().await?;
 
 				tracing::trace!(?upserted_meta, "Metadata upserted");
@@ -505,7 +659,7 @@ pub(crate) async fn handle_book_visit_operation(
 			}
 		},
 		BookVisitResult::Built(book) => {
-			let updated_media = update_media(db, *book).await?;
+			let updated_media = update_media(db, *book, author_cache).await?;
 			tracing::trace!(?updated_media, "Book updated");
 		},
 	}
@@ -794,13 +948,27 @@ pub(crate) async fn visit_and_update_media(
 
 	worker_ctx.report_progress(JobProgress::msg("Updating media in database"));
 	let task_count = build_results.len() as i32;
+	let all_writers = build_results
+		.iter()
+		.flat_map(|result| {
+			let writers = match result {
+				BookVisitResult::Built(draft) => draft.writers.as_deref(),
+				BookVisitResult::Custom(custom) => custom
+					.meta
+					.as_deref()
+					.and_then(|metadata| metadata.writers.as_deref()),
+			};
+			writers.into_iter().flatten().cloned()
+		})
+		.collect::<HashSet<_>>();
+	let author_cache = AuthorCache::build(conn, all_writers).await?;
 	let start = Instant::now();
 
 	let mut update_cursor = 0i32;
 
 	while let Some(result) = build_results.pop_front() {
 		let error_ctx = result.error_ctx();
-		match handle_book_visit_operation(conn, result).await {
+		match handle_book_visit_operation(conn, result, &author_cache).await {
 			Ok(_) => {
 				output.updated_media += 1;
 			},
@@ -858,6 +1026,9 @@ mod tests {
 		}
 		.insert(&db)
 		.await;
+		let author_cache = AuthorCache::build(&db, HashSet::new())
+			.await
+			.expect("empty author cache should build");
 
 		let original_visit = BookVisitResult::Custom(CustomVisitResult {
 			id: media.id.clone(),
@@ -869,7 +1040,7 @@ mod tests {
 			hashes: None,
 		});
 
-		handle_book_visit_operation(&db, original_visit)
+		handle_book_visit_operation(&db, original_visit, &author_cache)
 			.await
 			.expect("first upsert should not fail");
 
@@ -891,7 +1062,7 @@ mod tests {
 			hashes: None,
 		});
 
-		handle_book_visit_operation(&db, subsequent_visit)
+		handle_book_visit_operation(&db, subsequent_visit, &author_cache)
 			.await
 			.expect("second upsert should not fail");
 

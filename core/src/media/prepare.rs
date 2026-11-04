@@ -23,6 +23,9 @@ pub struct MediaDraft {
 	/// Applied additively to `media_tags` during create/update so user-assigned tags
 	/// are never removed by a rescan
 	pub tags: Vec<String>,
+	/// The names of writers extracted from the file's metadata, fed into the database
+	/// in its own authors/media_authors tables
+	pub writers: Option<Vec<String>>,
 }
 
 impl MediaDraft {
@@ -75,7 +78,7 @@ pub async fn prepare_draft(
 
 	let pages = processed.pages;
 	// TODO(metadata): we should consider locked metadata fields and only overwrite unlocked fields
-	let (resolved_metadata, resolved_tags) = processed
+	let (resolved_metadata, resolved_tags, writers) = processed
 		.metadata
 		.map(|mut metadata| {
 			let conflicting_page_counts =
@@ -90,11 +93,12 @@ pub async fn prepare_draft(
 			}
 
 			let tags = metadata.tags.take().unwrap_or_default();
+			let writers = metadata.writers.clone();
 			let active = media_metadata::ActiveModel {
 				media_id: Set(Some(id.clone())),
 				..metadata.into_active_model()
 			};
-			(Some(active), tags)
+			(Some(active), tags, writers)
 		})
 		.unwrap_or_default();
 
@@ -128,5 +132,6 @@ pub async fn prepare_draft(
 		media,
 		metadata: resolved_metadata,
 		tags: resolved_tags,
+		writers,
 	})
 }

@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 use merge::Merge;
+use models::domain::author::parse_writers;
 use sea_orm::{prelude::*, Set};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::utils::serde::{
@@ -14,6 +15,16 @@ use crate::metadata::utils::parse_pdf_date;
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
+
+fn author_list_deserializer<'de, D>(
+	deserializer: D,
+) -> Result<Option<Vec<String>>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	let raw = Option::<String>::deserialize(deserializer)?;
+	Ok(raw.map(|writers| parse_writers(&writers)))
+}
 
 /// Struct representing the metadata for a processed file.
 #[skip_serializing_none]
@@ -132,7 +143,7 @@ pub struct ProcessedMediaMetadata {
 	/// The writer(s) of the associated media
 	#[serde(
 		alias = "Writer",
-		deserialize_with = "string_list_deserializer",
+		deserialize_with = "author_list_deserializer",
 		default = "Option::default"
 	)]
 	pub writers: Option<Vec<String>>,

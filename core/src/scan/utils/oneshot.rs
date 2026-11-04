@@ -32,6 +32,7 @@ use crate::{
 	media::prepare::{prepare_draft, MediaDraft},
 	media::series::BuiltSeries,
 	scan::{
+		cache::AuthorCache,
 		tag_cache::TagCache,
 		utils::{media::insert_media_in_txn, BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},
 	},
@@ -189,6 +190,14 @@ async fn insert_oneshots(
 		.collect();
 	let tag_cache = TagCache::build(worker_ctx.conn(), all_tag_names).await?;
 
+	let all_writers: HashSet<String> = oneshots
+		.iter()
+		.filter_map(|oneshot| oneshot.media.writers.as_ref())
+		.flatten()
+		.cloned()
+		.collect();
+	let author_cache = AuthorCache::build(worker_ctx.conn(), all_writers).await?;
+
 	let total = oneshots.len() as i32;
 	let mut remaining = VecDeque::from(oneshots);
 	let mut count = 0i32;
@@ -203,6 +212,7 @@ async fn insert_oneshots(
 		let mut media_models: Vec<media::ActiveModel> = Vec::with_capacity(chunk_count);
 		let mut meta_models: Vec<media_metadata::ActiveModel> = Vec::new();
 		let mut tags_by_media: Vec<(String, Vec<String>)> = Vec::new();
+		let mut writers_by_media: Vec<(String, Vec<String>)> = Vec::new();
 
 		for _ in 0..chunk_count {
 			let Some(BuiltOneshot {
@@ -215,6 +225,7 @@ async fn insert_oneshots(
 						media,
 						metadata: media_metadata,
 						tags,
+						writers,
 					},
 			}) = remaining.pop_front()
 			else {
@@ -250,12 +261,23 @@ async fn insert_oneshots(
 			}
 
 			if !tags.is_empty() {
-				tags_by_media.push((media_id, tags));
+				tags_by_media.push((media_id.clone(), tags));
+			}
+			if let Some(writers) = writers {
+				writers_by_media.push((media_id, writers));
 			}
 		}
 
-		insert_media_in_txn(&txn, media_models, meta_models, tags_by_media, &tag_cache)
-			.await?;
+		insert_media_in_txn(
+			&txn,
+			media_models,
+			meta_models,
+			tags_by_media,
+			&tag_cache,
+			writers_by_media,
+			&author_cache,
+		)
+		.await?;
 		txn.commit().await?;
 
 		for (media_id, series_id) in event_pairs {

@@ -1,4 +1,5 @@
 import '@/__mocks__/resizeObserver'
+import '@/__mocks__/pointerCapture'
 
 import { SDKContext, StumpClientContext } from '@stump/client'
 import { LocaleProvider } from '@stump/i18n'
@@ -37,12 +38,31 @@ const stats = (sessionCount: number) => ({
 	},
 })
 
-function setup(handler: (query: string) => unknown) {
+const history = (sessionCount: number) => ({ myReadingStats: { totals: { sessionCount } } })
+
+type Handlers = {
+	ranged: () => unknown
+	history?: () => unknown
+}
+
+function setup(handlers: Handlers | (() => unknown)) {
+	const { ranged, history: hasHistory } =
+		typeof handlers === 'function' ? { ranged: handlers, history: undefined } : handlers
+
 	const sdk = new Api({ baseURL: 'http://localhost:10801', authMethod: 'session' })
 	const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-	const execute = vi
-		.spyOn(sdk, 'execute')
-		.mockImplementation(async (document) => handler(document.toString()) as never)
+	const execute = vi.spyOn(sdk, 'execute').mockImplementation(async (document) => {
+		const query = document.toString()
+		if (query.includes('query ReadingStatsHasReadingHistory')) {
+			if (!hasHistory) throw new Error('Unexpected history query')
+			return hasHistory() as never
+		}
+		return ranged() as never
+	})
+	const historyCalls = () =>
+		execute.mock.calls.filter(([document]) =>
+			document.toString().includes('query ReadingStatsHasReadingHistory'),
+		).length
 
 	function Wrapper({ children }: PropsWithChildren) {
 		return (
@@ -58,7 +78,12 @@ function setup(handler: (query: string) => unknown) {
 		)
 	}
 
-	return { execute, Wrapper }
+	return { execute, historyCalls, Wrapper }
+}
+
+async function selectRange(user: ReturnType<typeof userEvent.setup>, name: RegExp) {
+	await user.click(await screen.findByRole('combobox', { name: /stats range/i }))
+	await user.click(await screen.findByRole('option', { name }))
 }
 
 describe('Streaks', () => {
@@ -72,8 +97,8 @@ describe('Streaks', () => {
 })
 
 describe('RangedStats', () => {
-	it('should render the stats for the default (year) range', async () => {
-		const { Wrapper, execute } = setup(() => stats(2))
+	it('should render the stats for the default (year) range without the history query', async () => {
+		const { Wrapper, execute, historyCalls } = setup(() => stats(2))
 		render(<RangedStats />, { wrapper: Wrapper })
 
 		expect(await screen.findByText(/you read on 2 days/i)).toBeInTheDocument()
@@ -84,14 +109,27 @@ describe('RangedStats', () => {
 			expect.anything(),
 			expect.objectContaining({ range: { start: expect.stringMatching(/-01-01$/) } }),
 		)
+		expect(historyCalls()).toBe(0)
 	})
 
-	it('should show an empty state when there was no reading in the range', async () => {
-		const { Wrapper } = setup(() => stats(0))
+	it('should show the no reading history state without the headline', async () => {
+		const { Wrapper, historyCalls } = setup({ ranged: () => stats(0), history: () => history(0) })
 		render(<RangedStats />, { wrapper: Wrapper })
 
 		expect(await screen.findByText(/no reading activity/i)).toBeInTheDocument()
+		expect(await screen.findByText(/once you start reading/i)).toBeInTheDocument()
+		expect(screen.queryByText(/you read on/i)).not.toBeInTheDocument()
 		expect(screen.queryByText(/books finished/i)).not.toBeInTheDocument()
+		expect(historyCalls()).toBe(1)
+	})
+
+	it('should suggest another range when there is reading history outside of it', async () => {
+		const { Wrapper } = setup({ ranged: () => stats(0), history: () => history(12) })
+		render(<RangedStats />, { wrapper: Wrapper })
+
+		expect(await screen.findByText(/try another range/i)).toBeInTheDocument()
+		expect(screen.queryByText(/once you start reading/i)).not.toBeInTheDocument()
+		expect(screen.queryByText(/you read on/i)).not.toBeInTheDocument()
 	})
 
 	it('should request an unbounded range for lifetime', async () => {
@@ -99,25 +137,45 @@ describe('RangedStats', () => {
 		const { Wrapper, execute } = setup(() => stats(2))
 		render(<RangedStats />, { wrapper: Wrapper })
 
-		await user.selectOptions(await screen.findByLabelText(/stats range/i), 'lifetime')
+		await selectRange(user, /lifetime/i)
 
 		await waitFor(() => expect(execute).toHaveBeenLastCalledWith(expect.anything(), { range: {} }))
 	})
 
-	it('should show an error with a retry when the stats fail to load', async () => {
+	it('should not run the history query when lifetime is empty', async () => {
 		const user = userEvent.setup()
+		let empty = false
+		const { Wrapper, historyCalls } = setup({ ranged: () => stats(empty ? 0 : 2) })
+		render(<RangedStats />, { wrapper: Wrapper })
+		await screen.findByText(/you read on 2 days/i)
+
+		empty = true
+		await selectRange(user, /lifetime/i)
+
+		expect(await screen.findByText(/once you start reading/i)).toBeInTheDocument()
+		expect(historyCalls()).toBe(0)
+	})
+
+	it('should show and log the error with a retry when the stats fail to load', async () => {
+		const user = userEvent.setup()
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 		let fail = true
 		const { Wrapper } = setup(() => {
-			if (fail) throw new Error('nope')
+			if (fail) throw new Error('Something went wrong on the server')
 			return stats(2)
 		})
 		render(<RangedStats />, { wrapper: Wrapper })
 
-		expect(await screen.findByText(/your reading stats could not be loaded/i)).toBeInTheDocument()
+		expect(await screen.findByText(/failed to load reading stats/i)).toBeInTheDocument()
+		expect(screen.getByText('Something went wrong on the server')).toBeInTheDocument()
+		expect(consoleError).toHaveBeenCalledWith(
+			expect.objectContaining({ message: 'Something went wrong on the server' }),
+		)
 
 		fail = false
 		await user.click(screen.getByRole('button', { name: /try again/i }))
 
 		expect(await screen.findByText(/books finished/i)).toBeInTheDocument()
+		consoleError.mockRestore()
 	})
 })

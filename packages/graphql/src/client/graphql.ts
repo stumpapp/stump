@@ -6523,6 +6523,11 @@ export type ReadingStatsRangedQuery = { __typename?: 'Query', myReadingStats: (
     & { ' $fragmentRefs'?: { 'ReadingStatsDailyActivityFragment': ReadingStatsDailyActivityFragment;'ReadingStatsWeekdayFragment': ReadingStatsWeekdayFragment;'ReadingStatsTimeToFinishFragment': ReadingStatsTimeToFinishFragment } }
   ) };
 
+export type ReadingStatsHasReadingHistoryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadingStatsHasReadingHistoryQuery = { __typename?: 'Query', myReadingStats: { __typename?: 'ReadingStats', totals: { __typename?: 'ReadingTotals', sessionCount: number } } };
+
 export type ReadingStatsStreaksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -13306,6 +13311,15 @@ fragment ReadingStatsWeekday on ReadingStats {
     averageSeconds
   }
 }`) as unknown as TypedDocumentString<ReadingStatsRangedQuery, ReadingStatsRangedQueryVariables>;
+export const ReadingStatsHasReadingHistoryDocument = new TypedDocumentString(`
+    query ReadingStatsHasReadingHistory {
+  myReadingStats(range: {}) {
+    totals {
+      sessionCount
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ReadingStatsHasReadingHistoryQuery, ReadingStatsHasReadingHistoryQueryVariables>;
 export const ReadingStatsStreaksDocument = new TypedDocumentString(`
     query ReadingStatsStreaks {
   myReadingStreaks {

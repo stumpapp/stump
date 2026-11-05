@@ -1,10 +1,11 @@
 import { useGraphQL } from '@stump/client'
-import { Button, NativeSelect, NewCard, ProgressSpinner, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { NewCard, ProgressSpinner, Select, Text } from '@stump/components'
+import { graphql, ReadingStatsRangedQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate, formatNarrowDuration } from '@stump/i18n'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { ErrorState } from '@/components/ErrorState'
 import { OwlEmptyState } from '@/components/Owl'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -33,12 +34,55 @@ const query = graphql(`
 	}
 `)
 
+/**
+ * Only used when a bounded range has no reading, to tell apart a user without
+ * any reading history from a user who just didn't read within the range
+ */
+const hasReadingHistoryQuery = graphql(`
+	query ReadingStatsHasReadingHistory {
+		myReadingStats(range: {}) {
+			totals {
+				sessionCount
+			}
+		}
+	}
+`)
+
 export default function RangedStats() {
-	const { t, translate, locale } = useTranslate()
+	const { translate } = useTranslate()
 
 	const [preset, setPreset] = useState<StatsRangePreset>('year')
 
-	const { data, isPlaceholderData, isLoading, isError, refetch } = useGraphQL(
+	return (
+		<div className="gap-4 flex flex-1 flex-col">
+			<div className="max-w-4xl">
+				<Select value={preset} onValueChange={(value) => setPreset(value as StatsRangePreset)}>
+					<Select.Trigger size="sm" aria-label={translate('shared.readingStats.rangeLabel')}>
+						<Select.Value />
+					</Select.Trigger>
+					<Select.Content>
+						{STATS_RANGE_PRESETS.map((value) => (
+							<Select.Item key={value} value={value}>
+								{translate(`shared.readingStats.range.${value}`)}
+							</Select.Item>
+						))}
+					</Select.Content>
+				</Select>
+			</div>
+
+			<RangedStatsBody preset={preset} />
+		</div>
+	)
+}
+
+type RangedStatsBodyProps = {
+	preset: StatsRangePreset
+}
+
+function RangedStatsBody({ preset }: RangedStatsBodyProps) {
+	const { translate } = useTranslate()
+
+	const { data, error, isPlaceholderData, isLoading, refetch } = useGraphQL(
 		query,
 		['readingStatsRanged', preset],
 		{ range: toDateRange(preset) },
@@ -46,40 +90,65 @@ export default function RangedStats() {
 	)
 	const stats = data?.myReadingStats
 
-	const picker = (
-		<NativeSelect
-			size="sm"
-			className="w-auto"
-			aria-label={t('readingStatsScene.rangeLabel')}
-			value={preset}
-			onChange={(e) => setPreset(e.target.value as StatsRangePreset)}
-			options={STATS_RANGE_PRESETS.map((value) => ({
-				value,
-				label: translate(`shared.readingStats.range.${value}`),
-			}))}
-		/>
-	)
-
 	if (isLoading) {
 		return (
-			<div className="py-12 flex justify-center">
+			<div className="py-12 max-w-4xl flex justify-center">
 				<ProgressSpinner />
 			</div>
 		)
 	}
 
-	if (isError || !stats) {
+	if (!stats) {
 		return (
-			<NewCard>
-				<div className="gap-3 p-4 flex flex-col items-start">
-					<Text variant="muted">{t('readingStatsScene.error')}</Text>
-					<Button size="sm" variant="outline" onClick={() => refetch()}>
-						{translate('shared.common.tryAgain')}
-					</Button>
-				</div>
-			</NewCard>
+			<ErrorState
+				title={translate('shared.readingStats.loadError')}
+				error={error}
+				onRetry={() => refetch()}
+			/>
 		)
 	}
+
+	if (stats.totals.sessionCount === 0) {
+		return <NoReadingActivity preset={preset} />
+	}
+
+	return <RangedStatsContent stats={stats} isPlaceholderData={isPlaceholderData} />
+}
+
+function NoReadingActivity({ preset }: RangedStatsBodyProps) {
+	const { translate } = useTranslate()
+
+	// an empty lifetime range already means there isn't any reading history
+	const isLifetime = preset === 'lifetime'
+	const { data } = useGraphQL(
+		hasReadingHistoryQuery,
+		['readingStatsHasReadingHistory'],
+		undefined,
+		{
+			enabled: !isLifetime,
+		},
+	)
+	const hasReadingHistory = !isLifetime && !!data?.myReadingStats.totals.sessionCount
+
+	return (
+		<OwlEmptyState
+			title={translate('shared.readingStats.emptyState.title')}
+			description={translate(
+				hasReadingHistory
+					? 'shared.readingStats.emptyState.descriptionNoActivityInRange'
+					: 'shared.readingStats.emptyState.descriptionNoReadingHistory',
+			)}
+		/>
+	)
+}
+
+type RangedStatsContentProps = {
+	stats: ReadingStatsRangedQuery['myReadingStats']
+	isPlaceholderData: boolean
+}
+
+function RangedStatsContent({ stats, isPlaceholderData }: RangedStatsContentProps) {
+	const { translate, locale } = useTranslate()
 
 	const { totalSeconds, sessionCount, finishedCount, activeDayCount } = stats.totals
 
@@ -91,13 +160,12 @@ export default function RangedStats() {
 
 	return (
 		<div
-			className="gap-4 flex flex-col transition-opacity"
+			className="gap-4 max-w-4xl flex flex-col transition-opacity"
 			style={{ opacity: isPlaceholderData ? 0.6 : 1 }}
 			data-testid="ranged-reading-stats"
 		>
 			<NewCard>
 				<div className="gap-1 p-5 flex flex-col">
-					<div>{picker}</div>
 					<div className="gap-2 flex items-baseline">
 						<Text className="text-5xl font-bold">{durationSeparate?.value ?? '0'}</Text>
 						{durationSeparate?.unit && (
@@ -112,46 +180,37 @@ export default function RangedStats() {
 				</div>
 			</NewCard>
 
-			{sessionCount === 0 ? (
-				<OwlEmptyState
-					title={t('readingStatsScene.emptyState.title')}
-					description={t('readingStatsScene.emptyState.description')}
-				/>
-			) : (
-				<>
-					<DailyActivityGrid fragmentRef={stats} />
+			<DailyActivityGrid fragmentRef={stats} />
 
-					<NewCard>
-						<NewCard.StatGroup>
-							<NewCard.Stat
-								label={translate('shared.readingStats.booksFinished')}
-								value={finishedCount}
-							/>
-							<NewCard.Stat
-								label={translate('shared.readingStats.avgPerSession')}
-								value={formatNarrowDuration(avgPerSession, { significantUnits: 1, locale })}
-							/>
-							<NewCard.Stat
-								label={translate('shared.readingStats.avgPerActiveDay')}
-								value={formatNarrowDuration(avgPerActiveDay, { significantUnits: 1, locale })}
-							/>
-						</NewCard.StatGroup>
+			<NewCard>
+				<NewCard.StatGroup>
+					<NewCard.Stat
+						label={translate('shared.readingStats.booksFinished')}
+						value={finishedCount}
+					/>
+					<NewCard.Stat
+						label={translate('shared.readingStats.avgPerSession')}
+						value={formatNarrowDuration(avgPerSession, { significantUnits: 1, locale })}
+					/>
+					<NewCard.Stat
+						label={translate('shared.readingStats.avgPerActiveDay')}
+						value={formatNarrowDuration(avgPerActiveDay, { significantUnits: 1, locale })}
+					/>
+				</NewCard.StatGroup>
+			</NewCard>
+
+			<div className="gap-4 lg:grid-cols-2 grid grid-cols-1 items-start">
+				{totalSeconds > 0 && (
+					<NewCard
+						label={translate('shared.readingStats.dayOfWeek.title')}
+						description={translate('shared.readingStats.dayOfWeek.description')}
+					>
+						<WeekdayChart fragmentRef={stats} />
 					</NewCard>
+				)}
 
-					<div className="gap-4 lg:grid-cols-2 grid grid-cols-1 items-start">
-						{totalSeconds > 0 && (
-							<NewCard
-								label={translate('shared.readingStats.dayOfWeek.title')}
-								description={translate('shared.readingStats.dayOfWeek.description')}
-							>
-								<WeekdayChart fragmentRef={stats} />
-							</NewCard>
-						)}
-
-						<TimeToFinishStats fragmentRef={stats} />
-					</div>
-				</>
-			)}
+				<TimeToFinishStats fragmentRef={stats} />
+			</div>
 		</div>
 	)
 }

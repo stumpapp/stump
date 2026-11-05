@@ -21,8 +21,10 @@ export default function StatsScene() {
 				<Breadcrumbs segments={[{ label: title }]} />
 			</PageHeader>
 
-			<SceneContainer className="gap-6 max-w-4xl flex flex-1 flex-col">
-				<Streaks />
+			<SceneContainer className="gap-6 flex flex-1 flex-col">
+				<div className="max-w-4xl">
+					<Streaks />
+				</div>
 				<RangedStats />
 				<div className="pb-5 sm:pb-0" />
 			</SceneContainer>

@@ -2729,14 +2729,6 @@
         "settings": "Go to Settings"
       }
     },
-    "readingStatsScene": {
-      "rangeLabel": "Stats range",
-      "error": "Your reading stats could not be loaded",
-      "emptyState": {
-        "title": "No reading activity",
-        "description": "Your stats will show up here once you start reading. Try another range, or open a book to get started"
-      }
-    },
     "signOutModal": {
       "title": "Sign Out",
       "message": "Are you sure you want to sign out?",
@@ -3554,6 +3546,13 @@
         "title": "Time to Finish",
         "books_one": "Based on {{count}} book",
         "books_other": "Based on {{count}} books"
+      },
+      "rangeLabel": "Stats Range",
+      "loadError": "Failed to Load Reading Stats",
+      "emptyState": {
+        "title": "No Reading Activity",
+        "descriptionNoReadingHistory": "Your stats will show up here once you start reading. Open a book to get started",
+        "descriptionNoActivityInRange": "You didn't read anything in this range. Try another range"
       }
     },
     "errors": {

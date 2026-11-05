@@ -203,6 +203,7 @@ type Documents = {
     "\n\tmutation UpdateReadiumEpubProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateReadiumEpubProgressDocument,
     "\n\tfragment ReadingStatsDailyActivity on ReadingStats {\n\t\trange {\n\t\t\tstart\n\t\t\tend\n\t\t}\n\t\tdailyActivity {\n\t\t\tdate\n\t\t\ttotalSeconds\n\t\t\tsessionCount\n\t\t}\n\t}\n": typeof types.ReadingStatsDailyActivityFragmentDoc,
     "\n\tquery ReadingStatsRanged($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...ReadingStatsDailyActivity\n\t\t\t...ReadingStatsWeekday\n\t\t\t...ReadingStatsTimeToFinish\n\t\t}\n\t}\n": typeof types.ReadingStatsRangedDocument,
+    "\n\tquery ReadingStatsHasReadingHistory {\n\t\tmyReadingStats(range: {}) {\n\t\t\ttotals {\n\t\t\t\tsessionCount\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ReadingStatsHasReadingHistoryDocument,
     "\n\tquery ReadingStatsStreaks {\n\t\tmyReadingStreaks {\n\t\t\tcurrentDays\n\t\t\tlongestDays\n\t\t}\n\t}\n": typeof types.ReadingStatsStreaksDocument,
     "\n\tfragment ReadingStatsTimeToFinish on ReadingStats {\n\t\ttimeToFinish {\n\t\t\tlibraryType\n\t\t\tsampleSize\n\t\t\tmedianActiveSeconds\n\t\t}\n\t}\n": typeof types.ReadingStatsTimeToFinishFragmentDoc,
     "\n\tfragment ReadingStatsWeekday on ReadingStats {\n\t\tdayOfWeek {\n\t\t\tisoWeekday\n\t\t\taverageSeconds\n\t\t}\n\t}\n": typeof types.ReadingStatsWeekdayFragmentDoc,
@@ -554,6 +555,7 @@ const documents: Documents = {
     "\n\tmutation UpdateReadiumEpubProgress($id: ID!, $input: MediaProgressInput!) {\n\t\tupdateMediaProgress(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateReadiumEpubProgressDocument,
     "\n\tfragment ReadingStatsDailyActivity on ReadingStats {\n\t\trange {\n\t\t\tstart\n\t\t\tend\n\t\t}\n\t\tdailyActivity {\n\t\t\tdate\n\t\t\ttotalSeconds\n\t\t\tsessionCount\n\t\t}\n\t}\n": types.ReadingStatsDailyActivityFragmentDoc,
     "\n\tquery ReadingStatsRanged($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...ReadingStatsDailyActivity\n\t\t\t...ReadingStatsWeekday\n\t\t\t...ReadingStatsTimeToFinish\n\t\t}\n\t}\n": types.ReadingStatsRangedDocument,
+    "\n\tquery ReadingStatsHasReadingHistory {\n\t\tmyReadingStats(range: {}) {\n\t\t\ttotals {\n\t\t\t\tsessionCount\n\t\t\t}\n\t\t}\n\t}\n": types.ReadingStatsHasReadingHistoryDocument,
     "\n\tquery ReadingStatsStreaks {\n\t\tmyReadingStreaks {\n\t\t\tcurrentDays\n\t\t\tlongestDays\n\t\t}\n\t}\n": types.ReadingStatsStreaksDocument,
     "\n\tfragment ReadingStatsTimeToFinish on ReadingStats {\n\t\ttimeToFinish {\n\t\t\tlibraryType\n\t\t\tsampleSize\n\t\t\tmedianActiveSeconds\n\t\t}\n\t}\n": types.ReadingStatsTimeToFinishFragmentDoc,
     "\n\tfragment ReadingStatsWeekday on ReadingStats {\n\t\tdayOfWeek {\n\t\t\tisoWeekday\n\t\t\taverageSeconds\n\t\t}\n\t}\n": types.ReadingStatsWeekdayFragmentDoc,
@@ -1469,6 +1471,10 @@ export function graphql(source: "\n\tfragment ReadingStatsDailyActivity on Readi
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery ReadingStatsRanged($range: DateRangeInput) {\n\t\tmyReadingStats(range: $range) {\n\t\t\trange {\n\t\t\t\tstart\n\t\t\t\tend\n\t\t\t}\n\t\t\ttotals {\n\t\t\t\ttotalSeconds\n\t\t\t\tsessionCount\n\t\t\t\tfinishedCount\n\t\t\t\tactiveDayCount\n\t\t\t}\n\t\t\t...ReadingStatsDailyActivity\n\t\t\t...ReadingStatsWeekday\n\t\t\t...ReadingStatsTimeToFinish\n\t\t}\n\t}\n"): typeof import('./graphql').ReadingStatsRangedDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ReadingStatsHasReadingHistory {\n\t\tmyReadingStats(range: {}) {\n\t\t\ttotals {\n\t\t\t\tsessionCount\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ReadingStatsHasReadingHistoryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -152,6 +152,10 @@ impl Guard for BookClubRoleGuard {
 			return Ok(());
 		}
 
+		if !user.has_permission(UserPermission::AccessBookClub) {
+			return Err(error_message::FORBIDDEN_ACTION.into());
+		}
+
 		let Some(membership) =
 			book_club_member::Entity::find_by_club_for_user(user, &self.club_id)
 				.one(core.conn.as_ref())

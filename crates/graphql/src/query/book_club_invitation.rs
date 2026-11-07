@@ -1,8 +1,9 @@
 use async_graphql::{Context, Object, Result};
-use models::entity::book_club_invitation;
+use models::{entity::book_club_invitation, shared::enums::UserPermission};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	object::book_club_invitation::BookClubInvitation,
 };
 
@@ -12,6 +13,7 @@ pub struct BookClubInvitationQuery;
 #[Object]
 impl BookClubInvitationQuery {
 	/// Get all pending invitations for the current user
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn my_book_club_invitations(
 		&self,
 		ctx: &Context<'_>,

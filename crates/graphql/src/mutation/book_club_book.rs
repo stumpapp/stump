@@ -2,12 +2,16 @@ use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
 	entity::{book_club_book, book_club_discussion},
-	shared::book_club::{BookClubExternalBook, BookClubInternalBook},
+	shared::{
+		book_club::{BookClubExternalBook, BookClubInternalBook},
+		enums::UserPermission,
+	},
 };
 use sea_orm::{prelude::*, Set, TransactionTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	input::book_club::AddBookToClubInput,
 	mutation::book_club::get_book_club_for_admin,
 	object::{book_club::BookClub, book_club_book::BookClubBookVariant},
@@ -19,6 +23,7 @@ pub struct BookClubBookMutation;
 #[Object]
 impl BookClubBookMutation {
 	/// Add a book to the club's queue
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn add_book_to_club(
 		&self,
 		ctx: &Context<'_>,
@@ -79,6 +84,7 @@ impl BookClubBookMutation {
 	}
 
 	/// Mark the current book as completed
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn complete_book(
 		&self,
 		ctx: &Context<'_>,
@@ -118,6 +124,7 @@ impl BookClubBookMutation {
 	}
 
 	/// Reorder uncompleted books in the club's queue. Completed books cannot be reordered since they are effectively archived
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn reorder_books(
 		&self,
 		ctx: &Context<'_>,

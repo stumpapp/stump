@@ -319,7 +319,7 @@ impl BookClub {
 			.id
 			.clone()
 			.unwrap_or_else(|| Uuid::new_v4().to_string());
-		let name = self.name.clone().unwrap_or_else(|| format!("Fake Club"));
+		let name = self.name.clone().unwrap_or_else(|| "Fake Club".to_string());
 		let slug = self
 			.slug
 			.clone()
@@ -334,7 +334,6 @@ impl BookClub {
 			member_role_spec: ActiveValue::Set(self.member_role_spec.clone()),
 			created_at: ActiveValue::Set(Utc::now().into()),
 			emoji: ActiveValue::Set(self.emoji.clone()),
-			..Default::default()
 		}
 		.insert(db)
 		.await
@@ -372,7 +371,6 @@ impl BookClubMember {
 			),
 			user_id: ActiveValue::Set(self.user_id.clone()),
 			book_club_id: ActiveValue::Set(self.book_club_id.clone()),
-			..Default::default()
 		}
 		.insert(db)
 		.await
@@ -447,7 +445,6 @@ impl BookClubDiscussion {
 			is_pinned: ActiveValue::Set(self.is_pinned),
 			created_at: ActiveValue::Set(Utc::now().into()),
 			book_club_id: ActiveValue::Set(self.book_club_id.clone()),
-			..Default::default()
 		}
 		.insert(db)
 		.await

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result};
-use models::entity::{media, media_metadata, series, user::AuthUser};
-use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
+use models::entity::{media, media_metadata, user::AuthUser};
+use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -21,15 +21,6 @@ fn parse_writers(writers: &str) -> Vec<String> {
 		.collect()
 }
 
-/// Helper to build a subquery for series IDs in a specific library
-fn series_in_library_subquery(library_id: String) -> sea_orm::sea_query::SelectStatement {
-	Query::select()
-		.column(series::Column::Id)
-		.from(series::Entity)
-		.and_where(series::Column::LibraryId.eq(library_id))
-		.to_owned()
-}
-
 /// Fetches all unique author names from the database, optionally scoped to a library,
 /// and scoped to whatever the given user is allowed to see.
 ///
@@ -46,9 +37,7 @@ async fn fetch_all_authors(
 		.filter(media_metadata::Column::Writers.is_not_null());
 
 	if let Some(lib_id) = library_id {
-		query = query.filter(
-			media::Column::SeriesId.in_subquery(series_in_library_subquery(lib_id)),
-		);
+		query = query.filter(media::Column::LibraryId.eq(lib_id.clone()));
 	}
 
 	let writers: Vec<String> = query.into_tuple().all(conn).await?;
@@ -186,10 +175,7 @@ impl AuthorQuery {
 			.filter(media_metadata::Column::Series.is_not_null());
 
 		if let Some(ref lib_id) = library_id {
-			query = query.filter(
-				media::Column::SeriesId
-					.in_subquery(series_in_library_subquery(lib_id.clone())),
-			);
+			query = query.filter(media::Column::LibraryId.eq(lib_id.clone()));
 		}
 
 		let series_names: Vec<String> = query.into_tuple().all(conn).await?;

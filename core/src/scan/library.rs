@@ -11,13 +11,9 @@ use models::{
 		scanned_directory, series,
 	},
 	services::scanned_directory::stored_mtimes_under_path,
-	shared::enums::FileStatus,
+	shared::enums::{FileStatus, OrganizationMode, SeriesKind},
 };
-use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
-	QuerySelect, Set, TransactionTrait,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -39,7 +35,7 @@ use crate::{
 			build_ignore_rules,
 			media::{
 				build_and_insert_media, handle_missing_media, handle_restored_media,
-				visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+				visit_and_update_media, MediaBuildOperation,
 			},
 			oneshot::{
 				build_and_insert_oneshots,
@@ -51,6 +47,7 @@ use crate::{
 				handle_missing_series, insert_series, safely_build_series,
 				MissingSeriesOutput,
 			},
+			MAX_INSERT_CHUNK_SIZE,
 		},
 		walk::{
 			walk_library, walk_oneshots, walk_series, WalkedLibrary, WalkedOneshots,
@@ -67,6 +64,7 @@ pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
 	WalkOneshotsDirectory(PathBuf),
+	MetadataTask(SeriesScanTask),
 	SeriesTask {
 		id: String,
 		path: String,
@@ -116,10 +114,159 @@ impl LibraryScanJob {
 		}
 	}
 
+	async fn init_metadata_scan(
+		&self,
+		ctx: &JobContext,
+		ignore_rules: globset::GlobSet,
+	) -> Result<WorkingState<LibraryScanOutput, LibraryScanTask>, JobError> {
+		ctx.report_progress(JobProgress::msg("Discovering books recursively"));
+		let walked = walk_series(
+			Path::new(&self.path),
+			WalkerCtx {
+				db: ctx.apalis_state.conn.clone(),
+				ignore_rules,
+				max_depth: None,
+				options: self.options,
+				dir_mtimes: HashMap::new(),
+				series_id: None,
+				library_id: Some(self.id.clone()),
+				oneshots_directory: None,
+			},
+		)
+		.await?;
+		if walked.series_is_missing {
+			handle_missing_library(ctx.conn(), &self.id).await?;
+			ctx.emit_event(CoreEvent::DiscoveredMissingLibrary(
+				event::DiscoveredMissingLibrary {
+					id: self.id.clone(),
+				},
+			));
+			return Err(JobError::InitFailed(
+				"Library could not be found on disk".into(),
+			));
+		}
+		library::Entity::update_many()
+			.col_expr(
+				library::Column::Status,
+				Expr::value(FileStatus::Ready.to_string()),
+			)
+			.filter(library::Column::Id.eq(&self.id))
+			.filter(library::Column::Status.eq(FileStatus::Missing))
+			.exec(ctx.conn())
+			.await?;
+		let tasks = [
+			(!walked.missing_media.is_empty())
+				.then_some(SeriesScanTask::MarkMissingMedia(walked.missing_media)),
+			(!walked.recovered_media.is_empty())
+				.then_some(SeriesScanTask::RestoreMedia(walked.recovered_media)),
+		]
+		.into_iter()
+		.flatten()
+		.chain(
+			walked
+				.media_to_create
+				.chunks(MAX_INSERT_CHUNK_SIZE)
+				.map(|paths| SeriesScanTask::CreateMedia(paths.to_vec())),
+		)
+		.chain(
+			walked
+				.media_to_visit
+				.chunks(MAX_INSERT_CHUNK_SIZE)
+				.map(|params| SeriesScanTask::VisitMedia(params.to_vec())),
+		)
+		.map(LibraryScanTask::MetadataTask)
+		.collect();
+		Ok(WorkingState {
+			output: Some(LibraryScanOutput {
+				total_files: walked.seen_files,
+				ignored_files: walked.ignored_files,
+				skipped_files: walked.skipped_files,
+				total_directories: walked.seen_directories,
+				ignored_directories: walked.ignored_directories,
+				..Default::default()
+			}),
+			tasks,
+			logs: vec![],
+		})
+	}
+
+	async fn execute_series_scan_task(
+		&self,
+		ctx: &JobContext,
+		task: SeriesScanTask,
+		series: Option<(&str, &str)>,
+	) -> Result<JobTaskOutput<Self>, JobError> {
+		let series_id = series.map(|(id, _)| id);
+		let scope = series_id.map_or_else(
+			|| media::Column::LibraryId.eq(&self.id),
+			|id| media::Column::SeriesId.eq(id),
+		);
+		if let Some((_, path)) = series {
+			let series_name = Path::new(path)
+				.file_name()
+				.map(|name| name.to_string_lossy())
+				.unwrap_or_else(|| path.into());
+			let message = match &task {
+				SeriesScanTask::RestoreMedia(_) => "Restoring media",
+				SeriesScanTask::MarkMissingMedia(_) => "Handling missing media",
+				SeriesScanTask::CreateMedia(_) => "Creating media",
+				SeriesScanTask::VisitMedia(_) => "Visiting media",
+			};
+			ctx.report_progress(JobProgress::msg_with_subtitle(message, &series_name));
+		}
+		let operation = || {
+			self.config
+				.clone()
+				.map(|library_config| MediaBuildOperation {
+					series_id: series_id.map(str::to_string),
+					library_config,
+				})
+				.ok_or_else(|| {
+					JobError::TaskFailed("Library configuration is missing".into())
+				})
+		};
+		let result = match task {
+			SeriesScanTask::MarkMissingMedia(paths) => {
+				handle_missing_media(ctx, scope, paths).await
+			},
+			SeriesScanTask::RestoreMedia(ids) => {
+				handle_restored_media(ctx, scope, ids).await
+			},
+			SeriesScanTask::CreateMedia(paths) => {
+				build_and_insert_media(operation()?, ctx, paths).await?
+			},
+			SeriesScanTask::VisitMedia(params) => {
+				visit_and_update_media(operation()?, ctx, params).await?
+			},
+		};
+		let changed = result.created_media + result.updated_media;
+		if changed > 0 || series_id.is_some() {
+			self.bump_thumbnail_fallbacks(ctx, series_id, changed)
+				.await?;
+			ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+				CreatedOrUpdatedManyMedia {
+					count: changed,
+					series_id: series_id.map(str::to_string),
+					library_id: self.id.clone(),
+				},
+			));
+		}
+		Ok(JobTaskOutput {
+			output: LibraryScanOutput {
+				created_media: result.created_media,
+				updated_media: result.updated_media,
+				created_series: result.created_series,
+				..Default::default()
+			},
+			logs: result.logs,
+			subtasks: vec![],
+		})
+	}
+
 	async fn bump_thumbnail_fallbacks(
 		&self,
 		ctx: &JobContext,
-		series_id: &str,
+		series_id: Option<&str>,
 		changed_media: u64,
 	) -> Result<(), JobError> {
 		if changed_media > 0
@@ -128,7 +275,7 @@ impl LibraryScanJob {
 				.as_ref()
 				.is_some_and(|config| config.thumbnail_config.is_none())
 		{
-			bump_media_thumbnail_fallbacks(ctx.conn(), Some(series_id)).await?;
+			bump_media_thumbnail_fallbacks(ctx.conn(), &self.id, series_id).await?;
 		}
 
 		Ok(())
@@ -205,6 +352,13 @@ impl JobLifecycle for LibraryScanJob {
 		let oneshots_directory = config.oneshots_directory.clone();
 
 		self.config = Some(config);
+		if self
+			.config
+			.as_ref()
+			.is_some_and(|config| config.organization_mode == OrganizationMode::Metadata)
+		{
+			return self.init_metadata_scan(ctx, ignore_rules).await;
+		}
 
 		let stored_dir_mtimes =
 			stored_mtimes_under_path(self.path.as_str(), ctx.conn()).await?;
@@ -223,7 +377,7 @@ impl JobLifecycle for LibraryScanJob {
 			.await
 			.unwrap_or_default()
 			.into_iter()
-			.map(|s| (s.path, s.id))
+			.filter_map(|s| s.path.map(|path| (path, s.id)))
 			.collect::<HashMap<String, String>>();
 		tracing::debug!(count = loaded_series_ids.len(), "preloaded series ids");
 		if let Ok(mut map) = self.series_id_by_path.lock() {
@@ -251,6 +405,7 @@ impl JobLifecycle for LibraryScanJob {
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
 				series_id: None,
+				library_id: None,
 				oneshots_directory,
 			},
 		)
@@ -486,6 +641,9 @@ impl JobLifecycle for LibraryScanJob {
 		let mut subtasks = vec![];
 
 		match task {
+			LibraryScanTask::MetadataTask(task) => {
+				return self.execute_series_scan_task(ctx, task, None).await
+			},
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Initializing"));
@@ -630,7 +788,9 @@ impl JobLifecycle for LibraryScanJob {
 								output.created_series += created_series.len() as u64;
 								if let Ok(mut map) = self.series_id_by_path.lock() {
 									for s in &created_series {
-										map.insert(s.path.clone(), s.id.clone());
+										if let Some(path) = &s.path {
+											map.insert(path.clone(), s.id.clone());
+										}
 									}
 								}
 								ctx.emit_event(CoreEvent::CreatedManySeries(
@@ -702,6 +862,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
 						series_id: series_id.clone(),
+						library_id: None,
 						oneshots_directory: None,
 					},
 				)
@@ -718,6 +879,7 @@ impl JobLifecycle for LibraryScanJob {
 					skipped_files,
 					observed_dir_mtimes,
 					previous_oneshot_entries,
+					..
 				} = match walk_result {
 					Ok(walked_series) => walked_series,
 					Err(core_error) => {
@@ -840,7 +1002,8 @@ impl JobLifecycle for LibraryScanJob {
 						max_depth: None, // not needed
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
-						series_id: None,          // not needed
+						series_id: None, // not needed
+						library_id: None,
 						oneshots_directory: None, // not needed
 					},
 				)
@@ -931,145 +1094,10 @@ impl JobLifecycle for LibraryScanJob {
 					})
 					.collect();
 			},
-			LibraryScanTask::SeriesTask {
-				id: series_id,
-				path: series_path,
-				task: series_task,
-			} => match series_task {
-				SeriesScanTask::RestoreMedia(ids) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Restoring media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = handle_restored_media(ctx, &series_id, ids).await;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-							library_id: self.id.clone(),
-						},
-					));
-
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::MarkMissingMedia(paths) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Handling missing media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = handle_missing_media(ctx, &series_id, paths).await;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-							library_id: self.id.clone(),
-						},
-					));
-
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::CreateMedia(paths) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Creating media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						created_media,
-						logs: new_logs,
-						..
-					} = build_and_insert_media(
-						MediaBuildOperation {
-							series_id: series_id.clone(),
-							library_config: self.config.clone().ok_or(
-								JobError::TaskFailed(
-									"Library configuration is missing".to_string(),
-								),
-							)?,
-						},
-						ctx,
-						paths,
-					)
-					.await?;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, created_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						CreatedOrUpdatedManyMedia {
-							count: created_media,
-							series_id,
-							library_id: self.id.clone(),
-						},
-					));
-					output.created_media += created_media;
-					logs.extend(new_logs);
-				},
-				SeriesScanTask::VisitMedia(params) => {
-					let series_name = Path::new(&series_path)
-						.file_name()
-						.map(|n| n.to_string_lossy().into_owned())
-						.unwrap_or_else(|| series_path.clone());
-					ctx.report_progress(JobProgress::msg_with_subtitle(
-						"Visiting media",
-						&series_name,
-					));
-					let MediaOperationOutput {
-						updated_media,
-						logs: new_logs,
-						..
-					} = visit_and_update_media(
-						MediaBuildOperation {
-							series_id: series_id.clone(),
-							library_config: self.config.clone().ok_or(
-								JobError::TaskFailed(
-									"Library configuration is missing".to_string(),
-								),
-							)?,
-						},
-						ctx,
-						params,
-					)
-					.await?;
-					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
-						.await?;
-
-					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
-						event::CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-							library_id: self.id.clone(),
-						},
-					));
-					output.updated_media += updated_media;
-					logs.extend(new_logs);
-				},
+			LibraryScanTask::SeriesTask { id, path, task } => {
+				return self
+					.execute_series_scan_task(ctx, task, Some((&id, &path)))
+					.await
 			},
 		}
 
@@ -1103,6 +1131,7 @@ pub async fn handle_missing_library(
 			Expr::value(FileStatus::Missing.to_string()),
 		)
 		.filter(series::Column::LibraryId.eq(library_id))
+		.filter(series::Column::Kind.eq(SeriesKind::Filesystem))
 		.exec(&txn)
 		.await?
 		.rows_affected;
@@ -1112,15 +1141,7 @@ pub async fn handle_missing_library(
 			media::Column::Status,
 			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.filter(
-			media::Column::SeriesId.in_subquery(
-				Query::select()
-					.column(series::Column::Id)
-					.from(series::Entity)
-					.and_where(series::Column::LibraryId.eq(library_id))
-					.to_owned(),
-			),
-		)
+		.filter(media::Column::LibraryId.eq(library_id))
 		.exec(&txn)
 		.await?
 		.rows_affected;

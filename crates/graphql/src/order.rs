@@ -140,6 +140,16 @@ macro_rules! order_spec {
 // new([(col,order)]) etc
 pub(crate) use order_spec;
 
+/// The spec for reading order of books within a series
+pub(crate) fn series_position_spec() -> OrderSpec {
+	order_spec![
+		(media_metadata::Column::Number, Order::Asc),
+		(media::Column::Name, Order::Asc),
+		(media::Column::Id, Order::Asc),
+	]
+	// ^ this Id addition is really just a tie breaker
+}
+
 // NOTE: this is, in part, a workaround for https://github.com/SeaQL/sea-orm/issues/2407
 //
 // also, i must be cursed because i sat here for way too long and could not think of a
@@ -268,14 +278,6 @@ mod tests {
 	use sea_orm::{prelude::*, QueryFilter};
 
 	type Row = media::ModelWithMetadata;
-
-	fn series_position_spec() -> OrderSpec {
-		order_spec![
-			(media_metadata::Column::Number, Order::Asc),
-			(media::Column::Name, Order::Asc),
-			(media::Column::Id, Order::Asc),
-		]
-	}
 
 	fn cursor_values(row: &Row) -> Vec<Value> {
 		vec![

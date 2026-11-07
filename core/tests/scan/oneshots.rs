@@ -40,7 +40,7 @@ impl Snapshot {
 				.iter()
 				.find(|s| Some(&s.id) == m.series_id.as_ref());
 			assert!(
-				parent.is_some_and(|s| s.is_oneshot && s.path == m.path),
+				parent.is_some_and(|s| s.is_oneshot && s.path.as_ref() == Some(&m.path)),
 				"oneshot book {} should belong to a oneshot series at its own path\n{self:#?}",
 				m.path
 			);

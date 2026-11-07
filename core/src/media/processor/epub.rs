@@ -1,4 +1,5 @@
 use merge::Merge;
+use models::shared::enums::OrganizationMode;
 use quick_xml::{escape::unescape, events::Event, Reader};
 use std::{
 	collections::HashMap,
@@ -81,6 +82,7 @@ impl MediaProcessor for EpubProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		let mut epub_file = EpubDoc::new(path)?;
 		let metadata_map = metadata_to_map(epub_file.metadata.clone());
@@ -89,9 +91,10 @@ impl MediaProcessor for EpubProcessor {
 		tracing::trace!(before = ?embedded_metadata, "Processing embedded metadata");
 
 		let root_file_path = epub_file.root_file.clone();
-		if let Some(Ok(parsed_embedded_metadata)) = epub_file
+		if let Some(parsed_embedded_metadata) = epub_file
 			.get_resource_str_by_path(&root_file_path)
 			.map(|xml| parse_opf_xml(&xml))
+			.transpose()?
 		{
 			let additional_metadata =
 				ProcessedMediaMetadata::from(parsed_embedded_metadata);
@@ -104,7 +107,14 @@ impl MediaProcessor for EpubProcessor {
 		let file_path = path.with_extension("opf");
 		if file_path.exists() {
 			let opf_string = std::fs::read_to_string(file_path)?;
-			let opf_metadata = parse_opf_xml(&opf_string)?;
+			let opf_metadata = match parse_opf_xml(&opf_string) {
+				Ok(metadata) => metadata,
+				Err(error) if organization_mode == OrganizationMode::Filesystem => {
+					tracing::warn!(?error, "Ignoring invalid optional OPF sidecar");
+					return Ok(Some(embedded_metadata));
+				},
+				Err(error) => return Err(error),
+			};
 
 			// Prioritize the OPF metadata over the embedded metadata
 			let opf_metadata = ProcessedMediaMetadata::from(opf_metadata);
@@ -125,20 +135,14 @@ impl MediaProcessor for EpubProcessor {
 	) -> Result<ProcessedMediaFile, MediaProcessorError> {
 		tracing::trace!(?path, "Processing epub");
 
-		let metadata = self.process_metadata(path);
+		let metadata = if options.process_metadata {
+			self.process_metadata(path, options.organization_mode)?
+		} else {
+			None
+		};
 
 		let mut epub_file = EpubDoc::new(path)?;
 		let pages = compute_synthetic_page_count(&mut epub_file)?;
-
-		// Get metadata from epub file if process_metadata failed
-		let metadata = match metadata {
-			Ok(Some(m)) => m,
-			result => {
-				tracing::trace!(?result, "Falling back to epub-rs metadata");
-				let metadata_map = metadata_to_map(epub_file.metadata);
-				ProcessedMediaMetadata::from(metadata_map)
-			},
-		};
 
 		let hashes = self.generate_hashes(path, options)?;
 
@@ -146,7 +150,7 @@ impl MediaProcessor for EpubProcessor {
 			path: path.to_path_buf(),
 			hash: hashes.stump,
 			koreader_hash: hashes.koreader,
-			metadata: Some(metadata),
+			metadata,
 			pages,
 		})
 	}
@@ -583,15 +587,57 @@ fn find_image_in_xhtml(
 	}
 }
 
+/// An EPUB 3 `belongs-to-collection` entry
+#[derive(Debug)]
+struct EpubCollection {
+	id: String,
+	name: String,
+}
+
+/// The series name and position declared by EPUB 3 collections, when exactly one collection
+/// is refined as a series. `types` and `positions` are `(refines, value)` pairs from the
+/// `collection-type` and `group-position` entries.
+fn series_from_collections(
+	collections: &[EpubCollection],
+	types: &[(String, String)],
+	positions: &[(String, String)],
+) -> Option<(String, Option<String>)> {
+	let [collection] = collections else {
+		return None;
+	};
+	let refines_collection =
+		|refines: &String| !refines.is_empty() && *refines == collection.id;
+	let [(refines, kind)] = types else {
+		return None;
+	};
+	if !refines_collection(refines) || kind != "series" {
+		return None;
+	}
+	let position = match positions {
+		[] => None,
+		[(refines, position)] if refines_collection(refines) => Some(position.clone()),
+		_ => return None,
+	};
+	Some((collection.name.clone(), position))
+}
+
 /// Parse OPF XML content and extract supported metadata
 fn parse_opf_xml(
 	opf_content: &str,
 ) -> Result<HashMap<String, Vec<String>>, MediaProcessorError> {
 	let mut reader = Reader::from_str(opf_content);
-	reader.config_mut().trim_text(true);
+	reader.config_mut().trim_text(false);
 	let mut current_tag = String::new();
+	let mut current_content = String::new();
+	let mut current_id = String::new();
+	let mut current_refines = String::new();
+	let mut collections = Vec::new();
+	let mut collection_types = Vec::new();
+	let mut collection_positions = Vec::new();
 	let mut buf = Vec::new();
 	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+	let mut depth = 0usize;
+	let mut has_root = false;
 
 	// tags which _might_ contain html, will be handled differently if encountered
 	const HTML_CONTENT_TAGS: [&str; 3] = ["description", "summary", "synopsis"];
@@ -599,8 +645,13 @@ fn parse_opf_xml(
 	loop {
 		let mut html_tag_to_read: Option<(String, String)> = None;
 
-		match reader.read_event_into(&mut buf) {
-			Ok(Event::Start(ref e)) => {
+		match reader.read_event_into(&mut buf)? {
+			Event::Start(ref e) => {
+				has_root = true;
+				depth += 1;
+				current_content.clear();
+				current_id.clear();
+				current_refines.clear();
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 				let base_tag = tag_name
 					.strip_prefix("dc:")
@@ -608,57 +659,66 @@ fn parse_opf_xml(
 					.to_string();
 
 				if HTML_CONTENT_TAGS.contains(&base_tag.as_str()) {
+					for attr in e.attributes() {
+						attr?.decode_and_unescape_value(reader.decoder())?;
+					}
 					html_tag_to_read = Some((tag_name, base_tag));
 				} else {
 					current_tag = base_tag.clone();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
-								let scheme =
-									String::from_utf8_lossy(&attr.value).to_lowercase();
+								let scheme = value.to_lowercase();
 								current_tag = format!("identifier_{}", scheme);
 							},
 							b"name" if tag_name == "meta" => {
-								let name = String::from_utf8_lossy(&attr.value);
+								let name = value;
 								current_tag =
 									name.trim_start_matches("calibre:").to_string();
 							},
-							b"property" if tag_name == "meta" => {
-								let property = String::from_utf8_lossy(&attr.value);
-								current_tag = property.to_string();
+							b"property"
+								if matches!(tag_name.as_str(), "meta" | "opf:meta") =>
+							{
+								current_tag = value.into_owned();
 							},
-							b"property" if tag_name == "opf:meta" => {
-								let property = String::from_utf8_lossy(&attr.value);
-								current_tag = property.to_string();
+							b"id" => current_id = value.to_string(),
+							b"refines" => {
+								current_refines = value
+									.strip_prefix('#')
+									.unwrap_or_default()
+									.to_string()
 							},
 							_ => {},
 						}
 					}
 				}
 			},
-			Ok(Event::Empty(ref e)) => {
+			Event::Empty(ref e) => {
+				has_root = true;
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 
 				if tag_name == "meta" {
 					let mut meta_name = String::new();
 					let mut meta_content = String::new();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"name" => {
-								let name = String::from_utf8_lossy(&attr.value);
+								let name = value;
 								meta_name =
 									name.trim_start_matches("calibre:").to_string();
 							},
 							b"property" => {
-								let property = String::from_utf8_lossy(&attr.value);
+								let property = value;
 								meta_name = property.to_string();
 							},
 							b"content" => {
-								meta_content = String::from_utf8_lossy(&attr.value)
-									.trim()
-									.to_string();
+								meta_content = value.trim().to_string();
 							},
 							_ => {},
 						}
@@ -680,17 +740,16 @@ fn parse_opf_xml(
 					let mut tag_key = base_tag.clone();
 					let mut tag_content = String::new();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr?;
+						let value = attr.decode_and_unescape_value(reader.decoder())?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
-								let scheme =
-									String::from_utf8_lossy(&attr.value).to_lowercase();
+								let scheme = value.to_lowercase();
 								tag_key = format!("identifier_{}", scheme);
 							},
 							b"content" => {
-								tag_content = String::from_utf8_lossy(&attr.value)
-									.trim()
-									.to_string();
+								tag_content = value.trim().to_string();
 							},
 							_ => {},
 						}
@@ -701,25 +760,47 @@ fn parse_opf_xml(
 					}
 				}
 			},
-			Ok(Event::Text(e)) => {
+			Event::Text(e) => {
+				let raw = e.decode()?;
+				current_content.push_str(&raw);
+			},
+			Event::CData(e) => {
+				let raw = e.decode()?;
+				current_content.push_str(&raw);
+			},
+			Event::GeneralRef(e) => {
+				let reference = e.decode()?;
+				let raw = format!("&{reference};");
+				let value = unescape(&raw)?;
+				current_content.push_str(&value);
+			},
+			Event::End(_) => {
+				depth = depth.saturating_sub(1);
 				if !current_tag.is_empty() {
-					let text = String::from_utf8_lossy(&e).to_string();
-					let content = text.trim().to_string();
+					let content = current_content.trim().to_string();
 					if !content.is_empty() {
 						match current_tag.as_str() {
 							"belongs-to-collection" => {
+								collections.push(EpubCollection {
+									id: current_id.clone(),
+									name: content.clone(),
+								});
 								opf_metadata
 									.entry("collection_name".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"collection-type" => {
+								collection_types
+									.push((current_refines.clone(), content.clone()));
 								opf_metadata
 									.entry("collection_type".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"group-position" => {
+								collection_positions
+									.push((current_refines.clone(), content.clone()));
 								opf_metadata
 									.entry("collection_position".to_string())
 									.or_default()
@@ -749,38 +830,53 @@ fn parse_opf_xml(
 						}
 					}
 				}
-			},
-			Ok(Event::End(_)) => {
 				current_tag.clear();
+				current_content.clear();
 			},
-			Ok(Event::Eof) => break,
-			Err(e) => {
-				tracing::warn!("Error parsing OPF XML: {}", e);
-				break;
+			Event::Eof if depth == 0 && has_root => break,
+			Event::Eof => {
+				return Err(MediaProcessorError::Metadata(
+					"Unexpected end of OPF XML".into(),
+				))
 			},
 			_ => {},
 		}
 
 		if let Some((full_tag, base_tag)) = html_tag_to_read.take() {
 			let end = quick_xml::events::BytesEnd::new(&full_tag);
-			match reader.read_text(end.name()) {
-				Ok(raw_text) => {
-					let text = unescape(&raw_text)
-						.map(|c| c.into_owned())
-						.unwrap_or_else(|_| raw_text.into_owned());
-					let trimmed = text.trim().to_string();
+			let raw_text = reader.read_text(end.name())?;
+			depth = depth.saturating_sub(1);
+			let text = unescape(&raw_text)
+				.map(|c| c.into_owned())
+				.unwrap_or_else(|_| raw_text.into_owned());
+			let trimmed = text.trim().to_string();
 
-					if !trimmed.is_empty() {
-						opf_metadata.entry(base_tag).or_default().push(trimmed);
-					}
-				},
-				Err(e) => {
-					tracing::warn!("Error reading {} content: {}", base_tag, e);
-				},
+			if !trimmed.is_empty() {
+				opf_metadata.entry(base_tag).or_default().push(trimmed);
 			}
 		}
 
 		buf.clear();
+	}
+
+	if !opf_metadata.contains_key("series") && !collections.is_empty() {
+		match series_from_collections(
+			&collections,
+			&collection_types,
+			&collection_positions,
+		) {
+			Some((name, position)) => {
+				opf_metadata.insert("series".into(), vec![name]);
+				if let Some(position) = position {
+					opf_metadata.insert("series_index".into(), vec![position]);
+				}
+			},
+			None => tracing::warn!(
+				?collections,
+				?collection_types,
+				"EPUB collections do not identify one unambiguous series; leaving the book standalone"
+			),
+		}
 	}
 
 	tracing::trace!(?opf_metadata, "Extracted OPF metadata");
@@ -832,7 +928,7 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::media::fixtures::get_test_epub_path;
+	use crate::media::fixtures::{get_test_epub_path, write_test_epub};
 
 	#[test]
 	fn test_get_cover_from_xhtml_svg_cover() {
@@ -1112,7 +1208,8 @@ mod tests {
 		let path = Path::new(&path_str);
 		let processor = EpubProcessor;
 
-		let processed_metadata = processor.process_metadata(path);
+		let processed_metadata =
+			processor.process_metadata(path, OrganizationMode::Filesystem);
 		match processed_metadata {
 			Ok(Some(metadata)) => {
 				assert_eq!(
@@ -1385,66 +1482,9 @@ mod tests {
 	/// Build a minimal EPUB 3 with a single chapter and no image resources or cover
 	/// metadata, keeping the backing temp directory alive alongside its path.
 	fn build_test_epub_without_cover() -> (tempfile::TempDir, PathBuf) {
-		use std::io::Write;
-
 		let temp = tempfile::tempdir().expect("tempdir");
 		let path = temp.path().join("book.epub");
-		let file = File::create(&path).expect("create epub");
-		let mut zip = zip::ZipWriter::new(file);
-		let zip_options = zip::write::FileOptions::<()>::default();
-		// The EPUB OCF spec requires the mimetype entry to be stored uncompressed
-		let mimetype_options = zip::write::FileOptions::<()>::default()
-			.compression_method(zip::CompressionMethod::Stored);
-
-		zip.start_file("mimetype", mimetype_options)
-			.expect("mimetype");
-		zip.write_all(b"application/epub+zip")
-			.expect("mimetype bytes");
-		zip.start_file("META-INF/container.xml", zip_options)
-			.expect("container");
-		zip.write_all(
-			br#"<?xml version="1.0"?>
-<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-	<rootfiles>
-		<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
-	</rootfiles>
-</container>"#,
-		)
-		.expect("container bytes");
-		zip.start_file("OEBPS/content.opf", zip_options)
-			.expect("opf");
-		zip.write_all(
-			br#"<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
-	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-		<dc:identifier id="uid">urn:uuid:stump-no-cover-test</dc:identifier>
-		<dc:title>No Cover Test</dc:title>
-		<dc:language>en</dc:language>
-		<meta property="dcterms:modified">2026-01-01T00:00:00Z</meta>
-	</metadata>
-	<manifest>
-		<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-		<item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>
-	</manifest>
-	<spine><itemref idref="ch1"/></spine>
-</package>"#,
-		)
-		.expect("opf bytes");
-		zip.start_file("OEBPS/nav.xhtml", zip_options).expect("nav");
-		zip.write_all(
-			br#"<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head><body><nav epub:type="toc"><ol><li><a href="ch1.xhtml">Chapter 1</a></li></ol></nav></body></html>"#,
-		)
-		.expect("nav bytes");
-		zip.start_file("OEBPS/ch1.xhtml", zip_options)
-			.expect("chapter");
-		zip.write_all(
-			br#"<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Chapter 1</title></head><body><p>Hello</p></body></html>"#,
-		)
-		.expect("chapter bytes");
-		zip.finish().expect("finish zip");
-
+		write_test_epub(&path, "No Cover Test", "");
 		(temp, path)
 	}
 
@@ -1486,5 +1526,125 @@ mod tests {
 		assert!(cover.is_ok());
 		let chapter = get_chapter(path, 1);
 		assert!(chapter.is_ok());
+	}
+
+	fn opf(metadata: &str) -> String {
+		format!(
+			r#"<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+		<dc:title>Test</dc:title>
+		{metadata}
+	</metadata>
+</package>"#
+		)
+	}
+
+	fn series_of(metadata: &str) -> (Option<Vec<String>>, Option<Vec<String>>) {
+		let parsed = parse_opf_xml(&opf(metadata)).expect("Failed to parse OPF");
+		(
+			parsed.get("series").cloned(),
+			parsed.get("series_index").cloned(),
+		)
+	}
+
+	#[test]
+	fn test_collection_maps_to_series() {
+		let (series, index) = series_of(
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c1" property="group-position">2.5</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Wayfarers".to_string()]));
+		assert_eq!(index, Some(vec!["2.5".to_string()]));
+
+		let (series, index) = series_of(
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Wayfarers".to_string()]));
+		assert_eq!(index, None);
+	}
+
+	#[test]
+	fn test_ambiguous_collections_leave_book_standalone() {
+		let cases = [
+			// two series collections
+			r##"<meta property="belongs-to-collection" id="c1">One</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta property="belongs-to-collection" id="c2">Two</meta>
+			<meta refines="#c2" property="collection-type">series</meta>"##,
+			// a collection that isn't a series
+			r##"<meta property="belongs-to-collection" id="c1">Favorites</meta>
+			<meta refines="#c1" property="collection-type">set</meta>"##,
+			// a collection without a type
+			r##"<meta property="belongs-to-collection" id="c1">Favorites</meta>"##,
+			// a type that refines another element
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c2" property="collection-type">series</meta>"##,
+			// a collection without an id can't be refined
+			r##"<meta property="belongs-to-collection">Wayfarers</meta>
+			<meta refines="#" property="collection-type">series</meta>"##,
+			// a position that refines another element
+			r##"<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c2" property="group-position">1</meta>"##,
+		];
+		for case in cases {
+			assert_eq!(series_of(case), (None, None), "{case}");
+		}
+	}
+
+	#[test]
+	fn test_calibre_series_takes_precedence_over_collections() {
+		let (series, index) = series_of(
+			r##"<meta name="calibre:series" content="Calibre Series"/>
+			<meta name="calibre:series_index" content="3"/>
+			<meta property="belongs-to-collection" id="c1">Wayfarers</meta>
+			<meta refines="#c1" property="collection-type">series</meta>
+			<meta refines="#c1" property="group-position">1</meta>"##,
+		);
+		assert_eq!(series, Some(vec!["Calibre Series".to_string()]));
+		assert_eq!(index, Some(vec!["3".to_string()]));
+	}
+
+	#[test]
+	fn test_parse_opf_decodes_entities_and_cdata() {
+		let parsed = parse_opf_xml(&opf(
+			r#"<dc:publisher>Tom &amp; Jerry &#38; Co</dc:publisher>
+			<dc:subject><![CDATA[Fish & <Chips>]]></dc:subject>"#,
+		))
+		.expect("Failed to parse OPF");
+		assert_eq!(
+			parsed.get("publisher"),
+			Some(&vec!["Tom & Jerry & Co".to_string()])
+		);
+		assert_eq!(
+			parsed.get("subject"),
+			Some(&vec!["Fish & <Chips>".to_string()])
+		);
+	}
+
+	#[test]
+	fn test_parse_opf_rejects_truncated_xml() {
+		assert!(parse_opf_xml(r#"<package><metadata><dc:title>Test"#).is_err());
+		assert!(parse_opf_xml("").is_err());
+	}
+
+	#[test]
+	fn test_invalid_opf_sidecar_depends_on_organization_mode() {
+		let dir = tempfile::tempdir().expect("Failed to create temp dir");
+		let book = dir.path().join("book.epub");
+		std::fs::copy(get_test_epub_path(), &book).expect("Failed to copy test EPUB");
+		std::fs::write(book.with_extension("opf"), "<package><metadata>")
+			.expect("Failed to write sidecar");
+
+		let metadata = EpubProcessor
+			.process_metadata(&book, OrganizationMode::Filesystem)
+			.expect("Filesystem libraries should ignore an invalid sidecar");
+		assert!(metadata.is_some());
+		assert!(EpubProcessor
+			.process_metadata(&book, OrganizationMode::Metadata)
+			.is_err());
 	}
 }

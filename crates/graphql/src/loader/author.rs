@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
-use models::entity::{media, media_metadata, series, user};
-use sea_orm::{prelude::*, sea_query::Query};
+use models::entity::{media, media_metadata, user};
+use sea_orm::prelude::*;
 use std::{collections::HashMap, sync::Arc};
 
 use crate::object::media::Media;
@@ -14,14 +14,6 @@ fn parse_writers(writers: &str) -> Vec<String> {
 		.map(|s| s.trim().to_string())
 		.filter(|s| !s.is_empty())
 		.collect()
-}
-
-fn series_in_library_subquery(library_id: String) -> sea_orm::sea_query::SelectStatement {
-	Query::select()
-		.column(series::Column::Id)
-		.from(series::Entity)
-		.and_where(series::Column::LibraryId.eq(library_id))
-		.to_owned()
 }
 
 pub struct AuthorMediaLoader {
@@ -95,10 +87,7 @@ impl Loader<AuthorMediaLoaderKey> for AuthorMediaLoader {
 				.filter(media_metadata::Column::Writers.is_not_null());
 
 			if let Some(ref lib_id) = library_id {
-				query = query.filter(
-					media::Column::SeriesId
-						.in_subquery(series_in_library_subquery(lib_id.clone())),
-				);
+				query = query.filter(media::Column::LibraryId.eq(lib_id.clone()));
 			}
 
 			let models = query
@@ -211,10 +200,7 @@ impl Loader<MetadataSeriesMediaLoaderKey> for MetadataSeriesMediaLoader {
 				.filter(media_metadata::Column::Series.is_not_null());
 
 			if let Some(ref lib_id) = library_id {
-				query = query.filter(
-					media::Column::SeriesId
-						.in_subquery(series_in_library_subquery(lib_id.clone())),
-				);
+				query = query.filter(media::Column::LibraryId.eq(lib_id.clone()));
 			}
 
 			let models = query

@@ -725,7 +725,7 @@ mod tests {
 		let series = series::ActiveModel {
 			name: Set("Test Series".to_string()),
 			library_id: Set(Some(library.id.clone())),
-			path: Set("/test/series".to_string()),
+			path: Set(Some("/test/series".to_string())),
 			status: Set(FileStatus::Ready),
 			..Default::default()
 		}
@@ -738,6 +738,7 @@ mod tests {
 				name: Set(format!("Test Media {}", i + 1)),
 				path: Set(format!("/test/series/media{}", i + 1)),
 				series_id: Set(Some(series.id.clone())),
+				library_id: Set(library.id.clone()),
 				extension: Set("cbz".to_string()),
 				pages: Set(100 + i),
 				status: Set(FileStatus::Ready),

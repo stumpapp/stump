@@ -9,7 +9,7 @@ use sea_orm::{
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
-		enums::FileStatus,
+		enums::{FileStatus, SeriesKind},
 		image::ImageMetadata,
 		ordering::{OrderDirection, OrderingField},
 	},
@@ -33,8 +33,10 @@ pub struct Model {
 	pub name: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub path: Option<String>,
 	#[sea_orm(column_type = "Text")]
-	pub path: String,
+	pub kind: SeriesKind,
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
 	pub is_oneshot: bool,
@@ -121,7 +123,7 @@ impl Entity {
 #[derive(FromQueryResult)]
 pub struct SeriesIdentSelect {
 	pub id: String,
-	pub path: String,
+	pub path: Option<String>,
 }
 
 impl SeriesIdentSelect {
@@ -133,7 +135,7 @@ impl SeriesIdentSelect {
 #[derive(Debug, FromQueryResult)]
 pub struct SeriesThumbSelect {
 	pub id: String,
-	pub path: String,
+	pub path: Option<String>,
 	pub thumbnail_path: Option<String>,
 	pub thumbnail_meta: Option<crate::shared::image::ImageMetadata>,
 	pub library_id: Option<String>,
@@ -254,6 +256,9 @@ impl ActiveModelBehavior for ActiveModel {
 			}
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(FileStatus::Ready);
+			}
+			if self.kind.is_not_set() {
+				self.kind = ActiveValue::Set(SeriesKind::Filesystem);
 			}
 			if self.is_oneshot.is_not_set() {
 				self.is_oneshot = ActiveValue::Set(false);

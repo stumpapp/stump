@@ -32,6 +32,7 @@ pub enum MissingEntityType {
 #[derive(Debug, Clone, SimpleObject, FromQueryResult)]
 pub struct MissingEntity {
 	pub id: String,
-	pub path: String,
+	pub name: String,
+	pub path: Option<String>,
 	pub r#type: MissingEntityType,
 }

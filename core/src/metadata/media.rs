@@ -260,19 +260,35 @@ impl ProcessedMediaMetadata {
 
 // NOTE: this is primarily used for converting the EPUB metadata into a common Metadata struct
 impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
-	fn from(map: HashMap<String, Vec<String>>) -> Self {
-		let mut metadata = ProcessedMediaMetadata::default();
+	fn from(source: HashMap<String, Vec<String>>) -> Self {
+		let mut map = HashMap::<String, Vec<String>>::new();
+		for (key, values) in source {
+			map.entry(key.to_lowercase()).or_default().extend(values);
+		}
+		let mut metadata = ProcessedMediaMetadata {
+			number: map
+				.get("series_index")
+				.or_else(|| map.get("number"))
+				.filter(|values| values.len() == 1)
+				.and_then(|values| values[0].parse::<f64>().ok())
+				.filter(|number| number.is_finite()),
+			..Default::default()
+		};
 
 		for (key, value) in map {
 			match key.to_lowercase().as_str() {
 				"title" => metadata.title = Some(value.join("\n").to_string()),
 				"title_sort" => metadata.title_sort = Some(value.join("\n").to_string()),
-				"series" | "collection_name" => {
-					metadata.series = Some(value.join("\n").to_string())
-				},
-				"number" | "series_index" | "collection_position" => {
-					metadata.number =
-						value.into_iter().next().and_then(|n| n.parse().ok());
+				"series" => {
+					if let Some(name) =
+						value.first().filter(|name| !name.trim().is_empty())
+					{
+						if value.iter().all(|other| other.trim() == name.trim()) {
+							metadata.series = Some(name.trim().to_string());
+						} else {
+							tracing::warn!(series = ?value, "Multiple series names are ambiguous; leaving the book standalone");
+						}
+					}
 				},
 				"volume" => {
 					metadata.volume =

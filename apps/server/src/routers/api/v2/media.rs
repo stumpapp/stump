@@ -8,10 +8,10 @@ use axum::{
 };
 use graphql::data::AuthContext;
 use models::{
-	entity::{library, library_config, media, series, user::AuthUser},
+	entity::{library_config, media, user::AuthUser},
 	shared::image_processor_options::SupportedImageFormat,
 };
-use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
+use sea_orm::{prelude::*, QuerySelect};
 use stump_core::{
 	config::StumpConfig,
 	fs_utils::ContentType,
@@ -105,23 +105,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	}
 
 	let library_config = library_config::Entity::find()
-		.filter(
-			library_config::Column::LibraryId.in_subquery(
-				Query::select()
-					.column(library::Column::Id)
-					.from(library::Entity)
-					.and_where(
-						library::Column::Id.in_subquery(
-							Query::select()
-								.column(series::Column::LibraryId)
-								.from(series::Entity)
-								.and_where(series::Column::Id.eq(book.series_id.clone()))
-								.to_owned(),
-						),
-					)
-					.to_owned(),
-			),
-		)
+		.filter(library_config::Column::LibraryId.eq(&book.library_id))
 		.one(ctx.conn.as_ref())
 		.await?;
 	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));

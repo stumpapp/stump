@@ -9,7 +9,7 @@ use models::{
 	entity::{library_config, media, series},
 	shared::image_processor_options::SupportedImageFormat,
 };
-use sea_orm::{prelude::*, sea_query::Query, QueryOrder};
+use sea_orm::{prelude::*, sea_query::Query};
 use stump_core::{
 	config::StumpConfig,
 	fs_utils::ContentType,
@@ -87,12 +87,13 @@ async fn get_series_thumbnail_handler(
 		}
 	}
 
-	let first_book = media::Entity::find_for_user(&user)
-		.filter(media::Column::SeriesId.eq(series.id.clone()))
-		.order_by_asc(media::Column::Name)
-		.into_model::<media::MediaThumbSelect>()
-		.one(ctx.conn.as_ref())
-		.await?;
+	let first_book = media::Entity::order_in_series(
+		media::Entity::find_for_user(&user)
+			.filter(media::Column::SeriesId.eq(series.id.clone())),
+	)
+	.into_model::<media::MediaThumbSelect>()
+	.one(ctx.conn.as_ref())
+	.await?;
 
 	let library_config = library_config::Entity::find()
 		.filter(

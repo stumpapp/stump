@@ -760,14 +760,14 @@ async fn browse_library_by_id(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 	let library_books = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.limit(DEFAULT_LIMIT)
 		.order_by_asc(media::Column::Name)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
 	let library_books_count = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.count(ctx.conn.as_ref())
 		.await?;
 
@@ -801,7 +801,7 @@ async fn browse_library_by_id(
 		.build()?;
 
 	let latest_library_books = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.limit(DEFAULT_LIMIT)
 		.order_by_desc(media::Column::CreatedAt)
 		.into_model::<OPDSPublicationEntity>()
@@ -910,6 +910,7 @@ async fn fetch_books_and_generate_feed<C>(
 	for_user: &AuthUser,
 	condition: Option<Condition>,
 	order: (C, Order),
+	in_series: bool,
 	pagination: OffsetPagination,
 	title: &str,
 	subtitle: Option<String>,
@@ -934,7 +935,13 @@ where
 		)
 		.limit(take)
 		.offset(pagination.offset())
-		.order_by(order.0, order.1)
+		.apply_if(in_series.then_some(()), |query, _| {
+			media::Entity::order_in_series(query)
+		})
+		.apply_if(
+			(!in_series).then_some(order),
+			|query, (column, direction)| query.order_by(column, direction),
+		)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
@@ -1036,8 +1043,9 @@ async fn browse_library_books(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
 		&user,
-		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
+		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
+		false,
 		pagination.0,
 		"Library Books - All",
 		None,
@@ -1060,8 +1068,9 @@ async fn latest_library_books(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
 		&user,
-		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
+		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::CreatedAt, Order::Desc),
+		false,
 		pagination.0,
 		"Library Books - Latest",
 		None,
@@ -1296,6 +1305,7 @@ async fn browse_series_by_id(
 		&user,
 		Some(Condition::all().add(media::Column::SeriesId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
+		true,
 		pagination.0,
 		&title,
 		None,
@@ -1331,6 +1341,7 @@ async fn browse_books(
 		&user,
 		condition,
 		(media::Column::Name, Order::Asc),
+		false,
 		params.pagination,
 		"Browse Books",
 		subtitle,
@@ -1355,6 +1366,7 @@ async fn latest_books(
 		&user,
 		None,
 		(media::Column::CreatedAt, Order::Desc),
+		false,
 		pagination.0,
 		"Latest Books",
 		None,
@@ -1388,6 +1400,7 @@ async fn keep_reading(
 				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		),
 		(reading_session::Column::UpdatedAt, Order::Desc),
+		false,
 		pagination.0,
 		"Currently Reading",
 		None,

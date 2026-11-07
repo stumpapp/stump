@@ -17,14 +17,6 @@ const subscription = graphql(`
 				count
 				libraryId
 			}
-			... on CreatedMedia {
-				id
-				seriesId
-			}
-			... on CreatedOrUpdatedManyMedia {
-				count
-				seriesId
-			}
 			... on DiscoveredMissingLibrary {
 				id
 			}
@@ -155,12 +147,10 @@ const eventHandler = async (
 				])
 			}
 			break
+		case 'CreatedMedia':
 		case 'CreatedOrUpdatedManyMedia':
 			if (liveRefetch) {
-				await client.invalidateQueries({
-					predicate: ({ queryKey: [rootKey] }) =>
-						typeof rootKey === 'string' && ['series', 'media'].includes(rootKey.toLowerCase()),
-				})
+				await invalidateThumbnailQueries(client)
 			}
 			break
 		case 'JobOutput':

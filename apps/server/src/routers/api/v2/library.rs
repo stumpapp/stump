@@ -22,7 +22,7 @@ use stump_core::{
 	image::thumbnail::{get_saved_thumbnail, get_thumbnail},
 };
 
-use super::series::get_series_thumbnail;
+use super::{media::get_media_thumbnail, series::get_series_thumbnail};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -59,9 +59,12 @@ pub(crate) async fn get_library_thumbnail(
 		(None, Some(series)) => {
 			get_series_thumbnail(&series, first_book, image_format, config).await
 		},
-		(None, None) => Err(APIError::NotFound(
-			"Library does not have a thumbnail".to_string(),
-		)),
+		(None, None) => match first_book {
+			Some(book) => get_media_thumbnail(&book, image_format, config).await,
+			None => Err(APIError::NotFound(
+				"Library does not have a thumbnail".to_string(),
+			)),
+		},
 	}
 }
 
@@ -97,16 +100,13 @@ async fn get_library_thumbnail_handler(
 		.one(ctx.conn.as_ref())
 		.await?;
 
-	let first_book = if let Some(ref series) = first_series {
-		media::Entity::find_for_user(&user)
-			.filter(media::Column::SeriesId.eq(series.id.clone()))
-			.order_by_asc(media::Column::Name)
-			.into_model::<media::MediaThumbSelect>()
-			.one(ctx.conn.as_ref())
-			.await?
-	} else {
-		None
-	};
+	let first_book = media::Entity::find_for_user(&user)
+		.filter(media::Column::LibraryId.eq(&library.id))
+		.order_by_asc(series::Column::Name)
+		.order_by_asc(media::Column::Name)
+		.into_model::<media::MediaThumbSelect>()
+		.one(ctx.conn.as_ref())
+		.await?;
 
 	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 

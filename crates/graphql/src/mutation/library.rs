@@ -27,7 +27,10 @@ use stump_core::{
 	},
 	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-	metadata::provider::{MetadataFetchJobParams, MetadataFetchScope},
+	metadata::{
+		membership::{remove_series_thumbnails, reset_media_metadata},
+		provider::{MetadataFetchJobParams, MetadataFetchScope},
+	},
 	scan::options::ScanOptions,
 };
 use tokio::fs;
@@ -115,17 +118,8 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		let deleted_media_ids = media::Entity::delete_many()
-			.filter(
-				media::Column::Status.ne(FileStatus::Ready.to_string()).and(
-					media::Column::SeriesId.in_subquery(
-						Query::select()
-							.column(series::Column::Id)
-							.from(series::Entity)
-							.and_where(series::Column::LibraryId.eq(id.to_string()))
-							.to_owned(),
-					),
-				),
-			)
+			.filter(media::Column::Status.ne(FileStatus::Ready.to_string()))
+			.filter(media::Column::LibraryId.eq(id.to_string()))
 			.exec_with_returning(&txn)
 			.await?
 			.into_iter()
@@ -138,13 +132,13 @@ impl LibraryMutation {
 			.filter(
 				Condition::any()
 					.add(series::Column::Status.ne(FileStatus::Ready.to_string()))
-					// TODO: Double check that this query is correct
 					.add(
 						series::Column::Id.not_in_subquery(
 							Query::select()
 								.column(media::Column::SeriesId)
 								.distinct()
 								.from(media::Entity)
+								.and_where(media::Column::SeriesId.is_not_null())
 								.to_owned(),
 						),
 					),
@@ -156,8 +150,8 @@ impl LibraryMutation {
 			.collect::<Vec<_>>();
 		tracing::trace!(?deleted_series_ids, "Deleted series ids");
 
-		let is_library_empty = series::Entity::find()
-			.filter(series::Column::LibraryId.eq(id.to_string()))
+		let is_library_empty = media::Entity::find()
+			.filter(media::Column::LibraryId.eq(id.to_string()))
 			.count(&txn)
 			.await? == 0;
 
@@ -254,6 +248,10 @@ impl LibraryMutation {
 		mut input: CreateOrUpdateLibraryInput,
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
+
+		if let Some(config) = &input.config {
+			config.validate_organization(None)?;
+		}
 
 		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
 
@@ -380,33 +378,17 @@ impl LibraryMutation {
 			}
 		}
 
-		if matches!(
+		let thumbnails = if matches!(
 			impact,
 			MetadataResetImpact::Books | MetadataResetImpact::Everything
 		) {
-			let media_metadata_models = media_metadata::Entity::find()
-				.filter(
-					media_metadata::Column::MediaId.in_subquery(
-						Query::select()
-							.column(media::Column::Id)
-							.from(media::Entity)
-							.and_where(media::Column::SeriesId.is_in(series_ids))
-							.to_owned(),
-					),
-				)
-				.all(&tx)
-				.await?;
-			tracing::trace!(
-				count = media_metadata_models.len(),
-				"Found media metadata to delete"
-			);
-
-			for media_metadata in media_metadata_models {
-				media_metadata.delete(&tx).await?;
-			}
-		}
+			reset_media_metadata(&tx, media::Column::LibraryId.eq(&library.id)).await?
+		} else {
+			vec![]
+		};
 
 		tx.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		tracing::debug!(?impact, library_id = ?library.id, "Reset metadata for library");
 
@@ -438,6 +420,11 @@ impl LibraryMutation {
 		let Some(existing_config) = existing_config else {
 			return Err("Library is missing associated config!".into());
 		};
+
+		if let Some(config) = &input.config {
+			config.validate_organization(Some(existing_config.organization_mode))?;
+		}
+		let has_config = input.config.is_some();
 
 		enforce_valid_library_path(
 			core.conn.as_ref(),
@@ -480,6 +467,11 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		let (library, config) = input.into_active_model();
+		let config = if has_config {
+			config
+		} else {
+			existing_config.clone().into()
+		};
 
 		let _updated_config = library_config::ActiveModel {
 			id: Set(existing_config.id),
@@ -1120,15 +1112,7 @@ impl LibraryMutation {
 			.await?;
 
 		let books = media::Entity::find()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(library_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(library_id.clone()))
 			.select_only()
 			.columns(media::MediaIdentSelect::columns())
 			.into_model::<media::MediaIdentSelect>()
@@ -1176,15 +1160,7 @@ impl LibraryMutation {
 			.await?;
 
 		media::Entity::update_many()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(library_id))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(library_id))
 			.col_expr(media::Column::ThumbnailPath, Expr::value(None::<String>))
 			.col_expr(
 				media::Column::ThumbnailMeta,
@@ -1318,15 +1294,7 @@ impl LibraryMutation {
 		let library_id_str = library.id.clone();
 
 		let media_ids: Vec<String> = media::Entity::find()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(&library_id_str))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(&library_id_str))
 			.select_only()
 			.column(media::Column::Id)
 			.into_tuple()

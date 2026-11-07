@@ -4,17 +4,11 @@ use std::sync::Arc;
 use async_graphql::SimpleObject;
 use metadata_integrations::{MatchCandidate, SearchQuery};
 use models::{
-	entity::{
-		library_config, media, metadata_fetch_record, metadata_provider_config, series,
-	},
+	entity::{media, metadata_fetch_record, metadata_provider_config, series},
 	shared::enums::{LibraryType, MetadataFetchStatus},
 };
 use sea_orm::QuerySelect;
-use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
-	Set,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, Set};
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
@@ -22,7 +16,7 @@ use crate::job::{
 	JobTaskOutput, WorkingState,
 };
 
-use super::{apply, ProviderClientCache};
+use super::{apply, fetch::library_type_for_library, ProviderClientCache};
 
 type Id = String;
 
@@ -216,7 +210,6 @@ impl JobLifecycle for MetadataFetchJob {
 
 		self.get_or_init_cache(ctx).await?;
 
-		// TODO: This is terrible, media needs direct fk to library
 		// TODO: The names should be entity.metadata.name.or(entity.name)
 		let tasks: VecDeque<MetadataFetchTask> = match &self.params.scope {
 			MetadataFetchScope::Series(ids) => {
@@ -280,7 +273,7 @@ impl JobLifecycle for MetadataFetchJob {
 
 				let unique_library_ids: Vec<String> = media_list
 					.iter()
-					.filter_map(|(_, s)| s.as_ref().and_then(|s| s.library_id.clone()))
+					.map(|(m, _)| m.library_id.clone())
 					.collect::<std::collections::HashSet<_>>()
 					.into_iter()
 					.collect();
@@ -299,11 +292,7 @@ impl JobLifecycle for MetadataFetchJob {
 							media_id: m.id,
 							media_name: m.name,
 							series_name: s.as_ref().map(|s| s.name.clone()),
-							library_type: s
-								.as_ref()
-								.and_then(|s| s.library_id.as_ref())
-								.and_then(|lid| library_type_map.get(lid))
-								.cloned()?,
+							library_type: library_type_map.get(&m.library_id).cloned()?,
 						})
 					})
 					.collect()
@@ -340,17 +329,7 @@ impl JobLifecycle for MetadataFetchJob {
 				let library_type = resolve_library_type(conn, library_id).await?;
 
 				let media_list = media::Entity::find()
-					.filter(
-						media::Column::SeriesId.in_subquery(
-							// TODO(perf): I think I just need to add a direct fk to library on media at this point
-							// bc I do this way too often
-							Query::select()
-								.column(series::Column::Id)
-								.from(series::Entity)
-								.and_where(series::Column::LibraryId.eq(library_id))
-								.to_owned(),
-						),
-					)
+					.filter(media::Column::LibraryId.eq(library_id))
 					.find_also_related(series::Entity)
 					.all(conn)
 					.await?;
@@ -776,16 +755,7 @@ async fn resolve_library_type(
 	conn: &DatabaseConnection,
 	library_id: &str,
 ) -> Result<LibraryType, JobError> {
-	let config = library_config::Entity::find()
-		.filter(library_config::Column::LibraryId.eq(library_id))
-		.one(conn)
+	library_type_for_library(conn, library_id)
 		.await
-		.map_err(|e| JobError::InitFailed(e.to_string()))?
-		.ok_or_else(|| {
-			JobError::InitFailed(format!(
-				"Library config not found for library {library_id}"
-			))
-		})?;
-
-	Ok(config.library_type)
+		.map_err(|error| JobError::InitFailed(error.to_string()))
 }

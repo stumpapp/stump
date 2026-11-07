@@ -27,7 +27,7 @@ pub struct OPDSSeries {
 pub struct OPDSPublicationEntity {
 	pub media: media::Model,
 	pub metadata: Option<media_metadata::Model>,
-	pub series: OPDSSeries,
+	pub series: Option<OPDSSeries>,
 	pub reading_session: Option<reading_session::Model>,
 }
 
@@ -40,7 +40,7 @@ impl OPDSPublicationEntity {
 			.add_columns(series_metadata::Entity)
 			.selector
 			.left_join(media_metadata::Entity)
-			.inner_join(series::Entity)
+			.left_join(series::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
 				series_metadata::Entity::belongs_to(series::Entity)
@@ -64,12 +64,12 @@ impl OPDSPublicationEntity {
 			.add_columns(series_metadata::Entity)
 			.add_columns(reading_session::Entity)
 			.selector
-			.filter(series::Column::LibraryId.not_in_subquery(
+			.filter(media::Column::LibraryId.not_in_subquery(
 				library_exclusion::Entity::library_hidden_to_user_query(user),
 			))
 			.filter(Condition::all().add_option(age_restriction_filter))
 			.left_join(media_metadata::Entity)
-			.inner_join(series::Entity)
+			.left_join(series::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
 				series_metadata::Entity::belongs_to(series::Entity)
@@ -110,8 +110,15 @@ impl FromQueryResult for OPDSPublicationEntity {
 			series_metadata::Model,
 			series_metadata::Entity,
 		>(res)?;
-		let series_name = res.try_get("series", "name")?;
-		let series_id = res.try_get("series", "id")?;
+		let series = if let Some(id) = res.try_get::<Option<String>>("series", "id")? {
+			Some(OPDSSeries {
+				id,
+				name: res.try_get("series", "name")?,
+				metadata: series_metadata,
+			})
+		} else {
+			None
+		};
 		let reading_session = parse_query_to_model_optional::<
 			reading_session::Model,
 			reading_session::Entity,
@@ -120,11 +127,7 @@ impl FromQueryResult for OPDSPublicationEntity {
 		Ok(OPDSPublicationEntity {
 			media,
 			metadata: media_metadata,
-			series: OPDSSeries {
-				id: series_id,
-				name: series_name,
-				metadata: series_metadata,
-			},
+			series,
 			reading_session,
 		})
 	}

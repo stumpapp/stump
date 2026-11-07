@@ -8,7 +8,7 @@ use models::{
 use sea_orm::{prelude::*, QuerySelect, QueryTrait};
 
 use crate::{
-	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
+	database::chunk_vec_into,
 	image::thumbnail::generate::{
 		bump_series_thumbnail_fallbacks, safely_generate_batch, GenerateImageSource,
 		GenerateThumbnailOptions,
@@ -175,8 +175,7 @@ impl JobLifecycle for ThumbnailGenerationJob {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
-					.inner_join(series::Entity)
-					.filter(series::Column::LibraryId.eq(id))
+					.filter(media::Column::LibraryId.eq(id))
 					.apply_if(truthy_thumb_filter, |query, f| query.filter(f))
 					.into_model::<media::MediaThumbSelect>()
 					.all(ctx.conn())
@@ -186,30 +185,12 @@ impl JobLifecycle for ThumbnailGenerationJob {
 
 				let series_ids = books
 					.iter()
-					.map(|m| m.series_id.clone())
+					.filter_map(|m| m.series_id.clone())
 					.collect::<std::collections::HashSet<_>>() // Unique
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let mut series = Vec::with_capacity(series_ids.len());
-				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
-					let batch = series::Entity::find()
-						.select_only()
-						.columns(series::SeriesThumbSelect::columns())
-						.filter(series::Column::Id.is_in(chunk.to_vec()))
-						.into_model::<series::SeriesThumbSelect>()
-						.all(ctx.conn())
-						.await
-						.map_err(|e| JobError::InitFailed(e.to_string()))?;
-					series.extend(batch);
-				}
-
-				let library_ids = series
-					.iter()
-					.filter_map(|s| s.library_id.clone())
-					.collect::<std::collections::HashSet<_>>() // Unique
-					.into_iter()
-					.collect::<Vec<_>>();
+				let library_ids = vec![id.clone()];
 
 				ThumbnailGenerationInit {
 					media_ids,

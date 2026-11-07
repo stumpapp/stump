@@ -52,7 +52,7 @@ export default function BookOverviewScene() {
 					<BookOverviewDetails fragment={media} />
 				</div>
 
-				<BooksAfterCursor cursor={media.id} />
+				{media.seriesId && <BooksAfterCursor cursor={media.id} />}
 			</SceneContainer>
 
 			<BookInfoSheet

@@ -12,7 +12,7 @@ use crate::{
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{
-		media, series,
+		media,
 		smart_list::{self},
 	},
 	shared::enums::UserPermission,
@@ -93,10 +93,10 @@ impl SmartListsQuery {
 		let books_query =
 			build_books_query(user, smart_list.joiner, &deserialized_filters, None);
 
-		let ids: Vec<(String, Option<String>)> = books_query
+		let ids: Vec<(Option<String>, String)> = books_query
 			.select_only()
 			.column(media::Column::SeriesId)
-			.column(series::Column::LibraryId)
+			.column(media::Column::LibraryId)
 			.into_tuple()
 			.all(&txn)
 			.await?;
@@ -106,10 +106,10 @@ impl SmartListsQuery {
 		let mut matched_libraries: HashSet<String> = HashSet::new();
 
 		for (series_id, library_id) in ids {
-			matched_series.insert(series_id);
-			if let Some(library_id) = library_id {
-				matched_libraries.insert(library_id);
+			if let Some(series_id) = series_id {
+				matched_series.insert(series_id);
 			}
+			matched_libraries.insert(library_id);
 		}
 
 		txn.commit().await?;

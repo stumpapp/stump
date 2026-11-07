@@ -8,7 +8,7 @@ use crate::{
 	media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
 };
 use async_graphql::SimpleObject;
-use models::entity::{media, media_analysis, media_metadata, series};
+use models::entity::{media, media_analysis, media_metadata};
 use sea_orm::{prelude::*, QuerySelect};
 use serde::{Deserialize, Serialize};
 
@@ -103,8 +103,7 @@ impl JobLifecycle for AnalyzeMediaJob {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(media::MediaIdentSelect::columns())
-					.inner_join(series::Entity)
-					.filter(series::Column::LibraryId.eq(id))
+					.filter(media::Column::LibraryId.eq(id))
 					.into_model::<media::MediaIdentSelect>()
 					.all(ctx.conn())
 					.await

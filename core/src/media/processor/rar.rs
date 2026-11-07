@@ -1,3 +1,4 @@
+use models::shared::enums::OrganizationMode;
 use std::{
 	collections::HashMap,
 	fs::{self, create_dir_all, remove_dir_all, remove_file, File},
@@ -18,7 +19,7 @@ use crate::{
 		error::MediaProcessorError, zip::ZipProcessor, AnalyzedPage, GeneratedFileHashes,
 		MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
 	},
-	metadata::{utils::metadata_from_buf, ProcessedMediaMetadata},
+	metadata::{utils::comic_info_metadata, ProcessedMediaMetadata},
 };
 
 pub struct RarProcessor;
@@ -70,6 +71,7 @@ impl MediaProcessor for RarProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		let mut archive = process_archive(path)?;
 
@@ -89,7 +91,7 @@ impl MediaProcessor for RarProcessor {
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, _) = header.read()?;
 				let content_str = std::str::from_utf8(&data)?;
-				return Ok(metadata_from_buf(content_str));
+				return comic_info_metadata(content_str, organization_mode);
 			} else {
 				archive = header.skip()?;
 			}
@@ -137,7 +139,7 @@ impl MediaProcessor for RarProcessor {
 				let (data, rest) = header.read()?;
 				metadata = {
 					let content_str = std::str::from_utf8(&data)?;
-					metadata_from_buf(content_str)
+					comic_info_metadata(content_str, options.organization_mode)?
 				};
 				archive = rest;
 			} else {

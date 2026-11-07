@@ -10,8 +10,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, ConnectionTrait, EntityTrait, ExprTrait, Order,
-	QueryFilter, QueryOrder, QuerySelect,
+	prelude::*, sea_query::Query, ConnectionTrait, EntityTrait, QueryFilter, QueryOrder,
+	QuerySelect,
 };
 use tokio::{fs, task::spawn_blocking};
 
@@ -61,32 +61,24 @@ pub struct GenerateThumbnailOptions {
 
 pub async fn bump_media_thumbnail_fallbacks<C>(
 	conn: &C,
+	library_id: &str,
 	series_id: Option<&str>,
 ) -> Result<(), DbErr>
 where
 	C: ConnectionTrait,
 {
-	let Some(series_id) = series_id else {
-		return Ok(());
-	};
 	let updated_at = Some(DateTimeWithTimeZone::from(Utc::now()));
 
-	series::Entity::update_many()
-		.filter(series::Column::Id.eq(series_id))
-		.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
-		.exec(conn)
-		.await?;
+	if let Some(series_id) = series_id {
+		series::Entity::update_many()
+			.filter(series::Column::Id.eq(series_id))
+			.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
+			.exec(conn)
+			.await?;
+	}
 
 	library::Entity::update_many()
-		.filter(
-			library::Column::Id.in_subquery(
-				Query::select()
-					.column(series::Column::LibraryId)
-					.from(series::Entity)
-					.and_where(series::Column::Id.eq(series_id))
-					.to_owned(),
-			),
-		)
+		.filter(library::Column::Id.eq(library_id))
 		.col_expr(library::Column::UpdatedAt, Expr::value(updated_at))
 		.exec(conn)
 		.await?;
@@ -457,8 +449,8 @@ async fn generate_library_thumbnail(
 	let first_book = media::Entity::find()
 		.select_only()
 		.columns(media::MediaThumbSelect::columns())
-		.inner_join(series::Entity)
-		.filter(series::Column::LibraryId.eq(&library.id))
+		.left_join(series::Entity)
+		.filter(media::Column::LibraryId.eq(&library.id))
 		.order_by_asc(series::Column::Name)
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
@@ -534,9 +526,9 @@ pub async fn safely_generate_batch(
 		for (source_index, source) in chunk.iter().enumerate() {
 			let options = options.clone();
 			let path = match source {
-				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Book(book) => Some(book.path.clone()),
 				GenerateImageSource::Series(series) => series.path.clone(),
-				GenerateImageSource::Library(library) => library.path.clone(),
+				GenerateImageSource::Library(library) => Some(library.path.clone()),
 			};
 
 			let future = async move {
@@ -576,7 +568,7 @@ pub async fn safely_generate_batch(
 							"Failed to generate thumbnail: {:?}",
 							error.to_string()
 						))
-						.with_ctx(format!("Media path: {path}")),
+						.with_ctx(format!("Media path: {path:?}")),
 					);
 				},
 			}
@@ -730,19 +722,9 @@ async fn get_library_thumbnail_candidate(
 	ctx: &JobContext,
 ) -> Result<Option<Vec<u8>>, ThumbnailGenerateError> {
 	let first_book = media::Entity::find()
-		.filter(
-			media::Column::SeriesId.in_subquery(
-				Query::select()
-					.column(series::Column::Id)
-					.from(series::Entity)
-					.and_where(
-						Expr::col(series::Column::LibraryId).eq(library.id.clone()),
-					)
-					.order_by(series::Column::Name, Order::Asc)
-					.limit(1)
-					.to_owned(),
-			),
-		)
+		.left_join(series::Entity)
+		.filter(media::Column::LibraryId.eq(&library.id))
+		.order_by_asc(series::Column::Name)
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
 		.one(ctx.conn())
@@ -843,9 +825,9 @@ pub async fn safely_generate_placeholder_batch(
 		for (source_index, source) in chunk.iter().enumerate() {
 			let force_regen = force_regen;
 			let path = match source {
-				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Book(book) => Some(book.path.clone()),
 				GenerateImageSource::Series(series) => series.path.clone(),
-				GenerateImageSource::Library(library) => library.path.clone(),
+				GenerateImageSource::Library(library) => Some(library.path.clone()),
 			};
 
 			let future = async move {
@@ -884,7 +866,7 @@ pub async fn safely_generate_placeholder_batch(
 								"Failed to generate placeholder metadata: {:?}",
 								error.to_string()
 							))
-							.with_ctx(format!("Media path: {path}")),
+							.with_ctx(format!("Media path: {path:?}")),
 						);
 						output.skipped_entities += 1;
 					},

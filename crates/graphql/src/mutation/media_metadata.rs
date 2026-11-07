@@ -12,9 +12,12 @@ use models::{
 	entity::{media, media_metadata, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, TransactionTrait};
 use std::collections::HashMap;
-use stump_core::metadata::provider::ProviderClientCache;
+use stump_core::metadata::{
+	membership::{remove_series_thumbnails, sync_media_membership},
+	provider::ProviderClientCache,
+};
 
 #[derive(Default)]
 pub struct MediaMetadataMutation;
@@ -38,19 +41,25 @@ impl MediaMetadataMutation {
 			.await?
 			.ok_or("Media not found")?;
 
+		let txn = conn.begin().await?;
 		let updated_metadata = if let Some(existing) = model.metadata {
 			let mut active_model = input.into_active_model();
 			active_model.id = Set(existing.id);
 			active_model.media_id = Set(Some(model.media.id.clone()));
-			active_model.update(conn).await?
+			active_model.update(&txn).await?
 		} else {
 			let mut active_model = input.into_active_model();
 			active_model.media_id = Set(Some(model.media.id.clone()));
-			active_model.insert(conn).await?
+			active_model.insert(&txn).await?
 		};
+		let (book, thumbnails) =
+			sync_media_membership(&txn, model.media, updated_metadata.series.clone())
+				.await?;
+		txn.commit().await?;
+		remove_series_thumbnails(thumbnails).await;
 
 		let model = media::ModelWithMetadata {
-			media: model.media,
+			media: book,
 			metadata: Some(updated_metadata),
 		};
 

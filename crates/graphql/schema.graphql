@@ -508,13 +508,13 @@ type CreatedManySeries {
 
 type CreatedMedia {
 	id: String!
-	seriesId: String!
+	seriesId: String
 	libraryId: String!
 }
 
 type CreatedOrUpdatedManyMedia {
 	count: Int!
-	seriesId: String!
+	seriesId: String
 	libraryId: String!
 }
 
@@ -1143,6 +1143,7 @@ type LibraryConfig {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
+	organizationMode: OrganizationMode!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
 	libraryType: LibraryType!
@@ -1159,6 +1160,7 @@ type LibraryConfig {
 }
 
 input LibraryConfigInput {
+	organizationMode: OrganizationMode
 	convertRarToZip: Boolean!
 	hardDeleteConversions: Boolean!
 	generateFileHashes: Boolean!
@@ -1396,7 +1398,7 @@ type Media {
 	"The tags associated with the media"
 	tags: [Tag!]!
 	"The series the media belongs to"
-	series: Series!
+	series: Series
 	libraryId: String!
 	library: Library!
 	libraryConfig: LibraryConfig!
@@ -1479,6 +1481,8 @@ input MediaFilterInput {
 	createdAt: NumericFilterDateTime = null
 	updatedAt: NumericFilterDateTime = null
 	seriesId: FieldFilterString = null
+	libraryId: FieldFilterString = null
+	libraryType: ComputedFilterLibraryType = null
 	status: FieldFilterFileStatus = null
 	path: FieldFilterString = null
 	pages: NumericFilterI32 = null
@@ -1904,7 +1908,8 @@ input MetadataRetryConfigInput {
 
 type MissingEntity {
 	id: String!
-	path: String!
+	name: String!
+	path: String
 	type: MissingEntityType!
 }
 
@@ -2405,6 +2410,11 @@ enum OrderDirection {
 	DESC
 }
 
+enum OrganizationMode {
+	FILESYSTEM
+	METADATA
+}
+
 input PageBasedThumbnailInput {
 	"The page to pull inside the media file for generating the thumbnail"
 	page: Int!
@@ -2634,7 +2644,7 @@ type Query {
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
 	mediaDiskUsage: Int!
-	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, tags: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, libraryId: null, libraryType: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, tags: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	"Returns the available alphabet for all media in the server"
@@ -3125,7 +3135,8 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	path: String!
+	path: String
+	kind: SeriesKind!
 	status: FileStatus!
 	isOneshot: Boolean!
 	thumbnailMeta: ImageMetadata
@@ -3142,6 +3153,14 @@ type Series {
 	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!
+	"""
+	Thumbnails for a stacked series card, in order of:
+	
+	1. the series thumbnail (e.g., if manually set)
+	2. the first `take` amount of books, excluding the one which the thumbnail
+	was derived from
+	"""
+	stackedThumbnails(take: Int! = 3): [ImageRef!]!
 	mediaCount: Int!
 	mediaAlphabet: JSONObject!
 	upNext(take: Int! = 1, cursor: String): [Media!]!
@@ -3170,6 +3189,11 @@ input SeriesFilterInput {
 	_and: [SeriesFilterInput!] = null
 	_not: [SeriesFilterInput!] = null
 	_or: [SeriesFilterInput!] = null
+}
+
+enum SeriesKind {
+	FILESYSTEM
+	VIRTUAL
 }
 
 type SeriesMetadata {
@@ -3296,6 +3320,7 @@ enum SeriesModelOrdering {
 	NAME
 	DESCRIPTION
 	PATH
+	KIND
 	STATUS
 	IS_ONESHOT
 	THUMBNAIL_META
@@ -3407,7 +3432,7 @@ type SmartListGrouped {
 }
 
 type SmartListGroupedItem {
-	entity: SmartListItemEntity!
+	entity: SmartListItemEntity
 	books: [Media!]!
 }
 

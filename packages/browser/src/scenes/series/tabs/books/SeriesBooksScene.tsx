@@ -1,6 +1,6 @@
 import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
-import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
+import { InterfaceLayout, MediaFilterInput, SeriesKind } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
@@ -44,7 +44,7 @@ export default function SeriesBooksSceneContainer() {
 
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
-	const layoutKey = `library-${series.library.id}-seriesBooks`
+	const layoutKey = `library-${series.library.id}-${series.kind === SeriesKind.Virtual ? 'virtual-' : ''}seriesBooks`
 	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
 		useBooksLayout(
 			layoutKey,

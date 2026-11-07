@@ -23,7 +23,7 @@ pub struct DiscoveredMissingLibrary {
 #[serde(rename_all = "camelCase")]
 pub struct CreatedMedia {
 	pub id: String,
-	pub series_id: String,
+	pub series_id: Option<String>,
 	pub library_id: String,
 }
 
@@ -38,7 +38,7 @@ pub struct CreatedManySeries {
 #[serde(rename_all = "camelCase")]
 pub struct CreatedOrUpdatedManyMedia {
 	pub count: u64,
-	pub series_id: String,
+	pub series_id: Option<String>,
 	pub library_id: String,
 }
 

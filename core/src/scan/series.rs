@@ -169,6 +169,7 @@ impl JobLifecycle for SeriesScanJob {
 				options: self.options,
 				dir_mtimes: HashMap::new(),
 				series_id: Some(self.id.clone()),
+				library_id: None,
 				oneshots_directory: None, // not needed for series-level task
 			},
 		)
@@ -222,9 +223,14 @@ impl JobLifecycle for SeriesScanJob {
 		let image_options = self
 			.config
 			.as_ref()
-			.and_then(|o| o.thumbnail_config.clone());
+			.and_then(|config| config.thumbnail_config.clone());
 		if image_options.is_none() && (did_create || did_update) {
-			bump_media_thumbnail_fallbacks(ctx.conn(), Some(&self.id)).await?;
+			if let Some(library_id) = self.library_id() {
+				bump_media_thumbnail_fallbacks(ctx.conn(), &library_id, Some(&self.id))
+					.await?;
+			} else {
+				tracing::warn!(series_id = %self.id, "Skipping thumbnail fallback update: library owner missing from series scan");
+			}
 		}
 
 		ctx.emit_event(CoreEvent::JobOutput(event::JobOutput {
@@ -263,7 +269,7 @@ impl JobLifecycle for SeriesScanJob {
 			if let Err(e) = ctx
 				.enqueue(StumpJob::placeholder_generation(
 					PlaceholderGenerationJobConfig::new(
-						PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+						PlaceholderGenerationJobScope::BooksInSeries(self.id.clone()),
 						false,
 					),
 				))
@@ -291,13 +297,14 @@ impl JobLifecycle for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_restored_media(ctx, &self.id, ids).await;
+				} = handle_restored_media(ctx, media::Column::SeriesId.eq(&self.id), ids)
+					.await;
 				if let Some(library_id) = self.library_id() {
 					ctx.report_progress(JobProgress::msg("Restored media entities"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id: self.id.clone(),
+							series_id: Some(self.id.clone()),
 							library_id,
 						},
 					));
@@ -311,13 +318,14 @@ impl JobLifecycle for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_missing_media(ctx, &self.id, paths).await;
+				} = handle_missing_media(ctx, media::Column::SeriesId.eq(&self.id), paths)
+					.await;
 				if let Some(library_id) = self.library_id() {
 					ctx.report_progress(JobProgress::msg("Handled missing media"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id: self.id.clone(),
+							series_id: Some(self.id.clone()),
 							library_id,
 						},
 					));
@@ -335,7 +343,7 @@ impl JobLifecycle for SeriesScanJob {
 					..
 				} = build_and_insert_media(
 					MediaBuildOperation {
-						series_id: self.id.clone(),
+						series_id: Some(self.id.clone()),
 						library_config: self.config.clone().ok_or(
 							JobError::TaskFailed(
 								"Library configuration is missing".to_string(),
@@ -351,7 +359,7 @@ impl JobLifecycle for SeriesScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: created_media,
-							series_id: self.id.clone(),
+							series_id: Some(self.id.clone()),
 							library_id,
 						},
 					));
@@ -369,7 +377,7 @@ impl JobLifecycle for SeriesScanJob {
 					..
 				} = visit_and_update_media(
 					MediaBuildOperation {
-						series_id: self.id.clone(),
+						series_id: Some(self.id.clone()),
 						library_config: self.config.clone().ok_or(
 							JobError::TaskFailed(
 								"Library configuration is missing".to_string(),
@@ -385,7 +393,7 @@ impl JobLifecycle for SeriesScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id: self.id.clone(),
+							series_id: Some(self.id.clone()),
 							library_id,
 						},
 					));
@@ -442,4 +450,63 @@ async fn handle_missing_series(
 	tracing::trace!(?affected_media, "Marked media as missing");
 
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use std::sync::Arc;
+
+	use ::tests::{db::test_database, fake_data};
+	use apalis::prelude::MemoryStorage;
+	use models::entity::job;
+	use sea_orm::{ConnectionTrait, DbBackend, Schema};
+	use tokio::sync::broadcast;
+
+	use super::*;
+	use crate::{config::StumpConfig, job::ApalisWorkerState};
+
+	#[tokio::test]
+	async fn test_finalize_without_library_config_or_owner() {
+		let db = test_database().await;
+		let schema = Schema::new(DbBackend::Sqlite);
+		db.execute(&schema.create_table_from_entity(job::Entity))
+			.await
+			.unwrap();
+		let library = fake_data::Library::default().insert(&db).await;
+		let mut config = library
+			.find_related(library_config::Entity)
+			.one(&db)
+			.await
+			.unwrap()
+			.unwrap();
+		config.library_id = None;
+		let (events, mut receiver) = broadcast::channel(4);
+		let state = Arc::new(ApalisWorkerState::new(
+			Arc::new(db),
+			Arc::new(StumpConfig::debug()),
+			events,
+			MemoryStorage::new(),
+		));
+		let ctx = JobContext::new(
+			state,
+			"scan-job".into(),
+			&StumpJob::series_scan("series".into(), "/series".into(), None),
+		)
+		.await
+		.unwrap();
+
+		for config in [None, Some(config)] {
+			let mut scan = SeriesScanJob::new("series".into(), "/series".into(), None);
+			scan.config = config;
+			let output = SeriesScanOutput {
+				created_media: 1,
+				..Default::default()
+			};
+			scan.finalize(&ctx, &output).await.unwrap();
+			assert!(
+				matches!(receiver.try_recv().unwrap(), CoreEvent::JobOutput(event)
+				if event.id == "scan-job")
+			);
+		}
+	}
 }

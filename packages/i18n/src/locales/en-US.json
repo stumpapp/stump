@@ -3546,6 +3546,13 @@
         "title": "Time to Finish",
         "books_one": "Based on {{count}} book",
         "books_other": "Based on {{count}} books"
+      },
+      "rangeLabel": "Stats Range",
+      "loadError": "Failed to Load Reading Stats",
+      "emptyState": {
+        "title": "No Reading Activity",
+        "descriptionNoReadingHistory": "Your stats will show up here once you start reading. Open a book to get started",
+        "descriptionNoActivityInRange": "You didn't read anything in this range. Try another range"
       }
     },
     "errors": {

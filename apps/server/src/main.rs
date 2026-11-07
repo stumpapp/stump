@@ -1,3 +1,5 @@
+rust_i18n::i18n!("../../packages/i18n/src/locales", fallback = "en-US");
+
 use cli::{handle_command, Cli, Parser};
 use errors::EntryError;
 use stump_core::{

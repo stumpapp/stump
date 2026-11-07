@@ -4,8 +4,8 @@ import { graphql } from '@stump/graphql'
 import { Info } from 'lucide-react'
 import { useCallback } from 'react'
 
-import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/components/library/context'
+import { useTranslate } from '@/hooks/useTranslate'
 
 const mutation = graphql(`
 	mutation AnalyzeLibraryMedia($id: ID!) {

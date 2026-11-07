@@ -327,9 +327,12 @@
 			"pagesRead_other": "{{count}} Seiten gelesen",
 			"pageFragment": "Seite {{page}}",
 			"sessionSentence": {
-				"pageRange": "Du hast {{timeRange}} damit verbracht, von {{startPageFragment}} bis {{endPageFragment}} zu lesen."
+				"pageRange": "Du hast {{timeRange}} damit verbracht, von {{startPageFragment}} bis {{endPageFragment}} zu lesen.",
+				"singlePage": ""
 			},
-			"closedBookSentence": "Buch geschlossen bei {{pageFragment}}"
+			"closedBookSentence": "Buch geschlossen bei {{pageFragment}}",
+			"bookmarkSentence": "",
+			"openedBookSentence": ""
 		}
 	},
 	"webApp": {
@@ -761,13 +764,15 @@
 					"filesystemPattern": {
 						"label": "Bibliotheksmuster",
 						"COLLECTION_BASED": {
-							"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Reihe"
+							"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Reihe",
+							"label": ""
 						},
 						"SERIES_BASED": {
 							"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Reihe",
 							"label": "Rekursive Reihen"
 						}
-					}
+					},
+					"description": ""
 				},
 				"viewOptions": {
 					"defaultTab": {
@@ -1393,7 +1398,8 @@
 				"buttons": {
 					"confirm": "Liste erstellen"
 				}
-			}
+			},
+			"failedToCreateSmartList": ""
 		},
 		"createOrUpdateApiKey": {
 			"validation": {
@@ -2921,18 +2927,30 @@
 			"unableToOpen": "Kann nicht geöffnet werden",
 			"noSubdirectories": "Keine Unterordner",
 			"inputPlaceholder": "/weg/zum/ordner",
-			"showHiddenFiles": "Zeige Versteckte"
+			"showHiddenFiles": "Zeige Versteckte",
+			"goToParent": "",
+			"goToPath": ""
 		},
 		"thumbnailManagement": {
 			"changeThumbnail": {
-				"label": "Vorschaubild verändern"
+				"label": "Vorschaubild verändern",
+				"descriptionLibrary": ""
 			},
 			"processColors": {
-				"description": "Die dominante Farbe aus den Vorschaubildern für die Ästhetik durch die ganze App"
+				"description": "Die dominante Farbe aus den Vorschaubildern für die Ästhetik durch die ganze App",
+				"label": ""
 			},
 			"generate": "Generiere",
 			"everything": "Alle",
-			"missingOnly": "Nur Fehlende"
+			"missingOnly": "Nur Fehlende",
+			"regenerateThumbnails": {
+				"label": "",
+				"description": ""
+			},
+			"deleteThumbnails": {
+				"descriptionLibrary": "",
+				"label": ""
+			}
 		},
 		"steppedForm": {
 			"sheetTitle": "Schritte"
@@ -3078,8 +3096,48 @@
 			"friendlyName": "Freundlicher Name",
 			"groupBy": "Gruppieren nach",
 			"notFullyImplemented": {
-				"label": "Nicht vollständig implementiert"
-			}
+				"label": "Nicht vollständig implementiert",
+				"description": ""
+			},
+			"thisActionCannotBeUndone": "",
+			"thumbnail": "",
+			"reading": "",
+			"readLess": "",
+			"pagesCount_one": "",
+			"pagesCount_other": "",
+			"next": "",
+			"output": "",
+			"returnHome": "",
+			"users_one": "",
+			"users_other": "",
+			"tryAgain": "",
+			"less": "",
+			"time": {
+				"dateAndTime": "",
+				"dateRange": "",
+				"month": "",
+				"daysCount_one": "",
+				"daysCount_other": "",
+				"day": ""
+			},
+			"modifiedOnDisk": "",
+			"overview": "",
+			"truncatedText": "",
+			"readthroughs_one": "",
+			"readthroughs_other": "",
+			"members_one": "",
+			"members_other": "",
+			"management": "",
+			"more": "",
+			"presentTime": "",
+			"invalidUrl": "",
+			"path": "",
+			"hash": "",
+			"lastFinished": "",
+			"goForward": "",
+			"koreaderHash": "",
+			"run": "",
+			"rename": ""
 		},
 		"libraryType": {
 			"BOOK": "Bücher",
@@ -3140,7 +3198,10 @@
 			"coverArtists": "Cover-Künstler",
 			"links": "Links",
 			"year": "Jahr",
-			"size": "Größe"
+			"size": "Größe",
+			"published": "",
+			"colorist": "",
+			"genre": ""
 		},
 		"readerSettings": {
 			"title": "Bild-Readereinstellungen",
@@ -3384,7 +3445,8 @@
 			"deleteReadHistory": {
 				"label": "Leseverlauf löschen",
 				"confirmation": "Bist du dir sicher, dass du den Leseverlauf für {{bookTitle}} löschen möchtest?",
-				"failure": "Fehler beim Löschen des Leseverlaufs"
+				"failure": "Fehler beim Löschen des Leseverlaufs",
+				"disclaimer": ""
 			},
 			"deleteBook": {
 				"label": "Buch löschen",
@@ -3396,10 +3458,15 @@
 			},
 			"goToSeries": "Gehe zur Serie",
 			"seeDetails": "Details anzeigen",
-			"goToLibrary": "Geh zur Bibliothek"
+			"goToLibrary": "Geh zur Bibliothek",
+			"analyze": "",
+			"readFromBeginning": "",
+			"openNativePdf": "",
+			"readIncognito": ""
 		},
 		"libraryActions": {
-			"scan": "Scannen"
+			"scan": "Scannen",
+			"scanAll": ""
 		},
 		"sorting": {
 			"labelEllipsis": "Sortieren nach...",
@@ -3409,7 +3476,17 @@
 				"YEAR": "Jahr Veröffentlicht",
 				"NAME": "Name",
 				"ADDED_AT": "Datum Hinzugefügt",
-				"SERIES": "Reihen"
+				"SERIES": "Reihen",
+				"LIBRARY_ID": "",
+				"DESCRIPTION": "",
+				"PAGES": "",
+				"SIZE": "",
+				"MODIFIED_AT": "",
+				"SERIES_ID": "",
+				"VOLUME": "",
+				"EXTENSION": "",
+				"PATH": "",
+				"STATUS": ""
 			},
 			"sortDirection": {
 				"ASC": "Aufsteigend",
@@ -3426,7 +3503,14 @@
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",
 				"DESC": "10 → 1"
-			}
+			},
+			"fieldGroups": {
+				"metadata": "",
+				"book": ""
+			},
+			"label": "",
+			"placeholder": "",
+			"sortOrderLabel": ""
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -3450,6 +3534,10 @@
 				"reconnected": "Verbindung zum Server wiederhergestellt! Weiterleiten...",
 				"reconnectionFailed": "Etwas ist schiefgelaufen!",
 				"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist"
+			},
+			"bookNotFound": {
+				"title": "",
+				"description": ""
 			}
 		},
 		"emptyState": {
@@ -3571,7 +3659,8 @@
 				"description": "Grundlegende Informationen über deine Stump Serverinstanz",
 				"build": "Build",
 				"nonStableChannel": {
-					"title": "Du führst eine instabile Version von Stump aus"
+					"title": "Du führst eine instabile Version von Stump aus",
+					"description": ""
 				},
 				"version": "Version",
 				"exactCommit": "Exakter Commit",
@@ -3583,7 +3672,8 @@
 			},
 			"changelog": {
 				"label": "Änderungsprotokoll",
-				"description": "Sehe, was sich in den neuesten Versionen von Stump geändert hat"
+				"description": "Sehe, was sich in den neuesten Versionen von Stump geändert hat",
+				"fetchFailed": ""
 			},
 			"helpfulLinks": {
 				"title": "Hilfreiche Links",
@@ -3592,7 +3682,88 @@
 					"documentation": "Dokumentation",
 					"changelog": "Änderungsprotokoll"
 				}
-			}
+			},
+			"title": ""
+		},
+		"readingTimeline": {
+			"readthroughDateRange": "",
+			"startOfReadthrough": "",
+			"deleteSession": {
+				"label": "",
+				"finishedConfirm": "",
+				"dnfedConfirm": "",
+				"normalConfirm": "",
+				"failedToDelete": ""
+			},
+			"title": "",
+			"extendSession": {
+				"label": "",
+				"failedToExtend": "",
+				"description": ""
+			},
+			"emptyState": {
+				"label": "",
+				"description": ""
+			},
+			"feedType": {
+				"events": "",
+				"sessions": ""
+			},
+			"goToSession": ""
+		},
+		"readingStats": {
+			"dayOfWeek": {
+				"title": "",
+				"description": ""
+			},
+			"range": {
+				"year": "",
+				"week": "",
+				"lifetime": "",
+				"month": ""
+			},
+			"emptyState": {
+				"title": "",
+				"descriptionNoReadingHistory": "",
+				"descriptionNoActivityInRange": ""
+			},
+			"avgPerActiveDay": "",
+			"loadError": "",
+			"streaks": {
+				"current": "",
+				"longest": ""
+			},
+			"booksFinished": "",
+			"timeToFinish": {
+				"title": "",
+				"books_one": "",
+				"books_other": ""
+			},
+			"dailyActivity": "",
+			"activeDays_one": "",
+			"activeDays_other": "",
+			"avgPerSession": "",
+			"title": "",
+			"rangeLabel": ""
+		},
+		"serverStatus": {
+			"reachable": "",
+			"unreachable": "",
+			"current": "",
+			"checking": ""
+		},
+		"readingDevice": {
+			"placeholder": {
+				"ios": "",
+				"android": "",
+				"macos": ""
+			},
+			"description": "",
+			"device": ""
+		},
+		"readingJournal": {
+			"editorPlaceholder": "",
+			"failedToSaveEntry": ""
 		}
 	}
 }

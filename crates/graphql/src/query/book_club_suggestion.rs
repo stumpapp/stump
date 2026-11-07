@@ -1,12 +1,13 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{book_club, book_club_book_suggestion},
-	shared::book_club::BookClubSuggestionStatus,
+	shared::{book_club::BookClubSuggestionStatus, enums::UserPermission},
 };
 use sea_orm::{prelude::*, ColumnTrait, QueryFilter, QueryOrder, QueryTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	object::book_club_book_suggestion::BookClubBookSuggestion,
 };
 
@@ -16,6 +17,7 @@ pub struct BookClubSuggestionQuery;
 #[Object]
 impl BookClubSuggestionQuery {
 	/// Get all suggestions for a book club
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_suggestions(
 		&self,
 		ctx: &Context<'_>,
@@ -48,6 +50,7 @@ impl BookClubSuggestionQuery {
 	}
 
 	/// Get a single suggestion by ID
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_suggestion(
 		&self,
 		ctx: &Context<'_>,

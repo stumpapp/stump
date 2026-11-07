@@ -6,12 +6,13 @@ use models::{
 		book_club_discussion_message_reaction, book_club_member, custom_emoji,
 		user::AuthUser,
 	},
-	shared::book_club::BookClubMemberRole,
+	shared::{book_club::BookClubMemberRole, enums::UserPermission},
 };
 use sea_orm::{prelude::*, ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	input::book_club::{BookClubDiscussionInput, EditMessageInput, SendMessageInput},
 	object::{
 		book_club_discussion::BookClubDiscussion,
@@ -25,6 +26,7 @@ pub struct BookClubDiscussionMutation;
 #[Object]
 impl BookClubDiscussionMutation {
 	/// Send a message in a discussion
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn send_message(
 		&self,
 		ctx: &Context<'_>,
@@ -101,6 +103,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Edit your own message
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn edit_message(
 		&self,
 		ctx: &Context<'_>,
@@ -151,6 +154,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Delete (soft delete) your own message
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn delete_message(
 		&self,
 		ctx: &Context<'_>,
@@ -197,6 +201,7 @@ impl BookClubDiscussionMutation {
 	/// Toggle a reaction on a message
 	///
 	/// Returns true if the reaction was added, false if removed
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn toggle_reaction(
 		&self,
 		ctx: &Context<'_>,
@@ -284,6 +289,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Lock or unlock a discussion (Moderator+)
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn lock_discussion(
 		&self,
 		ctx: &Context<'_>,
@@ -315,6 +321,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Pin or unpin a message (Moderator+)
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn pin_message(
 		&self,
 		ctx: &Context<'_>,
@@ -356,6 +363,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Manually create a discussion for a book
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn create_discussion(
 		&self,
 		ctx: &Context<'_>,
@@ -408,6 +416,7 @@ impl BookClubDiscussionMutation {
 	}
 
 	/// Archive or unarchive a discussion (Moderator+)
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn archive_discussion(
 		&self,
 		ctx: &Context<'_>,

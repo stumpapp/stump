@@ -6538,6 +6538,32 @@ export type UpdateReadiumEpubProgressMutationVariables = Exact<{
 
 export type UpdateReadiumEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
 
+export type ReadingStatsDailyActivityFragment = { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, dailyActivity: Array<{ __typename?: 'DailyActivity', date: any, totalSeconds: number, sessionCount: number }> } & { ' $fragmentName'?: 'ReadingStatsDailyActivityFragment' };
+
+export type ReadingStatsRangedQueryVariables = Exact<{
+  range?: InputMaybe<DateRangeInput>;
+}>;
+
+
+export type ReadingStatsRangedQuery = { __typename?: 'Query', myReadingStats: (
+    { __typename?: 'ReadingStats', range: { __typename?: 'ResolvedDateRange', start?: any | null, end: any }, totals: { __typename?: 'ReadingTotals', totalSeconds: number, sessionCount: number, finishedCount: number, activeDayCount: number } }
+    & { ' $fragmentRefs'?: { 'ReadingStatsDailyActivityFragment': ReadingStatsDailyActivityFragment;'ReadingStatsWeekdayFragment': ReadingStatsWeekdayFragment;'ReadingStatsTimeToFinishFragment': ReadingStatsTimeToFinishFragment } }
+  ) };
+
+export type ReadingStatsHasReadingHistoryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadingStatsHasReadingHistoryQuery = { __typename?: 'Query', myReadingStats: { __typename?: 'ReadingStats', totals: { __typename?: 'ReadingTotals', sessionCount: number } } };
+
+export type ReadingStatsStreaksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadingStatsStreaksQuery = { __typename?: 'Query', myReadingStreaks: { __typename?: 'ReadingStreaks', currentDays: number, longestDays: number } };
+
+export type ReadingStatsTimeToFinishFragment = { __typename?: 'ReadingStats', timeToFinish: Array<{ __typename?: 'TimeToFinishStat', libraryType: LibraryType, sampleSize: number, medianActiveSeconds: number }> } & { ' $fragmentName'?: 'ReadingStatsTimeToFinishFragment' };
+
+export type ReadingStatsWeekdayFragment = { __typename?: 'ReadingStats', dayOfWeek: Array<{ __typename?: 'WeekdayActivity', isoWeekday: number, averageSeconds: number }> } & { ' $fragmentName'?: 'ReadingStatsWeekdayFragment' };
+
 export type SeriesBookGridQueryVariables = Exact<{
   id: Scalars['String']['input'];
   pagination?: InputMaybe<Pagination>;
@@ -9028,6 +9054,36 @@ export const LibraryOptionsMenuFragmentDoc = new TypedDocumentString(`
   name
 }
     `, {"fragmentName":"LibraryOptionsMenu"}) as unknown as TypedDocumentString<LibraryOptionsMenuFragment, unknown>;
+export const ReadingStatsDailyActivityFragmentDoc = new TypedDocumentString(`
+    fragment ReadingStatsDailyActivity on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+    `, {"fragmentName":"ReadingStatsDailyActivity"}) as unknown as TypedDocumentString<ReadingStatsDailyActivityFragment, unknown>;
+export const ReadingStatsTimeToFinishFragmentDoc = new TypedDocumentString(`
+    fragment ReadingStatsTimeToFinish on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+    `, {"fragmentName":"ReadingStatsTimeToFinish"}) as unknown as TypedDocumentString<ReadingStatsTimeToFinishFragment, unknown>;
+export const ReadingStatsWeekdayFragmentDoc = new TypedDocumentString(`
+    fragment ReadingStatsWeekday on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}
+    `, {"fragmentName":"ReadingStatsWeekday"}) as unknown as TypedDocumentString<ReadingStatsWeekdayFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -13177,6 +13233,65 @@ export const UpdateReadiumEpubProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateReadiumEpubProgressMutation, UpdateReadiumEpubProgressMutationVariables>;
+export const ReadingStatsRangedDocument = new TypedDocumentString(`
+    query ReadingStatsRanged($range: DateRangeInput) {
+  myReadingStats(range: $range) {
+    range {
+      start
+      end
+    }
+    totals {
+      totalSeconds
+      sessionCount
+      finishedCount
+      activeDayCount
+    }
+    ...ReadingStatsDailyActivity
+    ...ReadingStatsWeekday
+    ...ReadingStatsTimeToFinish
+  }
+}
+    fragment ReadingStatsDailyActivity on ReadingStats {
+  range {
+    start
+    end
+  }
+  dailyActivity {
+    date
+    totalSeconds
+    sessionCount
+  }
+}
+fragment ReadingStatsTimeToFinish on ReadingStats {
+  timeToFinish {
+    libraryType
+    sampleSize
+    medianActiveSeconds
+  }
+}
+fragment ReadingStatsWeekday on ReadingStats {
+  dayOfWeek {
+    isoWeekday
+    averageSeconds
+  }
+}`) as unknown as TypedDocumentString<ReadingStatsRangedQuery, ReadingStatsRangedQueryVariables>;
+export const ReadingStatsHasReadingHistoryDocument = new TypedDocumentString(`
+    query ReadingStatsHasReadingHistory {
+  myReadingStats(range: {}) {
+    totals {
+      sessionCount
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ReadingStatsHasReadingHistoryQuery, ReadingStatsHasReadingHistoryQueryVariables>;
+export const ReadingStatsStreaksDocument = new TypedDocumentString(`
+    query ReadingStatsStreaks {
+  myReadingStreaks {
+    currentDays
+    longestDays
+  }
+}
+    `) as unknown as TypedDocumentString<ReadingStatsStreaksQuery, ReadingStatsStreaksQueryVariables>;
 export const SeriesBookGridDocument = new TypedDocumentString(`
     query SeriesBookGrid($id: String!, $pagination: Pagination) {
   media(filter: {seriesId: {eq: $id}}, pagination: $pagination) {

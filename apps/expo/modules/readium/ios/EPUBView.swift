@@ -1,6 +1,4 @@
 import ExpoModulesCore
-import ReadiumAdapterGCDWebServer
-import ReadiumInternal
 import ReadiumNavigator
 import ReadiumShared
 import WebKit
@@ -477,9 +475,6 @@ public class EPUBView: ExpoView {
                     readiumCSSRSProperties: CSSRSProperties(
                         maxLineLength: CSSRemLength(200)
                     )
-                ),
-                httpServer: GCDHTTPServer(
-                    assetRetriever: BookService.instance.assetRetriever
                 )
             )
 
@@ -547,7 +542,6 @@ public class EPUBView: ExpoView {
         isInitialized = false
         totalPositions = 0
 
-        // Remove publication from cache
         if let bookId = props?.bookId {
             Task { await BookService.instance.closePublication(for: bookId) }
         }
@@ -581,8 +575,8 @@ public class EPUBView: ExpoView {
                 "chapterTitle": currentLocator.title ?? "",
                 "href": currentLocator.href.string,
                 "title": encodeIfNotNil(currentLocator.title),
-                "locations": encodeIfNotEmpty(currentLocator.locations.json),
-                "text": encodeIfNotEmpty(currentLocator.text.json),
+                "locations": encodeIfNotEmpty(currentLocator.locations.jsonObject),
+                "text": encodeIfNotEmpty(currentLocator.text.jsonObject),
                 "type": encodeIfNotEmpty(currentLocator.mediaType.string),
             ]))
     }
@@ -692,7 +686,7 @@ public class EPUBView: ExpoView {
         }
 
         var result: [String: Any] = [
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
         ]
 
         if let frame = selection.frame {
@@ -829,6 +823,32 @@ public class EPUBView: ExpoView {
 }
 
 extension EPUBView: EPUBNavigatorDelegate {
+    // Note: there was not a lot of docs on this, so i actually wound up using storyteller
+    // as a reference here. they don't quite do this exactly from what i could see, but
+    // they have a few other instances where they inject via `evaluateJavascript`:
+    // https://gitlab.com/storyteller-platform/storyteller/-/blob/main/applications/mobile/modules/readium/ios/EPUBView.swift?ref_type=heads#L1426
+
+    /// injects a custom script into the navigator to ensure text content within the
+    // rendered content is properly wrapped, so really absurdly-long words don't bleed
+    // into other pages
+    public func navigator(
+        _: EPUBNavigatorViewController,
+        setupUserScripts userContentController: WKUserContentController
+    ) {
+        let source = """
+        (function() {
+          if (document.getElementById('stump-long-word-wrap')) return;
+          var style = document.createElement('style');
+          style.id = 'stump-long-word-wrap';
+          style.textContent = 'html, html * { overflow-wrap: break-word !important; }';
+          (document.head || document.documentElement).appendChild(style);
+        })();
+        """
+        userContentController.addUserScript(
+            WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        )
+    }
+
     public func navigatorContentInset(_: VisualNavigator) -> UIEdgeInsets? {
         return .zero
     }
@@ -849,8 +869,8 @@ extension EPUBView: EPUBNavigatorDelegate {
                     "chapterTitle": locator.title ?? "",
                     "href": locator.href.string,
                     "title": encodeIfNotNil(locator.title),
-                    "locations": encodeIfNotEmpty(locator.locations.json),
-                    "text": encodeIfNotEmpty(locator.text.json),
+                    "locations": encodeIfNotEmpty(locator.locations.jsonObject),
+                    "text": encodeIfNotEmpty(locator.text.jsonObject),
                     "type": encodeIfNotEmpty(locator.mediaType.string),
                 ]))
         }
@@ -893,7 +913,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onHighlightRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 
@@ -908,7 +928,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onNoteRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 

@@ -1,12 +1,13 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{book_club_invitation, book_club_member, user::AuthUser},
-	shared::book_club::BookClubMemberRole,
+	shared::{book_club::BookClubMemberRole, enums::UserPermission},
 };
 use sea_orm::{prelude::*, Set};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	input::book_club::{
 		BookClubInvitationInput, BookClubInvitationResponseInput,
 		BookClubInvitationResponseValidator, BookClubMemberInput,
@@ -20,6 +21,7 @@ pub struct BookClubInvitationMutation;
 
 #[Object]
 impl BookClubInvitationMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn create_book_club_invitation(
 		&self,
 		ctx: &Context<'_>,
@@ -38,6 +40,7 @@ impl BookClubInvitationMutation {
 		Ok(created_invitation.into())
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn respond_to_book_club_invitation(
 		&self,
 		ctx: &Context<'_>,

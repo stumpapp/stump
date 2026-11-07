@@ -18,7 +18,7 @@ export default function withCoreLibraryDesugaring(config: ExpoConfig) {
 		const dependenciesPivot = dependenciesIndex + dependenciesPattern.length + 1
 		config.modResults.contents =
 			config.modResults.contents.slice(0, dependenciesPivot) +
-			'   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")\n\n ' +
+			'   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")\n\n ' +
 			config.modResults.contents.slice(dependenciesPivot)
 
 		return config

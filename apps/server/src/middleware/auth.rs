@@ -15,16 +15,13 @@ use models::{
 		api_key::{self, APIKeyWithUser},
 		user::{self, AuthUser},
 	},
-	shared::{
-		api_key::{APIKeyPermissions, API_KEY_PREFIX},
-		enums::UserPermission,
-		image::ImageRef,
-	},
+	shared::{api_key::API_KEY_PREFIX, enums::UserPermission, image::ImageRef},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use reqwest::Method;
 use sea_orm::{prelude::*, Condition, DatabaseConnection, ExprTrait};
 use serde::Deserialize;
+use stump_core::api_key::APIKeyController;
 use stump_core::opds::v2_0::{
 	authentication::{
 		OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
@@ -259,12 +256,9 @@ pub async fn validate_api_key(
 		.await?
 		.ok_or(APIError::Unauthorized)?;
 
-	let api_key_permissions = api_key.permissions.clone();
-
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
-	let can_use_key =
-		user.is_server_owner || user.permissions.contains(&UserPermission::AccessApiKeys);
+	let can_use_key = user.has_permission(UserPermission::AccessApiKeys);
 
 	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
 		tracing::error!(?can_use_key, "API key validation failed!");
@@ -282,17 +276,16 @@ pub async fn validate_api_key(
 		tracing::error!(error = ?e, "Failed to update API key");
 	}
 
-	let constructed_user = match api_key_permissions {
-		APIKeyPermissions::Inherit(_) => AuthUser::from(user),
-		// TODO(permissions): server owner going away
-		// Note: we don't construct permission sets for inferred permissions. What you
-		// give to your API key is what it gets, however the server owner flag
-		// will be set to false always.
-		APIKeyPermissions::Custom(permissions) => AuthUser {
-			permissions,
-			is_server_owner: false,
-			..AuthUser::from(user)
-		},
+	let owner = AuthUser::from(user);
+	// TODO(permissions): there are a few callsites similar, maybe add sm like `into_auth_user(existing_user)`
+	// or sm to do this all over. i think it could also warrant an update write to the key to not deal iwth
+	// this problem over and over. so perhaps the last_used_at stamp update could include this
+	// payload udpate too
+	let effective_permissions =
+		APIKeyController::new(api_key).resolve_permissions(&owner);
+	let constructed_user = AuthUser {
+		permissions: effective_permissions,
+		..owner
 	};
 
 	Ok(constructed_user)
@@ -522,21 +515,6 @@ mod tests {
 	}
 
 	#[test]
-	fn test_request_context_enforce_permissions_when_server_owner() {
-		let user = AuthUser {
-			is_server_owner: true,
-			..Default::default()
-		};
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context
-			.enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_ok());
-	}
-
-	#[test]
 	fn test_request_context_enforce_permissions_when_permitted() {
 		let user = AuthUser {
 			permissions: vec![UserPermission::AccessBookClub],
@@ -606,29 +584,6 @@ mod tests {
 		assert!(request_context
 			.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
 			.is_err());
-	}
-
-	#[test]
-	fn test_request_context_enforce_server_owner_when_server_owner() {
-		let user = AuthUser {
-			is_server_owner: true,
-			..Default::default()
-		};
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context.enforce_server_owner().is_ok());
-	}
-
-	#[test]
-	fn test_request_context_enforce_server_owner_when_not_server_owner() {
-		let user = AuthUser::default();
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context.enforce_server_owner().is_err());
 	}
 
 	#[test]

@@ -58,7 +58,7 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 	} = useLibraryManagement()
 
 	const loadAssociatedJob = useMemo(
-		() => checkPermission(UserPermission.ReadJobs),
+		() => checkPermission(UserPermission.ReadBackgroundJobs),
 		[checkPermission],
 	)
 	const loadJobLogs = useMemo(

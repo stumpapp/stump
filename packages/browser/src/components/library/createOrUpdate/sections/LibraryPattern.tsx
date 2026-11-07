@@ -3,8 +3,8 @@ import { LibraryPattern } from '@stump/graphql'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/components/library/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContextSafe } from '@/scenes/library/context'
 
 export default function LibraryPatternRadioGroup() {
 	const form = useFormContext()

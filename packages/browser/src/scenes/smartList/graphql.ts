@@ -32,6 +32,7 @@ const listByIdQuery = graphql(`
 			joiner
 			name
 			visibility
+			viewerRole
 			views {
 				id
 				listId

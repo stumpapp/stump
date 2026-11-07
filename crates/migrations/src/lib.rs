@@ -31,9 +31,13 @@ mod m20260613_000000_add_series_path_index;
 mod m20260617_200820_rm_thumbnails_in_headers_pref;
 mod m20260702_000000_metadata_fetch_partial_results;
 mod m20260804_000000_smart_list_role_to_integer;
+mod m20260811_182550_library_access;
+mod m20260813_151835_library_oidc_groups;
+mod m20260813_220807_user_oidc_groups;
 mod m20260815_205755_avatar_image_metadata;
 mod m20260816_000000_drop_legacy_epubcfi;
 mod m20260830_015110_oneshots;
+mod m20260921_153128_remove_server_owner;
 mod m20260928_173434_bookmark_and_annotation_fks_to_session;
 mod m20261006_152724_journal_entries;
 mod m20261006_225247_reading_devices;
@@ -75,9 +79,13 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260617_200820_rm_thumbnails_in_headers_pref::Migration),
 			Box::new(m20260702_000000_metadata_fetch_partial_results::Migration),
 			Box::new(m20260804_000000_smart_list_role_to_integer::Migration),
+			Box::new(m20260811_182550_library_access::Migration),
+			Box::new(m20260813_151835_library_oidc_groups::Migration),
+			Box::new(m20260813_220807_user_oidc_groups::Migration),
 			Box::new(m20260815_205755_avatar_image_metadata::Migration),
 			Box::new(m20260816_000000_drop_legacy_epubcfi::Migration),
 			Box::new(m20260830_015110_oneshots::Migration),
+			Box::new(m20260921_153128_remove_server_owner::Migration),
 			Box::new(m20260928_173434_bookmark_and_annotation_fks_to_session::Migration),
 			Box::new(m20261006_152724_journal_entries::Migration),
 			Box::new(m20261006_225247_reading_devices::Migration),

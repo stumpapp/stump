@@ -310,7 +310,17 @@ mod tests {
 			],
 		}];
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &auth_user.id)
+			// ^ give the user access to lib
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		let stinky_book = fake_data::Media {
 			name: Some("stinky book".to_string()),
@@ -447,7 +457,7 @@ mod tests {
 			.to_string(SqliteQueryBuilder);
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
 		);
 	}
 }

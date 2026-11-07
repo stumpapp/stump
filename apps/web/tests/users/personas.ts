@@ -1,13 +1,11 @@
 import { UserPermission } from '@stump/graphql'
 
 // TODO: add age restrictions
-export type Persona = {
+export type TestUser = {
 	username: string
 	password: string
 	permissions: UserPermission[]
 }
-
-export const API_URL = process.env.STUMP_BASE_URL ?? 'http://localhost:10801'
 
 /**
  * a collection of persistent users who will be created as part of setup during e2e runs.
@@ -17,19 +15,28 @@ export const API_URL = process.env.STUMP_BASE_URL ?? 'http://localhost:10801'
  * for more ephemeral users, you can create users more dynamically via the factory.ts exports
  */
 export const personas = {
-	// TODO(permissions): this will be the server owner but once improved permissioning is merged
-	// it will just be controled via permissions
 	admin: {
 		username: 'oromei',
 		password: 'oromei',
-		// TODO(permissions): give permissions
+		permissions: [UserPermission.ManageServer],
+	},
+	reader: {
+		username: 'reader',
+		password: 'reader',
 		permissions: [],
 	},
-} satisfies Record<string, Persona>
+	librarian: {
+		username: 'librarian',
+		password: 'librarian',
+		permissions: [UserPermission.ManageLibrary, UserPermission.ReadUsers],
+	},
+} satisfies Record<string, TestUser>
 
-export type PersonaName = keyof typeof personas
+export type Persona = keyof typeof personas
+
+export const persona = (key: Persona) => personas[key]
 
 /**
- * the path for the auth state of a given persona, which playwright re-uses for persistent auth
+ * the path for the auth state of a given username, which playwright re-uses for persistent auth
  */
-export const authStatePath = (persona: PersonaName) => `playwright/.auth/${persona}.json`
+export const authStatePath = (username: string) => `playwright/.auth/${username}.json`

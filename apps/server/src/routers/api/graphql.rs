@@ -15,6 +15,7 @@ use graphql::{
 	data::{AuthContext, ServiceContext},
 	schema::{build_schema, AppSchema},
 };
+use models::shared::enums::UserPermission;
 use tower_sessions::Session;
 
 use crate::{config::state::AppState, errors::APIError};
@@ -38,8 +39,11 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 async fn playground(
 	Extension(req_ctx): Extension<AuthContext>,
 ) -> Result<impl IntoResponse, APIError> {
-	if !req_ctx.user().is_server_owner {
-		return Err(APIError::forbidden_discreet());
+	if !req_ctx
+		.user()
+		.has_permission(UserPermission::AccessGraphQLPlayground)
+	{
+		return Err(APIError::NotFound("Not found".to_string()));
 	}
 
 	Ok(Html(

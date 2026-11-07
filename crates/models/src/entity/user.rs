@@ -12,13 +12,13 @@ use crate::{
 	shared::{
 		enums::UserPermission,
 		image::{ImageMetadata, ImageRef},
-		permission_set::PermissionSet,
+		permission_set::{permissions_satisfy, PermissionSet},
 	},
 };
 
 use super::{
 	age_restriction, api_key, book_club_invitation, book_club_member, bookmark,
-	emailer_send_record, last_library_visit, library_exclusion, media_annotation,
+	emailer_send_record, last_library_visit, library_access, media_annotation,
 	reading_list, reading_session, review, session, smart_list, smart_list_access_rule,
 	user_login_activity, user_preferences,
 };
@@ -35,7 +35,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	#[graphql(skip)]
 	pub hashed_password: String,
-	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_path: Option<String>,
 	#[sea_orm(column_type = "Json", nullable)]
@@ -58,6 +57,9 @@ pub struct Model {
 	pub oidc_issuer_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub oidc_email: Option<String>,
+	/// a comma-separated list of OIDC groups assigned to this user
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oidc_groups: Option<String>,
 	#[sea_orm(has_one)]
 	#[graphql(skip)]
 	pub age_restriction: HasOne<age_restriction::Entity>,
@@ -76,9 +78,9 @@ pub struct Model {
 	#[sea_orm(has_many)]
 	#[graphql(skip)]
 	pub emailer_send_records: HasMany<emailer_send_record::Entity>,
-	#[sea_orm(has_many, relation_enum = "HiddenLibrary")]
+	#[sea_orm(has_many, relation_enum = "AccessLibraries")]
 	#[graphql(skip)]
-	pub hidden_libraries: HasMany<library_exclusion::Entity>,
+	pub library_access_records: HasMany<library_access::Entity>,
 	#[sea_orm(has_many)]
 	#[graphql(skip)]
 	pub last_library_visits: HasMany<last_library_visit::Entity>,
@@ -124,7 +126,6 @@ pub struct AuthUser {
 	pub avatar_path: Option<String>,
 	pub avatar: ImageRef,
 	pub username: String,
-	pub is_server_owner: bool,
 	pub is_locked: bool,
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<super::age_restriction::Model>,
@@ -137,7 +138,7 @@ impl AuthUser {
 	}
 
 	pub fn has_permission(&self, permission: UserPermission) -> bool {
-		self.is_server_owner || self.permissions.contains(&permission)
+		permissions_satisfy(&self.permissions, permission)
 	}
 }
 
@@ -148,7 +149,6 @@ impl FromQueryResult for AuthUser {
 	) -> Result<Self, sea_orm::DbErr> {
 		let id = res.try_get("", "id")?;
 		let username = res.try_get("", "username")?;
-		let is_server_owner = res.try_get("", "is_server_owner")?;
 		let is_locked = res.try_get("", "is_locked")?;
 		let permissions_str: String = res.try_get("", "permissions")?;
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
@@ -193,7 +193,6 @@ impl FromQueryResult for AuthUser {
 			// avatar_updated_at,
 			avatar,
 			username,
-			is_server_owner,
 			is_locked,
 			permissions,
 			age_restriction,
@@ -210,7 +209,6 @@ pub struct LoginUser {
 	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub username: String,
 	pub hashed_password: String,
-	pub is_server_owner: bool,
 	pub is_locked: bool,
 	pub max_sessions_allowed: Option<i32>,
 	pub permissions: Vec<UserPermission>,
@@ -240,6 +238,10 @@ impl LoginUser {
 			.left_join(age_restriction::Entity)
 			.left_join(user_preferences::Entity)
 	}
+
+	pub fn has_permission(&self, permission: UserPermission) -> bool {
+		permissions_satisfy(&self.permissions, permission)
+	}
 }
 
 impl FromQueryResult for LoginUser {
@@ -264,7 +266,6 @@ impl FromQueryResult for LoginUser {
 			avatar_updated_at: user.avatar_updated_at,
 			username: user.username,
 			hashed_password: user.hashed_password,
-			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,
 			max_sessions_allowed: user.max_sessions_allowed,
 			permissions: PermissionSet::from(user.permissions.unwrap_or_default())
@@ -295,12 +296,48 @@ impl From<LoginUser> for AuthUser {
 				..Default::default()
 			},
 			username: user.username,
-			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,
 			permissions: user.permissions,
 			age_restriction: user.age_restriction,
 			preferences: user.preferences,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_has_permission_resolves_associated_permissions() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ManageUsers],
+			..get_default_user()
+		};
+
+		assert_eq!(user.has_permission(UserPermission::ManageUsers), true);
+		assert_eq!(user.has_permission(UserPermission::CreateUser), true);
+		assert_eq!(user.has_permission(UserPermission::DeleteUser), true);
+		assert_eq!(
+			user.has_permission(UserPermission::AccessKoreaderSync),
+			false
+		);
+	}
+
+	#[test]
+	fn test_has_permission_resolves_transitively() {
+		// ManageServer -> EmailerManage -> EmailerRead -> EmailSend
+		let user = AuthUser {
+			permissions: PermissionSet::new(vec![UserPermission::ManageServer])
+				.resolve_into_vec(),
+			..get_default_user()
+		};
+
+		assert_eq!(user.has_permission(UserPermission::EmailerManage), true);
+		assert_eq!(user.has_permission(UserPermission::EmailerRead), true);
+		assert_eq!(user.has_permission(UserPermission::EmailSend), true);
 	}
 }
 

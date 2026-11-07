@@ -1,16 +1,18 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { Avatar, Breadcrumbs, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { keepPreviousData } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { GroupedVirtuoso } from 'react-virtuoso'
 
 import { SceneContainer } from '@/components/container'
+import { LibrarySelect } from '@/components/library'
 import { PageHeader } from '@/components/sharedLayout'
 
 const query = graphql(`
-	query AuthorsSceneWeb {
-		authors(pagination: { none: { unpaginated: true } }) {
+	query AuthorsSceneWeb($filters: AuthorFilterInput) {
+		authors(pagination: { none: { unpaginated: true } }, filter: $filters) {
 			nodes {
 				id
 				name
@@ -27,15 +29,25 @@ const query = graphql(`
 // group instead of manual counts on client
 
 export default function AuthorsScene() {
-	const {
-		data: {
-			authors: { nodes: authors },
+	const [libraryId, setLibraryId] = useState<string>()
+	const { data } = useGraphQL(
+		query,
+		['authors', libraryId],
+		{
+			filters: libraryId
+				? {
+						libraryId: { eq: libraryId },
+					}
+				: {},
 		},
-	} = useSuspenseGraphQL(query, ['authors'])
+		{ placeholderData: keepPreviousData },
+	)
 	const listContainerRef = useRef<HTMLDivElement>(null)
 
 	const [containerWidth, setContainerWidth] = useState(0)
 	const [scrollParent, setScrollParent] = useState<HTMLElement | null>(null)
+
+	const authors = useMemo(() => data?.authors?.nodes ?? [], [data])
 
 	useEffect(() => {
 		const container = listContainerRef.current
@@ -119,6 +131,15 @@ export default function AuthorsScene() {
 				<PageHeader.Start>
 					<Breadcrumbs segments={[{ label: 'Authors', noShrink: true }]} />
 				</PageHeader.Start>
+
+				<PageHeader.End>
+					<div>
+						<LibrarySelect
+							selectedId={libraryId}
+							onChange={(value) => setLibraryId(value || undefined)}
+						/>
+					</div>
+				</PageHeader.End>
 			</PageHeader>
 
 			<SceneContainer>

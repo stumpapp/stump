@@ -1,5 +1,5 @@
 import { useSuspenseGraphQL } from '@stump/client'
-import { Breadcrumbs } from '@stump/components'
+import { Breadcrumbs, NewCard } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useParams } from 'react-router'
 
@@ -10,6 +10,12 @@ const query = graphql(`
 	query AuthorByIdWeb($id: ID!) {
 		authorById(id: $id) {
 			name
+			books {
+				resolvedName
+			}
+			series {
+				resolvedName
+			}
 		}
 	}
 `)
@@ -36,7 +42,19 @@ export default function AuthorById() {
 				</PageHeader.Start>
 			</PageHeader>
 
-			<SceneContainer></SceneContainer>
+			<SceneContainer className="gap-8">
+				<div>
+					<NewCard.ListLabel>Books</NewCard.ListLabel>
+
+					{JSON.stringify(author.books)}
+				</div>
+
+				<div>
+					<NewCard.ListLabel>Series</NewCard.ListLabel>
+
+					{JSON.stringify(author.series)}
+				</div>
+			</SceneContainer>
 		</>
 	)
 }

@@ -4,6 +4,7 @@ export {
 	usePrefetchLibraryBooksAlphabet,
 } from './LibraryBooksAlphabet'
 export { LibraryGridItem } from './LibraryGridItem'
+export { LibrarySelect } from './LibrarySelect'
 export {
 	default as LibrarySeriesAlphabet,
 	usePrefetchLibrarySeriesAlphabet,

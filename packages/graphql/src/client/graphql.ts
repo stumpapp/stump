@@ -6382,6 +6382,11 @@ export type LibraryBooksAlphabetQuery = { __typename?: 'Query', libraryById?: { 
 
 export type LibraryWebGridItemFragment = { __typename?: 'Library', id: string, name: string, series: Array<{ __typename?: 'Series', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number } } & { ' $fragmentName'?: 'LibraryWebGridItemFragment' };
 
+export type LibrarySelectWebQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibrarySelectWebQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string }> } };
+
 export type LibrarySeriesAlphabetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -6699,9 +6704,11 @@ export type AuthorByIdWebQueryVariables = Exact<{
 }>;
 
 
-export type AuthorByIdWebQuery = { __typename?: 'Query', authorById: { __typename?: 'Author', name: string } };
+export type AuthorByIdWebQuery = { __typename?: 'Query', authorById: { __typename?: 'Author', name: string, books: Array<{ __typename?: 'Media', resolvedName: string }>, series: Array<{ __typename?: 'AuthorSeries', resolvedName: string }> } };
 
-export type AuthorsSceneWebQueryVariables = Exact<{ [key: string]: never; }>;
+export type AuthorsSceneWebQueryVariables = Exact<{
+  filters?: InputMaybe<AuthorFilterInput>;
+}>;
 
 
 export type AuthorsSceneWebQuery = { __typename?: 'Query', authors: { __typename?: 'PaginatedAuthorResponse', nodes: Array<{ __typename?: 'Author', id: string, name: string, avatar: { __typename?: 'ImageRef', url: string } }> } };
@@ -12490,6 +12497,16 @@ export const LibraryBooksAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibraryBooksAlphabetQuery, LibraryBooksAlphabetQueryVariables>;
+export const LibrarySelectWebDocument = new TypedDocumentString(`
+    query LibrarySelectWeb {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibrarySelectWebQuery, LibrarySelectWebQueryVariables>;
 export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
     query LibrarySeriesAlphabet($id: ID!) {
   libraryById(id: $id) {
@@ -13618,12 +13635,18 @@ export const AuthorByIdWebDocument = new TypedDocumentString(`
     query AuthorByIdWeb($id: ID!) {
   authorById(id: $id) {
     name
+    books {
+      resolvedName
+    }
+    series {
+      resolvedName
+    }
   }
 }
     `) as unknown as TypedDocumentString<AuthorByIdWebQuery, AuthorByIdWebQueryVariables>;
 export const AuthorsSceneWebDocument = new TypedDocumentString(`
-    query AuthorsSceneWeb {
-  authors(pagination: {none: {unpaginated: true}}) {
+    query AuthorsSceneWeb($filters: AuthorFilterInput) {
+  authors(pagination: {none: {unpaginated: true}}, filter: $filters) {
     nodes {
       id
       name

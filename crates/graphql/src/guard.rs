@@ -132,6 +132,11 @@ impl Guard for BookClubRoleGuard {
 		} else {
 			UserPermission::ModerateBookClubs
 		};
+
+		if user.is_locked || !user.has_permission(UserPermission::AccessBookClub) {
+			return Err(error_message::FORBIDDEN_ACTION.into());
+		}
+
 		if user.has_permission(system_override) {
 			return Ok(());
 		}
@@ -144,7 +149,7 @@ impl Guard for BookClubRoleGuard {
 			return Err(error_message::FORBIDDEN_ACTION.into());
 		};
 
-		let is_permitted = membership.role >= self.role && !user.is_locked;
+		let is_permitted = membership.role >= self.role;
 
 		if is_permitted {
 			Ok(())
@@ -193,5 +198,17 @@ mod tests {
 
 		let guard = PermissionGuard::one(UserPermission::CreateUser);
 		assert!(!guard.is_authorized(&user));
+	}
+}
+
+pub struct UnreleasedFeatureGuard;
+
+impl Guard for UnreleasedFeatureGuard {
+	async fn check(&self, _ctx: &Context<'_>) -> Result<()> {
+		if cfg!(debug_assertions) {
+			Ok(())
+		} else {
+			Err("This feature is not yet developed and not available".into())
+		}
 	}
 }

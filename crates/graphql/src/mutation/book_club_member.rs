@@ -1,10 +1,13 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::{entity::book_club_member, shared::book_club::BookClubMemberRole};
+use models::{
+	entity::book_club_member,
+	shared::{book_club::BookClubMemberRole, enums::UserPermission},
+};
 use sea_orm::prelude::*;
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	guard::BookClubRoleGuard,
+	guard::{BookClubRoleGuard, PermissionGuard},
 	input::book_club::CreateBookClubMemberInput,
 	object::book_club_member::BookClubMember,
 };
@@ -40,12 +43,12 @@ impl BookClubMemberMutation {
 	async fn remove_book_club_member(
 		&self,
 		ctx: &Context<'_>,
-		// Note: This is a false positive since we use it for the guard
-		#[allow(unused_variables)] book_club_id: ID,
+		book_club_id: ID,
 		member_id: ID,
 	) -> Result<BookClubMember> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let member = book_club_member::Entity::find_by_id(member_id.as_ref())
+			.filter(book_club_member::Column::BookClubId.eq(book_club_id.as_ref()))
 			.one(conn)
 			.await?
 			.ok_or("Member not found")?;
@@ -60,6 +63,7 @@ impl BookClubMemberMutation {
 	}
 
 	/// Deletes the membership of the caller to the target book club
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn leave_book_club(
 		&self,
 		ctx: &Context<'_>,

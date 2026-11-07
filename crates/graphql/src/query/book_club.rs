@@ -1,8 +1,9 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::book_club;
+use models::{entity::book_club, shared::enums::UserPermission};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	object::book_club::BookClub,
 };
 
@@ -11,6 +12,7 @@ pub struct BookClubQuery;
 
 #[Object]
 impl BookClubQuery {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_clubs(
 		&self,
 		ctx: &Context<'_>,
@@ -26,6 +28,7 @@ impl BookClubQuery {
 		Ok(models.into_iter().map(BookClub::from).collect())
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<BookClub> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -38,6 +41,7 @@ impl BookClubQuery {
 		Ok(BookClub::from(model))
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_by_slug(
 		&self,
 		ctx: &Context<'_>,

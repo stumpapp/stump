@@ -54,6 +54,11 @@ export default defineConfig({
 			},
 		},
 	},
+	resolve: {
+		alias: {
+			'@/': fileURLToPath(new URL('../../packages/browser/src/', import.meta.url)),
+		},
+	},
 	clearScreen: false,
 	define: {
 		pkgJson: { name, version },

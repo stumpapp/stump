@@ -1,5 +1,7 @@
 use crate::{
-	data::CoreContext, guard::PermissionGuard, input::notifier::NotifierInput,
+	data::CoreContext,
+	guard::{PermissionGuard, UnreleasedFeatureGuard},
+	input::notifier::NotifierInput,
 	object::notifier::Notifier,
 };
 use async_graphql::{Context, Object, Result};
@@ -7,12 +9,16 @@ use models::entity::notifier;
 use models::shared::enums::UserPermission;
 use sea_orm::{prelude::*, ActiveModelTrait, Set};
 
+// TODO(notifier): rm the unreleased guard once i _actually_ build it out
+
 #[derive(Default)]
 pub struct NotifierMutation;
 
 #[Object]
 impl NotifierMutation {
-	#[graphql(guard = "PermissionGuard::one(UserPermission::CreateNotifier)")]
+	#[graphql(
+		guard = "UnreleasedFeatureGuard.and(PermissionGuard::one(UserPermission::CreateNotifier))"
+	)]
 	async fn create_notifier(
 		&self,
 		ctx: &Context<'_>,
@@ -28,7 +34,9 @@ impl NotifierMutation {
 		Ok(Notifier::from(result))
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageNotifier)")]
+	#[graphql(
+		guard = "UnreleasedFeatureGuard.and(PermissionGuard::one(UserPermission::ManageNotifier))"
+	)]
 	async fn update_notifier(
 		&self,
 		ctx: &Context<'_>,
@@ -46,7 +54,9 @@ impl NotifierMutation {
 		Ok(Notifier::from(result))
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::DeleteNotifier)")]
+	#[graphql(
+		guard = "UnreleasedFeatureGuard.and(PermissionGuard::one(UserPermission::DeleteNotifier))"
+	)]
 	async fn delete_notifier(&self, ctx: &Context<'_>, id: i32) -> Result<Notifier> {
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();

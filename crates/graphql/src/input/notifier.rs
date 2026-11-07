@@ -3,6 +3,8 @@ use models::entity::notifier::{self, NotifierConfig, NotifierType};
 use sea_orm::{ActiveValue::NotSet, Set};
 use stump_core::utils::encryption::encrypt_string;
 
+// TODO(notifier): consider encrypting webhook url in db before releasing feature
+
 #[derive(InputObject)]
 pub struct DiscordConfigInput {
 	pub webhook_url: String,

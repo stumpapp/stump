@@ -15,6 +15,7 @@ use models::{
 	shared::enums::ReadingStatus,
 };
 use sea_orm::prelude::*;
+use serde_json::Value;
 use tests::fake_data;
 
 async fn setup() -> (TestApp, Vec<String>) {
@@ -48,7 +49,7 @@ async fn setup() -> (TestApp, Vec<String>) {
 	(app, book_ids)
 }
 
-async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {
+async fn fetch_keep_reading_nodes(app: &TestApp) -> Vec<Value> {
 	let conn = app.conn();
 	let current_user = user::Entity::find()
 		.one(conn)
@@ -59,16 +60,17 @@ async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {
 	let result = app
 		.execute_gql(
 			r#"
-        query KeepReading($id: ID!) {
-            userById(id: $id) {
-                continueReading {
-                    nodes {
-                        id
-                    }
-                }
-            }
-        }
-        "#,
+           query KeepReading($id: ID!) {
+               userById(id: $id) {
+                   continueReading {
+                       nodes {
+                           id
+                           resolvedName
+                       }
+                   }
+               }
+           }
+           "#,
 			Some(serde_json::json!({
 				"id": current_user.id,
 			})),
@@ -82,6 +84,13 @@ async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {
 		.and_then(|continue_reading| continue_reading.get("nodes"))
 		.and_then(|nodes| nodes.as_array())
 		.expect("expected continueReading nodes in GraphQL response")
+		.to_owned()
+}
+
+async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {
+	let nodes = fetch_keep_reading_nodes(app).await;
+
+	nodes
 		.iter()
 		.map(|node| {
 			node.get("id")
@@ -204,3 +213,39 @@ async fn test_keep_reading_filters_finished_and_prior_readthroughs() {
 		.expect("db error");
 	assert_eq!(active_sessions_for_book_4, 2);
 }
+
+/// continueReading should properly load metadata from loaded books
+#[tokio::test]
+async fn test_keep_reading_properly_loads_media_metadata() {
+	let (app, book_ids) = setup().await;
+
+	let active_book = book_ids[0].clone();
+
+	start_active_session(&app, &active_book, 10).await;
+
+	let metadata = fake_data::MediaMetadata {
+		media_id: Some(active_book.clone()),
+		title: Some("Custom Title".to_string()),
+		..Default::default()
+	}
+	.insert(app.conn())
+	.await;
+
+	let nodes = fetch_keep_reading_nodes(&app).await;
+	let resolved_name = nodes[0]
+		.get("resolvedName")
+		.expect("should have a resolvedName")
+		.as_str()
+		.expect("should be a string");
+	// resolved name prioritizes metadata
+
+	assert_eq!(
+		resolved_name,
+		metadata
+			.title
+			.expect("meta should have had a title")
+			.as_str()
+	)
+}
+// ^ this isn't strictly a functionality test for keep_reading but a regression test
+// where i noticed my books in this list did not have their metadata title

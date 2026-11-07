@@ -318,7 +318,6 @@ impl MediaQuery {
 
 		let query = spec.apply(
 			media::Entity::apply_for_user(user, media::Entity::find())
-				.select_also(reading_session::Entity)
 				.filter(media::Column::DeletedAt.is_null())
 				.join_rev(
 					JoinType::InnerJoin,
@@ -345,6 +344,7 @@ impl MediaQuery {
 				if let Some(ref id) = info.after {
 					let (_, session) = query
 						.clone()
+						.select_also(reading_session::Entity)
 						.filter(media::Column::Id.eq(id.clone()))
 						.one(conn)
 						.await?
@@ -357,14 +357,12 @@ impl MediaQuery {
 				}
 
 				let nodes = query
-					// select_also_fake is the 2.0 replacement for select_also, i really
-					// hate the name of it tho
-					.select_also_fake(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.limit(info.limit)
 					.all(conn)
 					.await?
 					.into_iter()
-					.map(|(media, _session, metadata)| {
+					.map(|(media, metadata)| {
 						Media::from(media::ModelWithMetadata { media, metadata })
 					})
 					.collect::<Vec<_>>();
@@ -390,13 +388,13 @@ impl MediaQuery {
 			Pagination::Offset(info) => {
 				let count = query.clone().count(conn).await?;
 				let nodes = query
-					.select_also_fake(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
 					.await?
 					.into_iter()
-					.map(|(media, _session, metadata)| {
+					.map(|(media, metadata)| {
 						Media::from(media::ModelWithMetadata { media, metadata })
 					})
 					.collect::<Vec<_>>();
@@ -408,11 +406,11 @@ impl MediaQuery {
 			},
 			Pagination::None(_) => {
 				let nodes = query
-					.select_also_fake(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()
-					.map(|(media, _session, metadata)| {
+					.map(|(media, metadata)| {
 						Media::from(media::ModelWithMetadata { media, metadata })
 					})
 					.collect::<Vec<_>>();

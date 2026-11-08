@@ -6730,7 +6730,10 @@ export type AuthorByIdWebQueryVariables = Exact<{
 }>;
 
 
-export type AuthorByIdWebQuery = { __typename?: 'Query', authorById: { __typename?: 'Author', name: string, books: Array<{ __typename?: 'Media', resolvedName: string }>, series: Array<{ __typename?: 'AuthorSeries', resolvedName: string }> } };
+export type AuthorByIdWebQuery = { __typename?: 'Query', authorById: { __typename?: 'Author', name: string, biography?: string | null, avatar: { __typename?: 'ImageRef', url: string }, books: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
+    )>, series: Array<{ __typename?: 'AuthorSeries', id: string, resolvedName: string, mediaCount: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null } | null } }> } };
 
 export type AuthorsSceneWebQueryVariables = Exact<{
   filters?: InputMaybe<AuthorFilterInput>;
@@ -6936,8 +6939,6 @@ export type OnDeckBooksWebQuery = { __typename?: 'Query', onDeck: { __typename?:
       & { ' $fragmentRefs'?: { 'OnDeckBookFragment': OnDeckBookFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type RecentlyAddedBookFragment = { __typename?: 'Media', id: string, resolvedName: string, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedBookFragment' };
-
 export type RecentlyAddedMediaQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -6945,7 +6946,7 @@ export type RecentlyAddedMediaQueryVariables = Exact<{
 
 export type RecentlyAddedMediaQuery = { __typename?: 'Query', recentlyAddedMedia: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'RecentlyAddedBookFragment': RecentlyAddedBookFragment } }
+      & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type RecentlyAddedSeriesQueryVariables = Exact<{
@@ -9267,24 +9268,6 @@ export const OnDeckBookFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"OnDeckBook"}) as unknown as TypedDocumentString<OnDeckBookFragment, unknown>;
-export const RecentlyAddedBookFragmentDoc = new TypedDocumentString(`
-    fragment RecentlyAddedBook on Media {
-  id
-  resolvedName
-  createdAt
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-}
-    `, {"fragmentName":"RecentlyAddedBook"}) as unknown as TypedDocumentString<RecentlyAddedBookFragment, unknown>;
 export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     fragment LibrarySettingsConfig on Library {
   config {
@@ -13750,15 +13733,44 @@ export const AuthorByIdWebDocument = new TypedDocumentString(`
     query AuthorByIdWeb($id: ID!) {
   authorById(id: $id) {
     name
+    biography
+    avatar {
+      url
+    }
     books {
-      resolvedName
+      id
+      ...SimpleBookCard
     }
     series {
+      id
       resolvedName
+      mediaCount
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          thumbhash
+        }
+      }
     }
   }
 }
-    `) as unknown as TypedDocumentString<AuthorByIdWebQuery, AuthorByIdWebQueryVariables>;
+    fragment SimpleBookCard on Media {
+  id
+  resolvedName
+  createdAt
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}`) as unknown as TypedDocumentString<AuthorByIdWebQuery, AuthorByIdWebQueryVariables>;
 export const AuthorsSceneWebDocument = new TypedDocumentString(`
     query AuthorsSceneWeb($filters: AuthorFilterInput) {
   authors(pagination: {none: {unpaginated: true}}, filter: $filters) {
@@ -14434,7 +14446,7 @@ export const RecentlyAddedMediaDocument = new TypedDocumentString(`
   recentlyAddedMedia(pagination: $pagination) {
     nodes {
       id
-      ...RecentlyAddedBook
+      ...SimpleBookCard
     }
     pageInfo {
       __typename
@@ -14446,7 +14458,7 @@ export const RecentlyAddedMediaDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment RecentlyAddedBook on Media {
+    fragment SimpleBookCard on Media {
   id
   resolvedName
   createdAt

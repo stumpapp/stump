@@ -147,6 +147,7 @@ function RecentlyAddedSeries() {
 				/>
 			)}
 			cardHeight={cardHeight}
+			cardWidth={cardWidth}
 			onFetchMore={handleFetchMore}
 			emptyState={emptyState}
 		/>

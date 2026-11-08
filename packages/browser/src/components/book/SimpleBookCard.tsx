@@ -33,9 +33,14 @@ const fragment = graphql(`
 type Props = {
 	book: FragmentType<typeof fragment>
 	cardWidth?: number
+	subtitle?: React.ReactNode
 }
 
-export const SimpleBookCard = memo(function SimpleBookCard({ book, ...props }: Props) {
+// TODO: yoinked this from recently added media since i think it is the style i want, leaving the subtitle default
+// logic as-is but i thikn landing on it eventually i'll just make recently added handle the formatting instead
+// of it being opinionated in here
+
+export const SimpleBookCard = memo(function SimpleBookCard({ book, subtitle, ...props }: Props) {
 	const data = useFragment(fragment, book)
 	const paths = usePaths()
 
@@ -89,14 +94,19 @@ export const SimpleBookCard = memo(function SimpleBookCard({ book, ...props }: P
 				>
 					{data.resolvedName}
 				</Text>
-				<Text
-					className="mt-0.5 text-xs text-gray-200"
-					style={{
-						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-					}}
-				>
-					{formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
-				</Text>
+
+				{subtitle == undefined ? (
+					<Text
+						className="mt-0.5 text-xs text-gray-200"
+						style={{
+							textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+						}}
+					>
+						{formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
+					</Text>
+				) : (
+					subtitle
+				)}
 			</div>
 		</Link>
 	)

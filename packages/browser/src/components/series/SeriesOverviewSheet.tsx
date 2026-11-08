@@ -101,7 +101,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 			]
 		: undefined
 
-	const { cardHeight } = useSimpleBookCardSize()
+	const { cardWidth, cardHeight } = useSimpleBookCardSize()
 
 	return (
 		<EntityOverviewSheet
@@ -159,6 +159,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 					keyExtractor={(node) => node.id}
 					renderItem={(node) => <SimpleBookCard book={node} />}
 					cardHeight={cardHeight}
+					cardWidth={cardWidth}
 					rowCount={1}
 				/>
 			)}

@@ -19,6 +19,7 @@ export type IFilterContext = {
 	ordering: Ordering
 	pagination: OffsetPagination
 	setPage: (page: number) => void
+	setPageSize: (pageSize: number) => void
 	setFilters: (filters: FilterInput) => void
 	search: string | undefined
 	setSearch: (value: string) => void
@@ -36,6 +37,7 @@ export const FilterContext = createContext<IFilterContext>({
 	setFilters: noop,
 	setOrdering: noop,
 	setPage: noop,
+	setPageSize: noop,
 })
 export const useFilterContext = () => useContext(FilterContext)
 

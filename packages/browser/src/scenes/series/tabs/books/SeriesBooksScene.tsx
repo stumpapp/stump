@@ -45,18 +45,28 @@ export default function SeriesBooksSceneContainer() {
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
 	const layoutKey = `library-${series.library.id}-seriesBooks`
-	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
-		useBooksLayout(
-			layoutKey,
-			useShallow((state) => ({
-				columns: state.columns,
-				layoutMode: state.layout,
-				persistedOrdering: state.ordering,
-				setColumns: state.setColumns,
-				setLayout: state.setLayout,
-				setPersistedOrdering: state.setOrdering,
-			})),
-		)
+	const {
+		layoutMode,
+		setLayout,
+		columns,
+		setColumns,
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	} = useBooksLayout(
+		layoutKey,
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			persistedOrdering: state.ordering,
+			persistedPageSize: state.pageSize,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+			setPersistedOrdering: state.setOrdering,
+			setPersistedPageSize: state.setPageSize,
+		})),
+	)
 	const {
 		filters: mediaFilters,
 		ordering,
@@ -66,6 +76,8 @@ function SeriesBooksScene() {
 	} = useFilterScene({
 		persistedOrdering,
 		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
 		defaultOrdering: SERIES_POSITION_ORDERING,
 	})
 	const filters = mediaFilters as MediaFilterInput

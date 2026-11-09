@@ -35,12 +35,12 @@ export const opdsV1Url = createRouteURLHandler(OPDS_V2_ROUTE)
 export class OPDSV2API extends APIBase {
 	get config(): AxiosRequestConfig {
 		return {
-			baseURL: this.serviceURL.replace(/\/api(\/.+)?$/, ''),
+			baseURL: this.serviceURL.replace(/\/api(?:\/v\d+)?$/, ''),
 		}
 	}
 
 	imageURL(url: string): string {
-		return `${this.serviceURL.replace(/\/api(\/.+)?$/, '')}${url}`.replace(/([^:]\/)\/+/g, '$1')
+		return `${this.serviceURL.replace(/\/api(?:\/v\d+)?$/, '')}${url}`.replace(/([^:]\/)\/+/g, '$1')
 	}
 
 	/**

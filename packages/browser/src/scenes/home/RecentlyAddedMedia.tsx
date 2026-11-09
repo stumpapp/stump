@@ -88,10 +88,10 @@ function RecentlyAddedMedia() {
 			title={translate('shared.homeSections.recentlyAddedBooks.label')}
 			items={nodes}
 			keyExtractor={(node) => node.id}
-			renderItem={(node) => (
+			renderItem={(node, width) => (
 				<SimpleBookCard
 					book={node}
-					cardWidth={cardWidth}
+					cardWidth={width}
 					subtitle={(data) => formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
 				/>
 			)}

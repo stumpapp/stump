@@ -4,7 +4,6 @@ import { graphql } from '@stump/graphql'
 import { BookOpen, LibraryBig } from 'lucide-react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
-import { useMediaMatch } from 'rooks'
 
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
 import { SceneContainer } from '@/components/container'
@@ -60,7 +59,6 @@ export default function AuthorById() {
 	const { id } = useParams()
 	const paths = usePaths()
 	const { cardWidth, cardHeight } = useSimpleBookCardSize()
-	const isAtLeastLarge = useMediaMatch('(min-width: 1024px)')
 	const {
 		data: { authorById: author },
 	} = useSuspenseGraphQL(query, ['authorById', id], { id: id ?? '' })
@@ -118,12 +116,12 @@ export default function AuthorById() {
 					}
 					items={author.books}
 					keyExtractor={(book) => book.id}
-					renderItem={(book) => (
-						<SimpleBookCard book={book} cardWidth={cardWidth} subtitle={null} />
+					renderItem={(book, width) => (
+						<SimpleBookCard book={book} cardWidth={width} subtitle={null} />
 					)}
 					cardHeight={cardHeight}
 					cardWidth={cardWidth}
-					rowCount={isAtLeastLarge ? 3 : 1}
+					rowCount={3}
 					emptyState={<EmptySection message="No books associated with this author yet" />}
 				/>
 

@@ -157,7 +157,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 					title={translate('shared.common.upNext')}
 					items={upNext}
 					keyExtractor={(node) => node.id}
-					renderItem={(node) => <SimpleBookCard book={node} />}
+					renderItem={(node, width) => <SimpleBookCard book={node} cardWidth={width} />}
 					cardHeight={cardHeight}
 					cardWidth={cardWidth}
 					rowCount={1}

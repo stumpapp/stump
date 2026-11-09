@@ -135,13 +135,13 @@ function RecentlyAddedSeries() {
 			title={translate('shared.homeSections.recentlyAddedSeries.label')}
 			items={nodes}
 			keyExtractor={(series) => series.id}
-			renderItem={(series) => (
+			renderItem={(series, width) => (
 				<StackedSeriesCard
 					id={series.id}
 					name={series.resolvedName}
 					subtitle={formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
 					isMissing={series.status === 'MISSING'}
-					width={cardWidth}
+					width={width}
 					thumbnailData={[series.thumbnail, ...series.media.map((m) => m.thumbnail)]}
 					oneshotBookId={series.oneshotBook?.id}
 				/>

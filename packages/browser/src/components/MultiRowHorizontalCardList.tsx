@@ -1,6 +1,6 @@
 import { Button, cn, Heading, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight, CircleSlash2 } from 'lucide-react'
-import { forwardRef, ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 import { useMediaMatch } from 'rooks'
 
@@ -8,10 +8,13 @@ import { useTranslate } from '@/hooks/useTranslate'
 
 import { useHorizontalScroll, usePreferences } from '../hooks'
 
+// px-1.5 on each column
+const COLUMN_HORIZONTAL_PADDING = 12
+
 type Props<T> = {
 	title: ReactNode
 	items: T[]
-	renderItem: (item: T) => ReactNode
+	renderItem: (item: T, cardWidth: number) => ReactNode
 	keyExtractor: (item: T) => string
 	onFetchMore?: () => void
 	emptyState?: ReactNode
@@ -57,8 +60,22 @@ export default function MultiRowHorizontalCardList<T>({
 	}, [])
 
 	const maxRowCount = rowCountProp === 'responsive' ? (isAtLeastLarge ? 2 : 1) : rowCountProp
-	const columnsPerViewport = Math.max(1, Math.floor(containerWidth / (cardWidth + 12)))
-	const rowCount = Math.max(1, Math.min(maxRowCount, Math.floor(items.length / columnsPerViewport)))
+	// we want to make sure cards don't change their size because e.g. the simple book card i want
+	// to be a smaller variant. so insteead of shrinking/growing to fit we have to be more mathematical
+	// about how many fit in space to do synthetic wraps
+	const columnsThatFit = Math.max(
+		1,
+		Math.floor(containerWidth / (cardWidth + COLUMN_HORIZONTAL_PADDING)),
+	)
+	const rowsNeeded = Math.ceil(items.length / columnsThatFit)
+	const fitsWithoutScroll = containerWidth > 0 && rowsNeeded <= maxRowCount
+	const rowCount = Math.max(1, Math.min(maxRowCount, rowsNeeded))
+
+	// if it fits without scroll we likely don't even need to fetch more, however if there
+	// is something i am not considering then this would be an annoying bug
+	useEffect(() => {
+		if (fitsWithoutScroll) onFetchMore?.()
+	}, [fitsWithoutScroll, onFetchMore])
 
 	const columns = useMemo(() => {
 		const cols: T[][] = []
@@ -97,6 +114,18 @@ export default function MultiRowHorizontalCardList<T>({
 			)
 		}
 
+		if (fitsWithoutScroll) {
+			return (
+				<div className="gap-y-3 pb-1 flex flex-wrap">
+					{items.map((item) => (
+						<div key={keyExtractor(item)} className="px-1.5">
+							{renderItem(item, cardWidth)}
+						</div>
+					))}
+				</div>
+			)
+		}
+
 		return (
 			<Virtuoso
 				scrollerRef={scrollerRef}
@@ -109,7 +138,7 @@ export default function MultiRowHorizontalCardList<T>({
 				itemContent={(_, column) => (
 					<div className="gap-3 px-1.5 pb-1 flex flex-col">
 						{column.map((item) => (
-							<div key={keyExtractor(item)}>{renderItem(item)}</div>
+							<div key={keyExtractor(item)}>{renderItem(item, cardWidth)}</div>
 						))}
 					</div>
 				)}
@@ -126,7 +155,7 @@ export default function MultiRowHorizontalCardList<T>({
 				{typeof title === 'string' ? <Heading size="sm">{title}</Heading> : title}
 				<div
 					className={cn('self-end', {
-						hidden: !items.length || (!canSkipBackward && !canSkipForward),
+						hidden: !items.length || fitsWithoutScroll || (!canSkipBackward && !canSkipForward),
 					})}
 				>
 					<div className="gap-2 flex">

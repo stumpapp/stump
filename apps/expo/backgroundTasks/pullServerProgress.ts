@@ -121,9 +121,27 @@ export const executeSingleServerPullSync = async (
 			continue
 		}
 
-		// no progress = skip (nothing to pull)
 		const progress = media.readProgress
-		if (!progress) continue
+		if (!progress) {
+			const hadSyncedServerSession =
+				localProgress?.lastSyncedSessionId != null ||
+				localProgress?.lastPulledSessionUpdatedAt != null
+			// if we don't have either, this could just be offline progress the server has never seen
+			// so i don't want to delete it just because there's no remote cursor
+			if (localProgress?.syncStatus === syncStatus.enum.SYNCED && hadSyncedServerSession) {
+				try {
+					await db.delete(readProgress).where(eq(readProgress.bookId, media.id))
+				} catch (error) {
+					// i consider this okay, best-effort delete and if it fails it can be retried next sync
+					console.error('Failed to delete local progress after server cursor was cleared', {
+						bookId: media.id,
+						error,
+					})
+					Sentry.captureException(error, { extra: { bookId: media.id } })
+				}
+			}
+			continue
+		}
 
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 

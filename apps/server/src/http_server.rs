@@ -25,7 +25,10 @@ use crate::{
 };
 use stump_core::config::StumpConfig;
 
-pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
+pub async fn run_http_server(mut config: StumpConfig) -> ServerResult<()> {
+	config
+		.normalize_base_path()
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 	let core = StumpCore::new(config.clone()).await;
 
 	// TODO: These need reorganizing, the core-specific initializations should just be
@@ -133,7 +136,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
+	tracing::info!(
+		"⚡️ Stump HTTP server starting on http://{}{}/",
+		addr,
+		config.base_path
+	);
 
 	// TODO: Experiment with higher concurrency, YEARS ago at this point (before enforcing WAL even)
 	// I experienced multi-writer issues but perhaps with SeaORM + WAL we can have parallel scans.

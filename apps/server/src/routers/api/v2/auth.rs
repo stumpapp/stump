@@ -215,7 +215,7 @@ async fn login(
 	Json(PasswordUserInput { username, password }): Json<PasswordUserInput>,
 ) -> APIResult<Json<LoginResponse>> {
 	let config = state.config.clone();
-	let service = ServiceContext::new(details.host, details.scheme);
+	let service = ServiceContext::from(details);
 
 	let is_oidc_only_auth = config
 		.oidc
@@ -382,7 +382,7 @@ pub async fn register(
 	Json(input): Json<PasswordUserInput>,
 ) -> APIResult<Json<AuthUser>> {
 	let config = ctx.config.clone();
-	let service = ServiceContext::new(details.host, details.scheme);
+	let service = ServiceContext::from(details);
 
 	let is_oidc_only_auth = config
 		.oidc

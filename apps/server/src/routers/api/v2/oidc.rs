@@ -392,7 +392,9 @@ async fn callback(
 				APIError::InternalServerError("Session error".to_string())
 			})?;
 		tracing::debug!(user_id = %user_model.id, "Created session for OIDC user");
-		Ok(OidcCallbackResponse::Redirect(Redirect::temporary("/")))
+		Ok(OidcCallbackResponse::Redirect(Redirect::temporary(
+			&format!("{}/", ctx.config.base_path),
+		)))
 	}
 }
 
@@ -441,11 +443,44 @@ async fn get_frontend_url(
 		APIError::InternalServerError("Missing server config".to_string()),
 	)?;
 
-	Ok(config
+	let public_url = config
 		.public_url
 		.map(|url| url.trim().trim_end_matches('/').to_string())
-		.filter(|url| !url.is_empty())
-		.unwrap_or_else(|| service.url()))
+		.filter(|url| !url.is_empty());
+
+	Ok(match public_url {
+		Some(url) => append_base_path(&url, &service.base_path),
+		None => service.url(),
+	})
+}
+
+fn append_base_path(url: &str, base_path: &str) -> String {
+	if base_path.is_empty() {
+		return url.to_string();
+	}
+
+	let authority_end = url.find("://").and_then(|scheme_end| {
+		url[scheme_end + 3..].find('/').map(|i| scheme_end + 3 + i)
+	});
+	let path_start = authority_end.unwrap_or(url.len());
+	let path_end = url[path_start..]
+		.find(['?', '#'])
+		.map(|i| path_start + i)
+		.unwrap_or(url.len());
+	let path = &url[path_start..path_end];
+
+	if path == base_path
+		|| path.starts_with(&format!("{}/", base_path.trim_end_matches('/')))
+	{
+		url.to_string()
+	} else {
+		format!(
+			"{}{}{}",
+			url[..path_end].trim_end_matches('/'),
+			base_path,
+			&url[path_end..]
+		)
+	}
 }
 // ^ the url resolution is opposite to what i do elsewhere, e.g. for epub resource
 // fetching. i _think_ this is correct here tho since the redirects is handled
@@ -476,7 +511,39 @@ mod tests {
 		HostDetails {
 			host: "stump.example.com".to_string(),
 			scheme: "https".to_string(),
+			base_path: String::new(),
 		}
+	}
+
+	#[tokio::test]
+	async fn test_unset_public_url_includes_subpath() {
+		let db = setup_db(None).await;
+		let mut service = service();
+		service.base_path = "/stump".to_string();
+		assert_eq!(
+			get_frontend_url(&db, service).await.unwrap(),
+			"https://stump.example.com/stump"
+		);
+	}
+
+	#[test]
+	fn public_url_includes_base_path_without_duplicating_it() {
+		assert_eq!(
+			append_base_path("https://stump.example.com", "/stump"),
+			"https://stump.example.com/stump"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com/proxy", "/stump"),
+			"https://stump.example.com/proxy/stump"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com/stump/", "/stump"),
+			"https://stump.example.com/stump/"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com", ""),
+			"https://stump.example.com"
+		);
 	}
 
 	#[tokio::test]

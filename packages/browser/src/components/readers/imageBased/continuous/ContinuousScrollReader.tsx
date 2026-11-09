@@ -8,6 +8,7 @@ import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { publicUrl } from '@/utils/publicUrl'
 
 import { ImageReaderBookRef } from '../context'
 
@@ -175,7 +176,7 @@ const Page = ({ page, src, imageScaling: { scaleToFit }, onPageClick }: PageProp
 		src={src}
 		onError={(err) => {
 			// @ts-expect-error: is oke
-			err.target.src = '/favicon.png'
+			err.target.src = publicUrl('/assets/favicon.png')
 		}}
 		onClick={onPageClick}
 	/>

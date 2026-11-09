@@ -31,6 +31,19 @@ describe('Api', () => {
 	})
 
 	describe('getters and setters', () => {
+		it.each(['', '/stump', '/apps/api/stump', '/apps/stump/api'])(
+			'preserves the server prefix %s in API and OPDS URLs',
+			(prefix) => {
+				const rootURL = `https://example.org${prefix}`
+				const api = new Api({ baseURL: `${rootURL}/api` })
+				expect(api.serviceURL).toBe(`${rootURL}/api/v2`)
+				expect(api.rootURL).toBe(rootURL)
+				expect(api.eventSourceURL).toBe(`${rootURL}/sse`)
+				expect(api.opds.config.baseURL).toBe(rootURL)
+				expect(api.opdsLegacy.config.baseURL).toBe(rootURL)
+			},
+		)
+
 		it('should properly format the service URL', () => {
 			const api = new Api({ baseURL: 'http://localhost:10801', authMethod: 'session' })
 			expect(api.serviceURL).toBe('http://localhost:10801/api/v2')

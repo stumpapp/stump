@@ -21,6 +21,7 @@ import { z } from 'zod'
 
 import { useTranslate } from '@/hooks/useTranslate'
 import { useAppStore, useUserStore } from '@/stores'
+import { publicUrl } from '@/utils/publicUrl'
 
 // TODO: redirect away if the user is already logged in
 export default function LoginOrClaimScene() {
@@ -52,7 +53,7 @@ export default function LoginOrClaimScene() {
 				exact: false,
 			})
 			if (redirect.includes('/api')) {
-				window.location.href = redirect
+				window.location.href = `${sdk.rootURL}${redirect}`
 			} else {
 				navigate(redirect, { replace: true })
 			}
@@ -138,7 +139,7 @@ export default function LoginOrClaimScene() {
 			>
 				<div className="gap-8 p-4 flex h-full w-full flex-col items-center justify-center bg-background">
 					<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
-						<img src="/assets/favicon.png" width="80" height="80" />
+						<img src={publicUrl('/assets/favicon.png')} width="80" height="80" />
 						<Heading variant="gradient" size="3xl" className="font-bold">
 							Stump
 						</Heading>

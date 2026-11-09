@@ -19,6 +19,7 @@ const X_FORWARDED_FOR: &str = "X-Forwarded-For";
 pub struct HostDetails {
 	pub host: String,
 	pub scheme: String,
+	pub base_path: String,
 }
 
 impl Default for HostDetails {
@@ -26,16 +27,17 @@ impl Default for HostDetails {
 		HostDetails {
 			host: "localhost".to_string(),
 			scheme: "http".to_string(),
+			base_path: String::new(),
 		}
 	}
 }
 
 impl HostDetails {
 	pub fn url(&self) -> String {
-		format!("{}://{}", self.scheme, self.host)
+		format!("{}://{}{}", self.scheme, self.host, self.base_path)
 	}
 
-	/// Join an origin with an application path without duplicate boundary slashes.
+	/// Join the server base URL with an application path without duplicate boundary slashes.
 	pub fn url_for_path(&self, path: &str) -> String {
 		format!(
 			"{}/{}",
@@ -81,7 +83,11 @@ where
 				|| parts.headers.contains_key(FORWARDED));
 		let host = resolve_host(host.0, &scheme, app_state.config.port, via_proxy);
 
-		Ok(HostExtractor(HostDetails { host, scheme }))
+		Ok(HostExtractor(HostDetails {
+			host,
+			scheme,
+			base_path: app_state.config.base_path.clone(),
+		}))
 	}
 }
 
@@ -383,5 +389,46 @@ mod tests {
 	fn test_no_append_port_ipv4_default() {
 		let result = resolve_host("192.168.1.100".to_string(), "https", 443, false);
 		assert_eq!(result, "192.168.1.100");
+	}
+}
+
+impl From<HostDetails> for graphql::data::ServiceContext {
+	fn from(details: HostDetails) -> Self {
+		Self {
+			host: details.host,
+			scheme: details.scheme,
+			base_path: details.base_path,
+		}
+	}
+}
+
+#[cfg(test)]
+mod subpath_tests {
+	use super::*;
+
+	#[test]
+	fn generated_urls_include_the_base_path() {
+		let host = HostDetails {
+			host: "example.org".into(),
+			scheme: "https".into(),
+			base_path: "/mysubpath/mysvc".into(),
+		};
+		assert_eq!(
+			host.url_for_path("/api/v2/epub/123"),
+			"https://example.org/mysubpath/mysvc/api/v2/epub/123"
+		);
+		let service = graphql::data::ServiceContext::from(host.clone());
+		assert_eq!(
+			service.format_url("/api/v2/users/123/avatar"),
+			"https://example.org/mysubpath/mysvc/api/v2/users/123/avatar"
+		);
+		assert_eq!(
+			service.format_url("https://external.org/image.jpg"),
+			"https://external.org/image.jpg"
+		);
+		assert_eq!(
+			OPDSLinkFinalizer::from(host).format_link("/opds/v2.0/libraries"),
+			"https://example.org/mysubpath/mysvc/opds/v2.0/libraries"
+		);
 	}
 }

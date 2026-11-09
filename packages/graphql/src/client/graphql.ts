@@ -4801,6 +4801,8 @@ export type StumpConfig = {
   accessTokenTtl: Scalars['Int']['output'];
   /** A comma-separated list of origins for CORS */
   allowedOrigins: Array<Scalars['String']['output']>;
+  /** URL path under which the entire server is served (e.g. "/stump"). */
+  basePath: Scalars['String']['output'];
   /**
    * The directory where the web app bundle lives, which the server will serve as
    * static files

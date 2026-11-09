@@ -279,6 +279,7 @@ fn pagination_href(base_url: &str, pagination: &OffsetPagination, page: u64) -> 
 async fn auth(HostExtractor(host): HostExtractor) -> APIResult<OPDSAuthDocWrapper> {
 	Ok(OPDSAuthDocWrapper(
 		OPDSAuthenticationDocumentBuilder::default()
+			.id(host.url_for_path("/opds/v2.0/auth"))
 			.description(OPDSSupportedAuthFlow::Basic.description().to_string())
 			.links(vec![
 				OPDSLink::help(),

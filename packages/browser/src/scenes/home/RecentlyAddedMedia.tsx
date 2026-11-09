@@ -2,6 +2,7 @@ import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
@@ -87,7 +88,13 @@ function RecentlyAddedMedia() {
 			title={translate('shared.homeSections.recentlyAddedBooks.label')}
 			items={nodes}
 			keyExtractor={(node) => node.id}
-			renderItem={(node) => <SimpleBookCard book={node} cardWidth={cardWidth} />}
+			renderItem={(node) => (
+				<SimpleBookCard
+					book={node}
+					cardWidth={cardWidth}
+					subtitle={(data) => formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
+				/>
+			)}
 			cardHeight={cardHeight}
 			cardWidth={cardWidth}
 			onFetchMore={handleFetchMore}

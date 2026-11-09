@@ -1,6 +1,5 @@
 import { Link, Text } from '@stump/components'
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { formatDistanceToNow } from 'date-fns'
+import { FragmentType, graphql, SimpleBookCardFragment, useFragment } from '@stump/graphql'
 import { memo, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
 
@@ -33,12 +32,9 @@ const fragment = graphql(`
 type Props = {
 	book: FragmentType<typeof fragment>
 	cardWidth?: number
-	subtitle?: React.ReactNode
+	/** will render in a text with shadow regardless of what is provided, to be constrasty against thumb gradient */
+	subtitle?: string | React.ReactNode | ((data: SimpleBookCardFragment) => React.ReactNode)
 }
-
-// TODO: yoinked this from recently added media since i think it is the style i want, leaving the subtitle default
-// logic as-is but i thikn landing on it eventually i'll just make recently added handle the formatting instead
-// of it being opinionated in here
 
 export const SimpleBookCard = memo(function SimpleBookCard({ book, subtitle, ...props }: Props) {
 	const data = useFragment(fragment, book)
@@ -65,6 +61,20 @@ export const SimpleBookCard = memo(function SimpleBookCard({ book, subtitle, ...
 	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
 
 	const prefetch = () => Promise.all([prefetchBook(data.id), prefetchBooksAfterCursor(data.id)])
+
+	const renderSubtitle = () => {
+		if (!subtitle) return null
+		return (
+			<Text
+				className="mt-0.5 text-xs text-gray-200"
+				style={{
+					textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+				}}
+			>
+				{typeof subtitle === 'function' ? subtitle(data) : subtitle}
+			</Text>
+		)
+	}
 
 	return (
 		<Link
@@ -95,18 +105,7 @@ export const SimpleBookCard = memo(function SimpleBookCard({ book, subtitle, ...
 					{data.resolvedName}
 				</Text>
 
-				{subtitle == undefined ? (
-					<Text
-						className="mt-0.5 text-xs text-gray-200"
-						style={{
-							textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-						}}
-					>
-						{formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
-					</Text>
-				) : (
-					subtitle
-				)}
+				{renderSubtitle()}
 			</div>
 		</Link>
 	)

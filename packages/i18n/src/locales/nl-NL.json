@@ -130,9 +130,9 @@
 				"stepLabel": "Stap",
 				"steps": [
 					{
-						"label": "Basics",
+						"label": "Basis",
 						"heading": "Basisinformatie",
-						"description": "The details of the club, including its name and description"
+						"description": "De details van de vereniging, inclusief de naam en omschrijving"
 					},
 					{
 						"label": "Rollen",
@@ -141,13 +141,13 @@
 					},
 					{
 						"label": "Lidmaatschap",
-						"heading": "Membership Preferences",
-						"description": "Additional options for your book club"
+						"heading": "Lidmaatschap Voorkeuren",
+						"description": "Additionele opties voor je boek vereniging"
 					},
 					{
-						"label": "Review",
-						"heading": "Review",
-						"description": "Review your club settings before creating it"
+						"label": "Beoordeling",
+						"heading": "Beoordeling",
+						"description": "Beoordeel je vereniging instellingen voor het aanmaken"
 					}
 				],
 				"review": {
@@ -182,7 +182,7 @@
 					"deleteClub": {
 						"description": [
 							"Verwijder permanent deze boekenclub en alle inhoud ervan.",
-							"This action cannot be undone"
+							"Deze actie kan niet ongedaan gemaakt worden"
 						]
 					}
 				}
@@ -528,7 +528,7 @@
 				"sections": {
 					"themeSelect": {
 						"description": [
-							"If you're interested in creating your own custom theme, check out the",
+							"Als u geïnteresseerd bent in het maken van uw eigen aangepaste thema, bekijk dan de",
 							"documentatie"
 						],
 						"options": {
@@ -595,7 +595,7 @@
 							"confirmation": {
 								"trigger": "Clear authentication",
 								"title": "Clear authentication",
-								"description": "This will remove all securely-stored access tokens for your servers",
+								"description": "Weet u zeker dat u alle opgeslagen tokens wilt verwijderen?",
 								"confirm": "Clear authentication"
 							}
 						}
@@ -623,7 +623,7 @@
 					"permissions": {
 						"file": {
 							"explorer": {
-								"label": "File Explorer",
+								"label": "Bestandsverkenner",
 								"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
 							}
 						},
@@ -634,7 +634,7 @@
 						},
 						"smartlist": {
 							"read": {
-								"description": "Allows the user to access smart lists features"
+								"description": "Hiermee kan de gebruiker toegang krijgen tot functies van slimme lijsten. Granulaire machtigingen zijn nog niet geïmplementeerd, dus dit\nbevat machtigingen om hun eigen lijsten te lezen, te maken en bij te werken"
 							}
 						}
 					}
@@ -766,7 +766,7 @@
 				"heading": "Server niet beschikbaar",
 				"reconnected": "Opnieuw verbonden met server! Doorsturen...",
 				"reconnectionFailed": "Er is iets misgegaan!",
-				"message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
+				"message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat"
 			}
 		},
 		"serverSettings": {
@@ -798,7 +798,204 @@
 				"label": "Automatisch omschakelen naar Lokaal Profiel",
 				"description": "Schakel naar het lokale profiel wanneer u kunt"
 			},
-			"localUrl": "Lokale URL"
+			"localUrl": "Lokale URL",
+			"saveUrlChanges": "Bewaar URL Aanpassingen",
+			"swapUrls": {
+				"label": "Verander URLs",
+				"swap": "Verander",
+				"confirmationText": "Weet je het zeker dat je de URLs wil omwisselen? Dit wordt meteen actief gemaakt",
+				"noLocalUrlSet": {
+					"title": "Geen lokale URL ingesteld",
+					"description": "U moet een lokale URL instellen voordat u deze kunt verwisselen naar de externe URL"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wifi Netwerk",
+				"noAssociatedNetwork": "Geen Bijbehorend Wifi Netwerk",
+				"notConnectedToWifi": "Je bent niet verbonden met wifi. Maak verbinding met een lokaal netwerk om het lokale profiel te voltooien",
+				"connectedTip": "Als het huidige netwerk niet wordt vermeld, moet u mogelijk Stump toestemming geven om toegang te krijgen tot uw locatie",
+				"addNetwork": "Voeg toe: \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Toestemmingen Niet Toegekend",
+					"description": "U moet locatietoestemming verlenen om toegang te krijgen tot het actieve wifi-netwerk"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Locatie Toestemming Mislukt",
+					"description": "De app heeft geen rechten gekregen om toegang te krijgen tot uw locatie. Controleer de instellingen van uw apparaat en probeer het opnieuw"
+				},
+				"requestPermission": "Locatiemachtiging aanvragen",
+				"removeWifi": {
+					"label": "Verwijder",
+					"confirmationText": "Weet u zeker dat u het netwerk '{{ssid}}}' uit het lokale profiel wilt verwijderen?"
+				}
+			}
+		},
+		"tabs": {
+			"servers": "Servers",
+			"localLibrary": "Bibliotheek",
+			"settings": "Instellingen",
+			"browse": "Bladeren",
+			"clubs": "Verenigingen",
+			"activity": "Activiteiten",
+			"stats": "Statistieken"
+		},
+		"localLibrary": {
+			"title": "Lokale Bibliotheek",
+			"emptyState": {
+				"all": {
+					"title": "Nog niets te lezen",
+					"description": "Zodra je boeken hebt voor offline lezen, zullen ze hier verschijnen"
+				},
+				"imported": {
+					"title": "Geen geïmporteerde boeken",
+					"description": "Importeer boeken om ze offline te lezen"
+				},
+				"server": {
+					"title": "Geen gedownloade boeken",
+					"description": "Download boeken uit je bibliotheek om ze offline te lezen"
+				}
+			},
+			"downloadQueue": {
+				"downloading": "Downloaden",
+				"failed": "Mislukt",
+				"nothingDownloading": "Er wordt niets gedownload",
+				"noActiveDownloads": "Geen actieve downloads",
+				"noFailedDownloads": "Geen mislukte downloads",
+				"downloadStarting": "Starten..."
+			},
+			"downloadsHeaderMenu": {
+				"deleteAllDownloads": {
+					"label": "Verwijder Boeken",
+					"confirmation": "Weet u zeker dat u uw lokale bibliotheek wilt verwijderen?",
+					"disclaimer": "Deze actie kan niet ongedaan worden gemaakt."
+				},
+				"seeProblems": "Zie Problemen ({{problemCount}})",
+				"hideCurated": "Verberg Samengesteld",
+				"showCurated": "Toon Samengesteld",
+				"attemptSync": "Probeer Synchronisatie",
+				"syncConflicts": "Synchronisatie Conflicten"
+			},
+			"downloadsHeaderSortMenu": {
+				"sourceFilter": {
+					"all": "Alle Boeken",
+					"server": "Gedownload",
+					"imported": "Geïmporteerd"
+				}
+			},
+			"downloadProblemsSheet": {
+				"title": "Mislukte Downloads",
+				"noFailedDownloads": "Geen Mislukte Downloads",
+				"retryAll": "Herhaal Alles",
+				"dismissAll": "Alles afwijzen"
+			}
+		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Synchronisatie overgeslagen voor {{skippedCount}} server",
+				"skippedMultipleServers": "Synchronisatie overgeslagen voor {{skippedCount}} servers",
+				"explanation": "Sommige servers gebruiken authenticatiemethoden die niet automatisch kunnen worden vernieuwd"
+			},
+			"syncFailed": "Niet in geslaagd om offline voortgang te synchroniseren"
+		},
+		"syncConflicts": {
+			"title": "Synchronisatie Conflicten",
+			"remainingCount": "{{remainingCount}} Resterend",
+			"noConflicts": {
+				"title": "Geen Synchronisatie Conflicten",
+				"description": "Al uw lokale vorderingen zijn synchroon op hun servers"
+			},
+			"lastCommonSession": "Laatste Gemeenschappelijke Sessie",
+			"localSession": "Lokale Sessie",
+			"remoteSessionWithId": "Sessie op afstand {{sessionId}}",
+			"noCommonSession": "Geen Gemeenschappelijke Leesgeschiedenis",
+			"noRemoteSessions": "Geen sessies op afstand",
+			"divergentProgress": {
+				"title": "Uiteenlopende Vooruitgang",
+				"description": "De laatste gemeenschappelijke sessie werd aangepast op de server na uw laatste synchronisatie"
+			},
+			"noCommonReadingHistory": {
+				"title": "Geen Gemeenschappelijke Leesgeschiedenis",
+				"description": "Dit boek had geen gesynchroniseerde geschiedenis toen je offline begon te lezen"
+			},
+			"acceptSource": {
+				"local": "Accepteer lokaal",
+				"remote": "Accepteer Op Afstand",
+				"both": "Accepteer Beide"
+			},
+			"pullError": "Niet in geslaagd om remote vooruitgang op te halen"
+		},
+		"search": {
+			"label": "Zoek in deze server",
+			"description": "Specifieke inhoud op deze server zoeken"
+		},
+		"settings": {
+			"preferences": {
+				"label": "Voorkeuren",
+				"appTheme": {
+					"label": "Thema",
+					"options": {
+						"light": "Licht",
+						"dark": "Donker",
+						"system": "Systeem"
+					}
+				},
+				"appPrimaryColor": {
+					"label": "Kleur",
+					"options": {
+						"chromaScale": "Chroma schaal",
+						"hues": {
+							"red": "Rood",
+							"orange": "Oranje",
+							"amber": "Amber",
+							"yellow": "Geel",
+							"lime": "Limoen",
+							"green": "Groen",
+							"emerald": "Smaragdgroen",
+							"teal": "Groenblauw",
+							"cyan": "Cyaan",
+							"sky": "Hemel",
+							"blue": "Blauw",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Paars",
+							"fuchsia": "Fuchsia",
+							"pink": "Roze",
+							"rose": "Rosé",
+							"slate": "Leisteen",
+							"gray": "Grijs",
+							"zinc": "Zink",
+							"neutral": "Neutraal",
+							"stone": "Steen"
+						}
+					}
+				},
+				"appLanguage": "Taal",
+				"defaultServer": "Standaard Server",
+				"thumbnailRatio": "Miniatuurverhouding",
+				"thumbnailPlaceholder": {
+					"label": "Miniatuur Plaatsaanduiding",
+					"options": {
+						"grayscale": "Grijstinten",
+						"averageColor": "Gemiddelde Kleur",
+						"colorful": "Kleurrijk"
+					}
+				},
+				"thumbnailResizeMode": {
+					"label": "Miniatuur Formaat Wijzigen"
+				}
+			},
+			"reading": {
+				"maxPageViewingSeconds": {
+					"errors": {
+						"minimumValue": "Moet tenminste 1 seconde zijn",
+						"integer": "Moet een getal zijn"
+					}
+				}
+			},
+			"stump": {
+				"label": "Stump",
+				"description": "Functies in Stump zijn optioneel en kunnen worden uitgeschakeld als u ze niet nodig hebt"
+			}
 		}
 	}
 }

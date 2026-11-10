@@ -70,25 +70,40 @@ export default function LibrarySeriesScene({
 		library: { id, name },
 	} = useLibraryContext()
 	const layoutKey = `library-${id}-series${layoutKeyPostfix ? `-${layoutKeyPostfix}` : ''}`
-	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
-		useSeriesLayout(
-			layoutKey,
-			useShallow((state) => ({
-				columns: state.columns,
-				layoutMode: state.layout,
-				persistedOrdering: state.ordering,
-				setColumns: state.setColumns,
-				setLayout: state.setLayout,
-				setPersistedOrdering: state.setOrdering,
-			})),
-		)
+	const {
+		layoutMode,
+		setLayout,
+		columns,
+		setColumns,
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	} = useSeriesLayout(
+		layoutKey,
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			persistedOrdering: state.ordering,
+			persistedPageSize: state.pageSize,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+			setPersistedOrdering: state.setOrdering,
+			setPersistedPageSize: state.setPageSize,
+		})),
+	)
 	const {
 		filters: seriesFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
+	} = useFilterScene({
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	})
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const filters = seriesFilters as SeriesFilterInput
 	const orderBy = useSeriesURLOrderBy(ordering)

@@ -13,10 +13,7 @@ async-trait.workspace = true
 axum.workspace = true
 axum-macros = "0.5.0"
 axum_typed_multipart = "0.15.1"
-axum-extra = { version = "0.10.0", features = [
-  "typed-header",
-  "query",
-] }
+axum-extra = { version = "0.10.0", features = ["typed-header", "query"] }
 base64.workspace = true
 bcrypt.workspace = true
 cli = { path = "../../crates/cli" }
@@ -25,6 +22,7 @@ models = { path = "../../crates/models" }
 futures-util.workspace = true
 graphql = { path = "../../crates/graphql" }
 hyper = "0.14.27"
+i18n = { path = "../../crates/i18n" }
 infer.workspace = true
 itertools.workspace = true
 jsonwebtoken = "9.3.0"
@@ -32,9 +30,10 @@ linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602af
 local-ip-address = "0.6.2"
 openidconnect = { version = "4.0.1", default-features = false }
 oauth2-reqwest = { version = "0.1.0-alpha.3" }
-prefixed-api-key = { workspace = true}
+prefixed-api-key = { workspace = true }
 rand = { workspace = true }
 reqwest.workspace = true
+
 sea-orm.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -47,11 +46,11 @@ apalis.workspace = true
 apalis-cron.workspace = true
 tempfile = "3.13.0"
 tower-http = { version = "0.5.2", features = [
-  "fs",
-  "cors",
-  "set-header",
-  "trace",
-  "compression-full"
+    "fs",
+    "cors",
+    "set-header",
+    "trace",
+    "compression-full",
 ] }
 thiserror.workspace = true
 time = "0.3.36"

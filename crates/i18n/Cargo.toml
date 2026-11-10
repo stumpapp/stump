@@ -1,0 +1,8 @@
+[package]
+name = "i18n"
+edition = "2024"
+version.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rust-i18n.workspace = true

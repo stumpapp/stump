@@ -3762,52 +3762,5 @@
         }
       }
     }
-  },
-  "opds":   {
-    "catalog": "Stump OPDS 目录",
-    "catalogV2": "Stump OPDS V2 目录",
-    "keepReading": {
-      "title": "继续阅读",
-      "description": "继续阅读你正在读的书"
-    },
-    "allSeries": {
-      "title": "全部系列",
-      "description": "按系列浏览"
-    },
-    "latestSeries": {
-      "title": "最新系列",
-      "description": "浏览最新系列"
-    },
-    "allLibraries": {
-      "title": "全部书库",
-      "description": "按书库浏览"
-    },
-    "allBooks": {
-      "title": "全部书籍",
-      "description": "浏览全部书籍"
-    },
-    "latestBooks": {
-      "title": "最新书籍",
-      "description": "浏览最新书籍"
-    },
-    "searchResults": "搜索结果",
-    "keepReadingFeed": "继续阅读",
-    "allSeriesFeed": "全部系列",
-    "latestSeriesFeed": "最新系列",
-    "allBooksFeed": "全部书籍",
-    "latestBooksFeed": "最新书籍",
-    "libraries": "书库",
-    "series": "系列",
-    "books": "书籍",
-    "currentlyReading": "正在阅读",
-    "browseLibraries": "浏览书库",
-    "browseSeries": "浏览系列",
-    "browseBooks": "浏览书籍",
-    "libraryBooksAll": "书库书籍 - 全部",
-    "libraryBooksLatest": "书库书籍 - 最新",
-    "librarySeries": "书库系列",
-    "seriesSuffix": "系列",
-    "seriesFallbackPrefix": "系列 ",
-    "search": "搜索"
   }
 }

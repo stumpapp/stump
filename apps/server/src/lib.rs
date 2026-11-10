@@ -1,7 +1,5 @@
 #![warn(clippy::dbg_macro)]
 
-rust_i18n::i18n!("../../packages/i18n/src/locales", fallback = "en-US");
-
 pub mod config;
 pub mod errors;
 pub mod http_server;

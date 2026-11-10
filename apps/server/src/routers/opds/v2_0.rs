@@ -1,17 +1,17 @@
 use std::path::PathBuf;
 
 use axum::{
+	Extension, Json, Router,
 	extract::{Path, Query, State},
-	http::{header, HeaderMap, HeaderValue},
+	http::{HeaderMap, HeaderValue, header},
 	middleware,
 	response::IntoResponse,
 	routing::get,
-	Extension, Json, Router,
 };
 use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	domain::reading_progress::compute_page_based_percentage,
-	services::reading_progress::{upsert_reading_session, NormalizedProgression},
+	services::reading_progress::{NormalizedProgression, upsert_reading_session},
 };
 use models::{
 	entity::{
@@ -20,19 +20,19 @@ use models::{
 	},
 	shared::enums::ReadingStatus,
 };
-use rust_i18n::t;
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, ExprTrait, Order,
-	QueryOrder, QueryTrait, TransactionTrait,
+	ActiveValue::Set, Condition, ExprTrait, Order, QueryOrder, QueryTrait,
+	TransactionTrait, prelude::*, sea_query::Expr,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
+	Ctx,
 	media::processor::get_page,
 	opds::v2_0::{
 		authentication::{
-			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
-			OPDSSupportedAuthFlow, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+			OPDS_AUTHENTICATION_DOCUMENT_TYPE, OPDSAuthenticationDocument,
+			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
 		},
 		entity::{OPDSProgressionEntity, OPDSPublicationEntity},
 		feed::{OPDSFeed, OPDSFeedBuilder},
@@ -46,10 +46,8 @@ use stump_core::{
 		publication::OPDSPublication,
 	},
 	utils::chain_optional_iter,
-	Ctx,
 };
 
-use super::opds_locale;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
@@ -185,11 +183,7 @@ impl OPDSBrowseFilter {
 			}
 		}
 
-		if has_filter {
-			Some(condition)
-		} else {
-			None
-		}
+		if has_filter { Some(condition) } else { None }
 	}
 
 	/// Generate a query string from the filter, used for the browse links
@@ -301,7 +295,6 @@ async fn catalog(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let libraries = library::Entity::find_for_user(&user)
@@ -314,7 +307,7 @@ async fn catalog(
 	let library_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.libraries", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.libraries").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_count)
@@ -357,7 +350,7 @@ async fn catalog(
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.latestBooksFeed", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.latestBooksFeed").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(latest_books_count)
@@ -400,7 +393,7 @@ async fn catalog(
 	let keep_reading_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.keepReadingFeed", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.keepReadingFeed").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(continue_reading_count)
@@ -423,7 +416,7 @@ async fn catalog(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(t!("opds.catalogV2", locale = locale.as_str()).to_string())
+					.title(i18n::translate!(&req, "opds.catalogV2").to_string())
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
@@ -443,15 +436,17 @@ async fn catalog(
 					.templated(true)
 					.build()?.as_link(),
 			]))
-			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title(t!("opds.libraries", locale = locale.as_str()).to_string())
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href(link_finalizer.format_link("/opds/v2.0/libraries"))
-						.rel(OPDSLinkRel::Subsection.item())
-						.build()?,
-				)
-				.build()?])
+			.navigation(vec![
+				OPDSNavigationLinkBuilder::default()
+					.title(i18n::translate!(&req, "opds.libraries").to_string())
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href(link_finalizer.format_link("/opds/v2.0/libraries"))
+							.rel(OPDSLinkRel::Subsection.item())
+							.build()?,
+					)
+					.build()?,
+			])
 			.groups(vec![library_group, latest_books_group, keep_reading_group])
 			.build()?,
 	))
@@ -465,7 +460,6 @@ async fn search(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 	let query = query.ok_or(APIError::BadRequest(
 		"Query parameter is required".to_string(),
@@ -484,7 +478,7 @@ async fn search(
 	let library_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.libraries", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.libraries").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_count)
@@ -527,7 +521,7 @@ async fn search(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.series", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.series").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(series_count)
@@ -573,7 +567,7 @@ async fn search(
 	let books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.books", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.books").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(books_count)
@@ -596,7 +590,12 @@ async fn search(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(format!("{} - {}", t!("opds.search", locale = locale.as_str()), query.clone()))
+					.title(format!(
+						"{} - {}",
+						i18n::translate!(&req, "opds.search"),
+						query.clone()
+					))
+					// TODO: too tired rn but should be a template value in locale imo
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
@@ -627,7 +626,6 @@ async fn browse_libraries(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
-	let locale = opds_locale(&req);
 
 	let take = pagination.limit();
 
@@ -653,7 +651,7 @@ async fn browse_libraries(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.series", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.series").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(series_count)
@@ -710,7 +708,7 @@ async fn browse_libraries(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(t!("opds.browseLibraries", locale = locale.as_str()).to_string())
+					.title(i18n::translate!(&req, "opds.browseLibraries").to_string())
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(library_count)
@@ -757,7 +755,6 @@ async fn browse_library_by_id(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
-	let locale = opds_locale(&req);
 
 	let library = library::Entity::find_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
@@ -780,7 +777,7 @@ async fn browse_library_by_id(
 	let books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.libraryBooksAll", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.libraryBooksAll").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_books_count)
@@ -816,7 +813,7 @@ async fn browse_library_by_id(
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.libraryBooksLatest", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.libraryBooksLatest").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_books_count)
@@ -856,7 +853,7 @@ async fn browse_library_by_id(
 	let series_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
-				.title(t!("opds.librarySeries", locale = locale.as_str()).to_string())
+				.title(i18n::translate!(&req, "opds.librarySeries").to_string())
 				.pagination(Some(
 					OPDSPaginationMetadataBuilder::default()
 						.number_of_items(library_series_count)
@@ -890,19 +887,22 @@ async fn browse_library_by_id(
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			)]))
-			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title(t!("opds.allSeriesFeed", locale = locale.as_str()).to_string())
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href(
-							link_finalizer
-								.format_link(format!("/opds/v2.0/libraries/{id}/series")),
-						)
-						.rel(OPDSLinkRel::Subsection.item())
-						._type(OPDSLinkType::OpdsJson)
-						.build()?,
-				)
-				.build()?])
+			.navigation(vec![
+				OPDSNavigationLinkBuilder::default()
+					.title(i18n::translate!(&req, "opds.allSeriesFeed").to_string())
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href(
+								link_finalizer.format_link(format!(
+									"/opds/v2.0/libraries/{id}/series"
+								)),
+							)
+							.rel(OPDSLinkRel::Subsection.item())
+							._type(OPDSLinkType::OpdsJson)
+							.build()?,
+					)
+					.build()?,
+			])
 			.groups(vec![books_group, latest_books_group, series_group])
 			.build()?,
 	))
@@ -1037,8 +1037,7 @@ async fn browse_library_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
-	let title = t!("opds.libraryBooksAll", locale = locale.as_str());
+	let title = i18n::translate!(&req, "opds.libraryBooksAll");
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1063,8 +1062,7 @@ async fn latest_library_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
-	let title = t!("opds.libraryBooksLatest", locale = locale.as_str());
+	let title = i18n::translate!(&req, "opds.libraryBooksLatest");
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1089,7 +1087,6 @@ async fn browse_library_series(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 	let library = library::Entity::find_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
 		.one(ctx.conn.as_ref())
@@ -1141,7 +1138,12 @@ async fn browse_library_series(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(format!("{} {}", library.name, t!("opds.seriesSuffix", locale = locale.as_str())))
+					.title(format!(
+						"{} {}",
+						library.name,
+						i18n::translate!(&req, "opds.seriesSuffix")
+					))
+					// TODO: too tired rn but should be a template value in locale imo
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(series_count)
@@ -1193,7 +1195,6 @@ async fn browse_series(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 
 	let take = pagination.limit();
 	let series = series::Entity::find_for_user(&user)
@@ -1256,7 +1257,7 @@ async fn browse_series(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(t!("opds.browseSeries", locale = locale.as_str()).to_string())
+					.title(i18n::translate!(&req, "opds.browseSeries").to_string())
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(series_count)
@@ -1287,7 +1288,6 @@ async fn browse_series_by_id(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 
 	let series::ModelWithMetadata { series, metadata } =
 		series::ModelWithMetadata::find_for_user(&user)
@@ -1301,7 +1301,14 @@ async fn browse_series_by_id(
 	let title = metadata
 		.and_then(|m| m.title)
 		.or(Some(name))
-		.unwrap_or_else(|| format!("{}{}", t!("opds.seriesFallbackPrefix", locale = locale.as_str()), id));
+		// TODO: too tired rn but should be a template value in locale imo
+		.unwrap_or_else(|| {
+			format!(
+				"{}{}",
+				i18n::translate!(&req, "opds.seriesFallbackPrefix"),
+				id
+			)
+		});
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1326,7 +1333,6 @@ async fn browse_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
 
 	let filter_query_string = params.filter.to_query_string();
 	let subtitle = params.filter.subtitle();
@@ -1338,7 +1344,7 @@ async fn browse_books(
 	};
 
 	let condition = params.filter.into_condition();
-	let title = t!("opds.browseBooks", locale = locale.as_str());
+	let title = i18n::translate!(&req, "opds.browseBooks");
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1363,8 +1369,7 @@ async fn latest_books(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
-	let title = t!("opds.latestBooksFeed", locale = locale.as_str());
+	let title = i18n::translate!(&req, "opds.latestBooksFeed");
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1392,8 +1397,7 @@ async fn keep_reading(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let locale = opds_locale(&req);
-	let title = t!("opds.currentlyReading", locale = locale.as_str());
+	let title = i18n::translate!(&req, "opds.currentlyReading");
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	fetch_books_and_generate_feed(

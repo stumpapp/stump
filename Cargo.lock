@@ -4477,6 +4477,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "i18n"
+version = "0.1.12"
+dependencies = [
+ "rust-i18n",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9825,6 +9832,7 @@ dependencies = [
  "futures-util",
  "graphql",
  "hyper 0.14.27",
+ "i18n",
  "infer",
  "itertools 0.14.0",
  "jsonwebtoken",
@@ -9838,7 +9846,6 @@ dependencies = [
  "prefixed-api-key",
  "rand 0.9.2",
  "reqwest",
- "rust-i18n",
  "sea-orm",
  "serde",
  "serde-untagged",

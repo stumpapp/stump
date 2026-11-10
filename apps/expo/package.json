@@ -103,7 +103,6 @@
 		"react-dom": "19.3.0",
 		"react-native": "0.88.1",
 		"react-native-easing-gradient": "^1.1.1",
-		"react-native-edge-to-edge": "^1.8.1",
 		"react-native-enriched-markdown": "^1.1.1",
 		"react-native-gesture-handler": "~3.3.0",
 		"react-native-keyboard-controller": "1.22.7",

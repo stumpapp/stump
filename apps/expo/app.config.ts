@@ -27,6 +27,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			},
 			infoPlist: {
 				ITSAppUsesNonExemptEncryption: false,
+				UIViewControllerBasedStatusBarAppearance: true,
 				NSAppTransportSecurity: {
 					NSAllowsArbitraryLoads: true,
 				},
@@ -86,12 +87,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 		},
-		// TODO(android): this was removed at some point in expo, i think
-		// expo-navigation-bar is the route forward but do not have time
-		// to sort it out
-		// androidNavigationBar: {
-		// 	visible: 'immersive',
-		// },
 		web: {
 			bundler: 'metro',
 			output: 'static',
@@ -195,6 +190,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						gradleProperties: {
 							'org.gradle.jvmargs':
 								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
+							edgeToEdgeEnabled: 'true',
 						},
 						// Note: For i18next and date-fns intlFormat
 						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
@@ -208,6 +204,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						// and the widgets, with no way for me to specify a target, and that causes
 						// build failures
 					},
+				},
+			],
+			[
+				'expo-navigation-bar',
+				{
+					// https://docs.expo.dev/versions/latest/sdk/navigation-bar/#configurable-properties
+					enforceContrast: false,
 				},
 			],
 			[
@@ -230,16 +233,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					organization: 'stumpapp',
 				},
 			],
-			// TODO(expo-54): Figure out if this is still needed
-			// [
-			// 	'react-native-edge-to-edge',
-			// 	{
-			// 		android: {
-			// 			parentTheme: 'Default',
-			// 			enforceNavigationBarContrast: false,
-			// 		},
-			// 	},
-			// ],
 		],
 		owner: 'stumpapp',
 		experiments: {

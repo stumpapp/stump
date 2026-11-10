@@ -54,6 +54,7 @@ async function seedProgress(
 		lastSyncedElapsedSeconds?: number
 		lastModified?: Date
 		lastPulledSessionUpdatedAt?: Date | null
+		lastSyncedSessionId?: number | null
 	} = {},
 ) {
 	await db.insert(readProgress).values({
@@ -67,6 +68,9 @@ async function seedProgress(
 		lastModified: overrides.lastModified ?? new Date(OLDER_DATE),
 		...(overrides.lastPulledSessionUpdatedAt !== undefined
 			? { lastPulledSessionUpdatedAt: overrides.lastPulledSessionUpdatedAt }
+			: {}),
+		...(overrides.lastSyncedSessionId !== undefined
+			? { lastSyncedSessionId: overrides.lastSyncedSessionId }
 			: {}),
 	})
 }
@@ -212,6 +216,46 @@ describe('conflict resolution', () => {
 		const records = await db.select().from(readProgress).where(eq(readProgress.bookId, BOOK_ID))
 		expect(records).toHaveLength(1)
 		expect(records[0]!.page).toBe(10)
+	})
+})
+
+describe('server-cleared progress', () => {
+	it('deletes a synced local cursor when the server no longer has progress', async () => {
+		const db = dbProxy.current
+		const executeSingleServerPullSync = await loadPullProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.SYNCED,
+			lastSyncedSessionId: 12,
+			lastPulledSessionUpdatedAt: new Date(OLDER_DATE),
+		})
+
+		const api = makeMockApi([makeServerMedia({ readProgress: null })])
+		const result = await executeSingleServerPullSync(SERVER_ID, api as never)
+
+		expect(result.failedBookIds).toHaveLength(0)
+		const records = await db.select().from(readProgress).where(eq(readProgress.bookId, BOOK_ID))
+		expect(records).toHaveLength(0)
+	})
+
+	it('preserves unsynced local progress when the server has no cursor', async () => {
+		const db = dbProxy.current
+		const executeSingleServerPullSync = await loadPullProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			lastSyncedSessionId: 12,
+			lastPulledSessionUpdatedAt: new Date(OLDER_DATE),
+		})
+
+		const api = makeMockApi([makeServerMedia({ readProgress: null })])
+		await executeSingleServerPullSync(SERVER_ID, api as never)
+
+		const records = await db.select().from(readProgress).where(eq(readProgress.bookId, BOOK_ID))
+		expect(records).toHaveLength(1)
+		expect(records[0]!.syncStatus).toBe(syncStatus.enum.UNSYNCED)
 	})
 })
 

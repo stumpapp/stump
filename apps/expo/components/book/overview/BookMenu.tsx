@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native'
 import { useGraphQLMutation } from '@stump/client'
 import {
 	BookByIdQuery,
@@ -16,7 +17,7 @@ import { Platform } from 'react-native'
 import { toast } from 'sonner-native'
 
 import { SystemAlert } from '~/components/ui/system-alert'
-import { db, downloadedFiles } from '~/db'
+import { db, downloadedFiles, readProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -128,6 +129,23 @@ export default function BookMenu({ data }: Props) {
 		])
 	}
 
+	const deleteLocalProgress = async () => {
+		try {
+			await db
+				.delete(readProgress)
+				.where(and(eq(readProgress.bookId, book.id), eq(readProgress.serverId, serverID)))
+		} catch (error) {
+			console.error('Failed to delete local progress', {
+				bookId: book.id,
+				serverId: serverID,
+				error,
+			})
+			Sentry.captureException(error, { extra: { bookId: book.id, serverId: serverID } })
+		}
+
+		await onSuccess()
+	}
+
 	const onError = (title: string, error: unknown) => {
 		toast.error(title, {
 			description: extractErrorMessage(error, translate('shared.common.unknownError')),
@@ -135,11 +153,11 @@ export default function BookMenu({ data }: Props) {
 	}
 
 	const { mutate: completeBook } = useGraphQLMutation(completedMutation, {
-		onSuccess,
+		onSuccess: deleteLocalProgress,
 		onError: (error) => onError(translate('shared.bookActions.markAsRead.failure'), error),
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
-		onSuccess,
+		onSuccess: deleteLocalProgress,
 		onError: (error) => onError(translate('shared.bookActions.clearProgress.failure'), error),
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {

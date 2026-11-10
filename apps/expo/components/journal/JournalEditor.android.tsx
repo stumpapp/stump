@@ -24,7 +24,7 @@ export function JournalEditor({
 			multiline
 			textAlignVertical="top"
 			className="text-lg pb-4 w-full text-foreground"
-			style={{ lineHeight }}
+			style={{ lineHeight, minHeight: 96 }}
 			scrollEnabled={false}
 			// ^ otherwise it scrolls internally which i hated
 		/>

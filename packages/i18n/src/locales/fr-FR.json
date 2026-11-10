@@ -1780,8 +1780,83 @@
 	"mobileApp": {
 		"localLibrary": {
 			"downloadQueue": {
-				"nothingDownloading": "Aucun téléchargement en cours"
+				"nothingDownloading": "Aucun téléchargement en cours",
+				"downloading": "Téléchargement",
+				"failed": "Échec"
+			},
+			"title": "Bibliothèque locale",
+			"emptyState": {
+				"all": {
+					"title": "Rien à lire pour le moment",
+					"description": "Une fois que vous aurez téléchargé des livres pour une lecture hors ligne, ils apparaîtront ici"
+				},
+				"imported": {
+					"title": "Aucun livre importé",
+					"description": "Importez des livres pour les lire hors ligne"
+				},
+				"server": {
+					"title": "Aucun livre téléchargé",
+					"description": "Téléchargez des livres depuis votre bibliothèque pour les lire hors ligne"
+				}
 			}
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Configuration",
+				"networkSettings": "Paramètres Réseaux"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Profil Actif",
+				"localIsActive": "Le profil local est actif",
+				"primaryIsActive": "Le profil principal est actif",
+				"autoSwitchToLocalDidNotWork": "L'application n'a pas pu basculer vers le profil actif. Veuillez vérifier votre connexion réseau"
+			},
+			"localProfile": "Profil local",
+			"autoSwitchToLocal": {
+				"label": "Passage automatique au profil local",
+				"description": "Passez au profil local dès que possible"
+			},
+			"localUrl": "URL locale",
+			"saveUrlChanges": "Enregistrer les modifications de l'URL",
+			"swapUrls": {
+				"label": "Échanger les URL",
+				"swap": "Échanger",
+				"confirmationText": "Êtes-vous sûr de vouloir échanger les URL distante et locale ? Cela prendra effet immédiatement",
+				"noLocalUrlSet": {
+					"title": "Aucune URL locale définie",
+					"description": "Vous devez définir une URL locale avant de pouvoir l'échanger avec l'URL distante"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Réseau Wi-Fi",
+				"noAssociatedNetwork": "Aucun réseau Wi-Fi associé",
+				"notConnectedToWifi": "Vous n'êtes pas connecté au Wi-Fi. Veuillez vous connecter à un réseau local pour terminer la configuration du profil local",
+				"connectedTip": "Si le réseau actuel n'apparaît pas dans la liste, vous devrez peut-être autoriser Stump à accéder à votre position",
+				"addNetwork": "Ajouter \"{{ssid}} \"",
+				"permissionNotGranted": {
+					"label": "Autorisations refusées",
+					"description": "Vous devez accorder l'autorisation de localisation pour accéder au réseau Wi-Fi actif"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Échec de la permission de géolocalisation",
+					"description": "L'application n'a pas pu obtenir l'autorisation d'accéder à votre position. Veuillez vérifier les paramètres de votre appareil et réessayer"
+				},
+				"requestPermission": "Demander l'autorisation de localisation",
+				"removeWifi": {
+					"label": "Supprimer",
+					"confirmationText": "Êtes-vous sûr de vouloir supprimer le réseau '{{ssid}}' du profil local ?"
+				}
+			}
+		},
+		"tabs": {
+			"servers": "Serveurs",
+			"localLibrary": "Bibliothèque",
+			"settings": "Paramètres",
+			"browse": "Parcourir",
+			"activity": "Activité",
+			"stats": "Statistiques"
 		}
 	}
 }

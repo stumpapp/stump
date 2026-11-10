@@ -7,7 +7,7 @@ import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
 
-import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
+import { VirtualizedHorizontalCardGrid } from '@/components/container'
 import { StackedSeriesCard } from '@/components/series'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -92,6 +92,7 @@ function RecentlyAddedSeries() {
 	} = usePreferences()
 
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
+	const isAtLeastLarge = useMediaMatch('(min-width: 1024px)')
 
 	const cardWidth = isAtLeastMedium ? 200 : 160
 
@@ -131,7 +132,7 @@ function RecentlyAddedSeries() {
 	)
 
 	return (
-		<MultiRowHorizontalCardList
+		<VirtualizedHorizontalCardGrid
 			title={translate('shared.homeSections.recentlyAddedSeries.label')}
 			items={nodes}
 			keyExtractor={(series) => series.id}
@@ -148,6 +149,7 @@ function RecentlyAddedSeries() {
 			)}
 			cardHeight={cardHeight}
 			cardWidth={cardWidth}
+			maxRows={isAtLeastLarge ? 2 : 1}
 			onFetchMore={handleFetchMore}
 			emptyState={emptyState}
 		/>

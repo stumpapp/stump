@@ -7,7 +7,7 @@ import { BookCheck, BookOpen, Clock, ExternalLink, HardDrive } from 'lucide-reac
 
 import BadgeList from '@/components/BadgeList'
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
-import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
+import { HorizontalCardGrid } from '@/components/container'
 import { EntityOverviewSheet } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -101,7 +101,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 			]
 		: undefined
 
-	const { cardWidth, cardHeight } = useSimpleBookCardSize()
+	const { cardWidth } = useSimpleBookCardSize()
 
 	return (
 		<EntityOverviewSheet
@@ -153,14 +153,13 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 			)}
 
 			{!!upNext?.length && (
-				<MultiRowHorizontalCardList
+				<HorizontalCardGrid
 					title={translate('shared.common.upNext')}
 					items={upNext}
 					keyExtractor={(node) => node.id}
 					renderItem={(node, width) => <SimpleBookCard book={node} cardWidth={width} />}
-					cardHeight={cardHeight}
 					cardWidth={cardWidth}
-					rowCount={1}
+					maxRows={1}
 				/>
 			)}
 

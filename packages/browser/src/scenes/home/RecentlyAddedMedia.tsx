@@ -5,9 +5,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
+import { useMediaMatch } from 'rooks'
 
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
-import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
+import { VirtualizedHorizontalCardGrid } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
 const query = graphql(`
@@ -53,6 +54,7 @@ export const usePrefetchRecentlyAddedMedia = () => {
 function RecentlyAddedMedia() {
 	const { translate } = useTranslate()
 	const { cardWidth, cardHeight } = useSimpleBookCardSize()
+	const isAtLeastLarge = useMediaMatch('(min-width: 1024px)')
 
 	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
@@ -84,7 +86,7 @@ function RecentlyAddedMedia() {
 	)
 
 	return (
-		<MultiRowHorizontalCardList
+		<VirtualizedHorizontalCardGrid
 			title={translate('shared.homeSections.recentlyAddedBooks.label')}
 			items={nodes}
 			keyExtractor={(node) => node.id}
@@ -97,6 +99,7 @@ function RecentlyAddedMedia() {
 			)}
 			cardHeight={cardHeight}
 			cardWidth={cardWidth}
+			maxRows={isAtLeastLarge ? 2 : 1}
 			onFetchMore={handleFetchMore}
 			emptyState={emptyState}
 		/>

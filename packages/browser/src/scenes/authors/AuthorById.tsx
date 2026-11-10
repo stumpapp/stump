@@ -6,8 +6,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
-import { SceneContainer } from '@/components/container'
-import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
+import { HorizontalCardGrid, SceneContainer } from '@/components/container'
 import ReadMore from '@/components/ReadMore'
 import { PageHeader } from '@/components/sharedLayout'
 import { ThumbnailEntityCard } from '@/components/thumbnail'
@@ -58,7 +57,7 @@ const query = graphql(`
 export default function AuthorById() {
 	const { id } = useParams()
 	const paths = usePaths()
-	const { cardWidth, cardHeight } = useSimpleBookCardSize()
+	const { cardWidth } = useSimpleBookCardSize()
 	const {
 		data: { authorById: author },
 	} = useSuspenseGraphQL(query, ['authorById', id], { id: id ?? '' })
@@ -110,7 +109,7 @@ export default function AuthorById() {
 					</div>
 				</div>
 
-				<MultiRowHorizontalCardList
+				<HorizontalCardGrid
 					title={
 						<SectionHeading id="author-books-heading" label="Books" count={author.books.length} />
 					}
@@ -119,9 +118,9 @@ export default function AuthorById() {
 					renderItem={(book, width) => (
 						<SimpleBookCard book={book} cardWidth={width} subtitle={null} />
 					)}
-					cardHeight={cardHeight}
 					cardWidth={cardWidth}
-					rowCount={3}
+					fitToWidth
+					maxRows={3}
 					emptyState={<EmptySection message="No books associated with this author yet" />}
 				/>
 

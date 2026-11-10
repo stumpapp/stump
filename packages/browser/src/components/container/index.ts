@@ -1,4 +1,6 @@
 export { default as Container } from './Container'
 export { default as DynamicCardGrid } from './DynamicCardGrid'
 export { GridSizeSlider } from './GridSizeSlider'
+export { HorizontalCardGrid } from './HorizontalCardGrid'
 export { default as SceneContainer } from './SceneContainer'
+export { VirtualizedHorizontalCardGrid } from './VirtualizedHorizontalCardGrid'

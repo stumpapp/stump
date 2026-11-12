@@ -10,7 +10,7 @@ use serde_json::{json, Value};
 use tempfile::TempDir;
 use tests::{fake_data, fixtures};
 
-use crate::common::{account::CreateTestUser, TestApp};
+use crate::common::{account::CreateTestUser, library::setup_library, TestApp};
 
 const UPLOAD_BOOKS: &str =
 	r#"mutation UploadBooks($input: UploadBooksInput!) { uploadBooks(input: $input) }"#;
@@ -37,19 +37,22 @@ async fn setup() -> UploadFixture {
 	fs::create_dir_all(&library_dir).expect("failed to create library dir");
 	fs::create_dir_all(&outside_dir).expect("failed to create outside dir");
 
-	let library = fake_data::Library {
-		path: Some(library_dir.to_string_lossy().to_string()),
-		..Default::default()
-	}
-	.insert(app.conn())
-	.await;
-
 	let user = CreateTestUser {
 		username: "icanuploadyay-surelyiwontdoanythingbad!>:)".to_string(),
 		permissions: vec![UserPermission::UploadFile],
 		..Default::default()
 	}
 	.insert(&app)
+	.await;
+
+	let library = setup_library(
+		&app,
+		fake_data::Library {
+			path: Some(library_dir.to_string_lossy().to_string()),
+			..Default::default()
+		},
+		Some(user.id.clone()),
+	)
 	.await;
 
 	UploadFixture {

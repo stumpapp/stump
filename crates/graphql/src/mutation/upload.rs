@@ -1103,6 +1103,7 @@ mod tests {
 			last_scanned_at: None,
 			config_id: 1,
 			path: path.to_string(),
+			oidc_groups: None,
 			status: FileStatus::Ready,
 			thumbnail_meta: None,
 			thumbnail_path: None,

@@ -9,7 +9,7 @@ import { useMediaMatch } from 'rooks'
 import { SceneContainer } from '@/components/container'
 import { usePreferences } from '@/hooks'
 
-import { LibraryContext } from './context'
+import { LibraryContext } from '../../components/library/context'
 import LibraryHeader from './LibraryHeader'
 import { LibrarySettingsHeader, LibrarySettingsSidebar } from './tabs/settings'
 
@@ -20,6 +20,7 @@ const query = graphql(`
 			name
 			description
 			path
+			oidcGroups
 			stats {
 				seriesCount
 				bookCount

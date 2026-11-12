@@ -18,12 +18,12 @@ const BOOKS: [(&str, Option<f64>); 11] = [
 use models::entity::{media, series};
 use tests::fake_data;
 
-use crate::common::TestApp;
+use crate::common::{library::setup_library, TestApp};
 
 pub async fn create_murderbot(app: &TestApp) -> (series::Model, Vec<media::Model>) {
 	let conn = app.conn();
 
-	let library = fake_data::Library::default().insert(conn).await;
+	let library = setup_library(app, fake_data::Library::default(), None).await;
 	let series = fake_data::Series {
 		name: Some("The Murderbot Diaries".to_string()),
 		library_id: Some(library.id),

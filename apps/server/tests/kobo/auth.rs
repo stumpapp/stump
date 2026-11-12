@@ -1,11 +1,21 @@
 use axum::http::StatusCode;
+use models::shared::enums::UserPermission;
 use tests::fake_data;
 
 use crate::common::{api_key::create_api_key_for_user, TestApp};
 
 async fn setup() -> (TestApp, String) {
 	let app = TestApp::new().await;
-	let user = fake_data::User::new("kobo").insert(app.conn()).await;
+	let user = fake_data::User {
+		username: "kobo".to_string(),
+		permissions: Some(vec![
+			UserPermission::AccessApiKeys,
+			UserPermission::AccessKoboSync,
+		]),
+		..Default::default()
+	}
+	.insert(app.conn())
+	.await;
 	let (api_key, _) = create_api_key_for_user(&app, &user, None).await;
 	(app, api_key)
 }

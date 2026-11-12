@@ -15,7 +15,7 @@ export default function JobSettingsScene() {
 	const { t } = useTranslate()
 	const { checkPermission } = useAppContext()
 
-	const canManageJobs = checkPermission(UserPermission.ManageJobs)
+	const canManageJobs = checkPermission(UserPermission.ManageBackgroundJobs)
 
 	return (
 		<SceneContainer variant="settings">

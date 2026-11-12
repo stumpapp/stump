@@ -6,7 +6,7 @@ import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 import { EntityOverviewSheet } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 
-import { useLibraryContext } from './context'
+import { useLibraryContext } from '../../components/library/context'
 
 type Props = {
 	isOpen: boolean

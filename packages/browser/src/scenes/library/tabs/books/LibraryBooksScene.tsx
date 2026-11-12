@@ -30,7 +30,7 @@ import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 import { getQueryKey, query, usePrefetchLibraryBooks } from './queries'
 
 export default function LibraryBooksSceneContainer() {

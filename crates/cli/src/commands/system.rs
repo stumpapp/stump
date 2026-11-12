@@ -2,10 +2,12 @@ use std::str::FromStr;
 
 use clap::Subcommand;
 use dialoguer::Confirm;
-use sea_orm::{ConnectionTrait, DatabaseBackend, Statement};
+use models::entity::{refresh_token, server_config};
+use sea_orm::{prelude::*, ConnectionTrait, DatabaseBackend, Statement};
 use stump_core::{
 	config::StumpConfig,
 	database::{connect, JournalMode},
+	utils::encryption,
 };
 
 use super::default_progress_spinner;
@@ -20,6 +22,8 @@ pub enum System {
 		#[clap(long)]
 		mode: JournalMode,
 	},
+	/// rotate the secrets used to sign jwt tokens, which will invalidate all existing tokens
+	RotateJwtSecrets,
 }
 
 pub async fn handle_system_command(
@@ -28,6 +32,7 @@ pub async fn handle_system_command(
 ) -> CliResult<()> {
 	match command {
 		System::SetJournalMode { mode } => set_journal_mode(mode, config).await,
+		System::RotateJwtSecrets => rotate_jwt_secrets(config).await,
 	}
 }
 
@@ -75,6 +80,45 @@ async fn set_journal_mode(mode: JournalMode, config: &StumpConfig) -> CliResult<
 		.await?;
 
 	progress.finish_with_message("Journal mode successfully set");
+
+	Ok(())
+}
+
+async fn rotate_jwt_secrets(config: &StumpConfig) -> CliResult<()> {
+	let confirmation = Confirm::new()
+        .with_prompt("Rotating JWT secrets will invalidate all existing tokens. Are you sure you want to continue?")
+        .interact()?;
+
+	if !confirmation {
+		println!("Exiting...");
+		return Ok(());
+	}
+
+	let progress = default_progress_spinner();
+
+	let conn = connect(config).await?;
+
+	progress.set_message("Rotating JWT secrets...");
+
+	let jwt_access_secret = encryption::create_encryption_key()?;
+	let jwt_refresh_secret = encryption::create_encryption_key()?;
+	let _ = server_config::Entity::update_many()
+		.col_expr(
+			server_config::Column::JwtAccessSecret,
+			Expr::value(Some(jwt_access_secret)),
+		)
+		.col_expr(
+			server_config::Column::JwtRefreshSecret,
+			Expr::value(Some(jwt_refresh_secret)),
+		)
+		.exec(&conn)
+		.await?;
+
+	progress.set_message("Deleting all existing refresh tokens...");
+
+	refresh_token::Entity::delete_many().exec(&conn).await?;
+
+	progress.finish_with_message("JWT secrets successfully rotated!");
 
 	Ok(())
 }

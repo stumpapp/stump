@@ -1,8 +1,8 @@
 import { Badge, Text, ToolTip } from '@stump/components'
 import { useFragment } from '@stump/graphql'
 
+import { useLibraryContext } from '@/components/library/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContext } from '@/scenes/library/context'
 
 import { LibrarySettingsConfig } from '../../LibrarySettingsRouter'
 

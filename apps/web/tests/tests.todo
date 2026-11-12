@@ -1,0 +1,8 @@
+- accessControl currently covers a small set of library-specific access scenarios, i think it'd be good to also add:
+  - users.spec.ts -> create/update users does what it should
+    - i think things like asserting sidebar items is _fine_ but more for unit tests imo
+  - oidc.spec.ts -> a bit trickier, not sure how to handle this since config changes require server restarts and the core part of how this works rn is a single server freshly started and exited from start to end, also the provider would have to be reachable which is an annoying thing to mock out
+- the library create flow could use a basic test to ensure we never break it
+- basic reader tests to assert things like:
+  - can open cbz/cbr etc and read a few pages, going back reports expected things
+  - can open epub etc, etc etc

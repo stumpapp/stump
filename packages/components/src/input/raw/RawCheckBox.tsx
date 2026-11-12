@@ -38,9 +38,9 @@ export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
 	({ className, size, rounded, ...props }, ref) => (
 		<CheckboxPrimitive.Root
 			ref={ref}
+			data-testid={props.id}
 			className={cn(checkboxVariants({ className, rounded, size }))}
 			{...props}
-			data-testid={props.id}
 		>
 			<CheckboxPrimitive.Indicator
 				className={cn('grid place-content-center text-current transition-none')}

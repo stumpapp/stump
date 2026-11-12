@@ -3,8 +3,6 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::entity::user::AuthUser;
-
 use super::enums::UserPermission;
 
 pub trait AssociatedPermission {
@@ -21,17 +19,46 @@ impl PermissionSet {
 		PermissionSet(permissions)
 	}
 
-	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions
+	/// Returns true iff the target permission would be effectively granted to a user
+	/// holding this set — directly granted, or reachable transitively via associations.
+	pub fn contains(&self, target: UserPermission) -> bool {
+		PermissionSet::new(self.0.clone())
+			.resolve_into_vec()
+			.contains(&target)
+	}
+
+	/// Returns a new PermissionSet with the target permission added to the explicit
+	/// grants (no-op if it's already an explicit grant; a transitively-reachable
+	/// permission is still added as an explicit grant when requested).
+	pub fn with(mut self, target: UserPermission) -> PermissionSet {
+		if !self.0.contains(&target) {
+			self.0.push(target);
+		}
+		self
+	}
+
+	/// Returns a new PermissionSet with the target permission stripped from the
+	/// explicit grants (no-op if absent). Does NOT strip transitive grants — if the
+	/// set holds an upstream permission whose associations include the target, the
+	/// target is still reachable via `contains` after this call. To revoke a
+	/// transitively-granted permission, remove the upstream grant instead.
+	pub fn without(mut self, target: UserPermission) -> PermissionSet {
+		self.0.retain(|p| *p != target);
+		self
+	}
+
+	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions,
+	/// recursively, so that callers see the transitive closure of granted permissions.
 	pub fn resolve_into_vec(self) -> Vec<UserPermission> {
-		self.0
-			.into_iter()
-			.flat_map(|permission| {
-				let mut v = vec![permission];
-				v.extend(permission.associated());
-				v
-			})
-			.unique()
-			.collect()
+		let mut resolved: Vec<UserPermission> = Vec::new();
+		let mut queue: Vec<UserPermission> = self.0;
+		while let Some(permission) = queue.pop() {
+			if !resolved.contains(&permission) {
+				resolved.push(permission);
+				queue.extend(permission.associated());
+			}
+		}
+		resolved
 	}
 
 	pub fn resolve_into_string(self) -> Option<String> {
@@ -91,37 +118,139 @@ impl AssociatedPermission for UserPermission {
 			UserPermission::DeleteNotifier => {
 				vec![UserPermission::ManageNotifier, UserPermission::ReadNotifier]
 			},
-			UserPermission::ManageUsers => vec![UserPermission::ReadUsers],
+			UserPermission::CreateUser => vec![UserPermission::ReadUsers],
+			UserPermission::LockUser => vec![UserPermission::ReadUsers],
+			UserPermission::DeleteUser => {
+				vec![UserPermission::UpdateUser, UserPermission::ReadUsers]
+			},
+			UserPermission::ManageUserSessions => vec![UserPermission::ReadUsers],
+			UserPermission::ManageUsers => {
+				vec![UserPermission::DeleteUser, UserPermission::CreateUser]
+			},
+			UserPermission::ReadBackgroundJobs => {
+				vec![UserPermission::ReadEvents]
+				// ^ it would feel a little weird to be able to see jobs but not their events
+			},
+			UserPermission::ManageBackgroundJobs => {
+				vec![UserPermission::ReadBackgroundJobs]
+			},
+			UserPermission::ManageScheduledBackgroundJobs => {
+				vec![UserPermission::ReadScheduledBackgroundJobs]
+			},
 			UserPermission::ReadPersistedLogs => {
-				vec![UserPermission::ReadJobs]
+				vec![UserPermission::ReadBackgroundJobs]
 			},
 			UserPermission::WriteBackMetadata => vec![UserPermission::EditMetadata],
 			UserPermission::EditThumbnails => vec![],
+			UserPermission::ViewAllSmartLists => vec![],
+			UserPermission::MetadataFetchRecordManage => {
+				vec![UserPermission::MetadataFetchRecordRead]
+			},
+			UserPermission::MetadataProviderManage => {
+				vec![UserPermission::MetadataProviderRead]
+			},
+			UserPermission::ManageBookClubs => vec![UserPermission::ModerateBookClubs],
+			UserPermission::ManageServer => vec![
+				UserPermission::AccessGraphQLPlayground,
+				UserPermission::CreateBookClub,
+				UserPermission::EmailerManage,
+				UserPermission::CreateLibrary,
+				UserPermission::ManageLibrary,
+				UserPermission::CreateNotifier,
+				UserPermission::ManageNotifier,
+				UserPermission::CreateUser,
+				UserPermission::LockUser,
+				UserPermission::ManageUsers,
+				UserPermission::ReadPersistedLogs,
+				UserPermission::WriteBackMetadata,
+				UserPermission::EditThumbnails,
+				UserPermission::ViewAllSmartLists,
+				UserPermission::AccessApiKeys,
+				UserPermission::ChangePassword,
+				UserPermission::ChangeUsername,
+				UserPermission::ChangeAvatar,
+				UserPermission::EmailArbitrarySend,
+				UserPermission::FileExplorer,
+				UserPermission::UploadFile,
+				UserPermission::DownloadFile,
+				UserPermission::DeleteLibrary,
+				UserPermission::ManageUserSessions,
+				UserPermission::ManageBackgroundJobs,
+				UserPermission::ManageScheduledBackgroundJobs,
+				UserPermission::MetadataFetchRecordManage,
+				UserPermission::MetadataProviderManage,
+				UserPermission::ReadSystemLogs,
+				UserPermission::ManageBookClubs,
+				// TODO(permissions): the following are per-user feature-access perms,
+				// included so that admins retain parity with the legacy is_server_owner
+				// short-circuit. Likely candidates for removal once admins are issued
+				// a separate "default user perms" bundle alongside ManageServer.
+				// ^ the awkward part will be future features too, or if we did omit these from
+				// manage server how would the "owner" user get them? do we let them grant themselves?
+				// this needs a little more thought maybe
+				UserPermission::AccessKoreaderSync,
+				UserPermission::AccessKoboSync,
+				UserPermission::AccessSmartList,
+			],
 			_ => vec![],
 		}
 	}
 }
 
-/// A function to determine whether a user has a specific permission. The permission
-/// is checked against their explicitly assigned permissions, as well as any inherited
-/// ones through permission associations.
-fn user_has_permission(user: &AuthUser, permission: UserPermission) -> bool {
-	user.is_server_owner
-		|| user
-			.permissions
-			.iter()
-			.any(|p| p == &permission || p.associated().contains(&permission))
+/// Determine whether a set of granted permissions satisfies a target permission, either
+/// directly or via association.
+pub fn permissions_satisfy(granted: &[UserPermission], target: UserPermission) -> bool {
+	granted
+		.iter()
+		.any(|p| p == &target || p.associated().contains(&target))
 }
 
-pub fn user_has_all_permissions(user: &AuthUser, permissions: &[UserPermission]) -> bool {
-	if user.is_server_owner {
-		return true;
+/// Determine whether a set of granted permissions satisfies every required permission.
+pub fn permissions_satisfy_all(
+	granted: &[UserPermission],
+	required: &[UserPermission],
+) -> bool {
+	required
+		.iter()
+		.all(|target| permissions_satisfy(granted, *target))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_contains_resolves_associated_permissions() {
+		// ManageUsers transitively grants CreateUser via associations.
+		let set = PermissionSet::new(vec![UserPermission::ManageUsers]);
+		assert!(set.contains(UserPermission::ManageUsers));
+		assert!(set.contains(UserPermission::CreateUser));
+		assert!(!set.contains(UserPermission::AccessKoboSync));
 	}
 
-	let missing_permissions = permissions
-		.iter()
-		.filter(|&permission| !user_has_permission(user, *permission))
-		.collect::<Vec<_>>();
+	#[test]
+	fn test_with_adds_and_is_idempotent_on_explicit_grant() {
+		let set = PermissionSet::new(vec![UserPermission::AccessApiKeys]);
+		let extended = set.with(UserPermission::ManageServer);
+		assert!(extended.contains(UserPermission::ManageServer));
+		assert!(extended.contains(UserPermission::AccessApiKeys));
 
-	missing_permissions.is_empty()
+		// Idempotent: adding an already-present explicit grant does not duplicate it.
+		let extended_again = extended.with(UserPermission::ManageServer);
+		assert!(extended_again.contains(UserPermission::ManageServer));
+	}
+
+	#[test]
+	fn test_without_strips_explicit_grant_only() {
+		let set = PermissionSet::new(vec![
+			UserPermission::ManageUsers,
+			UserPermission::AccessApiKeys,
+		]);
+		let pruned = set.without(UserPermission::ManageUsers);
+		assert!(!pruned.contains(UserPermission::ManageUsers));
+		// CreateUser was reachable transitively via ManageUsers; with ManageUsers
+		// stripped, it's no longer reachable.
+		assert!(!pruned.contains(UserPermission::CreateUser));
+		assert!(pruned.contains(UserPermission::AccessApiKeys));
+	}
 }

@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/sharedLayout'
 import { useRouterContext } from '@/context/RouterContext'
 import { useTranslate } from '@/hooks/useTranslate'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 import { LibraryPatternDisplay } from './options/scanner'
 import { createRouteGroups } from './routes'
 

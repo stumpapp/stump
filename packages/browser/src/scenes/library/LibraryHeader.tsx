@@ -11,7 +11,7 @@ import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
 
-import { useLibraryContext } from './context'
+import { useLibraryContext } from '../../components/library/context'
 import { LibraryOverviewSheet } from './LibraryOverviewSheet'
 import { usePrefetchLibraryBooks } from './tabs/books/queries'
 import { usePrefetchLibrarySeries } from './tabs/series/queries'

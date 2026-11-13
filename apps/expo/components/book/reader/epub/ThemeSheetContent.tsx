@@ -5,6 +5,7 @@ import { Card } from '~/components/ui'
 import {
 	Brightness,
 	ColumnCount,
+	CompactReaderLayout,
 	FontConfig,
 	ImageFilter,
 	PageMargins,
@@ -18,6 +19,8 @@ type ThemeSheetContentProps = {
 	isSheetOpen: boolean
 	setTouchingSlider: React.Dispatch<React.SetStateAction<boolean>>
 }
+
+// TODO: consider moving PreferMinimalReader prefs here too
 
 export default function ThemeSheetContent({
 	isSheetOpen,
@@ -35,6 +38,7 @@ export default function ThemeSheetContent({
 				<ReadingProgression />
 				<ColumnCount />
 				<PageMargins />
+				<CompactReaderLayout />
 				<VolumeNavigation />
 			</Card>
 

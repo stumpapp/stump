@@ -528,28 +528,30 @@ export default function ReadiumReader({
 					paddingBottom: initialWindowMetrics?.insets.bottom || insets.bottom || 14,
 				}}
 			>
-				<ReadiumHeader />
+				<View className="flex-1">
+					<ReadiumHeader />
 
-				<ReadiumView
-					ref={readerRef}
-					bookId={book.id}
-					url={localUri}
-					initialLocator={initialLocator}
-					decorations={annotations}
-					onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
-					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
-					onMiddleTouch={handleMiddleTouch}
-					onReachedEnd={handleReachedEnd}
-					onHighlightRequest={handleHighlightRequest}
-					onNoteRequest={handleNoteRequest}
-					onAnnotationTap={handleAnnotationTap}
-					onEditHighlight={handleEditHighlight}
-					onDeleteHighlight={handleNativeDeleteAnnotation}
-					style={{ flex: 1 }}
-					{...config}
-				/>
+					<ReadiumView
+						ref={readerRef}
+						bookId={book.id}
+						url={localUri}
+						initialLocator={initialLocator}
+						decorations={annotations}
+						onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
+						onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
+						onMiddleTouch={handleMiddleTouch}
+						onReachedEnd={handleReachedEnd}
+						onHighlightRequest={handleHighlightRequest}
+						onNoteRequest={handleNoteRequest}
+						onAnnotationTap={handleAnnotationTap}
+						onEditHighlight={handleEditHighlight}
+						onDeleteHighlight={handleNativeDeleteAnnotation}
+						style={{ flex: 1 }}
+						{...config}
+					/>
 
-				<ReadiumFooter />
+					<ReadiumFooter />
+				</View>
 
 				<EpubSettingsSheet />
 				<TableOfContentsSheet />

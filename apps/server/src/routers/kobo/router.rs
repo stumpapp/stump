@@ -1,12 +1,12 @@
 use crate::routers::kobo::sync::KoboSync;
 use axum::{
+	Extension, Router,
 	body::Bytes,
 	extract::{Path, Request, State},
 	http::{HeaderMap, HeaderValue, Method},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::{get, post},
-	Extension, Router,
 };
 use graphql::data::AuthContext;
 use models::shared::{
@@ -16,7 +16,7 @@ use models::shared::{
 	},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Map};
+use serde_json::{Map, json};
 use stump_core::{
 	fs_utils::ContentType,
 	image::{GenericImageProcessor, ImageProcessor},
@@ -96,7 +96,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			)
 			.route(
 				"/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg",
-				get(book_thumbnail)
+				get(book_thumbnail),
 			)
 			.route("/v1/auth/device", post(auth_device))
 			.route("/v1/books/{book_id}/file/epub", get(book_download))

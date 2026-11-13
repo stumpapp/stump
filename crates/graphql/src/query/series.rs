@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::series,
 	shared::alphabet::{AvailableAlphabet, EntityLetter},
 };
-use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{FromQueryResult, QueryOrder, QuerySelect, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

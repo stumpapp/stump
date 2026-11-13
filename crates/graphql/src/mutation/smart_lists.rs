@@ -4,9 +4,9 @@ use crate::{
 	input::smart_lists::SaveSmartListInput,
 	object::smart_lists::SmartList,
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{entity::smart_list, shared::enums::UserPermission};
-use sea_orm::{prelude::*, Set, TransactionTrait};
+use sea_orm::{Set, TransactionTrait, prelude::*};
 
 #[derive(Default)]
 pub struct SmartListMutation;

@@ -1,5 +1,5 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Fragment, RefObject, useCallback, useEffect, useState } from 'react'
+import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -19,6 +19,7 @@ type Props = {
 	onCancel: () => void
 	mode?: 'edit' | 'create'
 	theme?: string
+	scrollRef?: RefObject<ScrollViewInstance | null>
 }
 
 const DEFAULT_THEMES = ['Light', 'Dark', 'Sepia']
@@ -31,7 +32,12 @@ const NEW_THEME_DEFAULTS: StoredConfig = {
 	},
 }
 
-export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTheme }: Props) {
+export default function CustomizeTheme({
+	onCancel,
+	mode = 'edit',
+	theme: namedTheme,
+	scrollRef,
+}: Props) {
 	const { translate } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
@@ -166,6 +172,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 			<ThemeHeaderPreview customTheme={customTheme} onCancel={handleCancel} onSaved={handleSave} />
 
 			<ScrollView
+				ref={scrollRef}
 				contentContainerStyle={{
 					paddingHorizontal: 16,
 					paddingTop: 16,

@@ -10,7 +10,7 @@ use models::{
 		image_processor_options::ImageProcessorOptions,
 	},
 };
-use sea_orm::{prelude::*, Set, Unchanged};
+use sea_orm::{Set, Unchanged, prelude::*};
 
 #[derive(Debug, InputObject)]
 pub struct CreateOrUpdateLibraryInput {

@@ -1,11 +1,11 @@
 use axum::{
+	Router,
 	extract::{Path, State},
 	middleware,
 	routing::get,
-	Router,
 };
 use models::entity::custom_emoji;
-use sea_orm::{prelude::*, ColumnTrait};
+use sea_orm::{ColumnTrait, prelude::*};
 use stump_core::fs_utils::ContentType;
 
 use crate::{

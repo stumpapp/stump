@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::Utc;
-use sea_orm::{prelude::*, DatabaseConnection, FromQueryResult, Value};
+use sea_orm::{DatabaseConnection, FromQueryResult, Value, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::CoreResult;

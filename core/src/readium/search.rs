@@ -10,9 +10,9 @@ use std::{
 	io::{BufReader, Read},
 };
 
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use epub::doc::EpubDoc;
-use quick_xml::{escape::unescape, events::Event, name::QName, Reader};
+use quick_xml::{Reader, escape::unescape, events::Event, name::QName};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio_util::sync::CancellationToken;
@@ -322,7 +322,7 @@ pub fn search_epub(
 			{
 				Ok(bytes) => bytes,
 				Err(EpubSearchError::Cancelled) => {
-					return Err(EpubSearchError::Cancelled)
+					return Err(EpubSearchError::Cancelled);
 				},
 				Err(error) => {
 					tracing::warn!(path = %zip_path, %error, "failed to read spine resource; skipping");

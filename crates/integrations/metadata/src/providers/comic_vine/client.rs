@@ -3,7 +3,8 @@ use reqwest::Url;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 
 use crate::{
-	client::{build_client_with_retry, RetryClientConfig},
+	ExternalMetadata, MetadataProvider, RateLimiter, SearchOutcome,
+	client::{RetryClientConfig, build_client_with_retry},
 	error::MetadataProviderError,
 	provider::ProviderCredentialVerification,
 	providers::comic_vine::utils::{
@@ -13,7 +14,6 @@ use crate::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchQuery,
 	},
-	ExternalMetadata, MetadataProvider, RateLimiter, SearchOutcome,
 };
 
 use super::{
@@ -134,7 +134,10 @@ impl ComicVineClient {
 		let params = vec![
 			("query", query),
 			("resources", "issue"),
-			("field_list", "id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits"),
+			(
+				"field_list",
+				"id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits",
+			),
 			("limit", limit_str.as_str()),
 		];
 
@@ -151,7 +154,10 @@ impl ComicVineClient {
 	) -> Result<Vec<IssueResult>, MetadataProviderError> {
 		let limit_str = limit.to_string();
 		let params = vec![
-			("field_list", "id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits"),
+			(
+				"field_list",
+				"id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits",
+			),
 			("limit", limit_str.as_str()),
 			("filter", filter),
 		];

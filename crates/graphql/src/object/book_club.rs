@@ -6,7 +6,7 @@ use crate::object::book_club_invitation::BookClubInvitation;
 use async_graphql::{ComplexObject, Context, Json, Result, SimpleObject};
 use models::entity::{
 	book_club, book_club_book, book_club_discussion, book_club_invitation,
-	book_club_member,
+	book_club_member, user::AuthUser,
 };
 use models::shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec};
 use sea_orm::prelude::*;
@@ -24,6 +24,19 @@ impl From<book_club::Model> for BookClub {
 	fn from(model: book_club::Model) -> Self {
 		Self { model }
 	}
+}
+
+pub(crate) async fn verify_read_access(
+	book_club_id: &str,
+	user: &AuthUser,
+	conn: &DatabaseConnection,
+) -> Result<()> {
+	book_club::Entity::find_by_id_and_user(book_club_id, user)
+		.one(conn)
+		.await?
+		.ok_or("Book club not found")?;
+
+	Ok(())
 }
 
 #[ComplexObject]

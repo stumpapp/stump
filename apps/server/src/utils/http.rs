@@ -1,5 +1,5 @@
 use axum::{
-	http::{header, HeaderValue},
+	http::{HeaderValue, header},
 	response::{IntoResponse, Response},
 };
 use stump_core::fs_utils::ContentType;

@@ -1,5 +1,5 @@
 use merge::Merge;
-use quick_xml::{escape::unescape, events::Event, Reader};
+use quick_xml::{Reader, escape::unescape, events::Event};
 use std::{
 	collections::HashMap,
 	fs::File,
@@ -14,12 +14,12 @@ use epub::doc::EpubDoc;
 
 use crate::{
 	fs_utils::{
-		hash::{self, generate_koreader_hash},
 		ContentType,
+		hash::{self, generate_koreader_hash},
 	},
 	media::processor::{
-		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
-		MediaProcessorOptions, ProcessedMediaFile,
+		AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+		ProcessedMediaFile, error::MediaProcessorError,
 	},
 	metadata::ProcessedMediaMetadata,
 };

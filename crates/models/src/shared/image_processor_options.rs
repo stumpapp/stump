@@ -1,5 +1,5 @@
 use async_graphql::{Enum, InputObject, OneofObject, SimpleObject, Union};
-use sea_orm::{prelude::Decimal, FromJsonQueryResult};
+use sea_orm::{FromJsonQueryResult, prelude::Decimal};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Enum)]

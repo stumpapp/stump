@@ -1,9 +1,9 @@
-import { Plus } from 'lucide-react-native'
+import { CopyPlus, Pencil, Plus, Trash } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
-import * as ContextMenu from 'zeego/context-menu'
 import { useShallow } from 'zustand/react/shallow'
 
+import { ContextMenu } from '~/components/ui/context-menu/context-menu'
 import { Icon } from '~/components/ui/icon'
 import { SystemAlert } from '~/components/ui/system-alert'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
@@ -105,37 +105,37 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 	}, [themeNames, name, deleteTheme, isActive, onSelect])
 
 	return (
-		<ContextMenu.Root>
-			<ContextMenu.Trigger>
-				<Pressable onPress={() => onSelect(name)} onLongPress={() => {}} delayLongPress={400}>
-					<ThemePreview
-						name={name}
-						theme={config}
-						className={cn(isActive && 'border-edge-brand dark:border-edge-brand border-2')}
-					/>
-				</Pressable>
-			</ContextMenu.Trigger>
-
-			<ContextMenu.Content>
-				<ContextMenu.Item key="edit" onSelect={() => openCustomizeTheme({ mode: 'edit', name })}>
-					<ContextMenu.ItemIcon ios={{ name: 'pencil' }} androidIconName="ic_menu_edit" />
-					<ContextMenu.ItemTitle>Edit Theme</ContextMenu.ItemTitle>
-				</ContextMenu.Item>
-
-				<ContextMenu.Item key="duplicate" onSelect={handleDuplicate}>
-					<ContextMenu.ItemIcon
-						ios={{ name: 'plus.square.on.square' }}
-						androidIconName="ic_menu_add"
-					/>
-					<ContextMenu.ItemTitle>Duplicate</ContextMenu.ItemTitle>
-				</ContextMenu.Item>
-
-				<ContextMenu.Item key="delete" onSelect={handleDelete} destructive>
-					<ContextMenu.ItemIcon ios={{ name: 'trash' }} androidIconName="ic_menu_delete" />
-					<ContextMenu.ItemTitle>Delete</ContextMenu.ItemTitle>
-				</ContextMenu.Item>
-			</ContextMenu.Content>
-		</ContextMenu.Root>
+		<ContextMenu
+			onPress={() => onSelect(name)}
+			groups={[
+				{
+					items: [
+						{
+							label: 'Edit Theme',
+							icon: { ios: 'pencil', android: Pencil },
+							onPress: () => openCustomizeTheme({ mode: 'edit', name }),
+						},
+						{
+							label: 'Duplicate',
+							icon: { ios: 'plus.square.on.square', android: CopyPlus },
+							onPress: handleDuplicate,
+						},
+						{
+							label: 'Delete',
+							icon: { ios: 'trash', android: Trash },
+							onPress: handleDelete,
+							role: 'destructive',
+						},
+					],
+				},
+			]}
+		>
+			<ThemePreview
+				name={name}
+				theme={config}
+				className={cn(isActive && 'border-edge-brand dark:border-edge-brand border-2')}
+			/>
+		</ContextMenu>
 	)
 }
 

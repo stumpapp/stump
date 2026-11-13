@@ -28,7 +28,7 @@ export default function AnnotationDialog({
 	onSave,
 	onDelete,
 }: Props) {
-	const { t, translate } = useTranslate()
+	const { translate } = useTranslate()
 	const [note, setNote] = useState(initialNote ?? '')
 
 	useEffect(() => {
@@ -42,7 +42,11 @@ export default function AnnotationDialog({
 			<Dialog.Content size="sm">
 				<Dialog.Header>
 					<Dialog.Title>
-						{t(mode === 'create' ? 'epubReader.annotation.addNote' : 'epubReader.annotation.edit')}
+						{translate(
+							mode === 'create'
+								? 'shared.epubReader.annotation.addNote'
+								: 'shared.epubReader.annotation.edit',
+						)}
 					</Dialog.Title>
 					<Dialog.Close onClick={() => onOpenChange(false)} />
 				</Dialog.Header>

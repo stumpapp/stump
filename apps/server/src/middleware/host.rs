@@ -2,7 +2,7 @@ use std::net::IpAddr;
 
 use axum::{
 	extract::{FromRef, FromRequestParts},
-	http::{request::Parts, Extensions, HeaderMap},
+	http::{Extensions, HeaderMap, request::Parts},
 };
 use axum_extra::extract::Host;
 
@@ -178,11 +178,14 @@ where
 		let app_state = AppState::from_ref(state);
 		let trust_proxy_headers = app_state.config.trust_proxy_headers;
 
-		let ip = extract_client_ip(&parts.headers, &parts.extensions, trust_proxy_headers)
-			.unwrap_or_else(|| {
-				tracing::warn!("No client IP found in headers or connection info, defaulting to localhost");
-				"127.0.0.1".parse().unwrap()
-			});
+		let ip =
+			extract_client_ip(&parts.headers, &parts.extensions, trust_proxy_headers)
+				.unwrap_or_else(|| {
+					tracing::warn!(
+						"No client IP found in headers or connection info, defaulting to localhost"
+					);
+					"127.0.0.1".parse().unwrap()
+				});
 		Ok(ClientIp(ip))
 	}
 }

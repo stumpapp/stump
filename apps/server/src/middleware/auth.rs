@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
 use axum::{
+	Json,
 	body::Body,
 	extract::{OriginalUri, Path, Request, State},
-	http::{header, StatusCode},
+	http::{StatusCode, header},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
-	Json,
 };
-use base64::{engine::general_purpose::STANDARD, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD};
 use graphql::data::{AuthContext, ServiceContext};
 use models::{
 	entity::{
@@ -16,19 +16,19 @@ use models::{
 		user::{self, AuthUser},
 	},
 	shared::{
-		api_key::{APIKeyPermissions, API_KEY_PREFIX},
+		api_key::{API_KEY_PREFIX, APIKeyPermissions},
 		enums::UserPermission,
 		image::ImageRef,
 	},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use reqwest::Method;
-use sea_orm::{prelude::*, Condition, DatabaseConnection, ExprTrait};
+use sea_orm::{Condition, DatabaseConnection, ExprTrait, prelude::*};
 use serde::Deserialize;
 use stump_core::opds::v2_0::{
 	authentication::{
-		OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
 		OPDS_AUTHENTICATION_DOCUMENT_REL, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+		OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
 	},
 	link::OPDSLink,
 };
@@ -37,10 +37,10 @@ use tower_sessions::Session;
 use crate::{
 	config::{
 		jwt::extract_user_from_jwt,
-		session::{delete_cookie_header, SESSION_USER_KEY},
+		session::{SESSION_USER_KEY, delete_cookie_header},
 		state::AppState,
 	},
-	errors::{api_error_message, APIError, APIResult},
+	errors::{APIError, APIResult, api_error_message},
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{
 		current_utc_time, decode_base64_credentials, fetch_session_user, verify_password,
@@ -531,9 +531,11 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(request_context
-			.enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_ok());
+		assert!(
+			request_context
+				.enforce_permissions(&[UserPermission::AccessBookClub])
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -546,9 +548,11 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(request_context
-			.enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_ok());
+		assert!(
+			request_context
+				.enforce_permissions(&[UserPermission::AccessBookClub])
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -558,9 +562,11 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(request_context
-			.enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_err());
+		assert!(
+			request_context
+				.enforce_permissions(&[UserPermission::AccessBookClub])
+				.is_err()
+		);
 	}
 
 	#[test]
@@ -573,12 +579,14 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(request_context
-			.enforce_permissions(&[
-				UserPermission::AccessBookClub,
-				UserPermission::CreateLibrary
-			])
-			.is_err());
+		assert!(
+			request_context
+				.enforce_permissions(&[
+					UserPermission::AccessBookClub,
+					UserPermission::CreateLibrary
+				])
+				.is_err()
+		);
 	}
 
 	#[test]
@@ -591,9 +599,11 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(user.is(&request_context
-			.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
-			.unwrap()));
+		assert!(
+			user.is(&request_context
+				.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
+				.unwrap())
+		);
 	}
 
 	#[test]
@@ -603,9 +613,11 @@ mod tests {
 			user: user.clone(),
 			api_key: None,
 		};
-		assert!(request_context
-			.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_err());
+		assert!(
+			request_context
+				.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
+				.is_err()
+		);
 	}
 
 	#[test]

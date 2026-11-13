@@ -186,7 +186,7 @@ export function AppLayout() {
 		if (isNetworkError || isUnauthorized) {
 			const to = isNetworkError
 				? '/server-connection-error'
-				: `/auth?redirect=${encodeURIComponent(location.pathname)}`
+				: `/auth?redirect=${encodeURIComponent(location.pathname + location.search)}`
 			navigate(to)
 		} else if (error) {
 			console.error('An unknown error occurred:', error)

@@ -1,13 +1,13 @@
 use std::{fs, io::Cursor};
 
-use image::{imageops, GenericImageView, ImageFormat};
+use image::{GenericImageView, ImageFormat, imageops};
 use models::shared::image_processor_options::{
 	Dimension, ImageProcessorOptions, ScaledDimensionResize, SupportedImageFormat,
 };
 
 use crate::image::{
 	error::ImageProcessorError,
-	process::{resized_dimensions, ImageProcessor},
+	process::{ImageProcessor, resized_dimensions},
 	scale_height_dimension, scale_width_dimension,
 };
 

@@ -3,7 +3,7 @@
 use axum::{
 	body::Body,
 	extract::Request,
-	http::{header, HeaderMap},
+	http::{HeaderMap, header},
 	response::IntoResponse,
 };
 use graphql::data::AuthContext;

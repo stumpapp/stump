@@ -1,17 +1,18 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::entity::{
-	book_club, book_club_book, book_club_discussion, book_club_discussion_message,
-	book_club_member, user::AuthUser,
+	book_club_book, book_club_discussion, book_club_discussion_message,
 };
+use models::shared::enums::UserPermission;
 use sea_orm::{
-	prelude::*, sea_query::Query, ColumnTrait, ExprTrait, QueryFilter, QueryOrder,
-	QuerySelect,
+	ColumnTrait, ExprTrait, QueryFilter, QueryOrder, QuerySelect, prelude::*,
+	sea_query::Query,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	object::{
-		book_club_discussion::BookClubDiscussion,
+		book_club::verify_read_access, book_club_discussion::BookClubDiscussion,
 		book_club_discussion_message::BookClubDiscussionMessage,
 	},
 	pagination::{CursorPaginatedResponse, CursorPagination, CursorPaginationInfo},
@@ -23,6 +24,7 @@ pub struct BookClubDiscussionQuery;
 #[Object]
 impl BookClubDiscussionQuery {
 	/// Get a discussion by ID
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_discussion(
 		&self,
 		ctx: &Context<'_>,
@@ -42,6 +44,7 @@ impl BookClubDiscussionQuery {
 	}
 
 	/// Get the discussions by the book they're associated with
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_discussion_by_book(
 		&self,
 		ctx: &Context<'_>,
@@ -72,6 +75,7 @@ impl BookClubDiscussionQuery {
 	}
 
 	/// Get all discussions for a book club, ordered by pinned first, then by date created
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_discussions(
 		&self,
 		ctx: &Context<'_>,
@@ -96,6 +100,7 @@ impl BookClubDiscussionQuery {
 	}
 
 	/// Get a single message by ID
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_discussion_message(
 		&self,
 		ctx: &Context<'_>,
@@ -120,6 +125,7 @@ impl BookClubDiscussionQuery {
 	}
 
 	/// Get messages in a discussion
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_discussion_messages(
 		&self,
 		ctx: &Context<'_>,
@@ -193,6 +199,7 @@ impl BookClubDiscussionQuery {
 		})
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn previous_book_club_discussions(
 		&self,
 		ctx: &Context<'_>,
@@ -252,36 +259,5 @@ impl BookClubDiscussionQuery {
 			.into_iter()
 			.map(BookClubDiscussion::from)
 			.collect())
-	}
-}
-
-async fn verify_read_access(
-	book_club_id: &str,
-	user: &AuthUser,
-	conn: &DatabaseConnection,
-) -> Result<()> {
-	if user.is_server_owner {
-		return Ok(());
-	}
-
-	let is_member = book_club_member::Entity::find_by_club_for_user(user, book_club_id)
-		.one(conn)
-		.await?
-		.is_some();
-
-	if is_member {
-		return Ok(());
-	}
-
-	let is_public = book_club::Entity::find_by_id(book_club_id)
-		.filter(book_club::Column::IsPrivate.eq(false))
-		.one(conn)
-		.await?
-		.is_some();
-
-	if is_public {
-		Ok(())
-	} else {
-		Err("You must be a member of the book club to access this discussion".into())
 	}
 }

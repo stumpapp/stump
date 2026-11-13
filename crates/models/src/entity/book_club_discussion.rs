@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, sqlx::types::chrono,
-	ActiveValue,
+	ActiveValue, entity::prelude::*, prelude::async_trait::async_trait,
+	sqlx::types::chrono,
 };
 
 use super::{book_club, book_club_book, book_club_discussion_message};

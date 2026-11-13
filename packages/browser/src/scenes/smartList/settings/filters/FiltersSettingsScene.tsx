@@ -23,7 +23,7 @@ export default function FiltersSettingsScene() {
 	const { list, patch } = useSmartListSettings()
 
 	const listAsForm = useMemo(() => intoForm(list), [list])
-	const form = useForm<SubSchema>({
+	const form = useForm({
 		defaultValues: intoForm(list),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(createSchema([], t, list)),

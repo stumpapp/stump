@@ -1,12 +1,12 @@
 use axum::{
+	Extension, Json, Router,
 	extract::{Query, Request, State},
 	http::{Response, StatusCode},
 	middleware,
 	response::IntoResponse,
 	routing::{get, post},
-	Extension, Json, Router,
 };
-use axum_extra::{headers::UserAgent, TypedHeader};
+use axum_extra::{TypedHeader, headers::UserAgent};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use graphql::data::{AuthContext, ServiceContext};
 use models::{
@@ -19,8 +19,8 @@ use models::{
 	shared::image::ImageRef,
 };
 use reqwest::header;
-use sea_orm::{prelude::*, ExprTrait};
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ExprTrait, prelude::*};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 use tracing::error;
@@ -28,14 +28,14 @@ use tracing::error;
 use crate::{
 	config::{
 		jwt::{
-			create_jwt_auth, exchange_refresh_token, extract_jti_from_refresh_token,
-			JwtTokenPair,
+			JwtTokenPair, create_jwt_auth, exchange_refresh_token,
+			extract_jti_from_refresh_token,
 		},
-		session::{delete_cookie_header, SESSION_USER_KEY},
+		session::{SESSION_USER_KEY, delete_cookie_header},
 		state::AppState,
 	},
 	errors::{APIError, APIResult},
-	middleware::{auth::auth_middleware, ClientIp, HostExtractor},
+	middleware::{ClientIp, HostExtractor, auth::auth_middleware},
 	utils::{default_true, fetch_session_user, hash_password, verify_password},
 };
 

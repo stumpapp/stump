@@ -7,7 +7,7 @@ use crate::{
 use async_graphql::{Context, Object, Result, SimpleObject};
 use email::EmailerClientConfig;
 use models::{entity::emailer, shared::enums::UserPermission};
-use sea_orm::{prelude::*, Set, TryIntoModel};
+use sea_orm::{Set, TryIntoModel, prelude::*};
 
 use super::sender;
 

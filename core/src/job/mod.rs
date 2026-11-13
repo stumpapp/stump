@@ -16,7 +16,7 @@
 use std::{collections::VecDeque, fmt::Debug};
 
 use models::shared::enums::LogLevel;
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de};
 
 pub mod context;
 pub mod dispatch;
@@ -26,7 +26,7 @@ mod scheduler;
 
 use chrono::{DateTime, Utc};
 pub use context::{ApalisWorkerState, JobContext};
-pub use dispatch::{dispatch_job, CoreJobOutput, JobOutputExt, StumpJob};
+pub use dispatch::{CoreJobOutput, JobOutputExt, StumpJob, dispatch_job};
 use error::JobError;
 pub use models::shared::enums::JobStatus;
 pub use progress::*;

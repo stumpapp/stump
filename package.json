@@ -1,6 +1,6 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.1.12",
+	"version": "0.1.13",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "SEE README.md",
@@ -47,7 +47,7 @@
 		"@typescript-eslint/parser": "^8.58.0",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"citty": "^0.2.2",
-		"concurrently": "^8.2.2",
+		"concurrently": "^10.0.6",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-plugin-react": "^7.37.5",
@@ -68,7 +68,7 @@
 		"typescript-eslint": "^8.48.1"
 	},
 	"resolutions": {
-		"vite": "^8.2.2",
+		"vite": "^8.3.5",
 		"postcss": "^8.5.10",
 		"@types/react": "~19.2.10",
 		"react": "=19.2.3",

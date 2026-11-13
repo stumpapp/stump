@@ -3,7 +3,7 @@ use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel};
 use serde_json::Value;
 use tests::fake_data;
 
-use crate::common::{series::setup_single_series_with_n_books, TestApp};
+use crate::common::{TestApp, series::setup_single_series_with_n_books};
 
 fn test_epub_path() -> String {
 	tests::fixtures::test_data_dir()

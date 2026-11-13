@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 
 use crate::pagination::get_paginated_results;
 use models::entity::{reading_list, user::AuthUser};

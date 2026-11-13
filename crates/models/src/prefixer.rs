@@ -3,8 +3,8 @@
 //! Taken from https://github.com/SeaQL/sea-orm/discussions/1502
 
 use sea_orm::sea_query::{Alias, IntoIden, SelectExpr, SelectStatement};
-use sea_orm::{prelude::*, FromQueryResult};
 use sea_orm::{EntityTrait, QueryTrait};
+use sea_orm::{FromQueryResult, prelude::*};
 
 /// A utility struct to prefix columns with table name in a query in order to achieve
 /// better nested structure support when doing complex join queries.

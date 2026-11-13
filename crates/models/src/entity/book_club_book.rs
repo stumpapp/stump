@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	prelude::{async_trait::async_trait, *},
 	ActiveValue, QueryOrder, QuerySelect,
+	prelude::{async_trait::async_trait, *},
 };
 
 use super::{book_club, book_club_discussion, media};

@@ -60,9 +60,5 @@ pub(crate) fn parse_date_parts(
 
 /// Return either the given vector or None if it's empty
 pub(crate) fn filled_array_or_none<T>(vec: Vec<T>) -> Option<Vec<T>> {
-	if vec.is_empty() {
-		None
-	} else {
-		Some(vec)
-	}
+	if vec.is_empty() { None } else { Some(vec) }
 }

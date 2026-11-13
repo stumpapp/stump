@@ -1,9 +1,9 @@
 use std::sync::OnceLock;
 
 use chrono::{DateTime, Duration, FixedOffset, Utc};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use models::entity::{refresh_token, server_config};
-use sea_orm::{prelude::*, ActiveValue, IntoActiveModel, QuerySelect};
+use sea_orm::{ActiveValue, IntoActiveModel, QuerySelect, prelude::*};
 use serde::{Deserialize, Serialize};
 use stump_core::config::StumpConfig;
 

@@ -1,4 +1,4 @@
-use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*, prelude::async_trait::async_trait};
 
 // TODO(reviews): Add timestamp
 // TODO(reviews): Rename content to review_text or something

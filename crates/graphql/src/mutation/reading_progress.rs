@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	domain::reading_progress::{
@@ -8,15 +8,15 @@ use models::{
 	},
 	entity::{media, reading_session},
 	services::reading_progress::{
-		derive_readthrough_number, get_book_pages, reset_cumulative_elapsed_seconds,
-		upsert_reading_session, NormalizedProgression,
+		NormalizedProgression, derive_readthrough_number, get_book_pages,
+		reset_cumulative_elapsed_seconds, upsert_reading_session,
 	},
 	shared::enums::ReadingStatus,
 };
 use sea_orm::{
-	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
-	ExprTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
-	TransactionTrait,
+	ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, ExprTrait,
+	IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
+	prelude::Decimal,
 };
 
 use crate::{

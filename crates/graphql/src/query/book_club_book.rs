@@ -1,10 +1,14 @@
-use async_graphql::{Context, Object, Result, ID};
-use models::entity::{book_club_book, media};
-use sea_orm::{prelude::*, QuerySelect};
+use async_graphql::{Context, ID, Object, Result};
+use models::{
+	entity::{book_club_book, media},
+	shared::enums::UserPermission,
+};
+use sea_orm::{QuerySelect, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	object::book_club_book::BookClubBook,
+	guard::PermissionGuard,
+	object::{book_club::verify_read_access, book_club_book::BookClubBook},
 };
 
 #[derive(Default)]
@@ -13,6 +17,7 @@ pub struct BookClubBookQuery;
 #[Object]
 impl BookClubBookQuery {
 	/// Get a club book by ID
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn book_club_book(&self, ctx: &Context<'_>, id: ID) -> Result<BookClubBook> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -21,6 +26,8 @@ impl BookClubBookQuery {
 			.one(conn)
 			.await?
 			.ok_or("Book not found")?;
+
+		verify_read_access(&book.book_club_id, user, conn).await?;
 
 		if let Some(ref entity_id) = book.book_entity_id {
 			// Note: _Technically_ this could also fail if the book doesn't exist, which is

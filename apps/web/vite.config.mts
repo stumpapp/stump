@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { constants as zlibConstants } from 'node:zlib'
 
 import babel from '@rolldown/plugin-babel'
@@ -53,6 +54,11 @@ export default defineConfig({
 			},
 		},
 	},
+	resolve: {
+		alias: {
+			'@/': fileURLToPath(new URL('../../packages/browser/src/', import.meta.url)),
+		},
+	},
 	clearScreen: false,
 	define: {
 		pkgJson: { name, version },
@@ -61,7 +67,7 @@ export default defineConfig({
 		tailwindcss(),
 		react(),
 		babel({ presets: [reactCompilerPreset()] }),
-		tsconfigPaths(),
+		tsconfigPaths({ tsConfigPath: ['tsconfig.json', '../../packages/browser/tsconfig.json'] }),
 		compression({
 			include: [/\.(js|mjs|json|css|html|svg|xml|wasm)$/i],
 			exclude: [/\.(png|jpe?g|gif|webp|avif|woff2?|mp4|webm)$/i],

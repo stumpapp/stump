@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use async_graphql::{Context, Json, MaybeUndefined, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, ID, Json, MaybeUndefined, Object, Result, SimpleObject};
 use chrono::Utc;
 use itertools::chain;
 use metadata_integrations::MetadataField;
@@ -15,15 +15,15 @@ use models::{
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
+	Condition, ExprTrait, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 	prelude::*,
 	sea_query::{Expr, OnConflict, Query},
-	Condition, ExprTrait, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::{
 	image::{
-		generate_thumbnail_from_book, remove_thumbnails, ImageProcessorOptionsExt,
-		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-		ThumbnailGenerationJobParams,
+		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+		generate_thumbnail_from_book, remove_thumbnails,
 	},
 	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},

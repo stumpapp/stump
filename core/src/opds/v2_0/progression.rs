@@ -4,7 +4,7 @@ use super::{entity::OPDSProgressionEntity, utils::default_now};
 use chrono::{DateTime, FixedOffset};
 use derive_builder::Builder;
 use models::shared::readium::{ReadiumLocation, ReadiumLocator};
-use rust_decimal::{prelude::ToPrimitive, Decimal};
+use rust_decimal::{Decimal, prelude::ToPrimitive};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

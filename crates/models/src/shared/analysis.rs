@@ -11,7 +11,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::FromJsonQueryResult;
 
-use serde::{ser::SerializeStruct, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, ser::SerializeStruct};
 use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;

@@ -1,12 +1,12 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{reading_session, user, user_login_activity},
 	shared::enums::{ReadingStatus, UserPermission},
 };
 use sea_orm::{
+	ExprTrait, QueryOrder, QuerySelect,
 	prelude::*,
 	sea_query::{Alias, Expr},
-	ExprTrait, QueryOrder, QuerySelect,
 };
 
 use crate::{

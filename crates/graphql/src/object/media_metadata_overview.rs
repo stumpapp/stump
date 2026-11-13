@@ -1,7 +1,7 @@
 use crate::data::{AuthContext, CoreContext};
 use async_graphql::{Context, Object, Result};
 use models::entity::{media, media_metadata, user::AuthUser};
-use sea_orm::{prelude::*, DatabaseConnection, QuerySelect, QueryTrait, Select};
+use sea_orm::{DatabaseConnection, QuerySelect, QueryTrait, Select, prelude::*};
 use std::collections::BTreeSet;
 
 static VALUE_SEPERATOR: char = ',';
@@ -161,7 +161,7 @@ impl MediaMetadataOverview {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use sea_orm::{sea_query::SqliteQueryBuilder, MockDatabase, QueryTrait, Value};
+	use sea_orm::{MockDatabase, QueryTrait, Value, sea_query::SqliteQueryBuilder};
 
 	async fn get_unique_values_inner_test(
 		conn: &DatabaseConnection,

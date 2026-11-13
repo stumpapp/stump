@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/native-tabs'
 
 import { useColors } from '~/lib/constants'
 import { useOPDSLegacyFeedContext } from '~/providers/OPDSLegacyFeedProvider'

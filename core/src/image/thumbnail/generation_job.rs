@@ -5,17 +5,17 @@ use models::{
 	entity::{library, media, series},
 	shared::image_processor_options::ImageProcessorOptions,
 };
-use sea_orm::{prelude::*, QuerySelect, QueryTrait};
+use sea_orm::{QuerySelect, QueryTrait, prelude::*};
 
 use crate::{
-	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
+	database::{SQLITE_BIND_LIMIT, chunk_vec_into},
 	image::thumbnail::generate::{
-		bump_series_thumbnail_fallbacks, safely_generate_batch, GenerateImageSource,
-		GenerateThumbnailOptions,
+		GenerateImageSource, GenerateThumbnailOptions, bump_series_thumbnail_fallbacks,
+		safely_generate_batch,
 	},
 	job::{
-		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkingState,
+		JobContext, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError,
 	},
 };
 

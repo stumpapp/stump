@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import * as Haptics from 'expo-haptics'
 import { Check, ChevronsUpDown, X } from 'lucide-react-native'
 import { useRef, useState } from 'react'
-import { Platform, Pressable, ScrollView, View } from 'react-native'
+import { Platform, Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native'
 
 import { useColors, usePalette } from '~/lib/constants'
 import { cn } from '~/lib/utils'
@@ -22,6 +22,7 @@ export function PickerSheet<T extends string = string>({
 	className,
 }: PickerProps<T>) {
 	const sheetRef = useRef<TrueSheet>(null)
+	const scrollRef = useRef<ScrollViewInstance>(null)
 	const colors = useColors()
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -73,9 +74,9 @@ export function PickerSheet<T extends string = string>({
 						<HeaderButton icon={{ ios: 'xmark', android: X }} onPress={handleCancel} />
 					</View>
 				}
-				scrollable
+				scrollableRef={scrollRef}
 			>
-				<ScrollView className="px-2 flex-1" nestedScrollEnabled>
+				<ScrollView ref={scrollRef} className="px-2 flex-1" nestedScrollEnabled>
 					{options.map((option) => (
 						<PickerSheetOption
 							key={option.value}
@@ -126,7 +127,12 @@ function PickerSheetOption<T extends string>({
 					/>
 					<View
 						className="gap-4 w-full flex-row items-center"
-						style={{ opacity: pressed ? 0.7 : 1, paddingLeft: 16, paddingRight: 16 }}
+						style={{
+							flex: 1,
+							opacity: pressed ? 0.7 : 1,
+							paddingLeft: 16,
+							paddingRight: 16,
+						}}
 					>
 						{isSelected ? <Icon as={Check} /> : <Icon as={Check} className="invisible" />}
 						<Text

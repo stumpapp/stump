@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use models::entity::{library_config, series};
-use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
+use sea_orm::{DatabaseConnection, QuerySelect, prelude::*};
 use std::{collections::HashMap, sync::Arc};
 
 pub struct LibraryConfigLoader {

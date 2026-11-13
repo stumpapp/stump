@@ -1,4 +1,4 @@
-use xml::{writer::XmlEvent, EventWriter};
+use xml::{EventWriter, writer::XmlEvent};
 
 use crate::error::CoreResult;
 

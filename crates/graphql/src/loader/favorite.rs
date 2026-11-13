@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use async_graphql::dataloader::Loader;
 use models::entity::{favorite_library, favorite_media, favorite_series};
-use sea_orm::{prelude::*, DatabaseConnection, ExprTrait};
+use sea_orm::{DatabaseConnection, ExprTrait, prelude::*};
 
 pub struct FavoritesLoader {
 	conn: Arc<DatabaseConnection>,

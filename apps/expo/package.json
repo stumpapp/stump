@@ -105,7 +105,7 @@
 		"react-native-easing-gradient": "^1.1.1",
 		"react-native-enriched-markdown": "^1.1.1",
 		"react-native-gesture-handler": "~3.3.0",
-		"react-native-keyboard-controller": "1.22.7",
+		"react-native-keyboard-controller": "1.23.0",
 		"react-native-linear-gradient": "^2.8.3",
 		"react-native-mmkv": "^3.3.3",
 		"react-native-nitro-modules": "^0.37.1",

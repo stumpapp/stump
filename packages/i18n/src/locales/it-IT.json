@@ -4,7 +4,7 @@
 			"servers": "Server",
 			"localLibrary": "Libreria",
 			"settings": "Impostazioni",
-			"browse": "Esplora",
+			"browse": "Sfoglia",
 			"clubs": "Club"
 		},
 		"localLibrary": {
@@ -58,7 +58,7 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sincronizzazione ignorata per {{skippedCount}} server",
+				"skippedOneServer": "Sincronizzazione saltata per {{skippedCount}} server",
 				"skippedMultipleServers": "Sincronizzazione ignorata per {{skippedCount}} server",
 				"explanation": "Alcuni server utilizzano metodi di autenticazione che non possono essere aggiornati automaticamente"
 			},
@@ -226,7 +226,36 @@
 		},
 		"serverSettingsSheet": {
 			"configuration": {
-				"label": "Configurazione"
+				"label": "Configurazione",
+				"networkSettings": "Impostazioni di rete"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Profilo attivo",
+				"localIsActive": "Il profilo locale è attivo",
+				"primaryIsActive": "Il profilo principale è attivo",
+				"autoSwitchToLocalDidNotWork": "L'app non è riuscita a passare al profilo attivo. Verifica la connessione di rete"
+			},
+			"localProfile": "Profilo locale",
+			"autoSwitchToLocal": {
+				"label": "Passaggio automatico al profilo locale",
+				"description": "Passare al profilo locale quando possibile"
+			},
+			"localUrl": "URL locale",
+			"saveUrlChanges": "Salva le modifiche all'URL",
+			"swapUrls": {
+				"label": "Scambia URL",
+				"swap": "Scambia",
+				"confirmationText": "Sei sicuro di voler scambiare l'URL remoto con quello locale? La modifica avrà effetto immediato",
+				"noLocalUrlSet": {
+					"title": "URL locale non specificato",
+					"description": "È necessario impostare un URL locale prima di poterlo sostituire con l'URL remoto"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Rete Wi-Fi",
+				"noAssociatedNetwork": "Nessuna rete Wi-Fi associata"
 			}
 		}
 	},

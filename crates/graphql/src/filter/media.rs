@@ -4,17 +4,17 @@ use models::{
 	shared::enums::{FileStatus, ReadingStatus},
 };
 use sea_orm::{
+	Condition, ExprTrait,
 	prelude::{DateTimeWithTimeZone, *},
 	sea_query::{Expr, Query, SelectStatement},
-	Condition, ExprTrait,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-	apply_numeric_filter, apply_string_filter, media_metadata::MediaMetadataFilterInput,
-	series::SeriesFilterInput, ConceptualFilter, IntoFilter, NumericFilter,
-	StringLikeFilter,
+	ConceptualFilter, IntoFilter, NumericFilter, StringLikeFilter, apply_numeric_filter,
+	apply_string_filter, media_metadata::MediaMetadataFilterInput,
+	series::SeriesFilterInput,
 };
 
 fn apply_reading_status_filter(value: ReadingStatus, not: bool) -> impl Into<Condition> {
@@ -37,11 +37,7 @@ fn apply_reading_status_filter(value: ReadingStatus, not: bool) -> impl Into<Con
 		ReadingStatus::NotStarted => reading_session::Column::Id.is_null(),
 	};
 
-	if not {
-		base_filter.not()
-	} else {
-		base_filter
-	}
+	if not { base_filter.not() } else { base_filter }
 }
 
 fn media_tag_name_subquery(filter: StringLikeFilter<String>) -> SelectStatement {

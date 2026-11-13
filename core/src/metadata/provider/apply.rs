@@ -7,7 +7,7 @@ use models::{
 	shared::enums::MetadataFetchStatus,
 };
 use rust_decimal::prelude::FromPrimitive;
-use sea_orm::{prelude::*, IntoActiveModel, Set};
+use sea_orm::{IntoActiveModel, Set, prelude::*};
 use serde_json::Value as JsonValue;
 
 use crate::CoreError;

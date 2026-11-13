@@ -1,7 +1,7 @@
-use async_graphql::{Enum, SimpleObject, ID};
+use async_graphql::{Enum, ID, SimpleObject};
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, Condition, DeriveActiveEnum, EnumIter, QuerySelect, QueryTrait,
+	Condition, DeriveActiveEnum, EnumIter, QuerySelect, QueryTrait, prelude::*,
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};

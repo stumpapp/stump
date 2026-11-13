@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use tests::fake_data;
 
-use crate::common::{api_key::create_api_key_for_user, TestApp};
+use crate::common::{TestApp, api_key::create_api_key_for_user};
 
 async fn setup() -> (TestApp, String) {
 	let app = TestApp::new().await;

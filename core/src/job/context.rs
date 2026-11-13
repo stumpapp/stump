@@ -1,16 +1,16 @@
 use std::{sync::Arc, time::Instant};
 
 use crate::{
+	CoreError,
 	config::StumpConfig,
 	event::{CoreEvent, JobOutput},
 	job::JobUpdate,
-	CoreError,
 };
 use dashmap::DashMap;
 use models::entity::{job, log, server_config};
 use sea_orm::{
-	prelude::*, sea_query::OnConflict, sqlx::types::chrono::Utc, ActiveValue::Set,
-	DatabaseConnection, QuerySelect,
+	ActiveValue::Set, DatabaseConnection, QuerySelect, prelude::*, sea_query::OnConflict,
+	sqlx::types::chrono::Utc,
 };
 use serde::Serialize;
 use tokio::sync::broadcast;
@@ -19,8 +19,8 @@ use tokio_util::sync::CancellationToken;
 use apalis::prelude::{MemoryStorage, MessageQueue};
 
 use super::{
-	dispatch::StumpJob, error::JobError, CoreJobOutput, JobExecuteLog, JobOutputExt,
-	JobProgress, JobStatus,
+	CoreJobOutput, JobExecuteLog, JobOutputExt, JobProgress, JobStatus,
+	dispatch::StumpJob, error::JobError,
 };
 
 #[derive(Clone)]

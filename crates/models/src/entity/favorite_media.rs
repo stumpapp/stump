@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::{prelude::*, ActiveValue, FromQueryResult};
+use sea_orm::{ActiveValue, FromQueryResult, prelude::*};
 
 use super::{media, user};
 

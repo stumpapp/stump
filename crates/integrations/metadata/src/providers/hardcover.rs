@@ -3,7 +3,8 @@ use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 
 use crate::{
-	client::{build_client_with_retry, RetryClientConfig},
+	ExternalMetadata, MetadataProvider, RateLimiter,
+	client::{RetryClientConfig, build_client_with_retry},
 	error::MetadataProviderError,
 	provider::ProviderCredentialVerification,
 	serde_utils::string_or_number,
@@ -11,7 +12,6 @@ use crate::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchOutcome, SearchQuery,
 	},
-	ExternalMetadata, MetadataProvider, RateLimiter,
 };
 
 const HARDCOVER_DEFAULT_RATE_LIMIT: u32 = 5;

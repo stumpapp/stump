@@ -4,7 +4,7 @@ use crate::{
 	input::media::{MediaMetadataInput, MediaMetadataSearchInput},
 	object::{media::Media, metadata_fetch_record::MetadataFetchRecord},
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use metadata_integrations::{
 	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride, SearchQuery,
 };
@@ -12,7 +12,7 @@ use models::{
 	entity::{media, media_metadata, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{ActiveValue::Set, IntoActiveModel, prelude::*};
 use std::collections::HashMap;
 use stump_core::metadata::provider::ProviderClientCache;
 

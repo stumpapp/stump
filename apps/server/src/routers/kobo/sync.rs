@@ -291,9 +291,9 @@ impl<'a> SyncPage<'a> {
 mod tests {
 	use chrono::Days;
 	use models::entity::{kobo_sync_session, user};
+	use sea_orm::EntityTrait;
 	use sea_orm::prelude::DateTimeWithTimeZone;
 	use sea_orm::query::*;
-	use sea_orm::EntityTrait;
 	use tests::db::test_database;
 	use tests::fake_data;
 

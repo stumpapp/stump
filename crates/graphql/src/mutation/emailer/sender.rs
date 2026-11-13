@@ -8,7 +8,7 @@ use async_graphql::Result;
 use email::{
 	AttachmentPayload, EmailContentType, EmailResult, EmailerClient, EmailerClientConfig,
 };
-use sea_orm::{prelude::*, IntoActiveModel, NotSet, Set};
+use sea_orm::{IntoActiveModel, NotSet, Set, prelude::*};
 use stump_core::{
 	fs_utils::{ContentType, FileParts, PathUtils},
 	utils::encryption::decrypt_string,

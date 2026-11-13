@@ -7,7 +7,7 @@ use crate::{
 use async_graphql::{Context, Object, Result};
 use models::entity::notifier;
 use models::shared::enums::UserPermission;
-use sea_orm::{prelude::*, ActiveModelTrait, Set};
+use sea_orm::{ActiveModelTrait, Set, prelude::*};
 
 // TODO(notifier): rm the unreleased guard once i _actually_ build it out
 

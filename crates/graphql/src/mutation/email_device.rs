@@ -6,7 +6,7 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result};
 use models::{entity::registered_email_device, shared::enums::UserPermission};
-use sea_orm::{prelude::*, Set, TryIntoModel};
+use sea_orm::{Set, TryIntoModel, prelude::*};
 
 #[derive(Default)]
 pub struct EmailDeviceMutation;

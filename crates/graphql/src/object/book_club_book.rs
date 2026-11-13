@@ -3,7 +3,7 @@ use models::{
 	entity::{book_club_book, book_club_discussion, media},
 	shared::book_club::{BookClubExternalBook, BookClubInternalBook},
 };
-use sea_orm::{prelude::*, QueryFilter, QueryOrder};
+use sea_orm::{QueryFilter, QueryOrder, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{AuthContext, CoreContext};

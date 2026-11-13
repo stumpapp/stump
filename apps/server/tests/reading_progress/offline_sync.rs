@@ -1,8 +1,8 @@
 use crate::common::{
-	book::update_progress, series::setup_single_series_with_n_books, TestApp,
+	TestApp, book::update_progress, series::setup_single_series_with_n_books,
 };
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tests::fake_data;
 
 async fn fetch_read_progress(app: &TestApp, book_id: &str) -> Value {

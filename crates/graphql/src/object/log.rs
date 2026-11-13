@@ -1,6 +1,6 @@
 use async_graphql::{Result, SimpleObject};
-use chrono::offset::Utc;
 use chrono::DateTime;
+use chrono::offset::Utc;
 use models::entity::log;
 use stump_core::config::StumpConfig;
 

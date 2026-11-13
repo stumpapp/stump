@@ -1,4 +1,4 @@
-use crate::common::{account::CreateTestUser, TestApp};
+use crate::common::{TestApp, account::CreateTestUser};
 use graphql::input::user::AgeRestrictionInput;
 use models::shared::enums::UserPermission;
 use serde_json::json;

@@ -5,17 +5,17 @@ use crate::{
 	utils::http::ImageResponse,
 };
 use axum::{
+	Extension, Router,
 	extract::{Path, State},
 	middleware,
 	routing::get,
-	Extension, Router,
 };
 use graphql::data::AuthContext;
 use models::{
 	entity::{library, library_config, media, series},
 	shared::image_processor_options::SupportedImageFormat,
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*};
 use stump_core::{
 	config::StumpConfig,
 	fs_utils::ContentType,

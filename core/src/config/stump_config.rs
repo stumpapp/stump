@@ -13,8 +13,8 @@ use schematic::{Config, ConfigLoader};
 use serde::Serialize;
 
 use crate::{
-	config::{get_default_config_dir, OidcConfig, PartialOidcConfig},
 	CoreError, CoreResult,
+	config::{OidcConfig, PartialOidcConfig, get_default_config_dir},
 };
 
 pub const CONFIG_DIR_KEY: &str = "STUMP_CONFIG_DIR";

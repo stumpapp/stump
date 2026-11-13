@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object, Result};
 use models::{
 	domain::reading_progress::logical_today,
-	services::reading_stats::{streaks_for_user, ReadingStreaks, SessionStats},
+	services::reading_stats::{ReadingStreaks, SessionStats, streaks_for_user},
 };
 
 use crate::{

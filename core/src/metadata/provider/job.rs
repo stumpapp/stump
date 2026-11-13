@@ -11,18 +11,18 @@ use models::{
 };
 use sea_orm::QuerySelect;
 use sea_orm::{
+	Set,
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Set,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
-	error::JobError, JobContext, JobExecuteLog, JobLifecycle, JobOutputExt, JobProgress,
-	JobTaskOutput, WorkingState,
+	JobContext, JobExecuteLog, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput,
+	WorkingState, error::JobError,
 };
 
-use super::{apply, ProviderClientCache};
+use super::{ProviderClientCache, apply};
 
 type Id = String;
 

@@ -8,7 +8,7 @@
 //! The client passes the value back to the server in its next /v1/library/sync request,
 //! in the "x-kobo-synctoken" header.
 use axum::http::HeaderValue;
-use base64::{engine::general_purpose::STANDARD_NO_PAD as BASE64, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD_NO_PAD as BASE64};
 use std::str::Utf8Error;
 
 use reqwest::header::{InvalidHeaderValue, ToStrError};

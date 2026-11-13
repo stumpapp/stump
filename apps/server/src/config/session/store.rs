@@ -3,14 +3,14 @@ use std::{collections::HashMap, str::FromStr, sync::Arc};
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::session;
-use sea_orm::{prelude::*, DatabaseConnection, ExprTrait, Set};
+use sea_orm::{DatabaseConnection, ExprTrait, Set, prelude::*};
 use stump_core::config::StumpConfig;
 use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{
+	SessionStore,
 	session::{Id, Record},
 	session_store::{self, ExpiredDeletion},
-	SessionStore,
 };
 
 use super::SESSION_USER_KEY;

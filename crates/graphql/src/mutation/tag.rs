@@ -3,14 +3,14 @@ use crate::{
 	guard::PermissionGuard,
 	object::{media::Media, series::Series, tag::Tag},
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{media, media_tag, series, series_tag, tag},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, ActiveValue::Set, DatabaseConnection,
-	DatabaseTransaction, ExprTrait, IntoActiveModel, QuerySelect, TransactionTrait,
+	ActiveValue::Set, DatabaseConnection, DatabaseTransaction, ExprTrait,
+	IntoActiveModel, QuerySelect, TransactionTrait, prelude::*, sea_query::Query,
 };
 use std::collections::HashSet;
 
@@ -420,7 +420,7 @@ mod tests {
 
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![
-				tag_models.clone()
+				tag_models.clone(),
 			])
 			.into_connection();
 		let txn = mock_db.begin().await.unwrap();
@@ -511,7 +511,7 @@ mod tests {
 		// Query 1: find by name -> found with same id (no-op)
 		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
-				existing.clone()
+				existing.clone(),
 			]])
 			.into_connection();
 
@@ -582,7 +582,7 @@ mod tests {
 		// Query 1: find tags by name not linked -> "add" exists in DB
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![
-				existing_in_db.clone()
+				existing_in_db.clone(),
 			])
 			.into_connection();
 		let txn = mock_db.begin().await.unwrap();

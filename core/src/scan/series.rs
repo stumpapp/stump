@@ -8,29 +8,28 @@ use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::FileStatus,
 };
-use sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult};
+use sea_orm::{Condition, UpdateResult, prelude::*, sea_query::Query};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	event,
+	CoreEvent, event,
 	image::{
-		bump_media_thumbnail_fallbacks, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJobParams, bump_media_thumbnail_fallbacks,
 	},
 	job::{
-		error::JobError, CoreJobOutput, JobContext, JobLifecycle, JobOutputExt,
-		JobProgress, JobTaskOutput, StumpJob, WorkingState,
+		CoreJobOutput, JobContext, JobLifecycle, JobOutputExt, JobProgress,
+		JobTaskOutput, StumpJob, WorkingState, error::JobError,
 	},
 	scan::{
 		options::{BookVisitOperation, ScanOptions},
 		utils::media::{
-			build_and_insert_media, handle_missing_media, handle_restored_media,
-			visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+			MediaBuildOperation, MediaOperationOutput, build_and_insert_media,
+			handle_missing_media, handle_restored_media, visit_and_update_media,
 		},
-		walk::{walk_series, WalkedSeries, WalkerCtx},
+		walk::{WalkedSeries, WalkerCtx, walk_series},
 	},
 	utils::chain_optional_iter,
-	CoreEvent,
 };
 
 #[allow(clippy::enum_variant_names)]

@@ -4,12 +4,12 @@ use crate::{
 	input::smart_list_view::SaveSmartListView,
 	object::smart_list_view::SmartListView,
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{smart_list, smart_list_view},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, ActiveModelTrait, Set, TransactionTrait};
+use sea_orm::{ActiveModelTrait, Set, TransactionTrait, prelude::*};
 
 #[derive(Default)]
 pub struct SmartListViewMutation;

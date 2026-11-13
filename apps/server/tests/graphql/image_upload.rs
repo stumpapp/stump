@@ -1,8 +1,8 @@
 use axum_test::multipart::{MultipartForm, Part};
 use models::shared::enums::UserPermission;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
-use crate::common::{account::CreateTestUser, TestApp};
+use crate::common::{TestApp, account::CreateTestUser};
 
 const UPLOAD_EMOJI: &str = r#"mutation UploadEmoji($input: CreateCustomEmojiInput!, $upload: Upload!) {
 	uploadCustomEmoji(input: $input, upload: $upload) { id }

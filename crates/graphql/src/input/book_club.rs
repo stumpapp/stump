@@ -1,9 +1,9 @@
-use async_graphql::{CustomValidator, InputObject, InputValueError, Json, ID};
+use async_graphql::{CustomValidator, ID, InputObject, InputValueError, Json};
 use models::{
 	entity::{book_club, book_club_member, user::AuthUser},
 	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
 };
-use sea_orm::{prelude::*, Set};
+use sea_orm::{Set, prelude::*};
 use slugify::slugify;
 
 use crate::object::book_club_book::BookClubBookVariant;

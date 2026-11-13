@@ -6,11 +6,11 @@ use std::{
 
 use axum_test::multipart::{MultipartForm, Part};
 use models::shared::enums::UserPermission;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tempfile::TempDir;
 use tests::{fake_data, fixtures};
 
-use crate::common::{account::CreateTestUser, TestApp};
+use crate::common::{TestApp, account::CreateTestUser};
 
 const UPLOAD_BOOKS: &str =
 	r#"mutation UploadBooks($input: UploadBooksInput!) { uploadBooks(input: $input) }"#;

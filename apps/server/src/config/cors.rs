@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 use axum::http::{
-	header::{ACCEPT, AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE, EXPIRES, PRAGMA},
 	HeaderName, HeaderValue, Method,
+	header::{ACCEPT, AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE, EXPIRES, PRAGMA},
 };
 use local_ip_address::local_ip;
 use stump_core::config::StumpConfig;

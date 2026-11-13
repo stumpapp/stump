@@ -3,7 +3,7 @@ use models::{
 	entity::reading_session, services::reading_timeline::sessions_with_events,
 	shared::ordering::OrderDirection,
 };
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

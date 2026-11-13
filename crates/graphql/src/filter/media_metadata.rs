@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-	apply_numeric_filter, apply_string_filter, IntoFilter, NumericFilter,
-	StringLikeFilter,
+	IntoFilter, NumericFilter, StringLikeFilter, apply_numeric_filter,
+	apply_string_filter,
 };
 
 #[skip_serializing_none]

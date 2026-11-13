@@ -367,10 +367,11 @@ mod tests {
 			MatchScorer::EXACT_TITLE_FLOOR,
 			c.confidence
 		);
-		assert!(c
-			.confidence_factors
-			.iter()
-			.any(|f| f.factor == "title_exact"));
+		assert!(
+			c.confidence_factors
+				.iter()
+				.any(|f| f.factor == "title_exact")
+		);
 	}
 
 	#[test]

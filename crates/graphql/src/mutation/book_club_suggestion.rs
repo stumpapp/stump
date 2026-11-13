@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	entity::{
@@ -10,7 +10,7 @@ use models::{
 		enums::UserPermission,
 	},
 };
-use sea_orm::{prelude::*, ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

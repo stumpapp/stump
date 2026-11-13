@@ -5,9 +5,9 @@ use models::{
 };
 use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
+	FromQueryResult, JoinType, QuerySelect, Select,
 	prelude::*,
 	sea_query::{Condition, Expr, ExprTrait, Query, SimpleExpr, SubQueryStatement},
-	FromQueryResult, JoinType, QuerySelect, Select,
 };
 
 use crate::kobo::sync_types::*;

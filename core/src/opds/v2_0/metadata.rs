@@ -69,11 +69,7 @@ fn csv_to_strings(csv: Option<String>) -> Option<Vec<String>> {
 		.filter(|s| !s.is_empty())
 		.collect();
 
-	if items.is_empty() {
-		None
-	} else {
-		Some(items)
-	}
+	if items.is_empty() { None } else { Some(items) }
 }
 
 /// A struct representing the Web Publication metadata for an OPDS entry, not all
@@ -305,9 +301,11 @@ mod tests {
 		assert_eq!(authors[0].name, "Writer A");
 		assert_eq!(authors[0].links.len(), 1);
 		assert_eq!(authors[0].links[0]._type, Some(OPDSLinkType::OpdsJson));
-		assert!(authors[0].links[0]
-			.href
-			.contains("/opds/v2.0/books/browse?author=Writer%20A"));
+		assert!(
+			authors[0].links[0]
+				.href
+				.contains("/opds/v2.0/books/browse?author=Writer%20A")
+		);
 
 		assert_eq!(authors[1].name, "Writer B");
 		assert!(authors[1].links[0].href.contains("author=Writer%20B"));

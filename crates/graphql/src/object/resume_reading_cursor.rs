@@ -1,7 +1,7 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::{entity::media, shared::readium::ReadiumLocator};
 use num_traits::ToPrimitive;
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 use stump_core::readium::ReadiumManifestGenerator;
 use tokio::task::spawn_blocking;
 

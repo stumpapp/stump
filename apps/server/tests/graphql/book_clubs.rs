@@ -5,7 +5,7 @@ use models::{
 use sea_orm::EntityTrait;
 use tests::fake_data;
 
-use crate::common::{account::CreateTestUser, TestApp};
+use crate::common::{TestApp, account::CreateTestUser};
 
 // TODO(clubs): split this up once i actually build out book club features
 

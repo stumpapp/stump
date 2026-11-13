@@ -3,7 +3,7 @@ use models::{
 	entity::{book_club_member, user},
 	shared::book_club::BookClubMemberRole,
 };
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 
 use crate::{
 	data::{CoreContext, ServiceContext},

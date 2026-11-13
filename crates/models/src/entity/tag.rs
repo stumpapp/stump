@@ -1,6 +1,6 @@
 use super::{library_tag, media_tag, series_tag};
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, JoinType, QuerySelect};
+use sea_orm::{JoinType, QuerySelect, entity::prelude::*};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, SimpleObject)]

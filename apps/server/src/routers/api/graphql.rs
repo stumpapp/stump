@@ -1,19 +1,19 @@
 use crate::middleware::{auth::auth_middleware, host::HostExtractor};
-use async_graphql::http::{Credentials, GraphiQLSource, ALL_WEBSOCKET_PROTOCOLS};
+use async_graphql::http::{ALL_WEBSOCKET_PROTOCOLS, Credentials, GraphiQLSource};
 use async_graphql_axum::{
 	GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket,
 };
 use axum::{
-	extract::{ws::WebSocketUpgrade, State},
+	Extension, Router,
+	extract::{State, ws::WebSocketUpgrade},
 	middleware,
 	response::{Html, IntoResponse},
 	routing::{get, post},
-	Extension, Router,
 };
 
 use graphql::{
 	data::{AuthContext, ServiceContext},
-	schema::{build_schema, AppSchema},
+	schema::{AppSchema, build_schema},
 };
 use tower_sessions::Session;
 

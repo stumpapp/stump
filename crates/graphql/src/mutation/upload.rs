@@ -4,24 +4,25 @@ use std::{
 };
 
 use async_graphql::{
-	Context, Error, InputObject, Object, Result, Upload, UploadValue, ID,
+	Context, Error, ID, InputObject, Object, Result, Upload, UploadValue,
 };
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set};
+use sea_orm::{IntoActiveModel, Set, prelude::*, sea_query::Query};
 use stump_core::{
 	fs_utils::ContentType,
 	image::{
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 		bump_media_thumbnail_fallbacks, bump_series_thumbnail_fallbacks, place_thumbnail,
-		remove_thumbnails, PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		remove_thumbnails,
 	},
 	job::StumpJob,
 };
 use tokio::fs;
-use zip::{read::ZipFile, ZipArchive};
+use zip::{ZipArchive, read::ZipFile};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -228,8 +229,8 @@ impl UploadMutation {
 
 		if !should_enqueue_placeholder {
 			tracing::info!(
-                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
-            );
+				"Thumbnail config is not set to process colors without config, skipping placeholder generation"
+			);
 			return Ok(library.into());
 		}
 
@@ -243,9 +244,9 @@ impl UploadMutation {
 			.enqueue(StumpJob::PlaceholderGeneration {
 				config: PlaceholderGenerationJobConfig {
 					force_regenerate: true,
-					scope: PlaceholderGenerationJobScope::Libraries(vec![library
-						.id
-						.clone()]),
+					scope: PlaceholderGenerationJobScope::Libraries(vec![
+						library.id.clone(),
+					]),
 				},
 			})
 			.await
@@ -326,8 +327,8 @@ impl UploadMutation {
 
 		if !should_enqueue_placeholder {
 			tracing::info!(
-                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
-            );
+				"Thumbnail config is not set to process colors without config, skipping placeholder generation"
+			);
 			return Ok(series.into());
 		}
 
@@ -341,10 +342,9 @@ impl UploadMutation {
 			.enqueue(StumpJob::PlaceholderGeneration {
 				config: PlaceholderGenerationJobConfig {
 					force_regenerate: true,
-					scope: PlaceholderGenerationJobScope::Series(vec![series
-						.series
-						.id
-						.clone()]),
+					scope: PlaceholderGenerationJobScope::Series(vec![
+						series.series.id.clone(),
+					]),
 				},
 			})
 			.await
@@ -435,8 +435,8 @@ impl UploadMutation {
 
 		if !should_enqueue_placeholder {
 			tracing::info!(
-                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
-            );
+				"Thumbnail config is not set to process colors without config, skipping placeholder generation"
+			);
 			return Ok(book.into());
 		}
 
@@ -450,10 +450,9 @@ impl UploadMutation {
 			.enqueue(StumpJob::PlaceholderGeneration {
 				config: PlaceholderGenerationJobConfig {
 					force_regenerate: true,
-					scope: PlaceholderGenerationJobScope::Books(vec![book
-						.media
-						.id
-						.clone()]),
+					scope: PlaceholderGenerationJobScope::Books(vec![
+						book.media.id.clone(),
+					]),
 				},
 			})
 			.await
@@ -530,8 +529,8 @@ impl UploadMutation {
 
 		if !should_enqueue_placeholder {
 			tracing::info!(
-                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
-            );
+				"Thumbnail config is not set to process colors without config, skipping placeholder generation"
+			);
 			return Ok(series.into());
 		}
 
@@ -545,10 +544,9 @@ impl UploadMutation {
 			.enqueue(StumpJob::PlaceholderGeneration {
 				config: PlaceholderGenerationJobConfig {
 					force_regenerate: true,
-					scope: PlaceholderGenerationJobScope::Series(vec![series
-						.series
-						.id
-						.clone()]),
+					scope: PlaceholderGenerationJobScope::Series(vec![
+						series.series.id.clone(),
+					]),
 				},
 			})
 			.await
@@ -630,8 +628,8 @@ impl UploadMutation {
 
 		if !should_enqueue_placeholder {
 			tracing::info!(
-                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
-            );
+				"Thumbnail config is not set to process colors without config, skipping placeholder generation"
+			);
 			return Ok(book.into());
 		}
 
@@ -645,10 +643,9 @@ impl UploadMutation {
 			.enqueue(StumpJob::PlaceholderGeneration {
 				config: PlaceholderGenerationJobConfig {
 					force_regenerate: true,
-					scope: PlaceholderGenerationJobScope::Books(vec![book
-						.media
-						.id
-						.clone()]),
+					scope: PlaceholderGenerationJobScope::Books(vec![
+						book.media.id.clone(),
+					]),
 				},
 			})
 			.await
@@ -824,8 +821,9 @@ fn validate_series_upload_contents(
 			// Error if the file already exists and we aren't allowing overwrites
 			if extraction_path.exists() && !allow_overwrite {
 				return Err(format!(
-                    "Unable to extract zip contents to {extraction_path:?}, overwrites are disabled"
-                ).into());
+					"Unable to extract zip contents to {extraction_path:?}, overwrites are disabled"
+				)
+				.into());
 			}
 
 			validate_zip_file(&mut zip_file)?;

@@ -1,4 +1,4 @@
-use sea_orm::{prelude::DateTimeWithTimeZone, sqlx::types::chrono::Utc, Statement};
+use sea_orm::{Statement, prelude::DateTimeWithTimeZone, sqlx::types::chrono::Utc};
 use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum_test::{TestResponse, TestServer};
 use sea_orm::DatabaseConnection;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use stump_core::{Ctx, StumpCore};
 use stump_server::config::session::get_session_layer;
 use stump_server::routers;

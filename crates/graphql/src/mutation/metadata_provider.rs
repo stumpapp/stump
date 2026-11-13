@@ -8,14 +8,14 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result};
 use metadata_integrations::{
-	create_provider, MatchCandidate, MergeStrategy, MetadataField,
-	ProviderCredentialVerification,
+	MatchCandidate, MergeStrategy, MetadataField, ProviderCredentialVerification,
+	create_provider,
 };
 use models::{
 	entity::{metadata_fetch_record, metadata_provider_config},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
-use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait, TryIntoModel};
+use sea_orm::{IntoActiveModel, Set, TransactionTrait, TryIntoModel, prelude::*};
 
 #[derive(Default)]
 pub struct MetadataProviderMutation;

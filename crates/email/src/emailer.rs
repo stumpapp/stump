@@ -1,13 +1,13 @@
 use async_graphql::InputObject;
 
 use lettre::{
+	Message, SmtpTransport, Transport,
 	address::{Address, AddressError},
 	message::{
-		header::{self, ContentType},
 		Attachment, Mailbox, MultiPart, SinglePart,
+		header::{self, ContentType},
 	},
 	transport::smtp::authentication::{Credentials, Mechanism},
-	Message, SmtpTransport, Transport,
 };
 use serde::{Deserialize, Serialize};
 

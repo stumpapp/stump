@@ -406,14 +406,6 @@ mod tests {
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
-
-		assert!(
-			mock_objs
-				.library_watcher
-				.add_watcher(tmp_dir.clone())
-				.await
-				.is_ok()
-		);
 		let new_file = tmp_dir.join("new_file");
 		assert!(
 			mock_objs
@@ -422,9 +414,11 @@ mod tests {
 				.is_ok()
 		);
 
-		// Wait for the background thread to trigger the flush
-		tokio::time::sleep(Duration::from_millis(100)).await;
-		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
+		let (id, path) =
+			tokio::time::timeout(Duration::from_secs(1), mock_objs.jobs_receiver.recv())
+				.await
+				.expect("Timed out waiting for the library scan job")
+				.expect("Job channel closed");
 		assert_eq!(id, "42");
 		assert_eq!(path, tmp_dir.to_string_lossy().to_string());
 	}

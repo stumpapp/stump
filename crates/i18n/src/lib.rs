@@ -14,6 +14,12 @@ pub use rust_i18n::t;
 /// the locale from the user preferences and passing to rust_i18n
 ///
 /// ```rust
+/// use i18n::translate;
+/// # struct Preferences { locale: String }
+/// # struct User { preferences: Option<Preferences> }
+/// # struct Auth { user: User }
+/// # let req = Auth { user: User { preferences: None } };
+/// # let var = String::from("value");
 ///
 /// // basic example no templating
 /// let my_string = translate!(&req, "a-key").to_string();

@@ -1690,7 +1690,7 @@ checksum = "b94f61472cee1439c0b966b47e3aca9ae07e45d070759512cd390ea2bebc6675"
 
 [[package]]
 name = "cli"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "bcrypt",
  "clap 4.5.48",
@@ -2935,7 +2935,7 @@ dependencies = [
 
 [[package]]
 name = "email"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "async-graphql",
  "lettre",
@@ -3227,7 +3227,7 @@ dependencies = [
 
 [[package]]
 name = "filter-gen"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "heck 0.5.0",
  "itertools 0.14.0",
@@ -3860,7 +3860,7 @@ dependencies = [
 
 [[package]]
 name = "graphql"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "alphanumeric-sort",
  "async-graphql",
@@ -4478,7 +4478,7 @@ dependencies = [
 
 [[package]]
 name = "i18n"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "rust-i18n",
 ]
@@ -4804,7 +4804,7 @@ dependencies = [
 
 [[package]]
 name = "integrations"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "async-trait",
  "lettre",
@@ -5635,7 +5635,7 @@ dependencies = [
 
 [[package]]
 name = "metadata_integrations"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "async-graphql",
  "async-trait",
@@ -9716,7 +9716,7 @@ dependencies = [
 
 [[package]]
 name = "stump_core"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "alphanumeric-sort",
  "apalis",
@@ -9790,7 +9790,7 @@ dependencies = [
 
 [[package]]
 name = "stump_desktop"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "chrono",
  "discord-rich-presence",
@@ -9811,7 +9811,7 @@ dependencies = [
 
 [[package]]
 name = "stump_server"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "alphanumeric-sort",
  "apalis",
@@ -10427,7 +10427,7 @@ dependencies = [
 
 [[package]]
 name = "tests"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "chrono",
  "models",

@@ -11,7 +11,7 @@ members = [
 exclude = ["crates/macros/Cargo.toml", "crates/integrations/Cargo.toml"]
 
 [workspace.package]
-version = "0.1.12"
+version = "0.1.13"
 rust-version = "1.97.1"
 
 # I've defined majority of dependencies here in the workspace so that they are

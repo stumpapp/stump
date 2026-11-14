@@ -99,10 +99,12 @@ async fn test_books_are_grouped_by_metadata_series() {
 	assert_eq!(snapshot.series_of(&second), Some(wayfarers.id.as_str()));
 	assert_eq!(snapshot.series_of(&other), Some(murderbot.id.as_str()));
 	assert_eq!(snapshot.series_of(&standalone), None);
-	assert!(snapshot
-		.media
-		.iter()
-		.all(|m| m.library_id == library.library.id));
+	assert!(
+		snapshot
+			.media
+			.iter()
+			.all(|m| m.library_id == library.library.id)
+	);
 
 	library.assert_rescan_is_noop().await;
 	// ^ sanity check
@@ -129,10 +131,12 @@ async fn test_changed_metadata_moves_book_and_removes_empty_series() {
 	let snapshot = library.snapshot().await;
 
 	assert_eq!(snapshot.series.len(), 2);
-	assert!(snapshot
-		.series
-		.iter()
-		.all(|series| series.name.contains("Wayfarers")));
+	assert!(
+		snapshot
+			.series
+			.iter()
+			.all(|series| series.name.contains("Wayfarers"))
+	);
 	// ^ we have 'Wayfarers' and 'The Wayfarers'
 	snapshot.assert_unique_media(2);
 

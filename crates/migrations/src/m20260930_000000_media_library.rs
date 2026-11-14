@@ -30,8 +30,12 @@ impl MigrationTrait for Migration {
 		}
 
 		let add_column = match backend {
-			DbBackend::Sqlite => "ALTER TABLE media ADD COLUMN library_id TEXT REFERENCES libraries(id) ON DELETE CASCADE ON UPDATE CASCADE",
-			DbBackend::Postgres => "ALTER TABLE media ADD COLUMN library_id TEXT CONSTRAINT fk_media_library REFERENCES libraries(id) ON DELETE CASCADE ON UPDATE CASCADE",
+			DbBackend::Sqlite => {
+				"ALTER TABLE media ADD COLUMN library_id TEXT REFERENCES libraries(id) ON DELETE CASCADE ON UPDATE CASCADE"
+			},
+			DbBackend::Postgres => {
+				"ALTER TABLE media ADD COLUMN library_id TEXT CONSTRAINT fk_media_library REFERENCES libraries(id) ON DELETE CASCADE ON UPDATE CASCADE"
+			},
 			_ => return Err(DbErr::Custom("Unsupported database backend".into())),
 		};
 		txn.execute_raw(Statement::from_string(backend, add_column))
@@ -64,14 +68,18 @@ impl MigrationTrait for Migration {
 					"CREATE UNIQUE INDEX idx_series_id_library_id ON series(id, library_id)",
 					"ALTER TABLE media ADD CONSTRAINT fk_media_series_library FOREIGN KEY (series_id, library_id) REFERENCES series(id, library_id)",
 				] {
-					txn.execute_raw(Statement::from_string(backend, sql)).await?;
+					txn.execute_raw(Statement::from_string(backend, sql))
+						.await?;
 				}
 			},
 			DbBackend::Sqlite => {
 				for (name, event, cascade_guard) in [
 					("insert", "INSERT", ""),
-					("update", "UPDATE OF library_id, series_id",
-					 "AND EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)"),
+					(
+						"update",
+						"UPDATE OF library_id, series_id",
+						"AND EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)",
+					),
 				] {
 					txn.execute_raw(Statement::from_string(backend, format!(
 						 "CREATE TRIGGER media_library_{name} BEFORE {event} ON media

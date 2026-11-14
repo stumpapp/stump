@@ -423,12 +423,16 @@ mod tests {
 	#[test]
 	fn test_organization_cannot_change_after_creation() {
 		let config = metadata_config();
-		assert!(config
-			.validate_organization(Some(OrganizationMode::Filesystem))
-			.is_err());
-		assert!(config
-			.validate_organization(Some(OrganizationMode::Metadata))
-			.is_ok());
+		assert!(
+			config
+				.validate_organization(Some(OrganizationMode::Filesystem))
+				.is_err()
+		);
+		assert!(
+			config
+				.validate_organization(Some(OrganizationMode::Metadata))
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -437,12 +441,16 @@ mod tests {
 			process_metadata: false,
 			..Default::default()
 		};
-		assert!(config
-			.validate_organization(Some(OrganizationMode::Metadata))
-			.is_err());
-		assert!(config
-			.validate_organization(Some(OrganizationMode::Filesystem))
-			.is_ok());
+		assert!(
+			config
+				.validate_organization(Some(OrganizationMode::Metadata))
+				.is_err()
+		);
+		assert!(
+			config
+				.validate_organization(Some(OrganizationMode::Filesystem))
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -469,24 +477,30 @@ mod tests {
 			process_metadata: Some(false),
 			..Default::default()
 		};
-		assert!(disable_processing
-			.apply_to_model(config_model(OrganizationMode::Metadata))
-			.is_err());
+		assert!(
+			disable_processing
+				.apply_to_model(config_model(OrganizationMode::Metadata))
+				.is_err()
+		);
 
 		let add_oneshots = PatchLibraryConfigInput {
 			oneshots_directory: MaybeUndefined::Value("oneshots".to_string()),
 			..Default::default()
 		};
-		assert!(add_oneshots
-			.apply_to_model(config_model(OrganizationMode::Metadata))
-			.is_err());
+		assert!(
+			add_oneshots
+				.apply_to_model(config_model(OrganizationMode::Metadata))
+				.is_err()
+		);
 
 		let disable_processing = PatchLibraryConfigInput {
 			process_metadata: Some(false),
 			..Default::default()
 		};
-		assert!(disable_processing
-			.apply_to_model(config_model(OrganizationMode::Filesystem))
-			.is_ok());
+		assert!(
+			disable_processing
+				.apply_to_model(config_model(OrganizationMode::Filesystem))
+				.is_ok()
+		);
 	}
 }

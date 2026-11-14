@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use models::entity::{media, user};
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 use std::{collections::HashMap, sync::Arc};
 
 use crate::object::media::Media;

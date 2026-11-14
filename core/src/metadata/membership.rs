@@ -5,15 +5,15 @@ use models::{
 	shared::enums::{FileStatus, OrganizationMode, SeriesKind},
 };
 use sea_orm::{
+	ExprTrait, Iterable, QuerySelect, Set,
 	prelude::*,
 	sea_query::{OnConflict, Query, SimpleExpr},
-	ExprTrait, Iterable, QuerySelect, Set,
 };
 
 use crate::{
-	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
-	image::thumbnail::bump_media_thumbnail_fallbacks,
 	CoreError, CoreResult,
+	database::{SQLITE_BIND_LIMIT, get_insert_batch_size},
+	image::thumbnail::bump_media_thumbnail_fallbacks,
 };
 
 /// Moves the book into the virtual series named by its metadata, returning the updated book

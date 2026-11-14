@@ -244,7 +244,9 @@ impl LibraryQuery {
 		let total_count_result = conn
 			.query_one_raw(db_statement(
 				conn,
-				format!("SELECT COUNT(*) AS count FROM ({missing_entities_sql}) AS missing_entities"),
+				format!(
+					"SELECT COUNT(*) AS count FROM ({missing_entities_sql}) AS missing_entities"
+				),
 				[library_id.as_str().into()],
 			))
 			.await?

@@ -33,7 +33,10 @@ export const attemptWebsocketConnect = async <TResult, TVariables>({
 	sdk,
 	...events
 }: GraphQLWebsocketConnectParams<TResult, TVariables>): Promise<GraphQLWebsocketConnectReturn> => {
-	const wsUrl = new URL('/api/graphql/ws', sdk.rootURL.replace(/^http/, 'ws')).toString()
+	const wsUrl = new URL(
+		'api/graphql/ws',
+		`${sdk.rootURL.replace(/^http/, 'ws').replace(/\/$/, '')}/`,
+	).toString()
 
 	const socket = new WebSocket(wsUrl, 'graphql-ws')
 	const socketID = Math.random().toString(36).substring(2, 15)

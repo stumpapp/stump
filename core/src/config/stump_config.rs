@@ -41,6 +41,10 @@ pub struct StumpConfig {
 	#[setting(default = 10801)]
 	pub port: u16,
 
+	/// URL path under which the entire server is served (e.g. "/stump").
+	#[setting(default = "")]
+	pub base_path: String,
+
 	/// The verbosity with which system logs are visible (default: 1)
 	/// 0 = none at all, 1 = info, 2 = debug, 3 = trace
 	#[setting(default = 1)]
@@ -194,9 +198,33 @@ impl StumpConfig {
 
 		let result = loader.load()?;
 
-		let config = result.config;
+		let mut config = result.config;
+		config.normalize_base_path()?;
 
 		Ok(config)
+	}
+
+	/// Normalize and validate the URL prefix before it is used in routes or HTML.
+	pub fn normalize_base_path(&mut self) -> CoreResult<()> {
+		let path = self.base_path.trim_matches('/');
+		if path.is_empty() {
+			self.base_path.clear();
+			return Ok(());
+		}
+		if path.split('/').any(|segment| {
+			segment.is_empty()
+				|| segment == "."
+				|| segment == ".."
+				|| !segment
+					.bytes()
+					.all(|c| c.is_ascii_alphanumeric() || b"-._~".contains(&c))
+		}) {
+			return Err(CoreError::InitializationError(
+				"base_path must contain URL path segments using letters, digits, '-', '.', '_', or '~'".to_string(),
+			));
+		}
+		self.base_path = format!("/{path}");
+		Ok(())
 	}
 
 	pub fn debug() -> Self {
@@ -318,6 +346,61 @@ impl StumpConfig {
 mod tests {
 	use super::*;
 	use tempfile;
+
+	#[test]
+	fn base_path_is_normalized_and_validated() {
+		for (input, expected) in [
+			("", ""),
+			("/", ""),
+			("stump", "/stump"),
+			("/stump/", "/stump"),
+			("/apps/stump/", "/apps/stump"),
+		] {
+			let mut config = StumpConfig {
+				base_path: input.to_string(),
+				..Default::default()
+			};
+			config.normalize_base_path().unwrap();
+			assert_eq!(config.base_path, expected);
+		}
+		for input in [
+			"/a//b",
+			"/../stump",
+			"/a/./b",
+			"https://example.org/stump",
+			"/stump?query",
+			"/stump#hash",
+			"/stump\"",
+			"/stump%2fpath",
+			"/stump path",
+			"/stump/{id}",
+		] {
+			let mut config = StumpConfig {
+				base_path: input.to_string(),
+				..Default::default()
+			};
+			assert!(config.normalize_base_path().is_err(), "accepted {input}");
+		}
+	}
+
+	#[test]
+	fn base_path_loads_from_toml_and_environment() {
+		temp_env::with_vars([("STUMP_BASE_PATH", None::<&str>)], || {
+			let dir = tempfile::tempdir().unwrap();
+			std::fs::write(
+				dir.path().join("Stump.toml"),
+				"base_path = \"/apps/stump/\"\n",
+			)
+			.unwrap();
+			assert_eq!(
+				StumpConfig::load(dir.path()).unwrap().base_path,
+				"/apps/stump"
+			);
+			temp_env::with_vars([("STUMP_BASE_PATH", Some("/books/"))], || {
+				assert_eq!(StumpConfig::load(dir.path()).unwrap().base_path, "/books");
+			});
+		});
+	}
 
 	#[test]
 	fn test_defaults_and_basic_env_override() {

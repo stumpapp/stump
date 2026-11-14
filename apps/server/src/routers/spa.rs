@@ -5,6 +5,7 @@ use axum::{
 	body::Body,
 	extract::State,
 	http::{HeaderMap, HeaderValue, Request, header},
+	response::Html,
 	response::IntoResponse,
 	response::Response,
 	routing::get,
@@ -57,14 +58,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.precompressed_br()
 				.precompressed_gzip(),
 		);
-
-	let spa_fallback = ServiceBuilder::new()
-		.layer(SetResponseHeaderLayer::if_not_present(
-			header::CACHE_CONTROL,
-			HeaderValue::from_static("no-cache"),
-		))
-		.service(ServeFile::new(dist_path.join("index.html")));
-
 	Router::new()
 		.route(INDEX, get(index_html))
 		.route(INDEX_HTML, get(index_html))
@@ -73,7 +66,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route(MANIFEST, get(serve_manifest))
 		.nest_service(ASSETS, static_assets)
 		.nest_service(DIST, dist_files)
-		.fallback_service(spa_fallback)
+		.fallback(get(index_html))
 }
 
 pub(crate) fn relative_favicon_path() -> String {
@@ -94,11 +87,19 @@ async fn favicon(
 	Ok(response)
 }
 
-async fn index_html(
-	State(ctx): State<AppState>,
-	headers: HeaderMap,
-) -> APIResult<impl IntoResponse> {
-	serve_with_no_cache(ctx, headers, "index.html").await
+async fn index_html(State(ctx): State<AppState>) -> APIResult<impl IntoResponse> {
+	let html =
+		tokio::fs::read_to_string(Path::new(&ctx.config.client_dir).join("index.html"))
+			.await
+			.map_err(|e| APIError::InternalServerError(e.to_string()))?;
+	Ok((
+		[(header::CACHE_CONTROL, "no-cache, no-store, must-revalidate")],
+		Html(index_with_base_path(&html, &ctx.config.base_path)),
+	))
+}
+
+fn index_with_base_path(html: &str, base_path: &str) -> String {
+	html.replacen("<head>", &format!("<head><base href=\"{base_path}/\">"), 1)
 }
 
 async fn serve_sw(

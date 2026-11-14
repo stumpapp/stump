@@ -15,6 +15,7 @@ import { name, version } from './package.json'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+	base: './',
 	build: {
 		assetsDir: './assets',
 		manifest: true,
@@ -82,7 +83,7 @@ export default defineConfig({
 			],
 		}),
 		VitePWA({
-			// We manually register in src/index.tsx to add idle scheduling and script preflight checks.
+			// Register at runtime so the worker URL and scope follow the configured base path.
 			injectRegister: null,
 			registerType: 'autoUpdate',
 			devOptions: {
@@ -91,34 +92,36 @@ export default defineConfig({
 			workbox: {
 				inlineWorkboxRuntime: true,
 				navigateFallbackDenylist: [
-					/^\/api(?:\/|$)/,
-					/^\/opds(?:\/|$)/,
-					/^\/kobo(?:\/|$)/,
-					/^\/koreader(?:\/|$)/,
+					/\/api(?:\/|$)/,
+					/\/opds(?:\/|$)/,
+					/\/kobo(?:\/|$)/,
+					/\/koreader(?:\/|$)/,
 				],
 				maximumFileSizeToCacheInBytes: 6 * 1024 * 1024, // 6MB
 			},
 			outDir: '../dist',
-			base: '/',
+			base: './',
 			// TODO(pwa): Add more manifest definitions for better overall experience
 			manifest: {
-				id: 'stump',
+				id: '../',
+				scope: '../',
+				start_url: '../',
 				name: 'Stump PWA',
 				short_name: 'Stump',
 				theme_color: '#161719',
 				icons: [
 					{
-						src: '/assets/favicon-16x16.png',
+						src: './favicon-16x16.png',
 						sizes: '16x16',
 						type: 'image/png',
 					},
 					{
-						src: '/assets/favicon-192x192.png',
+						src: './favicon-192x192.png',
 						sizes: '192x192',
 						type: 'image/png',
 					},
 					{
-						src: '/assets/favicon-512x512.png',
+						src: './favicon-512x512.png',
 						sizes: '512x512',
 						type: 'image/png',
 						purpose: 'any maskable',

@@ -96,8 +96,10 @@ pub async fn auth_middleware(
 		|path| path.0.path().to_owned(),
 	);
 
-	let service =
-		ServiceContext::new(host_details.host.clone(), host_details.scheme.clone());
+	let request_uri = request_uri
+		.strip_prefix(&ctx.config.base_path)
+		.unwrap_or(&request_uri);
+	let service = ServiceContext::from(host_details.clone());
 
 	let session_user = fetch_session_user(&session, ctx.conn.as_ref())
 		.await
@@ -147,7 +149,11 @@ pub async fn auth_middleware(
 			);
 		} else if is_playground {
 			// Sign in via React app and then redirect to server-side playground
-			return Err(Redirect::to("/auth?redirect=%2Fapi%2Fgraphql").into_response());
+			return Err(Redirect::to(&format!(
+				"{}/auth?redirect=%2Fapi%2Fgraphql",
+				ctx.config.base_path
+			))
+			.into_response());
 		}
 
 		return Err(APIError::Unauthorized.into_response());

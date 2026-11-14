@@ -83,6 +83,7 @@ impl OpdsFeed {
 
 pub struct OPDSFeedBuilder {
 	api_key: Option<String>,
+	base_path: String,
 }
 
 #[derive(Debug, Default)]
@@ -103,14 +104,22 @@ pub struct OPDSFeedBuilderParams {
 
 impl OPDSFeedBuilder {
 	pub fn new(api_key: Option<String>) -> Self {
-		Self { api_key }
+		Self {
+			api_key,
+			base_path: String::new(),
+		}
+	}
+
+	pub fn with_base_path(mut self, base_path: &str) -> Self {
+		self.base_path = base_path.to_string();
+		self
 	}
 
 	fn format_url(&self, path: &str) -> String {
 		if let Some(ref api_key) = self.api_key {
-			format!("/opds/{}/v1.2/{}", api_key, path)
+			format!("{}/opds/{}/v1.2/{}", self.base_path, api_key, path)
 		} else {
-			format!("/opds/v1.2/{}", path)
+			format!("{}/opds/v1.2/{}", self.base_path, path)
 		}
 	}
 
@@ -246,6 +255,16 @@ impl OPDSFeedBuilder {
 
 #[cfg(test)]
 mod tests {
+
+	#[test]
+	fn pagination_urls_include_subpath() {
+		let builder = OPDSFeedBuilder::new(Some("key".to_string()))
+			.with_base_path("/mysubpath/mysvc");
+		assert_eq!(
+			builder.format_url("books"),
+			"/mysubpath/mysvc/opds/key/v1.2/books"
+		);
+	}
 	use std::str::FromStr;
 
 	use chrono::DateTime;

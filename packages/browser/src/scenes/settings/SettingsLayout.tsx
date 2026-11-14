@@ -1,6 +1,6 @@
 import { cn } from '@stump/components'
 import { Suspense } from 'react'
-import { Navigate, Outlet } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -11,6 +11,7 @@ import SettingsHeader from './SettingsHeader'
 import SettingsSideBar from './SettingsSideBar'
 
 export default function SettingsLayout() {
+	const location = useLocation()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const { user } = useUserStore(
@@ -23,7 +24,7 @@ export default function SettingsLayout() {
 	} = usePreferences()
 
 	if (!user) {
-		return <Navigate to={`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`} />
+		return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname + window.location.search)}`} />
 	}
 
 	const displaySideBar = !isMobile

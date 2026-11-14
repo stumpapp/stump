@@ -16,6 +16,7 @@ pub type CoreContext = Arc<Ctx>;
 pub struct ServiceContext {
 	pub host: String,
 	pub scheme: String,
+	pub base_path: String,
 }
 
 impl Default for ServiceContext {
@@ -23,17 +24,22 @@ impl Default for ServiceContext {
 		ServiceContext {
 			host: "localhost".to_string(),
 			scheme: "http".to_string(),
+			base_path: String::new(),
 		}
 	}
 }
 
 impl ServiceContext {
 	pub fn new(host: String, scheme: String) -> Self {
-		Self { host, scheme }
+		Self {
+			host,
+			scheme,
+			base_path: String::new(),
+		}
 	}
 
 	pub fn url(&self) -> String {
-		format!("{}://{}", self.scheme, self.host)
+		format!("{}://{}{}", self.scheme, self.host, self.base_path)
 	}
 
 	pub fn format_url<A: AsRef<str>>(&self, path: A) -> String {

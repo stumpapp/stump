@@ -6,11 +6,15 @@ const getDebugUrl = () => {
 	return `http://${hostname}:10801`
 }
 
-export const baseUrl = import.meta.env.PROD ? window.location.origin : getDebugUrl()
+// The server injects a base element so this also works when opening a nested route directly.
+const basePath = import.meta.env.PROD ? new URL(document.baseURI).pathname.replace(/\/$/, '') : ''
+export const baseUrl = import.meta.env.PROD
+	? `${window.location.origin}${basePath}/api`
+	: getDebugUrl()
 
 export default function App() {
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename={basePath || '/'}>
 			<StumpWebClient platform={'browser'} baseUrl={baseUrl} />
 		</BrowserRouter>
 	)

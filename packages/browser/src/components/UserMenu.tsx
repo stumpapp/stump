@@ -1,5 +1,5 @@
 import { Avatar, cn, ConfirmationModal, Dropdown, Text } from '@stump/components'
-import { Bell, LogOut, Server, Settings } from 'lucide-react'
+import { BarChart3, Bell, LogOut, Server, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -79,6 +79,11 @@ export default function UserMenu() {
 								<Dropdown.Item disabled className={cn(itemClasses(), 'opacity-40')}>
 									<Bell className="h-4 w-4" />
 									Notifications
+								</Dropdown.Item>
+
+								<Dropdown.Item onClick={() => navigate(paths.stats())} className={itemClasses()}>
+									<BarChart3 className="h-4 w-4" />
+									{translate('shared.readingStats.title')}
 								</Dropdown.Item>
 
 								<Dropdown.Item onClick={() => navigate(paths.settings())} className={itemClasses()}>

@@ -8,11 +8,11 @@ mod series;
 mod user;
 
 use axum::{
+	Json, Router,
 	extract::State,
 	http::StatusCode,
 	response::IntoResponse,
 	routing::{get, post},
-	Json, Router,
 };
 use models::entity;
 use reqwest::header::USER_AGENT;

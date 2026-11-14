@@ -23,7 +23,6 @@ export function ServerSettingsSheet({ activeServer, ...sheetProps }: Props) {
 				ref={sheetRef}
 				detents={[1]}
 				grabber
-				scrollable
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				{...sheetProps}

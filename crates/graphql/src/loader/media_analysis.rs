@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use async_graphql::dataloader::Loader;
 use models::{entity::media_analysis, shared::analysis::PageDimension};
-use sea_orm::{prelude::*, DatabaseConnection};
+use sea_orm::{DatabaseConnection, prelude::*};
 
 pub struct MediaAnalysisLoader {
 	conn: Arc<DatabaseConnection>,

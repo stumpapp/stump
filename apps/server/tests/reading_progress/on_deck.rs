@@ -1,7 +1,7 @@
 use crate::common::{
+	TestApp,
 	book::{latest_finished_session_for_book, update_progress},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 
 use chrono::{Duration, Utc};

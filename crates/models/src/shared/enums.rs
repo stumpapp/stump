@@ -1,5 +1,5 @@
 use async_graphql::Enum;
-use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
+use sea_orm::{DeriveActiveEnum, EnumIter, prelude::*};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 

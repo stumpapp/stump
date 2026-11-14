@@ -1,4 +1,4 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/native-tabs'
 
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'

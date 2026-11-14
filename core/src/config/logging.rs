@@ -1,6 +1,6 @@
 use tracing_subscriber::{
-	filter::LevelFilter, prelude::__tracing_subscriber_SubscriberExt,
-	util::SubscriberInitExt, EnvFilter,
+	EnvFilter, filter::LevelFilter, prelude::__tracing_subscriber_SubscriberExt,
+	util::SubscriberInitExt,
 };
 
 use super::StumpConfig;

@@ -5,7 +5,7 @@ use models::entity::{
 	book_club_discussion_message, book_club_discussion_message_reaction,
 	book_club_member, custom_emoji,
 };
-use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, prelude::*};
 
 use crate::data::{AuthContext, CoreContext, ServiceContext};
 use crate::object::book_club_member::BookClubMember;

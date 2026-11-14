@@ -109,7 +109,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 
 	const openReview = useMatchReviewStore((s) => s.open)
 
-	const form = useForm<SearchFormValues>({
+	const form = useForm({
 		resolver: zodResolver(searchFormSchema),
 		defaultValues: {
 			title: initialTitle,

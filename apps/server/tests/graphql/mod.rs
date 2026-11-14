@@ -1,3 +1,4 @@
+mod book_clubs;
 mod home_arrangement;
 mod image_upload;
 mod media;

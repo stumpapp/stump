@@ -1,18 +1,18 @@
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use apalis::prelude::*;
-use axum::{extract::connect_info::Connected, serve::IncomingStream, Extension, Router};
+use axum::{Extension, Router, extract::connect_info::Connected, serve::IncomingStream};
 use stump_core::{
+	StumpCore,
 	config::{bootstrap_config_dir, logging::init_tracing},
 	job::dispatch_job,
-	StumpCore,
 };
 use tokio::net::TcpListener;
 use tokio::sync::Notify;
 use tower_http::{
 	compression::{
-		predicate::{DefaultPredicate, NotForContentType, Predicate},
 		CompressionLayer,
+		predicate::{DefaultPredicate, NotForContentType, Predicate},
 	},
 	trace::TraceLayer,
 };

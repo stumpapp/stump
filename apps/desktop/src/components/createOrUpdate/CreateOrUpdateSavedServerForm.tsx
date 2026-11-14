@@ -6,7 +6,7 @@ import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { match, P } from 'ts-pattern'
 
 import { CreateServer, SavedServer } from '../../stores/savedServer'
-import { buildSchema, CreateOrUpdateServerSchema } from './schema'
+import { buildSchema, CreateOrUpdateServerInput, CreateOrUpdateServerSchema } from './schema'
 
 export const CREATE_OR_UPDATE_SERVER_FORM_ID = 'createOrUpdateServerForm'
 
@@ -23,13 +23,13 @@ export default function CreateOrUpdateSavedServerForm({
 }: Props) {
 	const { t } = useLocaleContext()
 
-	const form = useForm<CreateOrUpdateServerSchema>({
+	const form = useForm<CreateOrUpdateServerInput, unknown, CreateOrUpdateServerSchema>({
 		defaultValues: {
 			name: editingServer?.name || '',
 			url: editingServer?.url || '',
 			authMode: 'login',
 			isDefault: false,
-		} as CreateOrUpdateServerSchema,
+		},
 		resolver: zodResolver(buildSchema(existingServers, t, editingServer)),
 	})
 	const { errors } = useFormState({ control: form.control })

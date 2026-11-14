@@ -1,7 +1,7 @@
 import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list'
 import { GlassView } from 'expo-glass-effect'
 import { Search } from 'lucide-react-native'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Platform, Pressable, TextInput, View } from 'react-native'
 import { useKeyboardHandler, useKeyboardState } from 'react-native-keyboard-controller'
 import Animated from 'react-native-reanimated'
@@ -28,209 +28,221 @@ type Props = {
 	isOpen: boolean
 }
 
-export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
-	const colors = useColors()
-	const { translate } = useTranslate()
-	const { getRequestHeaders } = useEpubReaderContext()
-	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-	const { height } = useDisplay()
-	const insets = useSafeAreaInsets()
-	const keyboardVisible = useKeyboardState((state) => state.isVisible)
+const TableOfContentsSheetContent = forwardRef<FlashListRef<TableOfContentsItemWithLevel>, Props>(
+	function TableOfContentsSheetContent({ goToPage, isOpen }, ref) {
+		const colors = useColors()
+		const { translate } = useTranslate()
+		const { getRequestHeaders } = useEpubReaderContext()
+		const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+		const { height } = useDisplay()
+		const insets = useSafeAreaInsets()
+		const keyboardVisible = useKeyboardState((state) => state.isVisible)
 
-	const selectionColor = usePalette('accent')
+		const selectionColor = usePalette('accent')
 
-	// FIXME: items behind the keyboard are viewableItems from the flashlist, but they shouldn't be counted
-	// and probably change to just use up and down arrows if keyboard is shown
-	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
-	const [textInputWidth, setTextInputWidth] = useState<number>()
+		// FIXME: items behind the keyboard are viewableItems from the flashlist, but they shouldn't be counted
+		// and probably change to just use up and down arrows if keyboard is shown
+		const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
+		const [textInputWidth, setTextInputWidth] = useState<number>()
 
-	const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
+		const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
-	const book = useEpubLocationStore((store) => store.book)
-	const toc = useEpubLocationStore((store) => store.toc)
-	const bookTitle = useEpubLocationStore((store) => book?.name || store.embeddedMetadata?.title)
-	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
-	const currentPage = useEpubLocationStore((store) => store.position)
-	const totalPages = useEpubLocationStore((store) => store.totalPages)
+		useImperativeHandle(ref, () => flashListRef.current!, [])
 
-	const flatTocWithLevels = flattenTocWithLevels(toc)
+		const book = useEpubLocationStore((store) => store.book)
+		const toc = useEpubLocationStore((store) => store.toc)
+		const bookTitle = useEpubLocationStore((store) => book?.name || store.embeddedMetadata?.title)
+		const currentChapter = useEpubLocationStore((store) => store.currentChapter)
+		const currentPage = useEpubLocationStore((store) => store.position)
+		const totalPages = useEpubLocationStore((store) => store.totalPages)
 
-	const activeTocItemIndex = flatTocWithLevels.findIndex(({ item }) => {
-		return item.label === currentChapter
-	})
+		const flatTocWithLevels = flattenTocWithLevels(toc)
 
-	const scrollToCurrentChapter = useCallback(
-		({ animated }: { animated: boolean }) =>
-			flashListRef.current?.scrollToIndex({
-				index: activeTocItemIndex,
-				animated: animated,
-				viewPosition: 0.5,
-				// scroll back up a bit to make it look more balanced (by half of: row width + rough header height)
-				viewOffset: (49 + 82) / 2,
-			}),
-		[activeTocItemIndex],
-	)
-
-	// we initially put the active chapter in the middle using this effect since
-	// initialScrollIndex does not have a `viewPosition` equivalent
-	useEffect(() => {
-		scrollToCurrentChapter({ animated: false })
-	}, [scrollToCurrentChapter])
-
-	// flash the scrollbar to give a rough indication of where we are
-	useEffect(() => {
-		if (!isOpen) return
-		flashListRef.current?.flashScrollIndicators()
-	}, [isOpen])
-
-	const scrollToCurrentChapterOnKeyboardShow = () => {
-		const layout = flashListRef.current?.getLayout(activeTocItemIndex)
-		if (!layout) return
-		// scroll up by 7px to add some padding
-		const offset = layout.y - 7
-		flashListRef.current?.scrollToOffset({
-			offset,
-			animated: true,
+		const activeTocItemIndex = flatTocWithLevels.findIndex(({ item }) => {
+			return item.label === currentChapter
 		})
-	}
 
-	useKeyboardHandler(
-		{
-			onStart: (e) => {
-				'worklet'
-				if (e.progress === 1) {
-					scheduleOnRN(scrollToCurrentChapterOnKeyboardShow)
-				}
-				if (e.progress === 0) {
-					scheduleOnRN(goToPage.reset)
+		const scrollToCurrentChapter = useCallback(
+			({ animated }: { animated: boolean }) =>
+				flashListRef.current?.scrollToIndex({
+					index: activeTocItemIndex,
+					animated: animated,
+					viewPosition: 0.5,
+					// scroll back up a bit to make it look more balanced (by half of: row width + rough header height)
+					viewOffset: (49 + 82) / 2,
+				}),
+			[activeTocItemIndex],
+		)
+
+		// we initially put the active chapter in the middle using this effect since
+		// initialScrollIndex does not have a `viewPosition` equivalent
+		useEffect(() => {
+			scrollToCurrentChapter({ animated: false })
+		}, [scrollToCurrentChapter])
+
+		// flash the scrollbar to give a rough indication of where we are
+		useEffect(() => {
+			if (!isOpen) return
+			flashListRef.current?.flashScrollIndicators()
+		}, [isOpen])
+
+		const scrollToCurrentChapterOnKeyboardShow = () => {
+			const layout = flashListRef.current?.getLayout(activeTocItemIndex)
+			if (!layout) return
+			// scroll up by 7px to add some padding
+			const offset = layout.y - 7
+			flashListRef.current?.scrollToOffset({
+				offset,
+				animated: true,
+			})
+		}
+
+		useKeyboardHandler(
+			{
+				onStart: (e) => {
+					'worklet'
+					if (e.progress === 1) {
+						scheduleOnRN(scrollToCurrentChapterOnKeyboardShow)
+					}
+					if (e.progress === 0) {
+						scheduleOnRN(goToPage.reset)
+					}
+				},
+			},
+			[],
+		)
+
+		const showTopIndicator =
+			isOpen &&
+			!keyboardVisible &&
+			activeTocItemIndex !== -1 &&
+			activeTocItemIndex < visibleRange.min
+		const showBottomIndicator =
+			isOpen &&
+			!keyboardVisible &&
+			activeTocItemIndex !== -1 &&
+			activeTocItemIndex > visibleRange.max
+
+		const onViewableItemsChanged = useCallback(
+			({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
+				if (viewableItems.length > 0) {
+					setVisibleRange({
+						min: viewableItems.at(0)?.index ?? 0,
+						max: viewableItems.at(-1)?.index ?? 0,
+					})
 				}
 			},
-		},
-		[],
-	)
+			[],
+		)
 
-	const showTopIndicator =
-		isOpen && !keyboardVisible && activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
-	const showBottomIndicator =
-		isOpen && !keyboardVisible && activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
+		// truesheet's height on ios when scrollable=true is a device height, which is too big, but
+		// iPad has floating sheets so this calculation doesn't work, and android was already fine
+		// i *think* this is the issue https://github.com/lodev09/react-native-true-sheet/issues/708
+		const style =
+			Platform.OS === 'ios' && !Platform.isPad ? { height: height - insets.top } : { flex: 1 }
 
-	const onViewableItemsChanged = useCallback(
-		({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
-			if (viewableItems.length > 0) {
-				setVisibleRange({
-					min: viewableItems.at(0)?.index ?? 0,
-					max: viewableItems.at(-1)?.index ?? 0,
-				})
-			}
-		},
-		[],
-	)
+		if (!book) return
 
-	// truesheet's height on ios when scrollable=true is a device height, which is too big, but
-	// iPad has floating sheets so this calculation doesn't work, and android was already fine
-	// i *think* this is the issue https://github.com/lodev09/react-native-true-sheet/issues/708
-	const style =
-		Platform.OS === 'ios' && !Platform.isPad ? { height: height - insets.top } : { flex: 1 }
+		return (
+			<>
+				<View style={style}>
+					<View className="px-4 gap-4 pb-4 pt-6 flex-row">
+						<ThumbnailImage
+							source={{
+								uri: book.thumbnail.url,
+								headers: {
+									...getRequestHeaders?.(),
+								},
+							}}
+							placeholderData={book.thumbnail.metadata}
+							size={{ height: 82, width: 82 * thumbnailRatio }}
+						/>
 
-	if (!book) return
+						<View className="pb-0.5 flex-1 justify-between">
+							<Heading className="shrink" numberOfLines={2}>
+								{bookTitle}
+							</Heading>
 
-	return (
-		<>
-			<View style={style}>
-				<View className="px-4 gap-4 pb-4 pt-6 flex-row">
-					<ThumbnailImage
-						source={{
-							uri: book.thumbnail.url,
-							headers: {
-								...getRequestHeaders?.(),
-							},
-						}}
-						placeholderData={book.thumbnail.metadata}
-						size={{ height: 82, width: 82 * thumbnailRatio }}
-					/>
+							<View className="flex-row items-center justify-between">
+								<Text className="text-[#898d94]">
+									{translate('shared.common.pageXOfY', {
+										current: currentPage,
+										total: totalPages,
+									})}
+								</Text>
 
-					<View className="pb-0.5 flex-1 justify-between">
-						<Heading className="shrink" numberOfLines={2}>
-							{bookTitle}
-						</Heading>
-
-						<View className="flex-row items-center justify-between">
-							<Text className="text-[#898d94]">
-								{translate('shared.common.pageXOfY', {
-									current: currentPage,
-									total: totalPages,
-								})}
-							</Text>
-
-							<GlassView
-								isInteractive
-								className={cn(
-									'right-0 h-10 px-4 gap-2 absolute flex-row items-center justify-center rounded-full',
-									!IS_IOS_26_PLUS && 'squircle bg-background-surface',
-								)}
-							>
-								<Icon as={Search} size={12} strokeWidth={2.5} color="#898d94" />
-								<TextInput
-									hitSlop={50}
-									placeholderTextColor="#898d94"
-									keyboardType="number-pad"
-									selectionColor={selectionColor}
-									placeholder={translate('shared.tableOfContents.goToPagePlaceholder')}
-									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
-									onChangeText={(text) => goToPage.setString(text)}
-									value={goToPage.string}
-									style={{
-										width: textInputWidth,
-										height: 50,
-										color:
-											goToPage.isValid || goToPage.isEmpty
-												? colors.foreground.DEFAULT
-												: colors.fill.danger.DEFAULT,
-									}}
-								/>
-							</GlassView>
+								<GlassView
+									isInteractive
+									className={cn(
+										'right-0 h-10 px-4 gap-2 absolute flex-row items-center justify-center rounded-full',
+										!IS_IOS_26_PLUS && 'squircle bg-background-surface',
+									)}
+								>
+									<Icon as={Search} size={12} strokeWidth={2.5} color="#898d94" />
+									<TextInput
+										hitSlop={50}
+										placeholderTextColor="#898d94"
+										keyboardType="number-pad"
+										selectionColor={selectionColor}
+										placeholder={translate('shared.tableOfContents.goToPagePlaceholder')}
+										onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
+										onChangeText={(text) => goToPage.setString(text)}
+										value={goToPage.string}
+										style={{
+											width: textInputWidth,
+											height: 50,
+											color:
+												goToPage.isValid || goToPage.isEmpty
+													? colors.foreground.DEFAULT
+													: colors.fill.danger.DEFAULT,
+										}}
+									/>
+								</GlassView>
+							</View>
 						</View>
 					</View>
-				</View>
 
-				<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
+					<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
 
-				<View className="flex-1">
-					<FlashList
-						ref={flashListRef}
-						data={flatTocWithLevels}
-						contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
-						onViewableItemsChanged={onViewableItemsChanged}
-						// compensate for the toolbar: h-14 = 49px, plus the gap between the keyboard and toolbar, plus extra padding above the toolbar
-						contentContainerStyle={{ paddingBottom: 49 + 7 + 7 }}
-						renderItem={({ item, index }) => (
-							<TableOfContentsListItem
-								item={item.item}
-								level={item.level}
-								currentChapterActive={index === activeTocItemIndex}
-								nextChapterActive={index + 1 === activeTocItemIndex}
+					<View className="flex-1">
+						<FlashList
+							ref={flashListRef}
+							data={flatTocWithLevels}
+							contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
+							onViewableItemsChanged={onViewableItemsChanged}
+							// compensate for the toolbar: h-14 = 49px, plus the gap between the keyboard and toolbar, plus extra padding above the toolbar
+							contentContainerStyle={{ paddingBottom: 49 + 7 + 7 }}
+							renderItem={({ item, index }) => (
+								<TableOfContentsListItem
+									item={item.item}
+									level={item.level}
+									currentChapterActive={index === activeTocItemIndex}
+									nextChapterActive={index + 1 === activeTocItemIndex}
+								/>
+							)}
+						/>
+
+						{showTopIndicator && (
+							<ScrollToChapterIndicator
+								onPress={() => scrollToCurrentChapter({ animated: true })}
+								className="top-2"
 							/>
 						)}
-					/>
 
-					{showTopIndicator && (
-						<ScrollToChapterIndicator
-							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="top-2"
-						/>
-					)}
-
-					{showBottomIndicator && (
-						<ScrollToChapterIndicator
-							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="bottom-safe-or-6"
-						/>
-					)}
+						{showBottomIndicator && (
+							<ScrollToChapterIndicator
+								onPress={() => scrollToCurrentChapter({ animated: true })}
+								className="bottom-safe-or-6"
+							/>
+						)}
+					</View>
 				</View>
-			</View>
-		</>
-	)
-}
+			</>
+		)
+	},
+)
+
+export default TableOfContentsSheetContent
 
 const TableOfContentsListItem = ({
 	item,
@@ -373,7 +385,7 @@ const ScrollToChapterIndicator = ({
 	)
 }
 
-type TableOfContentsItemWithLevel = { item: TableOfContentsItem; level: number }
+export type TableOfContentsItemWithLevel = { item: TableOfContentsItem; level: number }
 
 const flattenTocWithLevels = (
 	toc: TableOfContentsItem[],

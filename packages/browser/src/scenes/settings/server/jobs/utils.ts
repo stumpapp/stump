@@ -55,12 +55,9 @@ export const getScheduledJobSchema = (
 		name: z.string().min(1),
 		schedule: getCronSchema(t),
 		kind: z.enum(['LIBRARY_SCAN', 'METADATA_RETRY']),
-		libraryIds: z.array(z.string()).default([]),
-		statuses: z
-			.array(z.nativeEnum(MetadataFetchStatus))
-			.min(1)
-			.default([MetadataFetchStatus.RateLimited]),
-		enabled: z.boolean().default(true),
+		libraryIds: z.array(z.string()),
+		statuses: z.array(z.enum(MetadataFetchStatus)).min(1),
+		enabled: z.boolean(),
 	})
 export type ScheduledJobFormValues = z.infer<ReturnType<typeof getScheduledJobSchema>>
 

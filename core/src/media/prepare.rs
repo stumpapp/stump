@@ -9,10 +9,10 @@ use sea_orm::Set;
 use uuid::Uuid;
 
 use crate::{
+	CoreResult,
 	config::StumpConfig,
 	fs_utils::{FileParts, PathUtils},
-	media::processor::{process_file, MediaProcessorOptions},
-	CoreResult,
+	media::processor::{MediaProcessorOptions, process_file},
 };
 
 #[derive(Debug, Clone)]

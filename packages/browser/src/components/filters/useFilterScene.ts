@@ -20,6 +20,8 @@ type UseFilterSceneOptions = {
 	persistedOrdering?: Ordering
 	setPersistedOrdering?: (ordering: Ordering) => void
 	defaultOrdering?: Ordering
+	persistedPageSize?: number
+	setPersistedPageSize?: (pageSize: number) => void
 }
 
 export const SERIES_POSITION_ORDERING: Ordering = {
@@ -152,6 +154,8 @@ export function useFilterScene({
 	persistedOrdering,
 	setPersistedOrdering,
 	defaultOrdering,
+	persistedPageSize,
+	setPersistedPageSize,
 }: UseFilterSceneOptions = {}): Return {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [search, setSearch] = useState<string | undefined>(undefined)
@@ -189,9 +193,9 @@ export function useFilterScene({
 			page: searchParams.get('page') ? parseInt(searchParams.get('page') as string) : 1,
 			pageSize: searchParams.get('pageSize')
 				? parseInt(searchParams.get('pageSize') as string)
-				: defaultPageSize,
+				: (persistedPageSize ?? defaultPageSize),
 		}),
-		[searchParams, defaultPageSize],
+		[searchParams, persistedPageSize, defaultPageSize],
 	)
 
 	const setOrdering = useCallback(
@@ -220,6 +224,17 @@ export function useFilterScene({
 			})
 		},
 		[setSearchParams],
+	)
+
+	const setPageSize = useCallback(
+		(pageSize: number) => {
+			setPersistedPageSize?.(pageSize)
+			setSearchParams((prev) => {
+				prev.set('pageSize', pageSize.toString())
+				return prev
+			})
+		},
+		[setSearchParams, setPersistedPageSize],
 	)
 
 	/**
@@ -277,6 +292,7 @@ export function useFilterScene({
 		setFilters: handleSetFilters,
 		setOrdering,
 		setPage,
+		setPageSize,
 	}
 }
 

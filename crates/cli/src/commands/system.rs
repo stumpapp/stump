@@ -5,11 +5,11 @@ use dialoguer::Confirm;
 use sea_orm::{ConnectionTrait, DatabaseBackend, Statement};
 use stump_core::{
 	config::StumpConfig,
-	database::{connect, JournalMode},
+	database::{JournalMode, connect},
 };
 
 use super::default_progress_spinner;
-use crate::{error::CliResult, CliError};
+use crate::{CliError, error::CliResult};
 
 /// Subcommands for interacting with the system commands
 #[derive(Subcommand, Debug)]

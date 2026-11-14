@@ -120,6 +120,7 @@ class EPUBView(
     appContext: AppContext,
 ) : ExpoView(context, appContext),
     EpubNavigatorFragment.Listener,
+    EpubNavigatorFragment.PaginationListener,
     DecorableNavigator.Listener {
     // Required for proper layout! Forces Expo to
     // use the Android layout system for this view,
@@ -796,6 +797,50 @@ class EPUBView(
         val nav = navigator ?: return
         coroutineScope.launch {
             nav.goBackward(animated = true)
+        }
+    }
+
+    // Note: the `onPage*` overrides are named poorly imo, they should fire
+    // each resource change not each page (i.e, each xhtml file load)
+    // we apply for load and change since readium can preload resources,
+    // but it would noop if preloaded and then triggered from the change event
+
+    override fun onPageLoaded() {
+        applyLongWordWrapping()
+    }
+
+    override fun onPageChanged(pageIndex: Int, totalPages: Int, locator: Locator) {
+        applyLongWordWrapping()
+    }
+
+    // Note: there was not a lot of docs on this, so i actually wound up using storyteller
+    // as a reference here. they don't quite do this exactly from what i could see, but
+    // they have a few other instances where they inject via `evaluateJavascript`:
+    // https://gitlab.com/storyteller-platform/storyteller/-/blob/main/applications/mobile/modules/readium/android/src/main/java/expo/modules/readium/EpubView.kt#L246-261
+
+    /// injects a custom script into the navigator to ensure text content within the
+    // rendered content is properly wrapped, so really absurdly-long words don't bleed
+    // into other pages
+    private fun applyLongWordWrapping() {
+        coroutineScope.launch {
+            try {
+                navigator?.evaluateJavascript(
+                    """
+                    (function() {
+                      var style = document.getElementById('stump-long-word-wrap');
+                      if (!style) {
+                        style = document.createElement('style');
+                        style.id = 'stump-long-word-wrap';
+                        (document.head || document.documentElement).appendChild(style);
+                      }
+                      style.textContent = 'html, html * { overflow-wrap: break-word !important; }';
+                      return true;
+                    })();
+                    """.trimIndent(),
+                )
+            } catch (error: Exception) {
+                Log.w("EPUBView", "Failed to apply long-word wrapping", error)
+            }
         }
     }
 

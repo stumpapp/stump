@@ -3,7 +3,7 @@ use models::{
 	entity::smart_list::{SmartListGrouping, SmartListJoiner},
 	shared::enums::EntityVisibility,
 };
-use sea_orm::{prelude::*, ActiveValue::Set};
+use sea_orm::{ActiveValue::Set, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{

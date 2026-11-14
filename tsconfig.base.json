@@ -21,11 +21,15 @@
 		],
 		"allowImportingTsExtensions": true,
 		"paths": {
-			"@stump/browser/*": ["./packages/browser/src/*"],
+			"@stump/client": ["./packages/client/src/index.ts"],
 			"@stump/client/*": ["./packages/client/src/*"],
+			"@stump/components": ["./packages/components/src/index.ts"],
 			"@stump/components/*": ["./packages/components/src/*"],
+			"@stump/graphql": ["./packages/graphql/src/index.ts"],
 			"@stump/graphql/*": ["./packages/graphql/src/*"],
+			"@stump/i18n": ["./packages/i18n/src/index.ts"],
 			"@stump/i18n/*": ["./packages/i18n/src/*"],
+			"@stump/sdk": ["./packages/sdk/src/index.ts"],
 			"@stump/sdk/*": ["./packages/sdk/src/*"],
 			"@/*": ["./packages/browser/src/*"]
 		}

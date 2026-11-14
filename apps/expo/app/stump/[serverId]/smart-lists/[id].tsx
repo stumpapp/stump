@@ -4,7 +4,7 @@ import { graphql, SmartListBookItemFragment, SmartListScreenQuery } from '@stump
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { NativeSyntheticEvent, TextInputFocusEventData, View } from 'react-native'
+import { TextInputChangeEvent, View } from 'react-native'
 import { match } from 'ts-pattern'
 
 import RefreshControl from '~/components/RefreshControl'
@@ -109,7 +109,7 @@ export default function Screen() {
 				// Note: Client-side sorting which is obv not ideal but WAY too complicated for me to do properly without
 				// a large refactor of the smart list API sooooo it's fine for now. Web is the same. Just
 				// means lower-powered devices might struggle a bit with the feature
-				onChangeText: (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+				onChangeText: (e: TextInputChangeEvent) => {
 					const text = e.nativeEvent.text || ''
 					if (!text) {
 						onFuzzyTextChange.cancel()

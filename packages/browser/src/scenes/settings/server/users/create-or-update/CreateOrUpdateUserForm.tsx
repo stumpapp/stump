@@ -64,7 +64,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 		[t, existingUsernames, user],
 	)
 
-	const form = useForm<CreateOrUpdateUserSchema>({
+	const form = useForm({
 		defaultValues: formDefaults(user),
 		resolver: zodResolver(schema),
 	})

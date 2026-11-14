@@ -1,6 +1,6 @@
 use std::{
 	collections::HashMap,
-	fs::{self, create_dir_all, remove_dir_all, remove_file, File},
+	fs::{self, File, create_dir_all, remove_dir_all, remove_file},
 	path::{Path, PathBuf},
 };
 
@@ -10,15 +10,15 @@ use zip::ZipArchive;
 
 use crate::{
 	fs_utils::{
-		archive::create_zip_archive,
-		hash::{self, generate_koreader_hash, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
 		ContentType, FileParts, PathUtils,
+		archive::create_zip_archive,
+		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE, generate_koreader_hash},
 	},
 	media::processor::{
-		error::MediaProcessorError, zip::ZipProcessor, AnalyzedPage, GeneratedFileHashes,
-		MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
+		AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+		ProcessedMediaFile, error::MediaProcessorError, zip::ZipProcessor,
 	},
-	metadata::{utils::metadata_from_buf, ProcessedMediaMetadata},
+	metadata::{ProcessedMediaMetadata, utils::metadata_from_buf},
 };
 
 pub struct RarProcessor;

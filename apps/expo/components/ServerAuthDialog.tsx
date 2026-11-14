@@ -116,7 +116,6 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 			grabber
 			grabberOptions={{ color: colors.sheet.grabber }}
 			onDidDismiss={handleDismiss}
-			scrollable={false}
 		>
 			<ScrollView className="p-6">
 				<View className="gap-4 items-start">
@@ -194,8 +193,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 					<View className="gap-4 w-full">
 						<Button
-							// eslint-disable-next-line react-hooks/refs
-							onPress={handleSubmit(onSubmit)}
+							onPress={() => handleSubmit(onSubmit)()}
 							className="mt-4 w-full"
 							roundness="full"
 							disabled={isLoggingIn}

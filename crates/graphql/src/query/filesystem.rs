@@ -149,7 +149,7 @@ mod windows_fs {
 
 	use std::{ffi::OsString, os::windows::ffi::OsStringExt};
 
-	use windows::{core::PCWSTR, Win32::Foundation::MAX_PATH};
+	use windows::{Win32::Foundation::MAX_PATH, core::PCWSTR};
 
 	pub fn get_drive_listing(
 		pagination: OffsetPagination,

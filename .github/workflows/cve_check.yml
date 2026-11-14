@@ -17,18 +17,23 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
       - name: Run yarn audit
-        # TODO(expo): once upgrade of metro, check if resolved
-        # 1138808 -> image-size: there is no patch available, and this dep is pulled in by
-        #            metro bundler (which is build-time only and ends up in the app bundle)
-        # 1138809 -> image-size: same as above
-        # 1239765 -> image-size: same as above
-        # 1239766 -> image-size: same as above
-        run: ./scripts/github/yarn-audit-with-allowlist.sh 1138808 1138809 1239765 1239766
+        # 1243066 -> zod: used by @expo/cli so not fixable until the expo SDK bumps but also just
+        #            a dev tool
+        # 1244623 -> zod: same as above ^, it's cli it's fine
+        # 1243505 -> deepmerge: no patched version avail but also only consumers are build/dev tooling
+        #            (@expo/config, workbox-build, storybook) and storybook in particular is not
+        #            long for this world
+        # 1244012 -> minimatch: fix is 3.x to 11.x which, uh, is certainly a bump, but consumers
+        #            again are only dev tooling (eslint, lerna, gitmoji-changelog, storybook) so
+        #            acceptable for now
+        # 1244013 -> glob: fix is in 14.x major bump, rly only dev consumers and they are pinned
+        #            to diff major versions each so a big headache (expo, lerna, cacache, rimraf)
+        run: ./scripts/github/yarn-audit-with-allowlist.sh 1243066 1244623 1243505 1244012 1244013

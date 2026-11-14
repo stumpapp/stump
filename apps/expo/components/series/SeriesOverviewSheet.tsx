@@ -5,8 +5,8 @@ import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { BookCheck, BookOpen, Clock, HardDrive, Library } from 'lucide-react-native'
-import { forwardRef, useState } from 'react'
-import { View } from 'react-native'
+import { forwardRef, RefObject, useRef, useState } from 'react'
+import { type ScrollViewInstance, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -85,6 +85,7 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesById', ['overviewSheet', seriesId]), {
 		id: seriesId,
 	})
+	const innerScrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
@@ -100,19 +101,20 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 				ref={ref}
 				detents={[0.5, 1]}
 				grabber
-				scrollable
+				scrollableRef={innerScrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<SheetContent series={series} />
+				<SheetContent series={series} scrollRef={innerScrollRef} />
 			</TrueSheet>
 
 			{/*@ts-expect-error: it should be fine*/}
@@ -124,9 +126,13 @@ SeriesOverviewSheet.displayName = 'SeriesOverviewSheet'
 
 type SheetContentProps = {
 	series: NonNullable<SeriesOverviewSheetQuery['seriesById']>
+	scrollRef: RefObject<ScrollViewInstance | null>
 }
 
-function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
+function SheetContent({
+	series: { stats, metadata, resolvedName, tags },
+	scrollRef,
+}: SheetContentProps) {
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
 	const formattedTime = formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
 
@@ -186,7 +192,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 	const hasAbout = metadata?.summary || metadata?.descriptionFormatted
 
 	return (
-		<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+		<ScrollView ref={scrollRef} className="p-6 flex-1" nestedScrollEnabled>
 			<View className="gap-8">
 				<View>
 					<Heading size="2xl" numberOfLines={3}>

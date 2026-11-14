@@ -2,8 +2,8 @@ use crate::{
 	data::CoreContext,
 	guard::PermissionGuard,
 	input::scheduled_job_config::{
-		validate_create_input, validate_cron_expression, CreateScheduledJobInput,
-		ScheduledJobConfigInput, UpdateScheduledJobInput,
+		CreateScheduledJobInput, ScheduledJobConfigInput, UpdateScheduledJobInput,
+		validate_create_input, validate_cron_expression,
 	},
 	object::job_schedule_config::ScheduledJob,
 };
@@ -12,7 +12,7 @@ use models::{
 	entity::scheduled_job,
 	shared::enums::{ScheduledJobKind, UserPermission},
 };
-use sea_orm::{prelude::*, ActiveModelTrait, Set};
+use sea_orm::{ActiveModelTrait, Set, prelude::*};
 
 #[derive(Default)]
 pub struct ScheduledJobConfigMutation;

@@ -31,7 +31,7 @@ export function CreateProviderDialog() {
 
 	const { t, translate } = useTranslate()
 
-	const form = useForm<CreateProviderConfigSchema>({
+	const form = useForm({
 		defaultValues: {
 			providerType: undefined,
 			enabled: true,

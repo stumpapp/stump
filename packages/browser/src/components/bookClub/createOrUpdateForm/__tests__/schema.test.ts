@@ -1,6 +1,12 @@
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 
-import { buildSchema, type CreateOrUpdateBookClubSchema, defaultMemberSpec } from '../schema'
+import {
+	buildSchema,
+	createFormDefaults,
+	type CreateOrUpdateBookClubSchema,
+	defaultMemberSpec,
+	formDefaults,
+} from '../schema'
 
 const translateFn = vi.fn((key: string) => key)
 
@@ -24,23 +30,33 @@ const createClub = (
 
 describe('createOrUpdateBookClubForm schema', () => {
 	describe('formDefaults', () => {
-		it('should default creatorHideProgress to false when creating', () => {
-			const schema = buildSchema(translateFn, [], true)
-			expect(schema.parse(createClub({ creatorHideProgress: undefined })).creatorHideProgress).toBe(
-				false,
-			)
+		it('createFormDefaults should default creatorHideProgress to false', () => {
+			expect(createFormDefaults().creatorHideProgress).toBe(false)
 		})
 
-		it('should default creatorHideProgress to undefined when updating', () => {
+		it('createFormDefaults should default isPrivate to false', () => {
+			expect(createFormDefaults().isPrivate).toBe(false)
+		})
+
+		it('formDefaults should set creatorHideProgress to undefined (edit mode)', () => {
+			expect(formDefaults().creatorHideProgress).toBe(undefined)
+		})
+
+		it('schema requires creatorHideProgress when creating', () => {
+			const schema = buildSchema(translateFn, [], true)
+			expect(schema.safeParse(createClub({ creatorHideProgress: undefined })).success).toBe(false)
+		})
+
+		it('schema allows creatorHideProgress to be undefined when updating', () => {
 			const schema = buildSchema(translateFn, [], false)
 			expect(schema.parse(createClub({ creatorHideProgress: undefined })).creatorHideProgress).toBe(
 				undefined,
 			)
 		})
 
-		it('should default isPrivate to false', () => {
+		it('schema requires isPrivate', () => {
 			const schema = buildSchema(translateFn, [], true)
-			expect(schema.parse(createClub({ isPrivate: undefined })).isPrivate).toBe(false)
+			expect(schema.safeParse(createClub({ isPrivate: undefined })).success).toBe(false)
 		})
 
 		it('should map existing club to form defaults', () => {

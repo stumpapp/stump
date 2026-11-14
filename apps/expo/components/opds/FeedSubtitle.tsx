@@ -1,6 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { Fragment, useRef, useState } from 'react'
-import { Platform, Pressable, ScrollView } from 'react-native'
+import { Platform, Pressable, ScrollView, type ScrollViewInstance } from 'react-native'
 
 import { Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
@@ -13,6 +13,7 @@ type Props = {
 
 export default function FeedSubtitle({ value }: Props) {
 	const ref = useRef<TrueSheet | null>(null)
+	const scrollRef = useRef<ScrollViewInstance>(null)
 
 	const colors = useColors()
 
@@ -31,13 +32,13 @@ export default function FeedSubtitle({ value }: Props) {
 				// Android acts as if detents={[1]} when using scrollable and 'auto' so just set a smaller and larger size
 				detents={Platform.OS === 'android' ? [0.4, 1] : ['auto']}
 				grabber
-				scrollable
+				scrollableRef={scrollRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="p-6 flex-1">
+				<ScrollView ref={scrollRef} className="p-6 flex-1">
 					<Text className="text-foreground">{value}</Text>
 				</ScrollView>
 			</TrueSheet>

@@ -62,6 +62,7 @@ export const createSchema = (
 		customHeaders: z.array(createHeaderSchema(translate)).optional(),
 	})
 export type CreateOrUpdateServerData = z.infer<ReturnType<typeof createSchema>>
+export type CreateOrUpdateServerInput = z.input<ReturnType<typeof createSchema>>
 
 export const defaultCreateData = {
 	defaultServer: false,

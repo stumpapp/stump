@@ -3,7 +3,7 @@ use models::entity::library;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{apply_string_filter, IntoFilter, StringLikeFilter};
+use super::{IntoFilter, StringLikeFilter, apply_string_filter};
 
 // TODO: Support filter by tags (requires join logic)
 

@@ -8,9 +8,9 @@ import {
 	resolveUrl,
 } from '@stump/sdk'
 import { isValid, parseISO } from 'date-fns'
+import { md5 } from 'js-md5'
 import get from 'lodash/get'
 import { useCallback } from 'react'
-import { stringMd5 } from 'react-native-quick-md5'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
@@ -268,7 +268,7 @@ export const getLanguages = (meta: OPDSMetadata): string[] => {
 
 // An identifier that can be generated from a URL to uniquely identify a publication
 // without dealing with common URL issues for file names
-export const hashFromURL = (url: string) => stringMd5(url)
+export const hashFromURL = (url: string) => md5(url)
 
 export const extensionFromMime = (mime: string | null | undefined): string | null => {
 	if (!mime) return null

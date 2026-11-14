@@ -9,7 +9,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-use crate::{config::StumpConfig, CoreError};
+use crate::{CoreError, config::StumpConfig};
 
 pub const FORCE_RESET_KEY: &str = "FORCE_DB_RESET";
 

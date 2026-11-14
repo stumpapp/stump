@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use async_graphql::{
-	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+	ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader,
 };
 
 use models::{
@@ -17,7 +17,7 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect, QueryTrait,
+	FromQueryResult, QueryOrder, QuerySelect, QueryTrait, prelude::*, sea_query::Query,
 };
 
 use crate::{

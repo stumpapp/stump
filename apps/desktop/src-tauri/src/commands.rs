@@ -4,12 +4,12 @@ use tauri::{AppHandle, State};
 use crate::{
 	state::WrappedState,
 	store::{
+		AppStore, StoreError,
 		app_store::AppStoreExt,
 		secure_store::{
 			CredentialStoreTokenState, SecureStore, SecureStoreError, StoredCredentials,
 			StoredTokens,
 		},
-		AppStore, StoreError,
 	},
 	utils::discord::DiscordIntegrationError,
 };

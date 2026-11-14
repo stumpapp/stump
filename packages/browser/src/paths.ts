@@ -127,6 +127,7 @@ const pathsInternal = {
 	smartListSettings: (id: string) => `/smart-lists/${id}/settings`,
 	smartListCreate: () => '/smart-lists/create',
 	smartLists: () => '/smart-lists',
+	stats: () => '/stats',
 	updateUser: (id: string) => `${pathsInternal.settings('users')}/${id}/manage`,
 } as const
 
@@ -187,6 +188,7 @@ export function usePaths() {
 		smartListSettings: (id: string) => `${basePath}${pathsInternal.smartListSettings(id)}`,
 		smartListCreate: () => `${basePath}${pathsInternal.smartListCreate()}`,
 		smartLists: () => `${basePath}${pathsInternal.smartLists()}`,
+		stats: () => `${basePath}${pathsInternal.stats()}`,
 		updateUser: (id: string) => `${basePath}${pathsInternal.updateUser(id)}`,
 	}
 }

@@ -90,10 +90,15 @@ const linkSchema = z
 	}))
 export type OPDSLegacyLink = z.infer<typeof linkSchema>
 
-const entryAuthor = z.object({
-	name: coercedString,
-	uri: z.string().nullish(),
-})
+const entryAuthor = z
+	.object({
+		name: z.union([coercedString, z.array(coercedString)]),
+		uri: z.union([z.string(), z.array(z.string())]).nullish(),
+	})
+	.transform((obj) => ({
+		name: Array.isArray(obj.name) ? obj.name[0] : obj.name,
+		uri: Array.isArray(obj.uri) ? obj.uri[0] : obj.uri,
+	}))
 export type OPDSLegacyEntryAuthor = z.infer<typeof entryAuthor>
 
 const contentSchema = z

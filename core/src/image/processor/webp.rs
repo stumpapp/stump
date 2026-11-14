@@ -1,6 +1,6 @@
 use std::fs;
 
-use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
+use image::{DynamicImage, EncodableLayout, GenericImageView, imageops};
 use models::shared::image_processor_options::{
 	Dimension, ImageProcessorOptions, ImageResizeMethod, ScaledDimensionResize,
 };
@@ -8,7 +8,7 @@ use webp::Encoder;
 
 use crate::image::{
 	error::ImageProcessorError,
-	process::{resized_dimensions, ImageProcessor},
+	process::{ImageProcessor, resized_dimensions},
 	scale_height_dimension, scale_width_dimension,
 };
 
@@ -120,11 +120,10 @@ mod tests {
 
 		let webp_bytes = result.unwrap();
 		// should *still* be a valid webp image
-		assert!(image::load_from_memory_with_format(
-			&webp_bytes,
-			image::ImageFormat::WebP
-		)
-		.is_ok());
+		assert!(
+			image::load_from_memory_with_format(&webp_bytes, image::ImageFormat::WebP)
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -142,11 +141,10 @@ mod tests {
 
 		let webp_bytes = result.unwrap();
 		// should be a valid webp image
-		assert!(image::load_from_memory_with_format(
-			&webp_bytes,
-			image::ImageFormat::WebP
-		)
-		.is_ok());
+		assert!(
+			image::load_from_memory_with_format(&webp_bytes, image::ImageFormat::WebP)
+				.is_ok()
+		);
 	}
 
 	#[test]
@@ -216,11 +214,10 @@ mod tests {
 
 		let webp_bytes = result.unwrap();
 		// should be a valid webp image
-		assert!(image::load_from_memory_with_format(
-			&webp_bytes,
-			image::ImageFormat::WebP
-		)
-		.is_ok());
+		assert!(
+			image::load_from_memory_with_format(&webp_bytes, image::ImageFormat::WebP)
+				.is_ok()
+		);
 	}
 
 	#[test]

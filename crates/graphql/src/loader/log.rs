@@ -1,7 +1,7 @@
 use async_graphql::dataloader::Loader;
 use models::entity::log;
-use sea_orm::prelude::*;
 use sea_orm::DatabaseConnection;
+use sea_orm::prelude::*;
 use std::{collections::HashMap, sync::Arc};
 
 use crate::object::log::Log;

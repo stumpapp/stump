@@ -15,6 +15,7 @@ import { useSavedServers } from '~/stores'
 import { CreateOrUpdateServerForm } from './CreateOrUpdateServerForm'
 import {
 	CreateOrUpdateServerData,
+	CreateOrUpdateServerInput,
 	createSchema,
 	defaultCreateData,
 	intoCreateServer,
@@ -36,7 +37,7 @@ export function CreateServerSheet() {
 		[createServer],
 	)
 
-	const form = useForm<CreateOrUpdateServerData>({
+	const form = useForm<CreateOrUpdateServerInput, unknown, CreateOrUpdateServerData>({
 		defaultValues: defaultCreateData,
 		resolver: zodResolver(
 			createSchema(
@@ -88,7 +89,6 @@ export function CreateServerSheet() {
 					name="createServerSheet"
 					ref={sheetRef}
 					detents={[1]}
-					scrollable
 					headerLabel={translate('shared.addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{

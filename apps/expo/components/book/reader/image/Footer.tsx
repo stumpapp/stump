@@ -316,7 +316,6 @@ export default function Footer() {
 										width: pageSet.length === 1 ? '100%' : '50%',
 										height: '100%',
 										borderRadius: 6,
-										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
 										borderCurve: 'continuous',
 										overflow: 'hidden',
 										backgroundColor: colors.thumbnail.placeholder,

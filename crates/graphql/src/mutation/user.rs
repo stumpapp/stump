@@ -11,7 +11,7 @@ use crate::{
 };
 
 use super::upload::read_uploaded_image;
-use async_graphql::{Context, Object, Result, Upload, ID};
+use async_graphql::{Context, ID, Object, Result, Upload};
 use chrono::Utc;
 use models::{
 	entity::{
@@ -19,7 +19,7 @@ use models::{
 		user::{self, AuthUser},
 		user_login_activity, user_preferences,
 	},
-	services::user::{create_user_with_preferences, NewAgeRestriction},
+	services::user::{NewAgeRestriction, create_user_with_preferences},
 	shared::{
 		arrangement::{Arrangement, HomeArrangement},
 		enums::UserPermission,
@@ -27,8 +27,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel,
-	Set, TransactionTrait, TryIntoModel,
+	ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel, Set,
+	TransactionTrait, TryIntoModel, prelude::*,
 };
 
 use stump_core::{

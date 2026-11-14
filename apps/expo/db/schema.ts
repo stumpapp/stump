@@ -248,7 +248,7 @@ export const downloadQueueMetadata = z.object({
 	libraryName: z.string().nullish(),
 	thumbnailMeta: imageMeta.nullish(),
 	toc: z.array(z.string()).nullish(),
-	bookMetadata: z.record(z.unknown()).nullish(),
+	bookMetadata: z.record(z.string(), z.unknown()).nullish(),
 	readProgress: z
 		.object({
 			percentageCompleted: z.string().nullish(),

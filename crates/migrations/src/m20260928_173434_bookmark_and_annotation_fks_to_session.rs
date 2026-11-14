@@ -599,11 +599,7 @@ fn determine_approximate_session_id(
 		.filter_map(|s| {
 			let updated_at = s.updated_at?;
 			let diff = (updated_at - event_created_at).num_seconds();
-			if diff >= 0 {
-				Some((diff, s))
-			} else {
-				None
-			}
+			if diff >= 0 { Some((diff, s)) } else { None }
 		})
 		.min_by_key(|(diff, _)| *diff)
 		.map(|(_, s)| s);
@@ -787,7 +783,12 @@ mod tests {
 		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
-			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 11:30:00".into()],
+			vec![
+				"bm-1".into(),
+				"user-1".into(),
+				"media-1".into(),
+				"2026-10-03 11:30:00".into(),
+			],
 		))
 		.await
 		.expect("should insert reading session");
@@ -846,7 +847,12 @@ mod tests {
 		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
-			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
+			vec![
+				"bm-1".into(),
+				"user-1".into(),
+				"media-1".into(),
+				"2026-10-03 10:00:00".into(),
+			],
 		))
 		.await
 		.expect("should insert bookmark");
@@ -865,7 +871,12 @@ mod tests {
 		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
-			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
+			vec![
+				"bm-1".into(),
+				"user-1".into(),
+				"media-1".into(),
+				"2026-10-03 10:00:00".into(),
+			],
 		))
 		.await
 		.expect("should insert bookmark");
@@ -902,7 +913,12 @@ mod tests {
 		db.execute_raw(Statement::from_sql_and_values(
 			backend,
 			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
-			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 01:00:00".into()],
+			vec![
+				"bm-1".into(),
+				"user-1".into(),
+				"media-1".into(),
+				"2026-10-03 01:00:00".into(),
+			],
 		))
 		.await
 		.expect("should insert bookmark");

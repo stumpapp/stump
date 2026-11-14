@@ -2,7 +2,7 @@ use async_graphql::InputType;
 use chrono::{DateTime, Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session, shared::enums::ReadingStatus};
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*};
 
 use crate::common::TestApp;
 

@@ -4,9 +4,9 @@ import { formatDistanceToNow } from 'date-fns'
 import { BlurTargetView } from 'expo-blur'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo, useRef } from 'react'
-import { Easing, Pressable, View } from 'react-native'
+import { Easing, type HostInstance, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector, type LegacyPanGesture } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -29,6 +29,7 @@ type Props = {
 
 const IMAGE_WIDTH = 280
 
+// TODO(chore): lots o deprecations here
 export default function ReadingNow({ books }: Props) {
 	const { width } = useDisplay()
 
@@ -52,13 +53,16 @@ export default function ReadingNow({ books }: Props) {
 		(books.length - 1) * 6 + // total gap between dots
 		16 * 2 // container padding
 
+	// Note: we capture len outside the worklet since it would otherwise capture `books` and
+	// copy the entire array which would fail on Date with a `Cannot copy value of type `Date`
+	const totalItems = books.length
+
 	const pan = Gesture.Pan()
 		.activeOffsetX([-3, 3])
 		.failOffsetY([-6, 6])
 		.onUpdate(
 			// eslint-disable-next-line react-hooks/refs
 			(event) => {
-				const totalItems = books.length
 				const activeAreaWidth = paginationDotsContainerWidth / totalItems
 				const index = Math.min(totalItems - 1, Math.max(0, Math.floor(event.x / activeAreaWidth)))
 
@@ -92,7 +96,8 @@ export default function ReadingNow({ books }: Props) {
 					}}
 					onProgressChange={progressValue}
 					// Note: I added this to fix vertical scroll conflicts
-					onConfigurePanGesture={(pan) => {
+					onConfigurePanGesture={(gesture) => {
+						const pan = gesture as unknown as LegacyPanGesture
 						pan.activeOffsetX([-6, 6])
 						pan.failOffsetY([-12, 12])
 						return pan
@@ -259,7 +264,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
-	const blurTargetRef = useRef<View>(null)
+	const blurTargetRef = useRef<HostInstance>(null)
 
 	return (
 		<View className="gap-4 flex flex-row">

@@ -1,7 +1,7 @@
 use async_graphql::InputType;
 use graphql::input::user::AgeRestrictionInput;
 use models::shared::enums::UserPermission;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use super::TestApp;
 

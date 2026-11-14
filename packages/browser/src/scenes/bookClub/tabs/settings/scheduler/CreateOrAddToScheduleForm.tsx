@@ -33,7 +33,7 @@ export const defaultBook = {
 } as BookSchema
 
 export default function CreateOrAddToScheduleForm() {
-	const form = useForm<Schema>({
+	const form = useForm({
 		defaultValues: {
 			books: [defaultBook],
 		},

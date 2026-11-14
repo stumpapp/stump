@@ -1,8 +1,8 @@
 use serde_json::json;
 
 use super::{
+	FAVICON_URL, NOTIFIER_ID, NotificationClient, NotificationEvent,
 	error::{NotificationError, NotificationResult},
-	NotificationClient, NotificationEvent, FAVICON_URL, NOTIFIER_ID,
 };
 
 pub struct DiscordClient {

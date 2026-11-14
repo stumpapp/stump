@@ -28,30 +28,40 @@ export const buildSchema = (
 ) =>
 	z.object({
 		creatorDisplayName: z.string().optional(),
-		creatorHideProgress: isCreating ? z.boolean().default(false) : z.boolean().optional(),
+		creatorHideProgress: isCreating ? z.boolean() : z.boolean().optional(),
 		description: z.string().optional(),
-		isPrivate: z.boolean().default(false),
+		isPrivate: z.boolean(),
 		memberRoleSpec: memberRoleSpecSchema.optional(),
 		name: z
 			.string()
 			.min(1, { message: t(getKey('missingName')) })
-			.refine(
-				(value) => existingClubNames.every((name) => name !== value),
-				(value) => ({
-					message: `"${value}" ${t(getKey('alreadyTaken'))}`,
-				}),
-			)
+			.superRefine((value, ctx) => {
+				if (existingClubNames.some((name) => name === value)) {
+					ctx.addIssue({
+						code: 'custom',
+						message: `"${value}" ${t(getKey('alreadyTaken'))}`,
+					})
+				}
+			})
 			.refine((value) => !FORBIDDEN_ENTITY_NAMES.includes(value), {
 				message: t(getKey('forbiddenName')),
 			}),
 		slug: z.string().nullish(),
 	})
 export type CreateOrUpdateBookClubSchema = z.infer<ReturnType<typeof buildSchema>>
+export const createFormDefaults = (): CreateOrUpdateBookClubSchema => ({
+	creatorDisplayName: '',
+	creatorHideProgress: false,
+	description: '',
+	isPrivate: false,
+	name: '',
+})
 
 export const formDefaults = (
 	club?: NonNullable<BookClubLayoutQuery['bookClubBySlug']>,
 ): CreateOrUpdateBookClubSchema => ({
 	creatorDisplayName: club?.name || '',
+	creatorHideProgress: undefined,
 	description: '',
 	isPrivate: club?.isPrivate ?? false,
 	memberRoleSpec: club?.roleSpec,

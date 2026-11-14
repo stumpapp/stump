@@ -1,15 +1,15 @@
 use axum::{
+	Extension, Router,
 	extract::{Path, State},
 	middleware,
 	routing::get,
-	Extension, Router,
 };
 use graphql::data::AuthContext;
 use models::{
 	entity::{library_config, media, series},
 	shared::image_processor_options::SupportedImageFormat,
 };
-use sea_orm::{prelude::*, sea_query::Query, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*, sea_query::Query};
 use stump_core::{
 	config::StumpConfig,
 	fs_utils::ContentType,

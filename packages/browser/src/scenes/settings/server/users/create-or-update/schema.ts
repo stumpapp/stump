@@ -36,12 +36,9 @@ export const buildSchema = (
 			.refine(
 				// if we are updating a user, we don't need to validate the password
 				(value) => !!editingUser || !!value,
-				() => ({ message: t('authScene.form.validation.missingPassword') }),
+				{ message: t('authScene.form.validation.missingPassword') },
 			),
-		permissions: z
-			.array(userPermissionSchema)
-			.optional()
-			.default(editingUser?.permissions ?? []),
+		permissions: z.array(userPermissionSchema),
 		username: z
 			.string()
 			.min(1, { message: t('authScene.form.validation.missingUsername') })
@@ -49,13 +46,12 @@ export const buildSchema = (
 				(value) =>
 					(!!editingUser && value === editingUser.username) ||
 					existingUsernames.every((username) => username.toLowerCase() !== value.toLowerCase()),
-				() => ({
+				{
 					message: t(
 						'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',
 					),
-				}),
-			)
-			.default(editingUser?.username ?? ''),
+				},
+			),
 	})
 export type CreateOrUpdateUserSchema = z.infer<ReturnType<typeof buildSchema>>
 

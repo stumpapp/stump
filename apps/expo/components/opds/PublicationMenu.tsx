@@ -1,15 +1,12 @@
 import { OPDSMetadata } from '@stump/sdk'
 import { Stack, useNavigation } from 'expo-router'
-import { Ellipsis } from 'lucide-react-native'
+import { Trash } from 'lucide-react-native'
 import { useLayoutEffect } from 'react'
-import { Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import { Platform } from 'react-native'
 
+import { ActionMenu } from '~/components/ui/action-menu/action-menu'
 import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
-
-import { Icon } from '../ui'
 
 type Props = {
 	publicationUrl: string
@@ -47,35 +44,21 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 			</Stack.Toolbar>
 		),
 		android: (
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					<Pressable>
-						<View
-							accessibilityLabel="options"
-							style={{
-								height: 35,
-								width: 35,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							<Icon as={Ellipsis} size={24} className="text-foreground" />
-						</View>
-					</Pressable>
-				</DropdownMenu.Trigger>
-
-				<DropdownMenu.Content>
-					<DropdownMenu.Item
-						key="delete-download"
-						onSelect={handleDeleteDownload}
-						disabled={isDeleting}
-						destructive
-					>
-						<DropdownMenu.ItemTitle>Delete Download</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
-					</DropdownMenu.Item>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
+			<ActionMenu
+				groups={[
+					{
+						items: [
+							{
+								label: 'Delete Download',
+								icon: { ios: 'trash', android: Trash },
+								onPress: handleDeleteDownload,
+								role: 'destructive',
+								disabled: isDeleting,
+							},
+						],
+					},
+				]}
+			/>
 		),
 	})
 }

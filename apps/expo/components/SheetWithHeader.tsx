@@ -1,7 +1,7 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { Check, X } from 'lucide-react-native'
 import { RefObject, useRef, useState } from 'react'
-import { Platform, ScrollView, View } from 'react-native'
+import { Platform, ScrollView, type ScrollViewInstance, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { compositeColorOverBase, IS_IOS_26_PLUS, useColors } from '~/lib/constants'
@@ -31,7 +31,6 @@ type Props = TrueSheetProps & { ref?: RefObject<TrueSheet | null> } & HeaderProp
 
 export default function SheetWithHeader({
 	children,
-	scrollable,
 	ref,
 	headerLabel,
 	headerLeftButton,
@@ -55,14 +54,19 @@ export default function SheetWithHeader({
 	const blurGradientHeader =
 		!!(headerLabel || headerLeftButton || headerRightButton) && IS_IOS_26_PLUS
 
+	const innerScrollRef = useRef<ScrollViewInstance>(null)
+
 	return (
 		<TrueSheet
 			ref={sheetRef}
 			grabber
-			scrollable={scrollable}
+			scrollableRef={innerScrollRef}
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
-			style={{ paddingBottom: insets.bottom }}
+			style={{
+				flex: 1,
+				paddingBottom: insets.bottom,
+			}}
 			insetAdjustment="automatic"
 			header={
 				// i fckn hate not having grid in nativewind >:(
@@ -112,12 +116,12 @@ export default function SheetWithHeader({
 
 			<PortalHostProvider name={Platform.OS === 'android' ? props.name : undefined}>
 				<ScrollView
+					ref={innerScrollRef}
 					className={cn(
 						'p-6 h-full',
 						// the header is position: 'absolute' so we must manually offset
 						blurGradientHeader && 'pt-[5.25rem]',
 					)}
-					scrollEnabled={scrollable}
 				>
 					{children}
 				</ScrollView>

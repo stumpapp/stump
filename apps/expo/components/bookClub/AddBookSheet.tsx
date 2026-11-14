@@ -1,5 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, usePrefetchGraphQL } from '@stump/client'
 import { BookClubBookInput, graphql, InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IS_IOS_26_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import BookListItem from '../book/BookListItem'
+import BookListItem, { IBookListItemFragment } from '../book/BookListItem'
 import ListEmpty from '../ListEmpty'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -67,6 +67,7 @@ type Props = {
 
 export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, ref) => {
 	const sheetRef = useRef<TrueSheet>(null)
+	const listRef = useRef<FlashListRef<IBookListItemFragment & { id: string }>>(null)
 	const previewSheetRef = useRef<PreviewBookSheetRef>(null)
 
 	const {
@@ -139,12 +140,13 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 				ref={sheetRef}
 				detents={[1]}
 				grabber
-				scrollable
+				scrollableRef={listRef}
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom,
 				}}
 				insetAdjustment="automatic"
@@ -152,6 +154,7 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 				onDidDismiss={() => setIsOpen(false)}
 			>
 				<FlashList
+					ref={listRef}
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}
 					renderItem={({ item }) => (
 						<BookListItem

@@ -41,9 +41,9 @@ const executeSingleServerSync = async (
 				eq(readProgress.serverId, serverId),
 				not(
 					inArray(readProgress.syncStatus, [
-						syncStatus.Enum.SYNCED,
-						syncStatus.Enum.SYNCING,
-						syncStatus.Enum.CONFLICT,
+						syncStatus.enum.SYNCED,
+						syncStatus.enum.SYNCING,
+						syncStatus.enum.CONFLICT,
 					]),
 				),
 			),
@@ -62,7 +62,7 @@ const executeSingleServerSync = async (
 
 	await db
 		.update(readProgress)
-		.set({ syncStatus: syncStatus.Enum.SYNCING })
+		.set({ syncStatus: syncStatus.enum.SYNCING })
 		.where(
 			and(
 				eq(readProgress.serverId, serverId),
@@ -117,7 +117,7 @@ const executeSingleServerSync = async (
 			await db
 				.update(readProgress)
 				.set({
-					syncStatus: syncStatus.Enum.SYNCED,
+					syncStatus: syncStatus.enum.SYNCED,
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
 					pendingReset: false,
 					lastPulledSessionUpdatedAt: serverUpdatedAt,
@@ -128,7 +128,7 @@ const executeSingleServerSync = async (
 			failureCount++
 			await db
 				.update(readProgress)
-				.set({ syncStatus: syncStatus.Enum.ERROR })
+				.set({ syncStatus: syncStatus.enum.ERROR })
 				.where(eq(readProgress.id, record.id))
 		}
 	}

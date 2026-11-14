@@ -12,7 +12,7 @@ import { useTranslate } from '@/hooks/useTranslate'
 
 import { PROVIDER_LABELS } from './constants'
 import ProviderForm from './ProviderForm'
-import { createConfig, getPatchDefaults, PatchProviderConfigSchema } from './schema'
+import { getEditFormDefaults, patchConfig, PatchProviderConfigSchema } from './schema'
 
 const EditProviderDialogFragment = graphql(`
 	fragment EditProviderDialog on MetadataProviderConfigModel {
@@ -52,9 +52,9 @@ export function EditProviderDialog({ provider: fragmentRef }: Props) {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-	const form = useForm<PatchProviderConfigSchema>({
-		defaultValues: getPatchDefaults(provider),
-		resolver: zodResolver(createConfig),
+	const form = useForm({
+		defaultValues: getEditFormDefaults(provider),
+		resolver: zodResolver(patchConfig),
 	})
 
 	const { t, translate } = useTranslate()
@@ -80,7 +80,7 @@ export function EditProviderDialog({ provider: fragmentRef }: Props) {
 
 	const handleClose = () => {
 		setIsEditDialogOpen(false)
-		setTimeout(() => form.reset(getPatchDefaults(provider)))
+		setTimeout(() => form.reset(getEditFormDefaults(provider)))
 	}
 
 	const handleSubmit = (data: PatchProviderConfigSchema) => {

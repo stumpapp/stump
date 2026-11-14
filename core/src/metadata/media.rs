@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use merge::Merge;
-use sea_orm::{prelude::*, Set};
+use sea_orm::{Set, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

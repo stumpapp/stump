@@ -1,5 +1,5 @@
 use async_graphql::{
-	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+	ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader,
 };
 
 use models::entity::{
@@ -11,8 +11,8 @@ use models::{
 };
 use num_traits::cast::ToPrimitive;
 use sea_orm::{
-	prelude::*, sea_query::Query, ExprTrait, FromQueryResult, Order, QueryOrder,
-	QuerySelect,
+	ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect, prelude::*,
+	sea_query::Query,
 };
 
 use crate::{
@@ -367,7 +367,7 @@ impl Media {
 			_ => {
 				return Err(
 					"Only cursor pagination is supported for this operation".into()
-				)
+				);
 			},
 		};
 

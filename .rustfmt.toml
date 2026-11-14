@@ -1,3 +1,4 @@
+style_edition = "2024"
 hard_tabs = true
 tab_spaces = 4
 match_block_trailing_comma = true

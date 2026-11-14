@@ -3,7 +3,7 @@ use models::entity::{reading_list, reading_list_item};
 use sea_orm::{
 	ActiveValue::Set,
 	TransactionTrait,
-	{prelude::*, DatabaseTransaction},
+	{DatabaseTransaction, prelude::*},
 };
 
 use crate::{

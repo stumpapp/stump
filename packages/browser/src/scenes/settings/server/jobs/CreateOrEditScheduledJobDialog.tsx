@@ -93,7 +93,7 @@ export function CreateOrEditScheduledJobDialog({
 		} satisfies ScheduledJobFormValues
 	}, [data])
 
-	const form = useForm<ScheduledJobFormValues>({
+	const form = useForm({
 		defaultValues,
 		resolver: zodResolver(getScheduledJobSchema(t)),
 	})

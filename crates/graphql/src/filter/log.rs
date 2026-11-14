@@ -1,7 +1,7 @@
 use async_graphql::InputObject;
 use models::entity::log;
 
-use super::{apply_string_filter, IntoFilter, StringLikeFilter};
+use super::{IntoFilter, StringLikeFilter, apply_string_filter};
 
 #[derive(InputObject, Clone, Default)]
 pub struct LogFilterInput {

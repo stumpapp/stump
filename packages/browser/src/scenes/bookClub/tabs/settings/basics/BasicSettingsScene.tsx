@@ -40,7 +40,7 @@ export default function BasicSettingsScene() {
 	)
 
 	const schema = useMemo(() => buildSchema(t, existingClubNames, false), [t, existingClubNames])
-	const form = useForm<CreateOrUpdateBookClubSchema>({
+	const form = useForm({
 		defaultValues: formDefaults(club),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),

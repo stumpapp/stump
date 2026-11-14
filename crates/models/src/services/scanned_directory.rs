@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 
-use sea_orm::{prelude::*, ConnectionTrait, DbErr};
+use sea_orm::{ConnectionTrait, DbErr, prelude::*};
 
 use crate::entity::scanned_directory;
 

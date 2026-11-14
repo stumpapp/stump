@@ -1,5 +1,5 @@
-use criterion::{criterion_group, Criterion};
-use stump_core::readium::{search_epub, EpubSearchOptions};
+use criterion::{Criterion, criterion_group};
+use stump_core::readium::{EpubSearchOptions, search_epub};
 use tokio_util::sync::CancellationToken;
 
 fn fixture_epub() -> String {

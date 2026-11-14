@@ -27,7 +27,6 @@ export default function AnnotationsSheet() {
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				scrollable
 				grabber
 				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}

@@ -17,25 +17,25 @@ use models::{
 	shared::enums::FileStatus,
 };
 use sea_orm::{
-	prelude::*, sea_query::Expr, ActiveValue, ExprTrait, QuerySelect, Set,
-	TransactionTrait,
+	ActiveValue, ExprTrait, QuerySelect, Set, TransactionTrait, prelude::*,
+	sea_query::Expr,
 };
 use uuid::Uuid;
 
 use crate::{
+	CoreEvent,
 	config::StumpConfig,
 	database::SQLITE_BIND_LIMIT,
 	error::{CoreError, CoreResult},
 	event::CreatedMedia,
 	fs_utils::{FileParts, PathUtils},
-	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
-	media::prepare::{prepare_draft, MediaDraft},
+	job::{JobContext, JobExecuteLog, JobProgress, error::JobError},
+	media::prepare::{MediaDraft, prepare_draft},
 	media::series::BuiltSeries,
 	scan::{
 		tag_cache::TagCache,
-		utils::{media::insert_media_in_txn, BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},
+		utils::{BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE, media::insert_media_in_txn},
 	},
-	CoreEvent,
 };
 
 struct BuiltOneshot {

@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, Result, SimpleObject, ID};
+use async_graphql::{ID, InputObject, Result, SimpleObject};
 use models::entity::smart_list_view;
 use sea_orm::{NotSet, Set};
 use serde::{Deserialize, Serialize};

@@ -1,5 +1,5 @@
 use axum::{
-	extract::State, http::StatusCode, middleware, routing::delete, Extension, Router,
+	Extension, Router, extract::State, http::StatusCode, middleware, routing::delete,
 };
 use graphql::data::AuthContext;
 use models::entity::kobo_sync_session;

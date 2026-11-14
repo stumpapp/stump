@@ -6,7 +6,7 @@ use std::{
 };
 
 use apalis::prelude::MemoryStorage;
-use criterion::{criterion_group, BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, criterion_group};
 use models::{
 	entity::{job, library, library_config, media, series},
 	shared::enums::{
@@ -306,7 +306,7 @@ async fn validate_counts(
 			"Media count mismatch (actual vs expected): {} != {}. You probably introduced a bug :)",
 			actual_media_count,
 			series_count * books_per_series
-		)	);
+		));
 	}
 
 	Ok(())

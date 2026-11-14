@@ -3,7 +3,7 @@ use models::{
 	entity::{bookmark, media_annotation, media_metadata, user::AuthUser},
 	shared::{enums::MetadataProvider, readium::ReadiumLocator},
 };
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{ActiveValue::Set, IntoActiveModel, prelude::*};
 
 #[derive(Debug, Clone, InputObject)]
 pub struct EpubProgressInput {

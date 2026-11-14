@@ -21,7 +21,7 @@ export default function ScanConfigForm({ onScan }: Props) {
 	const {
 		library: { config: libraryConfig },
 	} = useLibraryManagement()
-	const form = useForm<FormValues>({
+	const form = useForm({
 		defaultValues: {
 			variant: 'force-rebuild',
 			config: null,

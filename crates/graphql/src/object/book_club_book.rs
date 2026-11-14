@@ -3,12 +3,14 @@ use models::{
 	entity::{book_club_book, book_club_discussion, media},
 	shared::book_club::{BookClubExternalBook, BookClubInternalBook},
 };
-use sea_orm::{prelude::*, QueryFilter, QueryOrder};
+use sea_orm::{QueryFilter, QueryOrder, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::data::CoreContext;
-use crate::object::book_club_discussion::BookClubDiscussion;
+use crate::data::{AuthContext, CoreContext};
 use crate::object::media::Media;
+use crate::object::{
+	book_club::verify_read_access, book_club_discussion::BookClubDiscussion,
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Union, OneofObject)]
 #[graphql(input_name = "BookClubBookInput")]
@@ -66,7 +68,10 @@ impl BookClubBook {
 	}
 
 	async fn discussions(&self, ctx: &Context<'_>) -> Result<Vec<BookClubDiscussion>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		verify_read_access(&self.model.book_club_id, user, conn).await?;
 
 		let discussions = book_club_discussion::Entity::find()
 			.filter(book_club_discussion::Column::BookClubBookId.eq(&self.model.id))

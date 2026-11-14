@@ -33,7 +33,7 @@ export default function BasicSettingsScene() {
 	} = useSuspenseGraphQL(query, ['smartListBasicSettingsScene'])
 	const listNames = (lists || []).map(({ name }) => name)
 
-	const form = useForm<SubSchema>({
+	const form = useForm({
 		defaultValues: intoForm(list),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(createSchema(listNames, t, list)),

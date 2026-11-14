@@ -17,6 +17,7 @@ const ServerConnectionErrorScene = lazy(
 	() => import('./scenes/error/ServerConnectionErrorScene.tsx'),
 )
 const LoginOrClaimScene = lazy(() => import('./scenes/auth'))
+const StatsScene = lazy(() => import('./scenes/stats'))
 
 type AppRouterProps = {
 	basePath?: string
@@ -49,6 +50,7 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 					<Route path="books/*" element={<BookRouter />} />
 					<Route path="clubs/*" element={<BookClubRouter />} />
 					<Route path="/smart-lists/*" element={<SmartListRouter />} />
+					<Route path="stats" element={<StatsScene />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

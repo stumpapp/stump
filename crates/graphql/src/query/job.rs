@@ -5,10 +5,10 @@ use crate::pagination::{
 	PaginationValidator,
 };
 use crate::{data::CoreContext, object::job::Job};
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::entity::scheduled_job;
 use models::{entity::job, shared::enums::UserPermission};
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{QueryOrder, QuerySelect, prelude::*};
 
 #[derive(Default)]
 pub struct JobQuery;

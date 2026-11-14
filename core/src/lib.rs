@@ -23,13 +23,13 @@ pub mod readium;
 pub mod scan;
 pub mod utils;
 
-use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
+use config::logging::STUMP_SHADOW_TEXT;
 use job::JobScheduler;
 use models::entity::server_config;
 use sea_orm::{
-	prelude::*, ActiveValue::Set, DatabaseBackend, EntityTrait, PaginatorTrait,
-	QuerySelect, Statement,
+	ActiveValue::Set, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect,
+	Statement, prelude::*,
 };
 
 pub use context::Ctx;
@@ -176,7 +176,9 @@ impl StumpCore {
 				.rows_affected;
 			tracing::trace!(affected_rows, "Updated encryption key");
 			if affected_rows > 1 {
-				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
+				tracing::warn!(
+					"More than one encryption key was updated? This is definitely not expected"
+				);
 			}
 			Ok(affected_rows > 0)
 		}
@@ -218,7 +220,9 @@ impl StumpCore {
 				.rows_affected;
 			tracing::trace!(affected_rows, "Updated JWT secrets");
 			if affected_rows > 1 {
-				tracing::warn!("More than one JWT secrets row was updated? This is definitely not expected");
+				tracing::warn!(
+					"More than one JWT secrets row was updated? This is definitely not expected"
+				);
 			}
 			Ok(affected_rows > 0)
 		}

@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 
-import { buildSchema, CreateOrUpdateUserSchema, ExistingUser, formDefaults } from '../schema'
+import { buildSchema, ExistingUser, formDefaults } from '../schema'
 import UserRestrictionsForm from '../UserRestrictionsForm'
 
 const onSubmit = vi.fn()
@@ -21,7 +21,7 @@ const Subject = ({ user }: SubjectProps = {}) => {
 		...user,
 	} as ExistingUser
 
-	const form = useForm<Pick<CreateOrUpdateUserSchema, 'ageRestrictionOnUnset' | 'ageRestriction'>>({
+	const form = useForm({
 		defaultValues: formDefaults(userDefaults),
 		resolver: zodResolver(buildSchema((t) => t, [], userDefaults)),
 	})

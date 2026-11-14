@@ -9,7 +9,7 @@ use crate::{
 		smart_lists::{SmartList, SmartListMeta},
 	},
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{
 		media, series,

@@ -59,7 +59,7 @@ const auth = z
 	.optional()
 
 const serverConfig = z.object({
-	customHeaders: z.record(z.string()).optional(),
+	customHeaders: z.record(z.string(), z.string()).optional(),
 	auth: auth.optional(),
 })
 export type ServerConfig = z.infer<typeof serverConfig>
@@ -280,9 +280,12 @@ export const useSavedServers = () => {
 				})
 			}
 
+			// The cached SDK instance was built from the old config (URL, auth, custom headers)
+			removeInstanceFromCache(id)
+
 			return serverMeta
 		},
-		[setDefaultServer, editServer, createServerConfig],
+		[setDefaultServer, editServer, createServerConfig, removeInstanceFromCache],
 	)
 
 	/**

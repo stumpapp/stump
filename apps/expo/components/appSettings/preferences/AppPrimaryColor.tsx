@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { Pipette } from 'lucide-react-native'
 import { useRef, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native'
 import tailwindColors from 'tailwindcss/colors'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -31,6 +31,7 @@ export default function AppPrimaryColor() {
 	const palette = tailwindColors[accentHue]
 
 	const sheetRef = useRef<TrueSheet>(null)
+	const scrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const { itemWidth } = useGridItemSize({
@@ -63,14 +64,14 @@ export default function AppPrimaryColor() {
 				ref={sheetRef}
 				detents={[0.6]}
 				grabber
-				scrollable
+				scrollableRef={scrollRef}
 				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 				insetAdjustment="automatic"
 			>
-				<ScrollView contentContainerClassName="px-4 py-6">
+				<ScrollView ref={scrollRef} contentContainerClassName="px-4 py-6">
 					<View className="mb-4 gap-2 p-3 squircle bg-accent-100 dark:bg-accent-950 items-center rounded-3xl">
 						<Text
 							className="font-bold text-lg"

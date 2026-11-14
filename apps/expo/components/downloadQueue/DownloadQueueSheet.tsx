@@ -1,8 +1,8 @@
 import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui'
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { forwardRef, useState } from 'react'
-import { Platform, ScrollView, View } from 'react-native'
+import { forwardRef, useRef, useState } from 'react'
+import { Platform, ScrollView, type ScrollViewInstance, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useColors } from '~/lib/constants'
@@ -64,6 +64,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 
 	const isTotalEmptyState = activeAndPendingItems.length === 0 && failedItems.length === 0
 
+	const innerScrollRef = useRef<ScrollViewInstance>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const onDismissInternal = () => {
@@ -77,12 +78,13 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 				ref={ref}
 				detents={[0.65, 1]}
 				grabber
-				scrollable
+				scrollableRef={innerScrollRef}
 				backgroundColor={colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
 				style={{
+					flex: 1,
 					paddingBottom: insets.bottom + 16,
 				}}
 				onDidPresent={() => setIsOpen(true)}
@@ -94,7 +96,13 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 							{Platform.select({
 								ios: (
 									<View className="w-full">
-										<Host matchContents style={{ width: 'auto' }}>
+										<Host
+											matchContents
+											style={{
+												flex: 1,
+												width: 'auto',
+											}}
+										>
 											<Picker
 												selection={tab}
 												modifiers={[pickerStyle('segmented')]}
@@ -133,7 +141,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 					</View>
 				}
 			>
-				<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+				<ScrollView ref={innerScrollRef} className="p-6 flex-1" nestedScrollEnabled>
 					<View className="gap-y-6">
 						{isTotalEmptyState && (
 							<View className="gap-4 py-8 items-center justify-center">

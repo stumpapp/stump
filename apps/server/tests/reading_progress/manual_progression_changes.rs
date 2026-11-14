@@ -1,16 +1,16 @@
 use crate::common::{
+	TestApp,
 	book::{
 		active_session_for_book, create_nth_readthrough, fudge_session_time,
 		update_progress,
 	},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 
 use async_graphql::InputType;
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session, shared::enums::ReadingStatus};
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*};
 use tests::fake_data;
 
 async fn setup() -> TestApp {
@@ -248,9 +248,11 @@ async fn test_clear_series_reading_history() {
 	assert_eq!(total_sessions.len(), 2);
 
 	// each session should be active
-	assert!(total_sessions
-		.iter()
-		.all(|session| session.status == ReadingStatus::Reading));
+	assert!(
+		total_sessions
+			.iter()
+			.all(|session| session.status == ReadingStatus::Reading)
+	);
 }
 
 #[tokio::test]
@@ -652,9 +654,11 @@ async fn test_accept_local_progress_splices_history_from_ancestor() {
 	assert_eq!(remote_sessions.len(), 3); // pre-ancestor, ancestor, and new local progress
 
 	let og_conflicting_ids = vec![conflicting_session_1.id, conflicting_session_2.id];
-	assert!(remote_sessions
-		.iter()
-		.all(|session| !og_conflicting_ids.contains(&session.id)));
+	assert!(
+		remote_sessions
+			.iter()
+			.all(|session| !og_conflicting_ids.contains(&session.id))
+	);
 
 	let ancestor_after = remote_sessions
 		.iter()
@@ -739,9 +743,11 @@ async fn test_accept_local_progress_with_no_conflicts() {
 		.expect("db error");
 	assert_eq!(remote_sessions.len(), 3); // pre-ancestor, ancestor, and new local progress
 
-	assert!(!remote_sessions
-		.iter()
-		.any(|s| s.id == conflicting_remote_session.id)); // it was replaced iwth local
+	assert!(
+		!remote_sessions
+			.iter()
+			.any(|s| s.id == conflicting_remote_session.id)
+	); // it was replaced iwth local
 
 	let local_now_remote_session = remote_sessions
 		.iter()
@@ -750,8 +756,10 @@ async fn test_accept_local_progress_with_no_conflicts() {
 	assert_eq!(local_now_remote_session.elapsed_seconds, Some(120));
 
 	// no sessions besides new local should have elapsed time
-	assert!(remote_sessions
-		.iter()
-		.filter(|s| s.id != local_now_remote_session.id)
-		.all(|s| s.elapsed_seconds == Some(0)));
+	assert!(
+		remote_sessions
+			.iter()
+			.filter(|s| s.id != local_now_remote_session.id)
+			.all(|s| s.elapsed_seconds == Some(0))
+	);
 }

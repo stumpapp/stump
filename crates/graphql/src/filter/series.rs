@@ -4,17 +4,16 @@ use models::{
 	shared::enums::{LibraryType, ReadingStatus},
 };
 use sea_orm::{
+	Condition, ExprTrait,
 	prelude::*,
 	sea_query::{Expr, JoinType, Query, SelectStatement},
-	Condition, ExprTrait,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-	apply_string_filter, library::LibraryFilterInput,
-	series_metadata::SeriesMetadataFilterInput, ConceptualFilter, IntoFilter,
-	StringLikeFilter,
+	ConceptualFilter, IntoFilter, StringLikeFilter, apply_string_filter,
+	library::LibraryFilterInput, series_metadata::SeriesMetadataFilterInput,
 };
 
 // TODO: Support filter by tags (requires join logic)
@@ -136,7 +135,9 @@ fn apply_series_reading_status_filter(
 		ReadingStatus::Finished => finished_series_subquery(user_id),
 		ReadingStatus::NotStarted => not_started_series_subquery(user_id),
 		// a panic might feel heavy but it will remind me not to surface this until i add some kind of abandoned tracking
-		ReadingStatus::Abandoned => unimplemented!("Stump does not yet track abandoned status. This query should not have been possible yet"),
+		ReadingStatus::Abandoned => unimplemented!(
+			"Stump does not yet track abandoned status. This query should not have been possible yet"
+		),
 	};
 
 	let expr = Expr::col((series::Entity, series::Column::Id)).in_subquery(subquery);

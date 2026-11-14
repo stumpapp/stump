@@ -1,16 +1,20 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	entity::{
 		book_club, book_club_book_suggestion, book_club_book_suggestion_like,
 		book_club_member, user::AuthUser,
 	},
-	shared::book_club::{BookClubMemberRole, BookClubSuggestionStatus},
+	shared::{
+		book_club::{BookClubMemberRole, BookClubSuggestionStatus},
+		enums::UserPermission,
+	},
 };
-use sea_orm::{prelude::*, ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	input::book_club::SuggestBookInput,
 	object::book_club_book_suggestion::BookClubBookSuggestion,
 };
@@ -21,6 +25,7 @@ pub struct BookClubSuggestionMutation;
 #[Object]
 impl BookClubSuggestionMutation {
 	/// Suggest a book for the book club
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn suggest_book(
 		&self,
 		ctx: &Context<'_>,
@@ -65,6 +70,7 @@ impl BookClubSuggestionMutation {
 	}
 
 	/// Remove your own suggestion (only before it's resolved)
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn remove_suggestion(
 		&self,
 		ctx: &Context<'_>,
@@ -101,6 +107,7 @@ impl BookClubSuggestionMutation {
 	}
 
 	/// Toggle like on a suggestion
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn toggle_suggestion_like(
 		&self,
 		ctx: &Context<'_>,
@@ -146,6 +153,7 @@ impl BookClubSuggestionMutation {
 	}
 
 	/// Update the status of a suggestion (Admin+)
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessBookClub)")]
 	async fn update_suggestion_status(
 		&self,
 		ctx: &Context<'_>,

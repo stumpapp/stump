@@ -2,7 +2,7 @@ use models::shared::image_processor_options::{
 	Dimension, ImageProcessorOptions, ImageResizeMethod, ScaledDimensionResize,
 };
 
-use super::{scale_height_dimension, scale_width_dimension, ImageProcessorError};
+use super::{ImageProcessorError, scale_height_dimension, scale_width_dimension};
 
 pub trait ImageProcessorOptionsExt {
 	type Error;

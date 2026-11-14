@@ -6,13 +6,13 @@ use models::{
 		series_metadata,
 		user::AuthUser,
 	},
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::analysis::MediaAnalysisData,
 };
 use sea_orm::{
+	Condition, ExprTrait, FromQueryResult, JoinType, QuerySelect,
 	entity::prelude::*,
 	sea_query::{ConditionType, Expr},
-	Condition, ExprTrait, FromQueryResult, JoinType, QuerySelect,
 };
 
 #[derive(Clone, Debug)]

@@ -28,6 +28,9 @@ export type LayoutStore = {
 	ordering?: LayoutOrdering
 	setOrdering: (ordering: LayoutOrdering) => void
 
+	pageSize?: number
+	setPageSize: (pageSize: number) => void
+
 	columns?: ColumnSort[]
 	setColumns: (columns: ColumnSort[]) => void
 }
@@ -47,6 +50,7 @@ export const createLayoutStore = ({ key, storage }: LayoutStoreParams) =>
 						setColumns: (columns) => set({ columns }),
 						setLayout: (layout) => set({ layout }),
 						setOrdering: (ordering) => set({ ordering }),
+						setPageSize: (pageSize) => set({ pageSize }),
 					}) as LayoutStore,
 				{
 					name: `stump-${key}-layout-store`,

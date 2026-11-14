@@ -77,7 +77,7 @@ const RouterContainer = (props: StumpClientProps) => {
 		navigate({
 			pathname: url,
 			search: createSearchParams({
-				redirect: location.pathname,
+				redirect: location.pathname + location.search,
 			}).toString(),
 		})
 	}

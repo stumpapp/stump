@@ -14,14 +14,14 @@ use pdfium_render::prelude::{
 use crate::{
 	config::StumpConfig,
 	fs_utils::{
+		ContentType, FileParts, PathUtils,
 		archive::create_zip_archive,
 		hash::{self, generate_koreader_hash},
-		ContentType, FileParts, PathUtils,
 	},
 	image::into_image_format,
 	media::processor::{
-		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
-		MediaProcessorOptions, ProcessedMediaFile,
+		AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+		ProcessedMediaFile, error::MediaProcessorError,
 	},
 	metadata::ProcessedMediaMetadata,
 };

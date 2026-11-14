@@ -1,16 +1,16 @@
 use crate::{
 	data::CoreContext,
-	filter::{log::LogFilterInput, IntoFilter},
+	filter::{IntoFilter, log::LogFilterInput},
 	guard::PermissionGuard,
 	object::log::{Log, LogFileInfo},
 	order::OrderSpec,
 	pagination::{
-		get_paginated_results, PaginatedResponse, Pagination, PaginationValidator,
+		PaginatedResponse, Pagination, PaginationValidator, get_paginated_results,
 	},
 };
 use async_graphql::{Context, Object, Result};
 use models::{entity::log, shared::enums::UserPermission};
-use sea_orm::{prelude::*, Order};
+use sea_orm::{Order, prelude::*};
 
 #[derive(Default)]
 pub struct LogQuery;

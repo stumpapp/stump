@@ -3,19 +3,29 @@ import { FieldValues, FormProvider, SubmitHandler, UseFormReturn } from 'react-h
 
 import { cn } from '../utils'
 
-export type FormProps<T extends FieldValues> = {
-	form: UseFormReturn<T>
-	onSubmit: SubmitHandler<T>
+export type FormProps<
+	TFieldValues extends FieldValues,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TContext = any,
+	TTransformedValues = TFieldValues,
+> = {
+	form: UseFormReturn<TFieldValues, TContext, TTransformedValues>
+	onSubmit: SubmitHandler<TTransformedValues>
 	fieldsetClassName?: string
 } & Omit<React.ComponentProps<'form'>, 'onSubmit'>
 
-export function Form<T extends FieldValues>({
+export function Form<
+	TFieldValues extends FieldValues,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TContext = any,
+	TTransformedValues = TFieldValues,
+>({
 	form,
 	onSubmit,
 	children,
 	fieldsetClassName,
 	...props
-}: FormProps<T>) {
+}: FormProps<TFieldValues, TContext, TTransformedValues>) {
 	return (
 		<FormProvider {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} {...props}>

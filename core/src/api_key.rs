@@ -2,7 +2,7 @@ use chrono::Utc;
 use models::{
 	entity::{api_key, user::AuthUser},
 	shared::{
-		api_key::{APIKeyPermissions, API_KEY_PREFIX},
+		api_key::{API_KEY_PREFIX, APIKeyPermissions},
 		enums::UserPermission,
 	},
 };
@@ -104,9 +104,11 @@ mod tests {
 			..create_test_key()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller
-			.validate(&pek.to_string())
-			.expect("Failed to validate key"));
+		assert!(
+			controller
+				.validate(&pek.to_string())
+				.expect("Failed to validate key")
+		);
 	}
 
 	#[test]
@@ -122,9 +124,11 @@ mod tests {
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller
-			.validate(&pek.to_string())
-			.expect("Failed to validate key"));
+		assert!(
+			controller
+				.validate(&pek.to_string())
+				.expect("Failed to validate key")
+		);
 		assert_eq!(controller.resolve_permissions(&user), vec![]);
 	}
 
@@ -142,9 +146,11 @@ mod tests {
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller
-			.validate(&pek.to_string())
-			.expect("Failed to validate key"));
+		assert!(
+			controller
+				.validate(&pek.to_string())
+				.expect("Failed to validate key")
+		);
 		assert_eq!(
 			controller.resolve_permissions(&user),
 			vec![UserPermission::AccessApiKeys]
@@ -168,9 +174,11 @@ mod tests {
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller
-			.validate(&pek.to_string())
-			.expect("Failed to validate key"));
+		assert!(
+			controller
+				.validate(&pek.to_string())
+				.expect("Failed to validate key")
+		);
 		assert_eq!(
 			controller.resolve_permissions(&user),
 			vec![UserPermission::AccessBookClub]

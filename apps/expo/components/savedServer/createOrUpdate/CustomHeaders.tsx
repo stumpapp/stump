@@ -36,10 +36,10 @@ export function CustomHeaders() {
 			form.setValue('customHeaders', [...(form.getValues('customHeaders') || []), result.data])
 			setIsAddingHeader(false)
 		} else {
-			console.error(result.error.errors)
+			console.error(result.error.issues)
 			SystemAlert.alert(
 				translate('shared.common.error'),
-				result.error.errors[0]?.message || translate(getKey(`customHeaders.invalidHeader`)),
+				result.error.issues[0]?.message || translate(getKey(`customHeaders.invalidHeader`)),
 			)
 		}
 	}, [newHeaderKey, newHeaderValue, form, translate, headerSchema])

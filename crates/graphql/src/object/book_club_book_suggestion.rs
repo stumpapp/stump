@@ -2,7 +2,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
 	book_club_book_suggestion, book_club_book_suggestion_like, book_club_member,
 };
-use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, prelude::*};
 
 use crate::data::CoreContext;
 use crate::object::book_club_member::BookClubMember;

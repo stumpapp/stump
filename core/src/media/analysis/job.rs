@@ -2,14 +2,14 @@ use std::path::Path;
 
 use crate::{
 	job::{
-		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkingState,
+		JobContext, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError,
 	},
-	media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
+	media::analysis::analyze::{MediaForProcessing, safely_analyze_book},
 };
 use async_graphql::SimpleObject;
 use models::entity::{media, media_analysis, media_metadata, series};
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 use serde::{Deserialize, Serialize};
 
 type Id = String;

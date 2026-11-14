@@ -10,16 +10,16 @@ use models::{
 	shared::enums::FileStatus,
 };
 use sea_orm::{
+	Condition, DatabaseConnection, Set, TransactionTrait,
 	prelude::*,
 	sea_query::{Expr, Query},
-	Condition, DatabaseConnection, Set, TransactionTrait,
 };
 use tokio::task::spawn_blocking;
 
 use crate::{
 	config::StumpConfig,
 	error::{CoreError, CoreResult},
-	job::{error::JobError, JobExecuteLog},
+	job::{JobExecuteLog, error::JobError},
 	media::series::{BuiltSeries, SeriesBuilder},
 	scan::utils::BuiltEntityFutures,
 };

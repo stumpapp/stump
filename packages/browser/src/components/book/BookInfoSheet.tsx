@@ -141,7 +141,7 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 	const placement: Row[] = [
 		{
 			label: meta('series'),
-			value: (
+			value: book.series ? (
 				<Link
 					to={paths.seriesOverview(book.series.id)}
 					underline={false}
@@ -149,7 +149,7 @@ export function BookInfoSheet({ fragment: fragmentRef, isOpen, onClose }: Props)
 				>
 					{book.series.resolvedName}
 				</Link>
-			),
+			) : null,
 		},
 		{ label: meta('number'), value: metadata?.number },
 		{ label: meta('volume'), value: metadata?.volume },

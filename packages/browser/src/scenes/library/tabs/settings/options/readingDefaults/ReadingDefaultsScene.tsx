@@ -5,7 +5,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
 
 import {
-	buildSchema,
+	buildReadingDefaultsSchema,
 	CreateOrUpdateLibrarySchema,
 	DefaultLibraryView,
 	DefaultReadingSettings,
@@ -43,18 +43,7 @@ export default function ReadingDefaultsScene() {
 		[patch, library.config],
 	)
 
-	const schema = useMemo(
-		() =>
-			buildSchema([], library).pick({
-				defaultReadingDir: true,
-				defaultReadingImageScaleFit: true,
-				defaultReadingMode: true,
-				defaultLibraryViewMode: true,
-				hideSeriesView: true,
-				skipBookOverview: true,
-			}),
-		[library],
-	)
+	const schema = useMemo(() => buildReadingDefaultsSchema(library), [library])
 	const form = useForm({
 		defaultValues: formDefaults(library),
 		resolver: zodResolver(schema),

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useGraphQLMutation, useSDK } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { CheckBox, Label, Text } from '@stump/components'
 import { FragmentType, graphql, MetadataField, useFragment, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -27,6 +27,7 @@ import {
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import { getEditorDefaultValues, MetadataEditorValues, schema } from './schema'
 
@@ -74,9 +75,7 @@ const fragment = graphql(`
 const mutation = graphql(`
 	mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
 		updateMediaMetadata(id: $id, input: $input) {
-			metadata {
-				...MediaMetadataEditor
-			}
+			id
 		}
 	}
 `)
@@ -106,9 +105,7 @@ type Props = {
 // TODO(ux): Improve error states within form
 
 export default function MediaMetadataEditor({ mediaId, data }: Props) {
-	const [_data, setData] = useState(() => data)
-
-	const metadata = useFragment(fragment, _data)
+	const metadata = useFragment(fragment, data)
 	const paths = usePaths()
 
 	const [showMissing, setShowMissing] = useState(false)
@@ -117,10 +114,6 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	)
 
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
-
-	useEffect(() => {
-		setData(data)
-	}, [mediaId, data])
 
 	const { checkPermission } = useAppContext()
 	const { translate } = useTranslate()
@@ -289,22 +282,17 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 		resolver: zodResolver(schema),
 	})
 
-	const client = useQueryClient()
-	const { sdk } = useSDK()
+	useEffect(() => {
+		form.reset(getEditorDefaultValues(metadata))
+		setLockedFields(new Set(metadata?.lockedFields ?? []))
+	}, [form, metadata])
 
-	const onRefetchParents = useCallback(() => {
-		client.refetchQueries({
-			queryKey: sdk.cacheKey('bookOverview', [mediaId]),
-		})
-	}, [client, sdk, mediaId])
+	const client = useQueryClient()
 
 	const { mutate: updateMetadata } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateMediaMetadata: { metadata } }) => {
-			if (metadata) {
-				setData(metadata)
-			}
+		onSuccess: () => {
 			setState(MetadataEditorState.Display)
-			onRefetchParents()
+			invalidateThumbnailQueries(client)
 		},
 		onError: (error) => {
 			console.error('Failed to update metadata', error)

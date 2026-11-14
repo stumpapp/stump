@@ -160,9 +160,7 @@ function LibraryBooksScene() {
 		),
 		{
 			filter: {
-				series: {
-					libraryId: { eq: library.id },
-				},
+				libraryId: { eq: library.id },
 				_and: resolvedFilters,
 				_or: searchFilter,
 			},

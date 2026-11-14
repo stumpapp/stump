@@ -10,3 +10,4 @@ uuid.workspace = true
 rand.workspace = true
 rust_decimal.workspace = true
 chrono.workspace = true
+zip.workspace = true

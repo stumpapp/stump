@@ -1,4 +1,5 @@
 import { Alert, AlertDescription, NewCard } from '@stump/components'
+import { OrganizationMode } from '@stump/graphql'
 import { Info } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -24,6 +25,8 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 	const ctx = useLibraryManagementSafe()
 	const isCreating = !ctx?.library
 
+	const isMetadata =
+		useWatch({ control: form.control, name: 'organizationMode' }) === OrganizationMode.Metadata
 	const [processMetadata, watch, generateFileHashes, koreaderHashes] = useWatch({
 		control: form.control,
 		name: ['processMetadata', 'watch', 'generateFileHashes', 'generateKoreaderHashes'],
@@ -85,9 +88,15 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 		<div className="gap-y-6 flex flex-col">
 			<NewCard label={t(getKey('section.heading'))} description={t(getKey('section.description'))}>
 				<NewCard.CheckboxRow
+					title={
+						isMetadata
+							? t('createOrUpdateLibraryForm.fields.organization.mode.processingRequired')
+							: undefined
+					}
 					id="processMetadata"
 					label={t(getKey('processMetadata.label'))}
 					description={t(getKey('processMetadata.description'))}
+					disabled={isMetadata}
 					checked={processMetadata}
 					onClick={handleProcessMetadataChange}
 					{...form.register('processMetadata')}

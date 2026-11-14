@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use chrono::Utc;
-use futures::{stream::FuturesUnordered, StreamExt};
+use futures::{StreamExt, stream::FuturesUnordered};
 use models::{
 	entity::{library, media, series},
 	shared::{
@@ -10,14 +10,16 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, ConnectionTrait, EntityTrait, QueryFilter, QueryOrder,
-	QuerySelect,
+	ConnectionTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect, prelude::*,
+	sea_query::Query,
 };
 use tokio::{fs, task::spawn_blocking};
 
 use crate::{
 	config::StumpConfig,
 	image::{
+		PlaceholderGenerationJob, PlaceholderGenerationOutput, ThumbnailGenerationJob,
+		ThumbnailGenerationOutput,
 		error::ImageProcessorError,
 		is_generated_thumbnail,
 		process::ImageProcessor,
@@ -25,8 +27,6 @@ use crate::{
 		thumbnail::placeholder::{
 			generate_image_metadata, generate_image_metadata_from_bytes,
 		},
-		PlaceholderGenerationJob, PlaceholderGenerationOutput, ThumbnailGenerationJob,
-		ThumbnailGenerationOutput,
 	},
 	job::{JobContext, JobExecuteLog, JobTaskOutput},
 	media::processor::get_page,
@@ -532,7 +532,10 @@ pub async fn safely_generate_batch(
 			};
 
 			let future = async move {
-				tracing::trace!(?path, "(Chunk {chunk_index}, Item {source_index}) Starting thumbnail generation");
+				tracing::trace!(
+					?path,
+					"(Chunk {chunk_index}, Item {source_index}) Starting thumbnail generation"
+				);
 
 				let result = match source {
 					GenerateImageSource::Book(book) => {
@@ -831,7 +834,10 @@ pub async fn safely_generate_placeholder_batch(
 			};
 
 			let future = async move {
-				tracing::trace!(?path, "(Chunk {chunk_index}, Item {source_index}) Starting placeholder generation");
+				tracing::trace!(
+					?path,
+					"(Chunk {chunk_index}, Item {source_index}) Starting placeholder generation"
+				);
 
 				let result = match source {
 					GenerateImageSource::Book(book) => {

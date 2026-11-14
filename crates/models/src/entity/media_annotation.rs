@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*};
 
 use crate::shared::readium::ReadiumLocator;
 

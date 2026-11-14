@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result};
 use models::entity::{media, media_metadata, user::AuthUser};
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

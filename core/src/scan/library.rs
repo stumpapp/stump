@@ -13,49 +13,48 @@ use models::{
 	services::scanned_directory::stored_mtimes_under_path,
 	shared::enums::{FileStatus, OrganizationMode, SeriesKind},
 };
-use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set, TransactionTrait};
+use sea_orm::{QuerySelect, Set, TransactionTrait, prelude::*, sea_query::OnConflict};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+	CoreEvent,
 	database::SQLITE_BIND_LIMIT,
 	event::{self, CreatedOrUpdatedManyMedia},
 	image::thumbnail::{
-		bump_media_thumbnail_fallbacks, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJobParams, bump_media_thumbnail_fallbacks,
 	},
 	job::{
-		error::JobError, CoreJobOutput, JobContext, JobExecuteLog, JobLifecycle,
-		JobOutputExt, JobProgress, JobTaskOutput, StumpJob, WorkingState,
+		CoreJobOutput, JobContext, JobExecuteLog, JobLifecycle, JobOutputExt,
+		JobProgress, JobTaskOutput, StumpJob, WorkingState, error::JobError,
 	},
 	metadata::provider::MetadataFetchJobParams,
 	scan::{
 		options::{BookVisitOperation, ScanOptions},
 		series::SeriesScanTask,
 		utils::{
-			build_ignore_rules,
+			MAX_INSERT_CHUNK_SIZE, build_ignore_rules,
 			media::{
-				build_and_insert_media, handle_missing_media, handle_restored_media,
-				visit_and_update_media, MediaBuildOperation,
+				MediaBuildOperation, build_and_insert_media, handle_missing_media,
+				handle_restored_media, visit_and_update_media,
 			},
 			oneshot::{
+				OneshotOperationOutput, PendingOneshotConversion, SeriesConversionOutput,
 				build_and_insert_oneshots,
 				convert_previous_oneshot_entries_to_series_media,
-				convert_to_oneshot_series, OneshotOperationOutput,
-				PendingOneshotConversion, SeriesConversionOutput,
+				convert_to_oneshot_series,
 			},
 			series::{
-				handle_missing_series, insert_series, safely_build_series,
-				MissingSeriesOutput,
+				MissingSeriesOutput, handle_missing_series, insert_series,
+				safely_build_series,
 			},
-			MAX_INSERT_CHUNK_SIZE,
 		},
 		walk::{
-			walk_library, walk_oneshots, walk_series, WalkedLibrary, WalkedOneshots,
-			WalkedSeries, WalkerCtx,
+			WalkedLibrary, WalkedOneshots, WalkedSeries, WalkerCtx, walk_library,
+			walk_oneshots, walk_series,
 		},
 	},
 	utils::chain_optional_iter,
-	CoreEvent,
 };
 
 /// The task variants that are used to scan a library
@@ -642,7 +641,7 @@ impl JobLifecycle for LibraryScanJob {
 
 		match task {
 			LibraryScanTask::MetadataTask(task) => {
-				return self.execute_series_scan_task(ctx, task, None).await
+				return self.execute_series_scan_task(ctx, task, None).await;
 			},
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
@@ -1022,13 +1021,13 @@ impl JobLifecycle for LibraryScanJob {
 						// NOTE: I don't error here in order to collect and report on the error later on.
 						// This can perhaps be refactored later on so that the parent (Job struct) properly handles this instead, however for now this is fine.
 						return Ok(JobTaskOutput {
-                        output,
-                        logs: vec![JobExecuteLog::error(format!(
-                            "Critical error during attempt to walk oneshot directory: {:?}",
-                            core_error.to_string()
-                        ))],
-                        subtasks,
-                    });
+							output,
+							logs: vec![JobExecuteLog::error(format!(
+								"Critical error during attempt to walk oneshot directory: {:?}",
+								core_error.to_string()
+							))],
+							subtasks,
+						});
 					},
 				};
 
@@ -1097,7 +1096,7 @@ impl JobLifecycle for LibraryScanJob {
 			LibraryScanTask::SeriesTask { id, path, task } => {
 				return self
 					.execute_series_scan_task(ctx, task, Some((&id, &path)))
-					.await
+					.await;
 			},
 		}
 

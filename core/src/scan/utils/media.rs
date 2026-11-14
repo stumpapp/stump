@@ -11,21 +11,22 @@ use models::{
 	shared::enums::{FileStatus, OrganizationMode},
 };
 use sea_orm::{
-	prelude::*,
-	sea_query::{Expr, OnConflict, SimpleExpr},
 	ActiveValue, DatabaseTransaction, IntoActiveModel, Iterable, QuerySelect, QueryTrait,
 	Set, TransactionTrait,
+	prelude::*,
+	sea_query::{Expr, OnConflict, SimpleExpr},
 };
 
 use crate::{
+	CoreEvent,
 	config::StumpConfig,
-	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
+	database::{SQLITE_BIND_LIMIT, get_insert_batch_size},
 	error::{CoreError, CoreResult},
 	event::{CreatedManySeries, CreatedMedia},
-	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
+	job::{JobContext, JobExecuteLog, JobProgress, error::JobError},
 	media::{
-		prepare::{prepare_draft, MediaDraft},
-		processor::{generate_hashes, process_metadata, MediaProcessorOptions},
+		prepare::{MediaDraft, prepare_draft},
+		processor::{MediaProcessorOptions, generate_hashes, process_metadata},
 	},
 	metadata::membership::{
 		refresh_series, remove_series_thumbnails, resolve_series_membership,
@@ -35,7 +36,6 @@ use crate::{
 		tag_cache::TagCache,
 		utils::{BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},
 	},
-	CoreEvent,
 };
 
 // TODO(granular-scans): intake ScanOptions

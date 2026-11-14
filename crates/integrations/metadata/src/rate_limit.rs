@@ -1,7 +1,7 @@
 use governor::{
+	Quota, RateLimiter as GovernorLimiter,
 	clock::DefaultClock,
 	state::{InMemoryState, NotKeyed},
-	Quota, RateLimiter as GovernorLimiter,
 };
 use std::{num::NonZeroU32, sync::Arc};
 

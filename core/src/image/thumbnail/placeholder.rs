@@ -1,8 +1,8 @@
 use base64::prelude::*;
 use image::{self, DynamicImage, GenericImageView};
-use kmeans_colors::{get_kmeans, Kmeans, Sort};
+use kmeans_colors::{Kmeans, Sort, get_kmeans};
 use models::shared::image::{ImageColor, ImageDimensions, ImageMetadata};
-use palette::{cast::from_component_slice, FromColor, IntoColor, Lab, Srgb};
+use palette::{FromColor, IntoColor, Lab, Srgb, cast::from_component_slice};
 use rust_decimal::Decimal;
 use std::path::Path;
 use thumbhash::rgba_to_thumb_hash;

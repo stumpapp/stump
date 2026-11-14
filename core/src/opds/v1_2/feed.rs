@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::{error::CoreError, opds::v1_2::link::OpdsLink, utils::chain_optional_iter};
 use chrono::{DateTime, Utc};
-use xml::{writer::XmlEvent, EventWriter};
+use xml::{EventWriter, writer::XmlEvent};
 
 use super::{
 	author::StumpAuthor,

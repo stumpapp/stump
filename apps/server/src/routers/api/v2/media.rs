@@ -1,23 +1,23 @@
 use axum::{
+	Extension, Router,
 	extract::{Path, State},
 	http::HeaderMap,
 	middleware,
 	response::IntoResponse,
 	routing::get,
-	Extension, Router,
 };
 use graphql::data::AuthContext;
 use models::{
 	entity::{library_config, media, user::AuthUser},
 	shared::image_processor_options::SupportedImageFormat,
 };
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{QuerySelect, prelude::*};
 use stump_core::{
+	Ctx,
 	config::StumpConfig,
 	fs_utils::ContentType,
 	image::thumbnail::{get_saved_thumbnail, get_thumbnail},
 	media::processor::get_page,
-	Ctx,
 };
 
 use crate::{

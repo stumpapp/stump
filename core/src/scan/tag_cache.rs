@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use models::entity::tag;
-use sea_orm::{prelude::*, Iterable, Set};
+use sea_orm::{Iterable, Set, prelude::*};
 
 use crate::{
 	database::{self, SQLITE_BIND_LIMIT},

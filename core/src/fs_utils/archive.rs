@@ -6,7 +6,7 @@ use std::{
 
 use tracing::{trace, warn};
 use walkdir::WalkDir;
-use zip::{write::FileOptions, CompressionMethod};
+use zip::{CompressionMethod, write::FileOptions};
 
 /// Walks `unpacked_path` and writes every file and directory into a zip archive
 /// at `destination`

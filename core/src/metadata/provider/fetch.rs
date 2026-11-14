@@ -9,12 +9,12 @@ use models::{
 	shared::enums::{LibraryType, MetadataFetchStatus, MetadataProvider},
 };
 use sea_orm::{
+	QuerySelect, Set,
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	QuerySelect, Set,
 };
 
-use super::{apply, ProviderClientCache};
+use super::{ProviderClientCache, apply};
 use crate::CoreError;
 
 pub(super) async fn library_type_for_library(

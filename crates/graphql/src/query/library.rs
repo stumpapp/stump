@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{
 		last_library_visit,
@@ -12,7 +12,7 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect, QueryTrait,
+	ExprTrait, FromQueryResult, Order, QueryOrder, QuerySelect, QueryTrait, prelude::*,
 };
 
 use crate::{
@@ -226,7 +226,7 @@ impl LibraryQuery {
 			_ => {
 				return Err(
 					"Only offset pagination is supported for missing entities".into()
-				)
+				);
 			},
 		};
 

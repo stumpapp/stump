@@ -1,4 +1,4 @@
-use crate::{job::StumpJob, CoreError, CoreResult};
+use crate::{CoreError, CoreResult, job::StumpJob};
 use apalis::prelude::MemoryStorage;
 use async_trait::async_trait;
 use models::entity::{library, library_config};
@@ -8,9 +8,9 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::mpsc::error::SendError;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::sync::Mutex;
+use tokio::sync::mpsc::error::SendError;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum LibraryWatcherCommand {
@@ -407,16 +407,20 @@ mod tests {
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		assert!(mock_objs
-			.library_watcher
-			.add_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
+		assert!(
+			mock_objs
+				.library_watcher
+				.add_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
 		let new_file = tmp_dir.join("new_file");
-		assert!(mock_objs
-			.sender
-			.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
-			.is_ok());
+		assert!(
+			mock_objs
+				.sender
+				.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
+				.is_ok()
+		);
 
 		// Wait for the background thread to trigger the flush
 		tokio::time::sleep(Duration::from_millis(100)).await;
@@ -433,23 +437,29 @@ mod tests {
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
 
-		assert!(mock_objs
-			.library_watcher
-			.add_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
-		assert!(mock_objs
-			.library_watcher
-			.remove_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
+		assert!(
+			mock_objs
+				.library_watcher
+				.add_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
+		assert!(
+			mock_objs
+				.library_watcher
+				.remove_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
 
 		// try removing again
-		assert!(mock_objs
-			.library_watcher
-			.remove_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
+		assert!(
+			mock_objs
+				.library_watcher
+				.remove_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
 	}
 
 	#[tokio::test]
@@ -459,16 +469,20 @@ mod tests {
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
-		assert!(mock_objs
-			.library_watcher
-			.add_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
-		assert!(mock_objs
-			.library_watcher
-			.add_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
+		assert!(
+			mock_objs
+				.library_watcher
+				.add_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
+		assert!(
+			mock_objs
+				.library_watcher
+				.add_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
 	}
 
 	#[tokio::test]
@@ -479,16 +493,20 @@ mod tests {
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
 
-		assert!(mock_objs
-			.library_watcher
-			.add_watcher(tmp_dir.clone())
-			.await
-			.is_ok());
+		assert!(
+			mock_objs
+				.library_watcher
+				.add_watcher(tmp_dir.clone())
+				.await
+				.is_ok()
+		);
 		let new_file = tmp_dir.join("new_file");
-		assert!(mock_objs
-			.sender
-			.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
-			.is_ok());
+		assert!(
+			mock_objs
+				.sender
+				.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
+				.is_ok()
+		);
 		assert!(mock_objs.library_watcher.stop().await.is_ok());
 	}
 
@@ -502,13 +520,15 @@ mod tests {
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		assert!(LibraryWatcher::start_jobs(
-			&mock_objs.library_watcher.library_provider,
-			&mock_objs.library_watcher.job_submitter,
-			paths,
-		)
-		.await
-		.is_ok());
+		assert!(
+			LibraryWatcher::start_jobs(
+				&mock_objs.library_watcher.library_provider,
+				&mock_objs.library_watcher.job_submitter,
+				paths,
+			)
+			.await
+			.is_ok()
+		);
 
 		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
 		assert_eq!(id, "42");
@@ -526,13 +546,15 @@ mod tests {
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		assert!(LibraryWatcher::start_jobs(
-			&mock_objs.library_watcher.library_provider,
-			&mock_objs.library_watcher.job_submitter,
-			bad_paths,
-		)
-		.await
-		.is_ok());
+		assert!(
+			LibraryWatcher::start_jobs(
+				&mock_objs.library_watcher.library_provider,
+				&mock_objs.library_watcher.job_submitter,
+				bad_paths,
+			)
+			.await
+			.is_ok()
+		);
 
 		assert_eq!(
 			mock_objs.jobs_receiver.try_recv().unwrap_err(),

@@ -5,7 +5,7 @@ use chrono::Utc;
 use croner::Cron;
 use models::entity::{library, metadata_fetch_record, scheduled_job};
 use models::shared::enums::{MetadataFetchStatus, ScheduledJobKind};
-use sea_orm::{prelude::*, EntityTrait, QueryFilter};
+use sea_orm::{EntityTrait, QueryFilter, prelude::*};
 
 use crate::job::StumpJob;
 use crate::metadata::provider::MetadataFetchJobParams;

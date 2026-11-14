@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, OneofObject, Result, ID};
+use async_graphql::{ID, InputObject, OneofObject, Result};
 use email::EmailerClientConfig;
 use models::entity::emailer;
 use sea_orm::{ActiveValue::NotSet, Set};

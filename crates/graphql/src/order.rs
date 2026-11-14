@@ -4,8 +4,8 @@ use models::{
 	shared::ordering::{OrderDirection, OrderingField},
 };
 use sea_orm::{
-	sea_query::{DynIden, Expr, ExprTrait, NullOrdering, SelectStatement, SimpleExpr},
 	ColumnTrait, Condition, ModelTrait, Order, QueryOrder, Value,
+	sea_query::{DynIden, Expr, ExprTrait, NullOrdering, SelectStatement, SimpleExpr},
 };
 
 #[derive(InputObject, Clone)]
@@ -275,7 +275,7 @@ fn value_is_null(value: &Value) -> bool {
 mod tests {
 	use super::*;
 	use ::tests::{db::test_database, fake_data};
-	use sea_orm::{prelude::*, QueryFilter};
+	use sea_orm::{QueryFilter, prelude::*};
 
 	type Row = media::ModelWithMetadata;
 

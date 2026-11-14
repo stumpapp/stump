@@ -6,15 +6,15 @@ use std::{
 
 use apalis::prelude::MemoryStorage;
 use models::entity::{library, library_config, media, series};
-use sea_orm::{prelude::*, DatabaseConnection};
+use sea_orm::{DatabaseConnection, prelude::*};
 use stump_core::{
+	CoreEvent,
 	config::StumpConfig,
 	database::connect_at,
 	job::{
 		ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt, StumpJob, WorkingState,
 	},
 	scan::library::{LibraryScanJob, LibraryScanOutput},
-	CoreEvent,
 };
 use tempfile::TempDir;
 use tests::{fake_data, fixtures::get_test_epub_path};

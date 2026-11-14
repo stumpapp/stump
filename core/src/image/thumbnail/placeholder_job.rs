@@ -3,17 +3,17 @@ use serde::{Deserialize, Serialize};
 
 use models::entity::{library, media, series};
 use sea_orm::{
-	prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait,
+	ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait, prelude::*,
 };
 
 use crate::{
 	database::chunk_vec_into,
 	image::thumbnail::generate::{
-		safely_generate_placeholder_batch, GenerateImageSource,
+		GenerateImageSource, safely_generate_placeholder_batch,
 	},
 	job::{
-		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkingState,
+		JobContext, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError,
 	},
 };
 

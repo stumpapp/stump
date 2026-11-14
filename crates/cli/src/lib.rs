@@ -4,7 +4,7 @@ mod commands;
 mod config;
 mod error;
 
-pub use commands::{handle_command, Commands};
+pub use commands::{Commands, handle_command};
 pub use config::CliConfig;
 pub use error::CliError;
 

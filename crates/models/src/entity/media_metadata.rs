@@ -1,6 +1,6 @@
 use async_graphql::SimpleObject;
 use filter_gen::Ordering;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{QueryOrder, QuerySelect, prelude::*};
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
@@ -142,7 +142,7 @@ impl Entity {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use sea_orm::{sea_query::SqliteQueryBuilder, QueryTrait};
+	use sea_orm::{QueryTrait, sea_query::SqliteQueryBuilder};
 
 	#[test]
 	fn test_find_for_column() {

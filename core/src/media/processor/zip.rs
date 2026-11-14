@@ -10,17 +10,17 @@ use zip::ZipArchive;
 
 use crate::{
 	fs_utils::{
-		hash::{self, generate_koreader_hash},
 		ContentType, FileParts, PathUtils,
+		hash::{self, generate_koreader_hash},
 	},
 	media::{
 		processor::{
-			error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes,
-			MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
+			AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+			ProcessedMediaFile, error::MediaProcessorError,
 		},
 		utils::sort_file_names,
 	},
-	metadata::{utils::comic_info_metadata, ProcessedMediaMetadata},
+	metadata::{ProcessedMediaMetadata, utils::comic_info_metadata},
 };
 
 pub struct ZipProcessor;
@@ -454,9 +454,11 @@ mod tests {
 			.get_page_content_types(Path::new(&path), vec![1, 2, 3])
 			.expect("Failed to get page content types");
 		assert_eq!(content_types.len(), 3);
-		assert!(content_types
-			.values()
-			.all(|ct| ct.mime_type() == "image/jpeg"));
+		assert!(
+			content_types
+				.values()
+				.all(|ct| ct.mime_type() == "image/jpeg")
+		);
 	}
 
 	#[test]

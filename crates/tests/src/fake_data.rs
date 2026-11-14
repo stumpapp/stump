@@ -11,7 +11,7 @@ use models::shared::{
 };
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
-use sea_orm::{prelude::*, ActiveModelTrait, ActiveValue, DbConn};
+use sea_orm::{ActiveModelTrait, ActiveValue, DbConn, prelude::*};
 use uuid::Uuid;
 
 // note that None here means "use some default", not necessarily "set the value to None".

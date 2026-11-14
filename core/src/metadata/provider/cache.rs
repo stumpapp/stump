@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use metadata_integrations::{create_provider, MetadataProvider, MetadataProviderError};
+use metadata_integrations::{MetadataProvider, MetadataProviderError, create_provider};
 use models::{
 	entity::metadata_provider_config,
 	shared::enums::MetadataProvider as MetadataProviderEnum,

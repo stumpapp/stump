@@ -19,7 +19,7 @@ use models::entity::{
 	user::AuthUser,
 };
 use sea_orm::{
-	prelude::*, Condition, DatabaseTransaction, QuerySelect, QueryTrait, Select,
+	Condition, DatabaseTransaction, QuerySelect, QueryTrait, Select, prelude::*,
 };
 
 use std::collections::HashMap;
@@ -226,16 +226,16 @@ mod tests {
 	use super::*;
 	use crate::{
 		filter::{
-			library::LibraryFilterInput, media::MediaFilterInput, NumericFilter,
-			StringLikeFilter,
+			NumericFilter, StringLikeFilter, library::LibraryFilterInput,
+			media::MediaFilterInput,
 		},
 		tests::common::get_default_user,
 	};
 	use ::tests::{db::test_database, fake_data};
 	use pretty_assertions::assert_eq;
 	use sea_orm::{
-		sea_query::{Query, SqliteQueryBuilder},
 		QueryTrait,
+		sea_query::{Query, SqliteQueryBuilder},
 	};
 
 	pub fn condition_to_string(condition: &Condition) -> String {
@@ -322,9 +322,11 @@ mod tests {
 			.expect("should exec query");
 
 		assert_eq!(results.len(), 1);
-		assert!(!results
-			.iter()
-			.any(|book| should_exclude_ids.contains(&book.media.id)));
+		assert!(
+			!results
+				.iter()
+				.any(|book| should_exclude_ids.contains(&book.media.id))
+		);
 		assert_eq!(results[0].media.id, totally_okay_will_return_book.id);
 	}
 

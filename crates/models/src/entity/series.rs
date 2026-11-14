@@ -2,12 +2,12 @@ use async_graphql::SimpleObject;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
-	Condition, FromQueryResult, Linked, QuerySelect, QueryTrait,
+	ActiveValue, Condition, FromQueryResult, Linked, QuerySelect, QueryTrait,
+	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query,
 };
 
 use crate::{
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::{
 		enums::{FileStatus, SeriesKind},
 		image::ImageMetadata,

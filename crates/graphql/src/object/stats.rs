@@ -1,5 +1,5 @@
 use async_graphql::{Result, SimpleObject};
-use sea_orm::{prelude::*, DatabaseConnection, FromQueryResult};
+use sea_orm::{DatabaseConnection, FromQueryResult, prelude::*};
 
 use crate::utils::db_statement;
 

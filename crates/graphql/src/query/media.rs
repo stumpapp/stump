@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{media, media_metadata, reading_session, user::AuthUser},
 	shared::{
@@ -9,20 +9,20 @@ use models::{
 	},
 };
 use sea_orm::{
+	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	filter::{media::MediaFilterInput, IntoFilter},
+	filter::{IntoFilter, media::MediaFilterInput},
 	guard::{PermissionGuard, ServerOwnerGuard},
 	object::{
 		media::Media,
 		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
 	},
-	order::{order_spec, MediaOrderBy},
+	order::{MediaOrderBy, order_spec},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,

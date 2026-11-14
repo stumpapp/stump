@@ -30,7 +30,9 @@ fn get_schema_string() -> String {
 fn check_schema(path: &str, sdl: &str) {
 	let contents = fs::read_to_string(path).expect("Unable to read file");
 	if contents != sdl {
-		panic!("\n\x1b[93mSchema mismatch! Please run 'cargo dump-schema' to update the schema.\n\x1b[0m");
+		panic!(
+			"\n\x1b[93mSchema mismatch! Please run 'cargo dump-schema' to update the schema.\n\x1b[0m"
+		);
 	}
 }
 

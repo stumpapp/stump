@@ -1,4 +1,4 @@
-use crate::{metadata::series::ProcessedSeriesMetadata, CoreError, CoreResult};
+use crate::{CoreError, CoreResult, metadata::series::ProcessedSeriesMetadata};
 use models::{
 	entity::{series, series_metadata},
 	shared::enums::FileStatus,

@@ -22,7 +22,7 @@ mod pdf;
 mod rar;
 mod zip;
 
-pub use epub::{get_cover, get_resource_by_path, EpubProcessor};
+pub use epub::{EpubProcessor, get_cover, get_resource_by_path};
 
 /// A struct representing the dimensions and content type of a single analyzed page
 #[derive(Debug, Clone)]

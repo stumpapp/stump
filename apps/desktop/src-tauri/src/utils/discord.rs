@@ -1,6 +1,6 @@
 use discord_rich_presence::{
-	activity::{self, Assets},
 	DiscordIpc, DiscordIpcClient,
+	activity::{self, Assets},
 };
 use serde::Serialize;
 

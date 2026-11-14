@@ -18,7 +18,7 @@ use crate::{
 	query::Query,
 	subscription::Subscription,
 };
-use async_graphql::{dataloader::DataLoader, ObjectType, Schema, SchemaBuilder};
+use async_graphql::{ObjectType, Schema, SchemaBuilder, dataloader::DataLoader};
 use models::shared::enums::AccessRole;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;

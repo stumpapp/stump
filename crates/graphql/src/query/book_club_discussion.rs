@@ -1,11 +1,11 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::entity::{
 	book_club_book, book_club_discussion, book_club_discussion_message,
 };
 use models::shared::enums::UserPermission;
 use sea_orm::{
-	prelude::*, sea_query::Query, ColumnTrait, ExprTrait, QueryFilter, QueryOrder,
-	QuerySelect,
+	ColumnTrait, ExprTrait, QueryFilter, QueryOrder, QuerySelect, prelude::*,
+	sea_query::Query,
 };
 
 use crate::{

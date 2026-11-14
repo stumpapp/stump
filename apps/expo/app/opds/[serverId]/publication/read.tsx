@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import * as NavigationBar from 'expo-navigation-bar'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
@@ -235,10 +234,8 @@ export default function Screen() {
 
 	useEffect(
 		() => {
-			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
 				refetchProgression()
-				NavigationBar.setVisibilityAsync('visible')
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps

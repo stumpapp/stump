@@ -1,8 +1,8 @@
 use axum::{
+	Extension, Router,
 	extract::{Path, State},
 	middleware,
 	routing::get,
-	Extension, Router,
 };
 use graphql::data::AuthContext;
 use models::{

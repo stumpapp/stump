@@ -8,15 +8,15 @@ use models::{
 	shared::enums::{LibraryType, MetadataFetchStatus},
 };
 use sea_orm::QuerySelect;
-use sea_orm::{prelude::*, sea_query::OnConflict, Set};
+use sea_orm::{Set, prelude::*, sea_query::OnConflict};
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
-	error::JobError, JobContext, JobExecuteLog, JobLifecycle, JobOutputExt, JobProgress,
-	JobTaskOutput, WorkingState,
+	JobContext, JobExecuteLog, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput,
+	WorkingState, error::JobError,
 };
 
-use super::{apply, fetch::library_type_for_library, ProviderClientCache};
+use super::{ProviderClientCache, apply, fetch::library_type_for_library};
 
 type Id = String;
 

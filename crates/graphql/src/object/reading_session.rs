@@ -1,5 +1,5 @@
 use async_graphql::{
-	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+	ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader,
 };
 use models::{
 	domain::readium::chapters_between_locators,
@@ -11,7 +11,7 @@ use models::{
 	},
 	shared::ordering::OrderDirection,
 };
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{QueryOrder, QuerySelect, prelude::*};
 use stump_core::readium::ReadiumManifestGenerator;
 use tokio::task::spawn_blocking;
 

@@ -4,12 +4,12 @@ use async_trait::async_trait;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, sea_query::NullOrdering, ActiveValue, Condition, FromQueryResult,
-	JoinType, QueryOrder, QuerySelect,
+	ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect,
+	prelude::*, sea_query::NullOrdering,
 };
 
 use crate::{
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::{
 		enums::FileStatus,
 		ordering::{OrderDirection, OrderingField},

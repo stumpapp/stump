@@ -1,8 +1,8 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::{async_trait::async_trait, *},
 	ActiveValue::Set,
 	FromQueryResult,
+	entity::prelude::{async_trait::async_trait, *},
 };
 
 use crate::shared::{

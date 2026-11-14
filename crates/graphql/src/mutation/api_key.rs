@@ -7,7 +7,7 @@ use crate::{
 use async_graphql::{Context, Object, Result};
 use models::entity::api_key;
 use models::shared::{api_key::APIKeyPermissions, enums::UserPermission};
-use sea_orm::{prelude::*, ActiveModelTrait};
+use sea_orm::{ActiveModelTrait, prelude::*};
 
 #[derive(Default)]
 pub struct APIKeyMutation;

@@ -8,7 +8,7 @@ use async_graphql::{
 	CustomValidator, InputObject, InputValueError, OneofObject, OutputType, Result,
 	SimpleObject, Union,
 };
-use sea_orm::{prelude::*, FromQueryResult, QuerySelect, Select};
+use sea_orm::{FromQueryResult, QuerySelect, Select, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 

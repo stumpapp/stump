@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use models::entity::media;
-use sea_orm::{prelude::*, ColumnTrait, DatabaseConnection, QueryFilter, QuerySelect};
+use sea_orm::{ColumnTrait, DatabaseConnection, QueryFilter, QuerySelect, prelude::*};
 use std::{collections::HashMap, sync::Arc};
 
 pub struct SeriesCountLoader {

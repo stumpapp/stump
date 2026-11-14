@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use apalis::prelude::{MemoryStorage, MessageQueue};
 use models::entity::server_config;
-use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, QuerySelect};
-use tokio::sync::broadcast::{channel, Receiver, Sender};
+use sea_orm::{DatabaseConnection, MockDatabase, QuerySelect, prelude::*};
+use tokio::sync::broadcast::{Receiver, Sender, channel};
 
 use crate::{
+	CoreError, CoreResult,
 	config::StumpConfig,
 	database,
 	event::CoreEvent,
-	job::{context::ApalisWorkerState, StumpJob},
+	job::{StumpJob, context::ApalisWorkerState},
 	scan::watcher::LibraryWatcher,
-	CoreError, CoreResult,
 };
 
 type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);

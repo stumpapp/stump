@@ -9,7 +9,7 @@ use serde_with::skip_serializing_none;
 use crate::fs_utils::ContentType;
 
 use super::{
-	properties::{OPDSProperties, AUTH_ROUTE},
+	properties::{AUTH_ROUTE, OPDSProperties},
 	utils::ArrayOrItem,
 };
 

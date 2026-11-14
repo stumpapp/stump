@@ -4,14 +4,14 @@ use models::{
 	shared::enums::LibraryType,
 };
 use sea_orm::{
+	Condition,
 	prelude::*,
 	sea_query::{Query, SelectStatement},
-	Condition,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{apply_string_filter, ConceptualFilter, IntoFilter, StringLikeFilter};
+use super::{ConceptualFilter, IntoFilter, StringLikeFilter, apply_string_filter};
 
 // TODO: Support filter by tags (requires join logic)
 
@@ -90,9 +90,5 @@ pub(super) fn apply_library_type_filter<C: ColumnTrait + Copy>(
 	};
 	let condition =
 		Condition::all().add(library_id.in_subquery(library_type_id_subquery(values)));
-	if negate {
-		condition.not()
-	} else {
-		condition
-	}
+	if negate { condition.not() } else { condition }
 }

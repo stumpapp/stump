@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use metadata_integrations::{
 	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride,
 };
@@ -6,7 +6,7 @@ use models::{
 	entity::{media, metadata_fetch_record, series, series_metadata},
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
-use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
+use sea_orm::{IntoActiveModel, Set, TransactionTrait, prelude::*};
 use stump_core::metadata::{
 	membership::{remove_series_thumbnails, reset_media_metadata},
 	provider::ProviderClientCache,

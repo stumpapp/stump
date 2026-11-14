@@ -1,11 +1,11 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	entity::{favorite_media, library, library_config, media},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
-	prelude::*, sea_query::OnConflict, ExprTrait, IntoActiveModel, QuerySelect, Set,
+	ExprTrait, IntoActiveModel, QuerySelect, Set, prelude::*, sea_query::OnConflict,
 };
 use stump_core::{
 	image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},

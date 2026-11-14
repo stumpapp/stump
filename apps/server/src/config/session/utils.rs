@@ -2,7 +2,7 @@ use std::sync::Arc;
 use stump_core::Ctx;
 use time::Duration;
 
-use tower_sessions::{cookie::SameSite, Expiry, SessionManagerLayer};
+use tower_sessions::{Expiry, SessionManagerLayer, cookie::SameSite};
 
 use super::StumpSessionStore;
 
@@ -23,7 +23,9 @@ pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<StumpSessionStore
 			tokio::time::Duration::from_secs(cleanup_interval),
 		));
 	} else {
-		tracing::debug!("expired_session_cleanup_interval is set to 0. Session expiry cleanup is disabled");
+		tracing::debug!(
+			"expired_session_cleanup_interval is set to 0. Session expiry cleanup is disabled"
+		);
 	}
 
 	// TODO: This configuration won't work for Tauri Windows app, it requires SameSite::None and Secure=true... Linux and macOS work fine.

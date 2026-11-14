@@ -1,6 +1,6 @@
 use merge::Merge;
 use models::shared::enums::OrganizationMode;
-use quick_xml::{escape::unescape, events::Event, Reader};
+use quick_xml::{Reader, escape::unescape, events::Event};
 use std::{
 	collections::HashMap,
 	fs::File,
@@ -15,12 +15,12 @@ use epub::doc::EpubDoc;
 
 use crate::{
 	fs_utils::{
-		hash::{self, generate_koreader_hash},
 		ContentType,
+		hash::{self, generate_koreader_hash},
 	},
 	media::processor::{
-		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
-		MediaProcessorOptions, ProcessedMediaFile,
+		AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+		ProcessedMediaFile, error::MediaProcessorError,
 	},
 	metadata::ProcessedMediaMetadata,
 };
@@ -837,7 +837,7 @@ fn parse_opf_xml(
 			Event::Eof => {
 				return Err(MediaProcessorError::Metadata(
 					"Unexpected end of OPF XML".into(),
-				))
+				));
 			},
 			_ => {},
 		}
@@ -1643,8 +1643,10 @@ mod tests {
 			.process_metadata(&book, OrganizationMode::Filesystem)
 			.expect("Filesystem libraries should ignore an invalid sidecar");
 		assert!(metadata.is_some());
-		assert!(EpubProcessor
-			.process_metadata(&book, OrganizationMode::Metadata)
-			.is_err());
+		assert!(
+			EpubProcessor
+				.process_metadata(&book, OrganizationMode::Metadata)
+				.is_err()
+		);
 	}
 }

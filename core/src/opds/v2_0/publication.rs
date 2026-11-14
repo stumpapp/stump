@@ -5,14 +5,14 @@ use std::collections::HashMap;
 
 use derive_builder::Builder;
 use models::entity::{media_analysis, media_metadata};
-use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::{
-	config::StumpConfig, fs_utils::ContentType,
+	CoreResult, config::StumpConfig, fs_utils::ContentType,
 	media::processor::get_content_type_for_page,
-	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder, CoreResult,
+	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder,
 };
 
 use super::{
@@ -24,7 +24,7 @@ use super::{
 	metadata::{
 		OPDSEntryBelongsTo, OPDSMetadata, OPDSMetadataBuilder, OPDSWebPubMetadata,
 	},
-	properties::{OPDSProperties, AUTH_ROUTE},
+	properties::{AUTH_ROUTE, OPDSProperties},
 	utils::OPDSV2QueryExt,
 };
 
@@ -281,18 +281,20 @@ impl OPDSPublication {
 				);
 				Ok(vec![])
 			},
-			Ok(content_type) => Ok(vec![OPDSImageLinkBuilder::default()
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href(finalizer.format_link(format!(
-							"/opds/v2.0/books/{}/thumbnail",
-							book.media.id
-						)))
-						._type(OPDSLinkType::from(content_type))
-						.build()?
-						.with_auth(finalizer.format_link(AUTH_ROUTE)),
-				)
-				.build()?]),
+			Ok(content_type) => Ok(vec![
+				OPDSImageLinkBuilder::default()
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href(finalizer.format_link(format!(
+								"/opds/v2.0/books/{}/thumbnail",
+								book.media.id
+							)))
+							._type(OPDSLinkType::from(content_type))
+							.build()?
+							.with_auth(finalizer.format_link(AUTH_ROUTE)),
+					)
+					.build()?,
+			]),
 		}
 	}
 
@@ -465,9 +467,11 @@ mod tests {
 		// Verify serialization works and contains expected fields
 		let json = serde_json::to_value(&publications[0]).unwrap();
 		assert!(json["metadata"]["title"].as_str().is_some());
-		assert!(json["metadata"]["belongsTo"]["series"]["name"]
-			.as_str()
-			.is_some());
+		assert!(
+			json["metadata"]["belongsTo"]["series"]["name"]
+				.as_str()
+				.is_some()
+		);
 		assert!(json["links"].is_array());
 		assert!(json["images"].is_array());
 	}
@@ -476,11 +480,13 @@ mod tests {
 	async fn test_from_book() {
 		let book = mock_book();
 
-		let position_results = vec![BTreeMap::from([
-			("id".to_string(), Value::from("1")),
-			("position".to_string(), Value::from(1.0f64)),
-		])
-		.into_mock_row()];
+		let position_results = vec![
+			BTreeMap::from([
+				("id".to_string(), Value::from("1")),
+				("position".to_string(), Value::from(1.0f64)),
+			])
+			.into_mock_row(),
+		];
 
 		// Mock the page analysis query result
 		let page_analysis_results = vec![media_analysis::Model {
@@ -598,10 +604,12 @@ mod tests {
 		assert_eq!(images.len(), 1);
 
 		let json = serde_json::to_value(&images[0]).unwrap();
-		assert!(json["href"]
-			.as_str()
-			.unwrap()
-			.contains("/opds/v2.0/books/1/thumbnail"));
+		assert!(
+			json["href"]
+				.as_str()
+				.unwrap()
+				.contains("/opds/v2.0/books/1/thumbnail")
+		);
 	}
 
 	#[test]

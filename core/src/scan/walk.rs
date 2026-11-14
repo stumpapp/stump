@@ -11,10 +11,11 @@ use models::entity::{
 	media,
 	series::{self, SeriesIdentSelect},
 };
-use sea_orm::{prelude::*, DatabaseConnection, ExprTrait, QuerySelect};
+use sea_orm::{DatabaseConnection, ExprTrait, QuerySelect, prelude::*};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
+	CoreResult,
 	error::CoreError,
 	fs_utils::PathUtils,
 	scan::{
@@ -22,13 +23,12 @@ use crate::{
 		utils::{
 			file_updated_since_scan, mtime_newer_than_datetime,
 			oneshot::{
-				collect_pending_oneshot_conversions, collect_previous_oneshot_entries,
 				PendingOneshotConversion, PreviousOneshotEntry,
+				collect_pending_oneshot_conversions, collect_previous_oneshot_entries,
 			},
 			safely_get_current_mtime,
 		},
 	},
-	CoreResult,
 };
 
 fn directory_has_media(path: &Path, ignore_rules: &GlobSet) -> bool {
@@ -829,9 +829,9 @@ pub async fn walk_oneshots(
 			},
 			_ => {
 				tracing::warn!(
-                    ?path_str,
-                    "Book path was not found in existing book map or has no series_id, skipping"
-                );
+					?path_str,
+					"Book path was not found in existing book map or has no series_id, skipping"
+				);
 				// ^ this should realistically never happen
 				continue;
 			},

@@ -7,12 +7,12 @@ use models::{
 	shared::enums::MetadataFetchStatus,
 };
 use rust_decimal::prelude::FromPrimitive;
-use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionSession, TransactionTrait};
+use sea_orm::{IntoActiveModel, Set, TransactionSession, TransactionTrait, prelude::*};
 use serde_json::Value as JsonValue;
 
 use crate::{
-	metadata::membership::{remove_series_thumbnails, sync_media_membership},
 	CoreError,
+	metadata::membership::{remove_series_thumbnails, sync_media_membership},
 };
 
 /// Apply the given match candidate to series metadata, merging fields

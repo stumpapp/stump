@@ -316,7 +316,7 @@ async fn get_libraries(
 ) -> APIResult<Xml> {
 	let user = req.user();
 
-	let libraries = library::Entity::find_for_user(&user)
+	let libraries = library::Entity::find_visible_for_user(&user)
 		.apply_if(search, |query, search| {
 			query.filter(library::Column::Name.contains(search))
 		})
@@ -363,7 +363,7 @@ async fn get_library_by_id(
 	// Note: This is just to enforce access to the library, otherwise we would get an
 	// empty result set without informing the requester that the resource they are
 	// requesting "does not exist"
-	let library = library::Entity::find_for_user(&user)
+	let library = library::Entity::find_visible_for_user(&user)
 		.select_only()
 		.columns(library::LibraryIdentSelect::columns())
 		.filter(library::Column::Id.eq(id.clone()))
@@ -586,7 +586,7 @@ async fn search_feed(
 	let mut entries = Vec::new();
 
 	// Search libraries
-	let libraries = library::Entity::find_for_user(&user)
+	let libraries = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Name.contains(&search))
 		.order_by_asc(library::Column::Name)
 		.all(ctx.conn.as_ref())

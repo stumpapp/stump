@@ -19,8 +19,8 @@ use crate::{
 use super::{
 	age_restriction, api_key, book_club_invitation, book_club_member, bookmark,
 	emailer_send_record, last_library_visit, library_exclusion, media_annotation,
-	reading_list, reading_session, review, session, smart_list, smart_list_access_rule,
-	user_login_activity, user_preferences,
+	reading_list, reading_session, review, series_share, session, smart_list,
+	smart_list_access_rule, user_login_activity, user_preferences,
 };
 
 #[sea_orm::model]
@@ -79,6 +79,9 @@ pub struct Model {
 	#[sea_orm(has_many, relation_enum = "HiddenLibrary")]
 	#[graphql(skip)]
 	pub hidden_libraries: HasMany<library_exclusion::Entity>,
+	#[sea_orm(has_many, relation_enum = "SharedSeries")]
+	#[graphql(skip)]
+	pub shared_series: HasMany<series_share::Entity>,
 	#[sea_orm(has_many)]
 	#[graphql(skip)]
 	pub last_library_visits: HasMany<last_library_visit::Entity>,

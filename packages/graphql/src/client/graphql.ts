@@ -2356,6 +2356,12 @@ export type Mutation = {
   updateScheduledJob: ScheduledJob;
   updateSeriesMetadata: Series;
   /**
+   * Share a series with users, granting them access to the series and all of its books even if
+   * the library containing it is hidden from them. This operates as a full replacement of the
+   * shared users list, so any users not included in the provided list will lose their share.
+   */
+  updateSeriesSharedUsers: Series;
+  /**
    * Update the thumbnail for a series. This will replace the existing thumbnail with the the one
    * associated with the provided input (book). If the book does not have a thumbnail, one
    * will be generated based on the library's thumbnail configuration.
@@ -3116,6 +3122,12 @@ export type MutationUpdateScheduledJobArgs = {
 export type MutationUpdateSeriesMetadataArgs = {
   id: Scalars['ID']['input'];
   input: SeriesMetadataInput;
+};
+
+
+export type MutationUpdateSeriesSharedUsersArgs = {
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -4415,6 +4427,11 @@ export type Series = {
   readCount: Scalars['Int']['output'];
   resolvedDescription?: Maybe<Scalars['String']['output']>;
   resolvedName: Scalars['String']['output'];
+  /**
+   * The users this series has been explicitly shared with. A share grants access to the series
+   * and all of its books, even if the library containing it is hidden from the user.
+   */
+  sharedUsers: Array<User>;
   stats: SeriesStats;
   status: FileStatus;
   tags: Array<Tag>;
@@ -7094,6 +7111,26 @@ export type SeriesSettingsSceneResetMetadataMutationVariables = Exact<{
 
 
 export type SeriesSettingsSceneResetMetadataMutation = { __typename?: 'Mutation', resetSeriesMetadata: { __typename?: 'Series', id: string } };
+
+export type SeriesSharingUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SeriesSharingUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
+
+export type SeriesSharingQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesSharingQueryQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, sharedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
+
+export type UpdateSeriesSharedUsersMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateSeriesSharedUsersMutation = { __typename?: 'Mutation', updateSeriesSharedUsers: { __typename?: 'Series', id: string, sharedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
 
 export type ApiKeyTableQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14944,6 +14981,38 @@ export const SeriesSettingsSceneResetMetadataDocument = new TypedDocumentString(
   }
 }
     `) as unknown as TypedDocumentString<SeriesSettingsSceneResetMetadataMutation, SeriesSettingsSceneResetMetadataMutationVariables>;
+export const SeriesSharingUsersQueryDocument = new TypedDocumentString(`
+    query SeriesSharingUsersQuery {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesSharingUsersQueryQuery, SeriesSharingUsersQueryQueryVariables>;
+export const SeriesSharingQueryDocument = new TypedDocumentString(`
+    query SeriesSharingQuery($id: ID!) {
+  seriesById(id: $id) {
+    id
+    sharedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesSharingQueryQuery, SeriesSharingQueryQueryVariables>;
+export const UpdateSeriesSharedUsersDocument = new TypedDocumentString(`
+    mutation UpdateSeriesSharedUsers($id: ID!, $userIds: [String!]!) {
+  updateSeriesSharedUsers(id: $id, userIds: $userIds) {
+    id
+    sharedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateSeriesSharedUsersMutation, UpdateSeriesSharedUsersMutationVariables>;
 export const ApiKeyTableDocument = new TypedDocumentString(`
     query APIKeyTable {
   apiKeys {

@@ -5,10 +5,13 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
+	entity::{
+		library, media, media_metadata, reading_session, series, series_share,
+		series_tag, tag, user,
+	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		enums::ReadingStatus,
+		enums::{ReadingStatus, UserPermission},
 		image::ImageRef,
 	},
 };
@@ -21,6 +24,7 @@ use sea_orm::{
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
+	guard::PermissionGuard,
 	loader::{
 		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
@@ -31,7 +35,7 @@ use crate::{
 	utils::db_statement,
 };
 
-use super::{library::Library, media::Media, tag::Tag};
+use super::{library::Library, media::Media, tag::Tag, user::User};
 
 #[derive(Clone, Debug, SimpleObject)]
 #[graphql(complex)]
@@ -91,6 +95,32 @@ impl Series {
 			.ok_or("Library not found")?;
 
 		Ok(Library::from(model))
+	}
+
+	/// The users this series has been explicitly shared with. A share grants access to the series
+	/// and all of its books, even if the library containing it is hidden from the user.
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])"
+	)]
+	async fn shared_users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let users = user::Entity::find()
+			.filter(
+				user::Column::Id.in_subquery(
+					Query::select()
+						.column(series_share::Column::UserId)
+						.from(series_share::Entity)
+						.and_where(
+							series_share::Column::SeriesId.eq(self.model.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(users.into_iter().map(User::from).collect())
 	}
 
 	async fn oneshot_book(&self, ctx: &Context<'_>) -> Result<Option<Media>> {

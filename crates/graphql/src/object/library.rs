@@ -254,9 +254,12 @@ impl Library {
 		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
 		#[graphql(default, validator(minimum = 0))] skip: Option<u64>,
 	) -> Result<Vec<Series>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = series::ModelWithMetadata::find()
+		// Note: A library may be visible only because some of its series were shared with the
+		// user, so the series must be filtered for the user as well
+		let models = series::ModelWithMetadata::find_for_user(user)
 			.filter(series::Column::LibraryId.eq(Some(self.model.id.clone())))
 			// TODO: Consider allowing custom ordering?
 			.order_by_asc(series::Column::Name)

@@ -297,11 +297,11 @@ async fn catalog(
 	let user = req.user();
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-	let libraries = library::Entity::find_for_user(&user)
+	let libraries = library::Entity::find_visible_for_user(&user)
 		.limit(DEFAULT_LIMIT)
 		.all(ctx.conn.as_ref())
 		.await?;
-	let library_count = library::Entity::find_for_user(&user)
+	let library_count = library::Entity::find_visible_for_user(&user)
 		.count(ctx.conn.as_ref())
 		.await?;
 	let library_group = OPDSFeedGroupBuilder::default()
@@ -465,12 +465,12 @@ async fn search(
 		"Query parameter is required".to_string(),
 	))?;
 
-	let libraries = library::Entity::find_for_user(&user)
+	let libraries = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Name.contains(query.clone()))
 		.limit(DEFAULT_LIMIT)
 		.all(ctx.conn.as_ref())
 		.await?;
-	let library_count = library::Entity::find_for_user(&user)
+	let library_count = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Name.contains(query.clone()))
 		.count(ctx.conn.as_ref())
 		.await?;
@@ -629,13 +629,13 @@ async fn browse_libraries(
 
 	let take = pagination.limit();
 
-	let libraries = library::Entity::find_for_user(&user)
+	let libraries = library::Entity::find_visible_for_user(&user)
 		.limit(take)
 		.offset(pagination.offset())
 		.order_by_asc(library::Column::Name)
 		.all(ctx.conn.as_ref())
 		.await?;
-	let library_count = library::Entity::find_for_user(&user)
+	let library_count = library::Entity::find_visible_for_user(&user)
 		.count(ctx.conn.as_ref())
 		.await?;
 
@@ -756,7 +756,7 @@ async fn browse_library_by_id(
 
 	let user = req.user();
 
-	let library = library::Entity::find_for_user(&user)
+	let library = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
 		.one(ctx.conn.as_ref())
 		.await?
@@ -1087,7 +1087,7 @@ async fn browse_library_series(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let library = library::Entity::find_for_user(&user)
+	let library = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
 		.one(ctx.conn.as_ref())
 		.await?

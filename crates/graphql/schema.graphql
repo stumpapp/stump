@@ -2070,6 +2070,12 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
+	"""
+	Share a series with users, granting them access to the series and all of its books even if
+	the library containing it is hidden from them. This operates as a full replacement of the
+	shared users list, so any users not included in the provided list will lose their share.
+	"""
+	updateSeriesSharedUsers(id: ID!, userIds: [String!]!): Series!
 	analyzeSeries(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
 	"""
@@ -3139,6 +3145,11 @@ type Series {
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
+	"""
+	The users this series has been explicitly shared with. A share grants access to the series
+	and all of its books, even if the library containing it is hidden from the user.
+	"""
+	sharedUsers: [User!]!
 	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!

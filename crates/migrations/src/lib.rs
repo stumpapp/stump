@@ -38,6 +38,7 @@ mod m20260928_173434_bookmark_and_annotation_fks_to_session;
 mod m20261006_152724_journal_entries;
 mod m20261006_225247_reading_devices;
 mod m20261025_235745_drop_navigation_user_prefs;
+mod m20261114_000000_series_shares;
 
 pub struct Migrator;
 
@@ -82,6 +83,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20261006_152724_journal_entries::Migration),
 			Box::new(m20261006_225247_reading_devices::Migration),
 			Box::new(m20261025_235745_drop_navigation_user_prefs::Migration),
+			Box::new(m20261114_000000_series_shares::Migration),
 		]
 	}
 }

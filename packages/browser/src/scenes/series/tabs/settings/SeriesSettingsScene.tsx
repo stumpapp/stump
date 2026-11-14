@@ -12,6 +12,8 @@ import { SettingsSection } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 
+import SeriesSharing from './SeriesSharing'
+
 const query = graphql(`
 	query SeriesSettingsScene($id: ID!) {
 		seriesById(id: $id) {
@@ -84,6 +86,13 @@ export default function SeriesSettingsScene() {
 			>
 				<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />
 			</SettingsSection>
+
+			{checkPermission(UserPermission.ManageLibrary) &&
+				checkPermission(UserPermission.ReadUsers) && (
+					<Suspense>
+						<SeriesSharing key={seriesById.id} seriesId={seriesById.id} />
+					</Suspense>
+				)}
 		</SceneContainer>
 	)
 }

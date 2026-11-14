@@ -117,7 +117,7 @@ async fn group_by_library(
 			acc
 		});
 
-	let library_models = library::Entity::find_for_user(user)
+	let library_models = library::Entity::find_visible_for_user(user)
 		.filter(library::Column::Id.is_in(library_to_series_ids.keys()))
 		.into_model::<library::Model>()
 		.all(txn)
@@ -449,7 +449,7 @@ mod tests {
 			.to_string(SqliteQueryBuilder);
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')) AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
 		);
 	}
 }

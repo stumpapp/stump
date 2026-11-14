@@ -2,7 +2,7 @@ use async_graphql::SimpleObject;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	ActiveValue, DerivePartialModel, entity::prelude::*,
+	ActiveValue, Condition, DerivePartialModel, entity::prelude::*,
 	prelude::async_trait::async_trait,
 };
 
@@ -14,7 +14,7 @@ use crate::shared::{
 
 use super::{
 	last_library_visit, library_config, library_exclusion, library_scan_record, series,
-	user::AuthUser,
+	series_share, user::AuthUser,
 };
 
 #[sea_orm::model]
@@ -69,10 +69,28 @@ pub struct Model {
 }
 
 impl Entity {
+	/// Find the libraries which are not hidden from the user. This is the strict check and should be
+	/// used for anything beyond reading, e.g. managing or uploading to a library.
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		Entity::find().filter(Column::Id.not_in_subquery(
 			library_exclusion::Entity::library_hidden_to_user_query(user),
 		))
+	}
+
+	/// Find the libraries a user can browse. In addition to [Entity::find_for_user], this includes
+	/// libraries which are hidden from the user but contain at least one series that was shared
+	/// with them. The contents of such libraries must be filtered using the series and media
+	/// visibility filters, and this must not be used to authorize management actions.
+	pub fn find_visible_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(
+			Condition::any()
+				.add(Column::Id.not_in_subquery(
+					library_exclusion::Entity::library_hidden_to_user_query(user),
+				))
+				.add(Column::Id.in_subquery(
+					series_share::Entity::libraries_with_shared_series_query(user),
+				)),
+		)
 	}
 }
 

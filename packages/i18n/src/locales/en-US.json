@@ -1235,6 +1235,16 @@
         "downloadSeries": "Download Series"
       }
     },
+    "seriesSettingsScene": {
+      "sections": {
+        "sharing": {
+          "heading": "Share Series",
+          "description": "Grant users access to this series and all of its books, even if the library is hidden from them",
+          "noUsersTitle": "No Users to Share With",
+          "noUsers": "There are no other registered users to share this series with"
+        }
+      }
+    },
     "seriesHeader": {
       "tabs": {
         "books": "Books"

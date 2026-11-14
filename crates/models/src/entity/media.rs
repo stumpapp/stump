@@ -17,9 +17,8 @@ use crate::{
 
 use super::{
 	book_club_book, book_club_book_suggestion, book_club_member_favorite_book, bookmark,
-	library_exclusion, media_analysis, media_annotation, media_metadata, media_tag,
-	metadata_fetch_record, reading_list_item, reading_session, review, series,
-	series_metadata, user::AuthUser,
+	media_analysis, media_annotation, media_metadata, media_tag, metadata_fetch_record,
+	reading_list_item, reading_session, review, series, series_metadata, user::AuthUser,
 };
 
 #[sea_orm::model]
@@ -207,9 +206,7 @@ fn apply_series_metadata_join(query: Select<Entity>) -> Select<Entity> {
 }
 
 fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select<Entity> {
-	query.filter(series::Column::LibraryId.not_in_subquery(
-		library_exclusion::Entity::library_hidden_to_user_query(user),
-	))
+	query.filter(series::visible_to_user_condition(user))
 }
 
 impl Entity {
@@ -422,7 +419,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')"#
         );
 	}
 
@@ -440,7 +437,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"# +
+            r#"WHERE ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42'))"# +
             r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
         );
 	}
@@ -453,7 +450,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "media"."id" = '123'"#
+            r#"WHERE ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')) AND "media"."id" = '123'"#
         );
 	}
 
@@ -465,7 +462,7 @@ mod tests {
 		assert_eq!(
 			stmt_str,
 			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-			r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "series"."id" = '123'"#
+			r#"WHERE ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')) AND "series"."id" = '123'"#
 		);
 	}
 
@@ -477,7 +474,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')"#
             );
 	}
 
@@ -489,7 +486,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "media"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+            r#"WHERE "media"."id" = '123' AND ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42'))"#
             );
 	}
 
@@ -507,7 +504,7 @@ mod tests {
 		assert_eq!(
             stmt_str,
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"# +
+            r#"WHERE ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42'))"# +
             r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
         );
 	}

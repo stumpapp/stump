@@ -58,7 +58,7 @@ impl LibraryQuery {
 			.iter()
 			.fold(OrderSpec::new(), |spec, o| spec.by(&o.field, o.direction))
 			.then(library::Column::Id, Order::Asc);
-		let query = spec.apply(library::Entity::find_for_user(user).apply_if(
+		let query = spec.apply(library::Entity::find_visible_for_user(user).apply_if(
 			search,
 			|query, search| {
 				query.filter(
@@ -73,7 +73,7 @@ impl LibraryQuery {
 			Pagination::Cursor(info) => {
 				let mut query = query;
 				if let Some(ref id) = info.after {
-					let cursor = library::Entity::find_for_user(user)
+					let cursor = library::Entity::find_visible_for_user(user)
 						.filter(library::Column::Id.eq(id.clone()))
 						.one(conn)
 						.await?
@@ -133,7 +133,7 @@ impl LibraryQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = library::Entity::find_for_user(user)
+		let model = library::Entity::find_visible_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
 			.one(conn)
 			.await?;
@@ -190,7 +190,9 @@ impl LibraryQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = library::Entity::find_for_user(user).count(conn).await?;
+		let count = library::Entity::find_visible_for_user(user)
+			.count(conn)
+			.await?;
 
 		Ok(count)
 	}

@@ -71,7 +71,7 @@ async fn get_library_thumbnail_handler(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user();
-	let (library, library_config) = library::Entity::find_for_user(&user)
+	let (library, library_config) = library::Entity::find_visible_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
         .find_also_related(library_config::Entity)
 		.into_model::<library::LibraryThumbSelect, library_config::LibraryConfigThumbnailConfig>()

@@ -3,7 +3,7 @@ use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	ActiveValue, Condition, FromQueryResult, Linked, QuerySelect, QueryTrait,
-	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query,
+	entity::prelude::*, prelude::async_trait::async_trait,
 };
 
 use crate::{
@@ -17,7 +17,7 @@ use crate::{
 
 use super::{
 	library, library_exclusion, media, metadata_fetch_record, series_metadata,
-	series_tag, user::AuthUser,
+	series_share, series_tag, user::AuthUser,
 };
 
 // TODO: Properly support soft deletion
@@ -71,6 +71,9 @@ pub struct Model {
 	#[sea_orm(has_one)]
 	#[graphql(skip)]
 	pub metadata_fetch_record: HasOne<metadata_fetch_record::Entity>,
+	#[sea_orm(has_many, relation_enum = "SharedWithUsers")]
+	#[graphql(skip)]
+	pub shares: HasMany<series_share::Entity>,
 }
 
 pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
@@ -83,6 +86,20 @@ pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Cond
 			.add(series_metadata::Column::AgeRating.is_null())
 			.add(series_metadata::Column::AgeRating.lte(min_age))
 	}
+}
+
+/// A condition which matches the series a user is allowed to see, not accounting for age
+/// restrictions. A series is visible when its library is not hidden from the user, or when it
+/// has been explicitly shared with the user (which takes precedence over the library exclusion).
+pub fn visible_to_user_condition(user: &AuthUser) -> Condition {
+	Condition::any()
+		.add(Column::LibraryId.not_in_subquery(
+			library_exclusion::Entity::library_hidden_to_user_query(user),
+		))
+		.add(
+			Column::Id
+				.in_subquery(series_share::Entity::series_shared_with_user_query(user)),
+		)
 }
 
 impl Entity {
@@ -99,9 +116,7 @@ impl Entity {
 
 		Entity::find()
 			.filter(Column::DeletedAt.is_null())
-			.filter(Column::LibraryId.not_in_subquery(
-				library_exclusion::Entity::library_hidden_to_user_query(user),
-			))
+			.filter(visible_to_user_condition(user))
 			.apply_if(age_restriction_filter, |query, filter| {
 				query.left_join(series_metadata::Entity).filter(filter)
 			})
@@ -207,17 +222,7 @@ fn apply_hidden_library_filter(
 	user: &AuthUser,
 	select: Select<Entity>,
 ) -> Select<Entity> {
-	select
-		.filter(
-			Column::LibraryId.not_in_subquery(
-				Query::select()
-					.column(library_exclusion::Column::LibraryId)
-					.from(library_exclusion::Entity)
-					.and_where(library_exclusion::Column::UserId.eq(user.id.clone()))
-					.to_owned(),
-			),
-		)
-		.to_owned()
+	select.filter(visible_to_user_condition(user))
 }
 
 fn apply_age_restriction_filter(
@@ -282,7 +287,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" WHERE "series"."deleted_at" IS NULL AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+			r#"SELECT  FROM "series" WHERE "series"."deleted_at" IS NULL AND ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42'))"#
 		);
 	}
 
@@ -300,7 +305,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."deleted_at" IS NULL AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."deleted_at" IS NULL AND ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')) AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
 		);
 	}
 
@@ -327,7 +332,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" WHERE "series"."deleted_at" IS NULL AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "series"."id" = '123'"#.to_string()
+			r#"SELECT  FROM "series" WHERE "series"."deleted_at" IS NULL AND ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')) AND "series"."id" = '123'"#.to_string()
 		);
 	}
 
@@ -338,7 +343,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42')"#
 		);
 	}
 
@@ -349,7 +354,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#.to_string()
+            r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."id" = '123' AND ("series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') OR "series"."id" IN (SELECT "series_id" FROM "series_shares" WHERE "series_shares"."user_id" = '42'))"#.to_string()
         );
 	}
 }

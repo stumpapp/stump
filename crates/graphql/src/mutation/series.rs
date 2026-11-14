@@ -1,12 +1,12 @@
 use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
-	entity::{favorite_series, library, library_config, media, series},
+	entity::{favorite_series, library, library_config, media, series, series_share},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
 	ActiveValue::Set,
-	ExprTrait,
+	ExprTrait, TransactionTrait,
 	prelude::*,
 	sea_query::{OnConflict, Query},
 };
@@ -28,6 +28,90 @@ pub struct SeriesMutation;
 
 #[Object]
 impl SeriesMutation {
+	/// Share a series with users, granting them access to the series and all of its books even if
+	/// the library containing it is hidden from them. This operates as a full replacement of the
+	/// shared users list, so any users not included in the provided list will lose their share.
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::ManageLibrary, UserPermission::ReadUsers])"
+	)]
+	async fn update_series_shared_users(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		user_ids: Vec<String>,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		// Sharing is a management action, so a share of their own is not enough: the user must
+		// have regular access to the library containing the series
+		let library_id = model
+			.series
+			.library_id
+			.clone()
+			.ok_or("Series is not part of a library")?;
+		library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let existing_shares = series_share::Entity::find()
+			.filter(series_share::Column::SeriesId.eq(model.series.id.clone()))
+			.all(conn)
+			.await?;
+
+		let to_add = user_ids
+			.iter()
+			.filter(|id| !existing_shares.iter().any(|share| share.user_id == **id))
+			.map(|id| series_share::ActiveModel {
+				series_id: Set(model.series.id.clone()),
+				user_id: Set(id.clone()),
+				..Default::default()
+			})
+			.collect::<Vec<_>>();
+
+		let to_remove = existing_shares
+			.iter()
+			.filter(|share| !user_ids.contains(&share.user_id))
+			.map(|share| share.id)
+			.collect::<Vec<_>>();
+
+		if to_add.is_empty() && to_remove.is_empty() {
+			tracing::debug!("No changes to series shares");
+			return Ok(Series::from(model));
+		}
+
+		let txn = conn.begin().await?;
+
+		if !to_add.is_empty() {
+			series_share::Entity::insert_many(to_add)
+				.on_conflict_do_nothing()
+				.exec(&txn)
+				.await?;
+		}
+
+		if !to_remove.is_empty() {
+			series_share::Entity::delete_many()
+				.filter(series_share::Column::Id.is_in(to_remove))
+				.exec(&txn)
+				.await?;
+		}
+
+		txn.commit().await?;
+
+		// Note: We return the full node so the ID may be pulled to properly update the cache.
+		Ok(Series::from(model))
+	}
+
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn analyze_series(
 		&self,

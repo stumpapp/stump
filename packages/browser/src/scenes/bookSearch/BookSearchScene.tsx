@@ -3,7 +3,6 @@ import { usePrevious } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
 import { BookCard, BookTable } from '@/components/book'
@@ -32,6 +31,7 @@ import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
+import { AppTitle } from '@/AppTitle'
 
 import BooksAlphabet from '../book/BooksAlphabet'
 
@@ -353,9 +353,7 @@ function BookSearchScene() {
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | Books</title>
-				</Helmet>
+				<AppTitle title="Books" />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

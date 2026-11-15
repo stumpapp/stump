@@ -1,10 +1,10 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useMemo } from 'react'
-import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
+import { AppTitle } from '@/AppTitle'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 
@@ -31,9 +31,7 @@ export default function CreateUserScene() {
 
 	return (
 		<SceneContainer>
-			<Helmet>
-				<title>Stump | {t('settingsScene.server/users.createUser.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.server/users.createUser.helmet')} />
 
 			<CreateOrUpdateUserForm existingUsernames={existingUsernames} />
 		</SceneContainer>

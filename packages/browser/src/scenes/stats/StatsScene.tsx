@@ -1,10 +1,10 @@
 import { Breadcrumbs } from '@stump/components'
-import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { RangedStats, Streaks } from '@/components/readingStats'
 import { PageHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
+import { AppTitle } from '@/AppTitle'
 
 export default function StatsScene() {
 	const { translate } = useTranslate()
@@ -13,9 +13,7 @@ export default function StatsScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {title}</title>
-			</Helmet>
+			<AppTitle title={title} />
 
 			<PageHeader>
 				<Breadcrumbs segments={[{ label: title }]} />

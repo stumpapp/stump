@@ -2,7 +2,6 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { Suspense, useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useNavigate, useParams } from 'react-router'
 
 import { BookHeader } from '@/components/book/BookHeader'
@@ -13,6 +12,7 @@ import { SettingsSection } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
+import { AppTitle } from '@/AppTitle'
 
 import BookMetadataSearch from './BookMetadataSearch'
 import BookTagEditor from './BookTagEditor'
@@ -64,9 +64,7 @@ export default function BookSettingsScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {book.resolvedName}</title>
-			</Helmet>
+			<AppTitle title={book.resolvedName} />
 
 			<BookHeader fragment={book} />
 

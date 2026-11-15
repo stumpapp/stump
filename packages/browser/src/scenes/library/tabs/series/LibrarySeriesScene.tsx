@@ -8,7 +8,6 @@ import {
 	SeriesOrderBy,
 } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
 import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
@@ -35,6 +34,7 @@ import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
+import { AppTitle } from '@/AppTitle'
 
 import { useLibraryContext } from '../../context'
 import { getQueryKey, query, usePrefetchLibrarySeries } from './queries'
@@ -311,9 +311,7 @@ export default function LibrarySeriesScene({
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | {name}</title>
-				</Helmet>
+				<AppTitle title={name} />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

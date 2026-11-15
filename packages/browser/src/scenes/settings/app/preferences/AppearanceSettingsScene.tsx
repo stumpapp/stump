@@ -1,9 +1,9 @@
 import { NewCard } from '@stump/components'
 import { Suspense } from 'react'
-import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
+import { AppTitle } from '@/AppTitle'
 
 import DebugSettings from './DebugSettings'
 import EnableAlphabetFiltering from './EnableAlphabetFiltering'
@@ -28,9 +28,7 @@ export default function AppearanceSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.app/preferences.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.app/preferences.helmet')} />
 
 			<DebugSettings />
 

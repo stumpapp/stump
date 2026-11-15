@@ -1,9 +1,9 @@
-import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
 import { useBookOverview } from '@/components/book'
 import { BookHeader } from '@/components/book/BookHeader'
 import UnderConstruction from '@/components/unimplemented/UnderConstruction'
+import { AppTitle } from '@/AppTitle'
 
 // TODO(reading-timeline): build out some kind of page for this, will prob wind up being entirely different for
 // web because such a different screen size to optimize for, and have no clue
@@ -23,9 +23,7 @@ export default function BookReadingTimelineScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {media.resolvedName}</title>
-			</Helmet>
+			<AppTitle title={media.resolvedName} />
 
 			<BookHeader fragment={media} />
 

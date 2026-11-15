@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
 import { useBookOverview } from '@/components/book'
@@ -9,6 +8,7 @@ import { BookOverviewDetails } from '@/components/book/BookOverviewDetails'
 import { BookReadActions } from '@/components/book/BookReadActions'
 import { SceneContainer } from '@/components/container'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
+import { AppTitle } from '@/AppTitle'
 
 import BooksAfterCursor from './BooksAfterCursor'
 
@@ -32,9 +32,7 @@ export default function BookOverviewScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {media.resolvedName}</title>
-			</Helmet>
+			<AppTitle title={media.resolvedName} />
 
 			<BookHeader fragment={media} onInfoClick={() => setIsInfoSheetOpen(true)} />
 

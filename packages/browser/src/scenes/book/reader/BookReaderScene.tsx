@@ -13,6 +13,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import { usePaths } from '@/paths'
+import { AppTitle } from '@/AppTitle'
 
 import { useBookPreferences } from './useBookPreferences'
 
@@ -174,12 +175,15 @@ function BookReaderScene({ book }: Props) {
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (
-			<ImageBasedReader
-				media={book}
-				isIncognito={isIncognito}
-				initialPage={initialPage}
-				onProgress={updateProgress}
-			/>
+			<>
+				<AppTitle title={book.resolvedName} />
+				<ImageBasedReader
+					media={book}
+					isIncognito={isIncognito}
+					initialPage={initialPage}
+					onProgress={updateProgress}
+				/>
+			</>
 		)
 	}
 

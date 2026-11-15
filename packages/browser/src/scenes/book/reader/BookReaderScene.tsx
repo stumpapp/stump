@@ -15,6 +15,7 @@ import { ImageBasedReader } from '@/components/readers/imageBased'
 import { usePaths } from '@/paths'
 
 import { useBookPreferences } from './useBookPreferences'
+import { Helmet } from 'react-helmet'
 
 export const BOOK_READER_SCENE_QUERY = graphql(`
 	query BookReaderScene($id: ID!) {
@@ -174,12 +175,17 @@ function BookReaderScene({ book }: Props) {
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (
-			<ImageBasedReader
-				media={book}
-				isIncognito={isIncognito}
-				initialPage={initialPage}
-				onProgress={updateProgress}
-			/>
+			<>
+				<Helmet>
+					<title>Stump | {book.resolvedName || ''}</title>
+				</Helmet>
+				<ImageBasedReader
+					media={book}
+					isIncognito={isIncognito}
+					initialPage={initialPage}
+					onProgress={updateProgress}
+				/>
+			</>
 		)
 	}
 

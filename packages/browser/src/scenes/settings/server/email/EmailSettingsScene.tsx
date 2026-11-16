@@ -1,5 +1,4 @@
-import { Helmet } from 'react-helmet'
-
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -11,9 +10,7 @@ export default function EmailSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.server/email.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.server/email.helmet')} />
 
 			<div className="gap-12 flex flex-col">
 				<EmailersSection />

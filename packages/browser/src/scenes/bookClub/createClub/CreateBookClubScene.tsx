@@ -2,9 +2,9 @@ import { useGraphQLMutation } from '@stump/client'
 import { CreateBookClubInput, graphql } from '@stump/graphql'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { Suspense, useCallback } from 'react'
-import { Helmet } from 'react-helmet'
 import { useNavigate } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import {
 	CreateOrUpdateBookClubSchema,
 	defaultMemberSpec,
@@ -65,9 +65,7 @@ export default function CreateBookClubScene() {
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<Helmet>
-				<title>Stump | Create a book club</title>
-			</Helmet>
+			<AppTitle title="Create a book club" />
 
 			<CreateSceneHeader
 				parent={{ label: t('sidebar.buttons.bookClubs'), to: paths.bookClubs() }}

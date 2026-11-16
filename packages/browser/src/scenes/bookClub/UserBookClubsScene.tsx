@@ -2,8 +2,8 @@ import { useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
 import { graphql, UserBookClubsSceneQuery } from '@stump/graphql'
 import pluralize from 'pluralize'
-import { Helmet } from 'react-helmet'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { usePaths } from '@/paths'
 
@@ -108,9 +108,7 @@ export default function UserBookClubsScene() {
 		<SceneContainer
 			className={cx({ 'flex h-full items-center justify-center': !bookClubs?.length })}
 		>
-			<Helmet>
-				<title>Stump | Book Clubs</title>
-			</Helmet>
+			<AppTitle title="Book Clubs" />
 
 			{renderContent()}
 		</SceneContainer>

@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import { usePaths } from '@/paths'
 
@@ -174,12 +175,15 @@ function BookReaderScene({ book }: Props) {
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (
-			<ImageBasedReader
-				media={book}
-				isIncognito={isIncognito}
-				initialPage={initialPage}
-				onProgress={updateProgress}
-			/>
+			<>
+				<AppTitle title={book.resolvedName} />
+				<ImageBasedReader
+					media={book}
+					isIncognito={isIncognito}
+					initialPage={initialPage}
+					onProgress={updateProgress}
+				/>
+			</>
 		)
 	}
 

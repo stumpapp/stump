@@ -4,6 +4,7 @@ import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { Suspense, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import {
 	CreateOrUpdateBookClubSchema,
 	defaultMemberSpec,
@@ -11,7 +12,6 @@ import {
 import { CreateSceneHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
-import { AppTitle } from '@/AppTitle'
 
 import CreateBookClubForm from './CreateBookClubForm'
 

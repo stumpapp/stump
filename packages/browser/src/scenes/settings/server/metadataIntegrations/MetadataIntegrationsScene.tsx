@@ -1,8 +1,8 @@
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { ExperimentalFeatureDisclaimer } from '@/components/ExperimentalFeatureDisclaimer'
 import { PendingMatchesSection } from '@/components/metadata/metadataMatching'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle'
 
 import { ProvidersSection } from './providers'
 

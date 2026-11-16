@@ -2,10 +2,10 @@ import { Heading, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { Suspense } from 'react'
 
+import { AppTitle } from '@/AppTitle.tsx'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle.tsx'
 
 import DeleteJobHistoryConfirmation from './DeleteJobHistoryConfirmation.tsx'
 import JobScheduler from './JobScheduler.tsx'

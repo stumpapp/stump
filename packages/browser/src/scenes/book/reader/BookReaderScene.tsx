@@ -11,9 +11,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import { usePaths } from '@/paths'
-import { AppTitle } from '@/AppTitle'
 
 import { useBookPreferences } from './useBookPreferences'
 

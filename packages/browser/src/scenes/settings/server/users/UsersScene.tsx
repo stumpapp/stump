@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'

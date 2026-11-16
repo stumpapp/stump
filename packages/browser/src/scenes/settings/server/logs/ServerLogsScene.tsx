@@ -1,6 +1,6 @@
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle'
 
 import { LiveLogsSection } from './live-logs'
 import { PersistedLogsSection } from './persisted-logs'

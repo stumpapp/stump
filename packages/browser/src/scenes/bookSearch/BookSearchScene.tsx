@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
 import DynamicCardGrid from '@/components/container/DynamicCardGrid'
@@ -31,7 +32,6 @@ import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
-import { AppTitle } from '@/AppTitle'
 
 import BooksAlphabet from '../book/BooksAlphabet'
 

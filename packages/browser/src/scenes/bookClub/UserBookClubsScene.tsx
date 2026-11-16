@@ -3,9 +3,9 @@ import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
 import { graphql, UserBookClubsSceneQuery } from '@stump/graphql'
 import pluralize from 'pluralize'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { usePaths } from '@/paths'
-import { AppTitle } from '@/AppTitle'
 
 // TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`

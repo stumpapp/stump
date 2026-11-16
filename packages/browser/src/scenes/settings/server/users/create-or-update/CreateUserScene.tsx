@@ -2,9 +2,9 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useMemo } from 'react'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 

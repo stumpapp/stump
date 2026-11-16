@@ -1,9 +1,9 @@
 import { useParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { useBookOverview } from '@/components/book'
 import { BookHeader } from '@/components/book/BookHeader'
 import UnderConstruction from '@/components/unimplemented/UnderConstruction'
-import { AppTitle } from '@/AppTitle'
 
 // TODO(reading-timeline): build out some kind of page for this, will prob wind up being entirely different for
 // web because such a different screen size to optimize for, and have no clue

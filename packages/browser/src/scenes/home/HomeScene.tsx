@@ -3,13 +3,13 @@ import { Breadcrumbs, ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { NoLibraries } from '@/components/library'
 import { OwlEmptyState } from '@/components/Owl'
 import { PageHeader } from '@/components/sharedLayout'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
-import { AppTitle } from '@/AppTitle'
 
 import {
 	getHomeSectionId,

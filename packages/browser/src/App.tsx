@@ -11,10 +11,10 @@ import { createSearchParams, useLocation, useNavigate } from 'react-router'
 import { ErrorFallback } from '@/components/ErrorFallback'
 
 import { AppRouter } from './AppRouter'
+import { AppTitle } from './AppTitle'
 import { Toaster } from './components/Toaster'
 import { useApplyTheme } from './hooks'
 import { useAppStore, useDebugStore, useUserStore } from './stores'
-import { AppTitle } from './AppTitle'
 
 export default function StumpWebClient(props: StumpClientProps) {
 	const locale = useUserStore((store) => store.userPreferences?.locale)

@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
 	FilterContext,
@@ -34,7 +35,6 @@ import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
-import { AppTitle } from '@/AppTitle'
 
 import { useLibraryContext } from '../../context'
 import { getQueryKey, query, usePrefetchLibrarySeries } from './queries'

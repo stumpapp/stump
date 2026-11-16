@@ -3,9 +3,9 @@ import { Alert, AlertDescription } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 import { Suspense } from 'react'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
-import { AppTitle } from '@/AppTitle'
 
 import HelpfulLinks from './HelpfulLinks'
 import { ServerConfiguration } from './ServerConfiguration'

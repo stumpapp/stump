@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { useBookOverview } from '@/components/book'
 import { BookHeader } from '@/components/book/BookHeader'
 import { BookInfoSheet } from '@/components/book/BookInfoSheet'
@@ -8,7 +9,6 @@ import { BookOverviewDetails } from '@/components/book/BookOverviewDetails'
 import { BookReadActions } from '@/components/book/BookReadActions'
 import { SceneContainer } from '@/components/container'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
-import { AppTitle } from '@/AppTitle'
 
 import BooksAfterCursor from './BooksAfterCursor'
 

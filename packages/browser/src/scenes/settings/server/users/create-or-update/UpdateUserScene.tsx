@@ -3,11 +3,11 @@ import { graphql, UserPermission } from '@stump/graphql'
 import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 import { usePaths } from '@/paths'
-import { AppTitle } from '@/AppTitle'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 

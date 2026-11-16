@@ -1,4 +1,5 @@
 mod account;
+mod library;
 mod system;
 
 use std::time::Duration;
@@ -9,7 +10,7 @@ use stump_core::config::StumpConfig;
 
 use crate::error::CliResult;
 
-use self::{account::Account, system::System};
+use self::{account::Account, library::Library, system::System};
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
@@ -17,6 +18,8 @@ pub enum Commands {
 	Account(Account),
 	#[command(subcommand)]
 	System(System),
+	#[command(subcommand)]
+	Library(Library),
 }
 
 pub async fn handle_command(command: Commands, config: &StumpConfig) -> CliResult<()> {
@@ -25,6 +28,9 @@ pub async fn handle_command(command: Commands, config: &StumpConfig) -> CliResul
 			account::handle_account_command(account, config).await
 		},
 		Commands::System(system) => system::handle_system_command(system, config).await,
+		Commands::Library(library) => {
+			library::handle_library_command(library, config).await
+		},
 	}
 }
 

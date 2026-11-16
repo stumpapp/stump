@@ -1693,6 +1693,7 @@ name = "cli"
 version = "0.1.13"
 dependencies = [
  "bcrypt",
+ "chrono",
  "clap 4.5.48",
  "dialoguer",
  "indicatif",
@@ -1703,6 +1704,7 @@ dependencies = [
  "stump_core",
  "thiserror 2.0.20",
  "tokio",
+ "uuid 1.18.1",
 ]
 
 [[package]]

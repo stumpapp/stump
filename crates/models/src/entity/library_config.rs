@@ -7,7 +7,7 @@ use sea_orm::{
 
 use crate::shared::{
 	enums::{
-		LibraryPattern, LibraryType, LibraryViewMode, ReadingDirection,
+		LibraryPattern, LibraryType, LibraryViewMode, OrganizationMode, ReadingDirection,
 		ReadingImageScaleFit, ReadingMode,
 	},
 	ignore_rules::IgnoreRules,
@@ -41,6 +41,8 @@ pub struct Model {
 	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
 	pub library_pattern: LibraryPattern,
+	#[sea_orm(column_type = "Text")]
+	pub organization_mode: OrganizationMode,
 	#[sea_orm(column_type = "Text")]
 	pub default_library_view_mode: LibraryViewMode,
 	pub hide_series_view: bool,
@@ -130,6 +132,9 @@ impl ActiveModelBehavior for ActiveModel {
 
 		if self.library_pattern.is_not_set() {
 			self.library_pattern = Set(LibraryPattern::SeriesBased);
+		}
+		if self.organization_mode.is_not_set() {
+			self.organization_mode = Set(OrganizationMode::Filesystem);
 		}
 
 		if self.default_library_view_mode.is_not_set() {

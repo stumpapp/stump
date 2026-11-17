@@ -1,0 +1,25 @@
+---
+title: Metadata Organization
+description: How Stump will interpret your library when organization is from metadata within it
+---
+
+<Callout type="warning" title="Experimental Feature">
+	Metadata library organization is extremely new and experimental. If you decide to try it, please
+	share feedback or any problems faced
+</Callout>
+
+Stump will collect the metadata from content in the library and use that to organize books into series accordingly. Internally, Stump will refer to any series created with this organizational mode as a virtual series. Since a virtual series itself does not need to exist on disk, there will not be a files tab in any Stump client for them.
+
+## Notable Behavior
+
+### EPUB Metadata
+
+- A matching `.opf` sidecar overrides any embedded fields
+- Stump will assign a book to a series if it is unambiguously associated, i.e., there are not conflicting collection definitions in the metadata
+
+### Metadata Editing
+
+Editing a book's series metadata, whether manual or accepting a provider match, updates its series association immediately when relevant. A few important things to keep in mind:
+
+- If a virtual series is empty after an update, it will be deleted from the database
+- If a book were to have its series metadata field removed, or already exist upon scan without one, it will exist as a standalone book in the library

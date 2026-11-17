@@ -48,6 +48,7 @@ export type AddDownloadedFileParams = {
 	bookName?: string | null
 	metadata?: Partial<MediaMetadata> | null
 	seriesId?: string | null
+	libraryId?: string | null
 	toc?: string[] | null
 	// TODO: This technically would be different if the user uploaded a custom thumbnail for the book,
 	// since the mobile app generates its own thumbnail. I think this is acceptable for now, but something
@@ -138,6 +139,44 @@ export class DownloadRepository {
 					})
 			}
 
+			const newFile: NewDownloadedFile = {
+				id: file.id,
+				filename: file.filename,
+				uri: toRelativePath(file.uri),
+				serverId: file.serverId,
+				size: file.size,
+				bookName: file.bookName ?? file.metadata?.title,
+				bookDescription: file.metadata?.summary,
+				bookMetadata: file.metadata,
+				libraryId:
+					file.libraryId ?? relations?.libraryRef?.id ?? relations?.seriesRef?.libraryId ?? null,
+				seriesId: file.seriesId,
+				pages,
+				toc: file.toc,
+				thumbnailMeta: file.imageMetadata,
+				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
+			}
+
+			const result = await tx
+				.insert(downloadedFiles)
+				.values(newFile)
+				.onConflictDoUpdate({
+					target: downloadedFiles.id,
+					set: {
+						filename: newFile.filename,
+						uri: newFile.uri,
+						size: newFile.size,
+						bookName: newFile.bookName,
+						bookDescription: newFile.bookDescription,
+						bookMetadata: newFile.bookMetadata,
+						libraryId: newFile.libraryId,
+						seriesId: newFile.seriesId,
+						pages: newFile.pages,
+						toc: newFile.toc,
+					},
+				})
+				.returning()
+
 			if (relations?.existingProgression) {
 				const values = {
 					bookId: file.id,
@@ -164,40 +203,6 @@ export class DownloadRepository {
 					})
 			}
 
-			const newFile: NewDownloadedFile = {
-				id: file.id,
-				filename: file.filename,
-				uri: toRelativePath(file.uri),
-				serverId: file.serverId,
-				size: file.size,
-				bookName: file.bookName ?? file.metadata?.title,
-				bookDescription: file.metadata?.summary,
-				bookMetadata: file.metadata,
-				seriesId: file.seriesId,
-				pages,
-				toc: file.toc,
-				thumbnailMeta: file.imageMetadata,
-				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
-			}
-
-			const result = await tx
-				.insert(downloadedFiles)
-				.values(newFile)
-				.onConflictDoUpdate({
-					target: downloadedFiles.id,
-					set: {
-						filename: newFile.filename,
-						uri: newFile.uri,
-						size: newFile.size,
-						bookName: newFile.bookName,
-						bookDescription: newFile.bookDescription,
-						bookMetadata: newFile.bookMetadata,
-						seriesId: newFile.seriesId,
-						pages: newFile.pages,
-						toc: newFile.toc,
-					},
-				})
-				.returning()
 			return result[0]
 		})
 

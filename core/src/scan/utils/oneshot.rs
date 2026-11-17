@@ -65,7 +65,7 @@ async fn build_oneshot<P: AsRef<Path>>(
 	// ^ we set id early to share with book
 	let series = series::ActiveModel {
 		id: Set(id.to_string()),
-		path: Set(path.to_string_lossy().to_string()),
+		path: Set(Some(path.to_string_lossy().to_string())),
 		name: Set(name.clone()),
 		library_id: Set(Some(library_id.to_string())),
 		is_oneshot: Set(true),
@@ -73,9 +73,15 @@ async fn build_oneshot<P: AsRef<Path>>(
 		..Default::default()
 	};
 
-	let media = prepare_draft(path, &id.to_string(), library_config, core_config, None)
-		.await?
-		.oneshot();
+	let media = prepare_draft(
+		path,
+		Some(&id.to_string()),
+		library_config,
+		core_config,
+		None,
+	)
+	.await?
+	.oneshot();
 
 	let metadata = match media.metadata.as_ref().map(|m| m.title.clone()) {
 		// ^ note: as_ref() impl for ActiveValue allegedly can panic if the value is not set,
@@ -261,7 +267,7 @@ async fn insert_oneshots(
 		for (media_id, series_id) in event_pairs {
 			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
 				id: media_id,
-				series_id,
+				series_id: Some(series_id),
 				library_id: library_id.to_string(),
 			}));
 		}
@@ -411,9 +417,11 @@ pub(crate) async fn collect_previous_oneshot_entries(
 			.all(conn)
 			.await?
 			.into_iter()
-			.map(|s| PreviousOneshotEntry {
-				book_path: PathBuf::from(&s.path),
-				old_series_id: s.id,
+			.filter_map(|s| {
+				s.path.map(|path| PreviousOneshotEntry {
+					book_path: PathBuf::from(path),
+					old_series_id: s.id,
+				})
 			})
 			.collect::<Vec<_>>();
 		previous_oneshots.extend(oneshots_to_convert);
@@ -567,7 +575,9 @@ pub(crate) async fn convert_to_oneshot_series(
 			.all(&txn)
 			.await?;
 		for s in series_idents {
-			existing_oneshots.entry(s.path).or_default().push(s.id);
+			if let Some(path) = s.path {
+				existing_oneshots.entry(path).or_default().push(s.id);
+			}
 		}
 	}
 
@@ -642,7 +652,7 @@ async fn create_oneshot_series_for<C: ConnectionTrait>(
 
 	series::ActiveModel {
 		id: Set(id.clone()),
-		path: Set(path.to_string()),
+		path: Set(Some(path.to_string())),
 		name: Set(name),
 		library_id: Set(Some(library_id.to_string())),
 		is_oneshot: Set(true),

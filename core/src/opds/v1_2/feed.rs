@@ -85,10 +85,23 @@ pub struct OPDSFeedBuilder {
 	api_key: Option<String>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct OPDSFeedBuilderPageParams {
 	pub page: u64,
 	pub count: u64,
+	pub page_size: u64,
+	pub zero_based: bool,
+}
+
+impl Default for OPDSFeedBuilderPageParams {
+	fn default() -> Self {
+		Self {
+			page: 1,
+			count: 0,
+			page_size: 20,
+			zero_based: false,
+		}
+	}
 }
 
 #[derive(Debug, Default)]
@@ -140,24 +153,33 @@ impl OPDSFeedBuilder {
 			search,
 		}: OPDSFeedBuilderParams,
 	) -> Result<OpdsFeed, CoreError> {
-		let OPDSFeedBuilderPageParams { page, count } = page_params.unwrap_or_default();
-
-		let search_params = search
-			.as_ref()
-			.map(|s| ("search".to_string(), s.to_string()));
-
-		let this_params = chain_optional_iter(
-			[("page".to_string(), page.to_string())],
-			[search_params.clone()],
-		)
-		.into_iter()
-		.collect::<HashMap<_, _>>();
+		let OPDSFeedBuilderPageParams {
+			page,
+			count,
+			page_size,
+			zero_based,
+		} = page_params.unwrap_or_default();
+		let first_page = u64::from(!zero_based);
+		if page_size == 0 || page < first_page {
+			return Err(CoreError::BadRequest("Invalid OPDS pagination".into()));
+		}
+		let params_for_page = |page: u64| {
+			let mut params = HashMap::from([
+				("page".into(), page.to_string()),
+				("page_size".into(), page_size.to_string()),
+				("zero_based".into(), zero_based.to_string()),
+			]);
+			if let Some(search) = &search {
+				params.insert("search".into(), search.clone());
+			}
+			params
+		};
 
 		let mut links = vec![
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
 				OpdsLinkRel::ItSelf,
-				self.format_params(&href_postfix, this_params),
+				self.format_params(&href_postfix, params_for_page(page)),
 			),
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
@@ -166,35 +188,20 @@ impl OPDSFeedBuilder {
 			),
 		];
 
-		if page > 0 {
-			let next_params = chain_optional_iter(
-				[("page".to_string(), (page - 1).to_string())],
-				[search_params.clone()],
-			)
-			.into_iter()
-			.collect::<HashMap<_, _>>();
-
+		if page > first_page {
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Previous,
-				href: self.format_params(&href_postfix, next_params),
+				href: self.format_params(&href_postfix, params_for_page(page - 1)),
 			});
 		}
 
-		let total_pages = (count as f32 / 20.0).ceil() as u32;
-
-		if page < total_pages as u64 && entries.len() == 20 {
-			let next_params = chain_optional_iter(
-				[("page".to_string(), (page + 1).to_string())],
-				[search_params.clone()],
-			)
-			.into_iter()
-			.collect::<HashMap<_, _>>();
-
+		let total_pages = count.div_ceil(page_size);
+		if page - first_page + 1 < total_pages && entries.len() as u64 == page_size {
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,
-				href: self.format_params(&href_postfix, next_params),
+				href: self.format_params(&href_postfix, params_for_page(page + 1)),
 			});
 		}
 

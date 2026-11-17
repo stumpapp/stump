@@ -10,7 +10,7 @@ pub enum SmartListItemEntity {
 
 #[derive(Debug, SimpleObject)]
 pub struct SmartListGroupedItem {
-	pub entity: SmartListItemEntity,
+	pub entity: Option<SmartListItemEntity>,
 	pub books: Vec<Media>,
 }
 

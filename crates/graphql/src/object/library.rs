@@ -61,15 +61,7 @@ impl Library {
 					.to(media_metadata::Column::MediaId)
 					.into(),
 			)
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(self.model.id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(self.model.id.clone()))
 			.filter(media_metadata::Column::Writers.is_not_null())
 			.into_tuple()
 			.all(conn)
@@ -176,15 +168,7 @@ impl Library {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = media::ModelWithMetadata::find_for_user(user)
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(self.model.id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(self.model.id.clone()))
 			// TODO: Consider allowing custom ordering?
 			.order_by_asc(media::Column::Name)
 			.apply_if(take, |query, take| query.limit(take))
@@ -209,11 +193,7 @@ impl Library {
 					media
 				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
 				WHERE
-					media.series_id IN (
-						SELECT series.id
-						FROM series
-						WHERE series.library_id = $1
-					)
+					media.library_id = $1
 				GROUP BY
 					letter
 				ORDER BY
@@ -422,18 +402,7 @@ async fn get_unique_metadata_fields(
 				Query::select()
 					.column(media::Column::Id)
 					.from(media::Entity)
-					.and_where(
-						media::Column::SeriesId.in_subquery(
-							Query::select()
-								.column(series::Column::Id)
-								.from(series::Entity)
-								.and_where(
-									series::Column::LibraryId
-										.eq(library.model.id.clone()),
-								)
-								.to_owned(),
-						),
-					)
+					.and_where(media::Column::LibraryId.eq(library.model.id.clone()))
 					.to_owned(),
 			),
 		)
@@ -463,18 +432,7 @@ async fn get_unique_str_list_metadata_fields(
 				Query::select()
 					.column(media::Column::Id)
 					.from(media::Entity)
-					.and_where(
-						media::Column::SeriesId.in_subquery(
-							Query::select()
-								.column(series::Column::Id)
-								.from(series::Entity)
-								.and_where(
-									series::Column::LibraryId
-										.eq(library.model.id.clone()),
-								)
-								.to_owned(),
-						),
-					)
+					.and_where(media::Column::LibraryId.eq(library.model.id.clone()))
 					.to_owned(),
 			),
 		)

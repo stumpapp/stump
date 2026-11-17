@@ -270,6 +270,7 @@ const CheckboxRow = forwardRef<
 				className,
 			)}
 			htmlFor={props.id}
+			title={props.title}
 		>
 			<RawCheckBox ref={ref} {...props} />
 		</BaseRowComponent>

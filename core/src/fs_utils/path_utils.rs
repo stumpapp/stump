@@ -110,7 +110,10 @@ impl PathUtils for Path {
 	/// infer can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_supported(&self) -> bool {
 		let content_type = ContentType::from_path(self);
-		content_type != ContentType::UNKNOWN && !content_type.is_image()
+		content_type.is_zip()
+			|| content_type.is_rar()
+			|| content_type.is_epub()
+			|| content_type == ContentType::PDF
 	}
 
 	/// Returns true when the scanner should not persist the file to the database.

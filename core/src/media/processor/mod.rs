@@ -3,7 +3,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use models::entity::library_config;
+use models::{entity::library_config, shared::enums::OrganizationMode};
 use tokio::task::spawn_blocking;
 
 use crate::{
@@ -44,6 +44,7 @@ pub struct MediaProcessorOptions {
 	pub generate_file_hashes: bool,
 	/// Whether to process metadata for the file
 	pub process_metadata: bool,
+	pub organization_mode: OrganizationMode,
 	/// Whether to generate a hash for the file that is compatible with KOReader
 	pub generate_koreader_hashes: bool,
 	/// The directory to use whenever a temporary file is needed, e.g. when converting
@@ -60,7 +61,9 @@ impl MediaProcessorOptions {
 			convert_rar_to_zip: library_config.convert_rar_to_zip,
 			delete_conversion_source: library_config.hard_delete_conversions,
 			generate_file_hashes: library_config.generate_file_hashes,
-			process_metadata: library_config.process_metadata,
+			process_metadata: library_config.process_metadata
+				|| library_config.organization_mode == OrganizationMode::Metadata,
+			organization_mode: library_config.organization_mode,
 			generate_koreader_hashes: library_config.generate_koreader_hashes,
 			cache_directory: core_config.cache_directory(),
 		}
@@ -107,6 +110,7 @@ pub trait MediaProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError>;
 
 	/// Process a media file at the given path, with the provided options
@@ -189,11 +193,12 @@ pub async fn process_file(
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn process_metadata(
 	path: impl AsRef<Path>,
+	organization_mode: OrganizationMode,
 	config: &StumpConfig,
 ) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
 	let processor = get_processor(&path, config).await?;
-	spawn_blocking(move || processor.process_metadata(&path)).await?
+	spawn_blocking(move || processor.process_metadata(&path, organization_mode)).await?
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]

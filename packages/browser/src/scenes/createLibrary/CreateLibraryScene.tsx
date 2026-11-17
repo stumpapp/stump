@@ -107,7 +107,7 @@ export default function CreateLibraryScene() {
 	}, [createError, t])
 
 	return (
-		<div className="relative flex flex-1 flex-col">
+		<div className="min-w-0 relative flex flex-1 flex-col">
 			<CreateSceneHeader
 				parent={{ label: translate('shared.common.libraries'), to: paths.libraries() }}
 				title={t('sidebar.buttons.createLibrary')}

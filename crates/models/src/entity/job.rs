@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::{entity::prelude::*, ActiveValue::Set, FromQueryResult};
+use sea_orm::{ActiveValue::Set, FromQueryResult, entity::prelude::*};
 
 use crate::shared::enums::JobStatus;
 

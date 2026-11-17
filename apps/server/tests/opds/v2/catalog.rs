@@ -1,6 +1,6 @@
 use crate::common::{
-	account::CreateTestUser, library::setup_library,
-	series::setup_single_series_with_n_books, TestApp,
+	TestApp, account::CreateTestUser, library::setup_library,
+	series::setup_single_series_with_n_books,
 };
 
 use serde_json::Value;
@@ -55,12 +55,16 @@ async fn libraries_paginate_with_valid_navigation_links() {
 	assert_eq!(first["metadata"]["itemsPerPage"], 20);
 	assert_eq!(first["metadata"]["currentPage"], 1);
 	assert_eq!(first["navigation"].as_array().unwrap().len(), 20);
-	assert!(link(&first, "self")
-		.unwrap()
-		.ends_with("/opds/v2.0/libraries?page=1"));
-	assert!(link(&first, "next")
-		.unwrap()
-		.ends_with("/opds/v2.0/libraries?page=2"));
+	assert!(
+		link(&first, "self")
+			.unwrap()
+			.ends_with("/opds/v2.0/libraries?page=1")
+	);
+	assert!(
+		link(&first, "next")
+			.unwrap()
+			.ends_with("/opds/v2.0/libraries?page=2")
+	);
 	assert!(link(&first, "previous").is_none());
 
 	let second = app.get("/opds/v2.0/libraries?page=2&page_size=20").await;
@@ -92,18 +96,20 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 				.unwrap()
 				.ends_with("/opds/v2.0/libraries/library/series")
 	}));
-	assert!(catalog["navigation"]
-		.as_array()
-		.unwrap()
-		.iter()
-		.any(|link| {
-			link["title"] == "All Series"
-				&& link["href"]
-					.as_str()
-					.unwrap()
-					.ends_with("/opds/v2.0/libraries/library/series")
-				&& link["rel"] == "subsection"
-		}));
+	assert!(
+		catalog["navigation"]
+			.as_array()
+			.unwrap()
+			.iter()
+			.any(|link| {
+				link["title"] == "All Series"
+					&& link["href"]
+						.as_str()
+						.unwrap()
+						.ends_with("/opds/v2.0/libraries/library/series")
+					&& link["rel"] == "subsection"
+			})
+	);
 
 	let first = app
 		.get("/opds/v2.0/libraries/library/series?page=1&page_size=10")
@@ -111,12 +117,16 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 	first.assert_status_ok();
 	let first: Value = first.json();
 	assert_eq!(first["navigation"].as_array().unwrap().len(), 10);
-	assert!(link(&first, "self")
-		.unwrap()
-		.ends_with("page=1&page_size=10"));
-	assert!(link(&first, "next")
-		.unwrap()
-		.ends_with("page=2&page_size=10"));
+	assert!(
+		link(&first, "self")
+			.unwrap()
+			.ends_with("page=1&page_size=10")
+	);
+	assert!(
+		link(&first, "next")
+			.unwrap()
+			.ends_with("page=2&page_size=10")
+	);
 	assert!(link(&first, "previous").is_none());
 
 	let second = app
@@ -125,9 +135,11 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 	second.assert_status_ok();
 	let second: Value = second.json();
 	assert_eq!(second["navigation"].as_array().unwrap().len(), 1);
-	assert!(link(&second, "previous")
-		.unwrap()
-		.ends_with("page=1&page_size=10"));
+	assert!(
+		link(&second, "previous")
+			.unwrap()
+			.ends_with("page=1&page_size=10")
+	);
 	assert!(link(&second, "next").is_none());
 }
 
@@ -173,9 +185,11 @@ async fn book_feed_preserves_pagination_links_until_the_last_page() {
 	let first: Value = first.json();
 	assert_eq!(first["publications"].as_array().unwrap().len(), 2);
 	assert!(link(&first, "previous").is_none());
-	assert!(link(&first, "next")
-		.unwrap()
-		.ends_with("/opds/v2.0/series/paginated-series?page=2&page_size=2"));
+	assert!(
+		link(&first, "next")
+			.unwrap()
+			.ends_with("/opds/v2.0/series/paginated-series?page=2&page_size=2")
+	);
 
 	let second = app
 		.get("/opds/v2.0/series/paginated-series?page=2&page_size=2")
@@ -183,9 +197,11 @@ async fn book_feed_preserves_pagination_links_until_the_last_page() {
 	second.assert_status_ok();
 	let second: Value = second.json();
 	assert_eq!(second["publications"].as_array().unwrap().len(), 1);
-	assert!(link(&second, "previous")
-		.unwrap()
-		.ends_with("/opds/v2.0/series/paginated-series?page=1&page_size=2"));
+	assert!(
+		link(&second, "previous")
+			.unwrap()
+			.ends_with("/opds/v2.0/series/paginated-series?page=1&page_size=2")
+	);
 	assert!(link(&second, "next").is_none());
 }
 
@@ -200,10 +216,14 @@ async fn terminal_book_page_has_no_next_and_uses_catalog_start_link() {
 	response.assert_status_ok();
 	let body: Value = response.json();
 	assert!(link(&body, "next").is_none());
-	assert!(link(&body, "start")
-		.unwrap()
-		.ends_with("/opds/v2.0/catalog"));
-	assert!(link(&body, "self")
-		.unwrap()
-		.ends_with("/opds/v2.0/series/library-series-00?page=1"));
+	assert!(
+		link(&body, "start")
+			.unwrap()
+			.ends_with("/opds/v2.0/catalog")
+	);
+	assert!(
+		link(&body, "self")
+			.unwrap()
+			.ends_with("/opds/v2.0/series/library-series-00?page=1")
+	);
 }

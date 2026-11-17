@@ -8,7 +8,6 @@ export const cacheKeys = {
 	series: 'series',
 	seriesBooks: 'seriesBooks',
 	seriesById: 'seriesById',
-	seriesLinks: 'seriesLinks',
 	recentlyAddedSeries: 'recentlyAddedSeries',
 	libraries: 'libraries',
 	inProgress: 'continueReading',

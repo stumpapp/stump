@@ -1,14 +1,14 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	entity::{favorite_series, library, library_config, media, series},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
 	ExprTrait,
+	prelude::*,
+	sea_query::{OnConflict, Query},
 };
 use stump_core::{
 	image::{bump_series_thumbnail_fallbacks, generate_thumbnail_from_book},
@@ -201,7 +201,10 @@ impl SeriesMutation {
 				.await?
 				.ok_or("Series not found")?;
 
-		core.enqueue(StumpJob::series_scan(model.id, model.path, None))
+		let path = model.path.ok_or(
+			"Virtual series cannot be scanned as a directory; scan its library instead",
+		)?;
+		core.enqueue(StumpJob::series_scan(model.id, path, None))
 			.await?;
 
 		Ok(true)

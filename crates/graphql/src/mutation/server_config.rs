@@ -1,7 +1,7 @@
 use crate::{data::CoreContext, guard::PermissionGuard};
 use async_graphql::{Context, Object, Result};
 use models::{entity::server_config, shared::enums::UserPermission};
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{ActiveValue::Set, IntoActiveModel, prelude::*};
 
 #[derive(Default)]
 pub struct ServerConfigMutation;

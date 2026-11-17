@@ -1,9 +1,9 @@
 use crate::common::{
-	library::setup_library, series::setup_single_series_with_n_books, TestApp,
+	TestApp, library::setup_library, series::setup_single_series_with_n_books,
 };
 
 use chrono::Utc;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tests::fake_data;
 
 async fn setup() -> (TestApp, String) {

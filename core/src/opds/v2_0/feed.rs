@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
+	OPDSV2Error,
 	group::OPDSFeedGroup,
 	link::{OPDSLink, OPDSNavigationLink},
 	metadata::OPDSMetadata,
 	publication::OPDSPublication,
-	OPDSV2Error,
 };
 
 /// An OPDS 2.0 feed collection, considered the root of an OPDS 2.0 document.
@@ -91,25 +91,28 @@ mod tests {
 					.build()
 					.unwrap(),
 			)])
-			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title("Libraries".to_string())
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href("/opds/v2.0/libraries".to_string())
-						.rel(OPDSLinkRel::Subsection.item())
-						.build()
-						.unwrap(),
-				)
-				.build()
-				.unwrap()])
-			.groups(vec![OPDSFeedGroupBuilder::default()
-				.links(vec![OPDSLink::Link(
-					OPDSBaseLinkBuilder::default()
-						.href("/opds/v2.0/libraries".to_string())
-						.build()
-						.unwrap(),
-				)])
-				.navigation(vec![OPDSNavigationLinkBuilder::default()
+			.navigation(vec![
+				OPDSNavigationLinkBuilder::default()
+					.title("Libraries".to_string())
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href("/opds/v2.0/libraries".to_string())
+							.rel(OPDSLinkRel::Subsection.item())
+							.build()
+							.unwrap(),
+					)
+					.build()
+					.unwrap(),
+			])
+			.groups(vec![
+				OPDSFeedGroupBuilder::default()
+					.links(vec![OPDSLink::Link(
+						OPDSBaseLinkBuilder::default()
+							.href("/opds/v2.0/libraries".to_string())
+							.build()
+							.unwrap(),
+					)])
+					.navigation(vec![OPDSNavigationLinkBuilder::default()
 					.title("Marvel".to_string())
 					.base_link(
 						OPDSBaseLinkBuilder::default()
@@ -142,15 +145,16 @@ mod tests {
 						)
 						.build()
 						.unwrap()])
-				.metadata(
-					OPDSMetadataBuilder::default()
-						.title("Libraries".to_string())
-						.modified("2024-06-26".to_string())
-						.build()
-						.unwrap(),
-				)
-				.build()
-				.unwrap()])
+					.metadata(
+						OPDSMetadataBuilder::default()
+							.title("Libraries".to_string())
+							.modified("2024-06-26".to_string())
+							.build()
+							.unwrap(),
+					)
+					.build()
+					.unwrap(),
+			])
 			.metadata(
 				OPDSMetadataBuilder::default()
 					.title("Stump OPDS V2 Catalog".to_string())
@@ -176,37 +180,42 @@ mod tests {
 					.build()
 					.unwrap(),
 			)])
-			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title("Libraries".to_string())
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href("/opds/v2.0/libraries".to_string())
-						.rel(OPDSLinkRel::Subsection.item())
-						.build()
-						.unwrap(),
-				)
-				.build()
-				.unwrap()])
+			.navigation(vec![
+				OPDSNavigationLinkBuilder::default()
+					.title("Libraries".to_string())
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href("/opds/v2.0/libraries".to_string())
+							.rel(OPDSLinkRel::Subsection.item())
+							.build()
+							.unwrap(),
+					)
+					.build()
+					.unwrap(),
+			])
 			.allow_empty(false)
 			.build()
 			.unwrap_err();
 
-		assert!(error
-			.to_string()
-			.contains("OPDSFeed missing at least one group or publication"));
+		assert!(
+			error
+				.to_string()
+				.contains("OPDSFeed missing at least one group or publication")
+		);
 	}
 
 	#[test]
 	fn test_opds_feed_no_navigation_or_links_failure() {
 		let error = OPDSFeedBuilder::default()
-			.groups(vec![OPDSFeedGroupBuilder::default()
-				.links(vec![OPDSLink::Link(
-					OPDSBaseLinkBuilder::default()
-						.href("/opds/v2.0/libraries".to_string())
-						.build()
-						.unwrap(),
-				)])
-				.navigation(vec![OPDSNavigationLinkBuilder::default()
+			.groups(vec![
+				OPDSFeedGroupBuilder::default()
+					.links(vec![OPDSLink::Link(
+						OPDSBaseLinkBuilder::default()
+							.href("/opds/v2.0/libraries".to_string())
+							.build()
+							.unwrap(),
+					)])
+					.navigation(vec![OPDSNavigationLinkBuilder::default()
 					.title("Marvel".to_string())
 					.base_link(
 						OPDSBaseLinkBuilder::default()
@@ -239,21 +248,24 @@ mod tests {
 						)
 						.build()
 						.unwrap()])
-				.metadata(
-					OPDSMetadataBuilder::default()
-						.title("Libraries".to_string())
-						.modified("2024-06-26".to_string())
-						.build()
-						.unwrap(),
-				)
-				.build()
-				.unwrap()])
+					.metadata(
+						OPDSMetadataBuilder::default()
+							.title("Libraries".to_string())
+							.modified("2024-06-26".to_string())
+							.build()
+							.unwrap(),
+					)
+					.build()
+					.unwrap(),
+			])
 			.allow_empty(false)
 			.build()
 			.unwrap_err();
 
-		assert!(error
-			.to_string()
-			.contains("OPDSFeed missing at least one navigation link or link"));
+		assert!(
+			error
+				.to_string()
+				.contains("OPDSFeed missing at least one navigation link or link")
+		);
 	}
 }

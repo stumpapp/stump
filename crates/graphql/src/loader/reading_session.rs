@@ -1,7 +1,7 @@
 use async_graphql::dataloader::Loader;
 use itertools::Itertools;
 use models::{entity::reading_session, shared::enums::ReadingStatus};
-use sea_orm::{prelude::*, DatabaseConnection, ExprTrait, QueryOrder, QuerySelect};
+use sea_orm::{DatabaseConnection, ExprTrait, QueryOrder, QuerySelect, prelude::*};
 use std::{
 	cmp::Reverse,
 	collections::{HashMap, HashSet},

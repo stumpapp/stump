@@ -1,4 +1,8 @@
 use openidconnect::{
+	AdditionalClaims, AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken,
+	EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields,
+	IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier,
+	RedirectUrl, Scope, StandardErrorResponse, StandardTokenResponse, TokenResponse,
 	core::{
 		CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreErrorResponseType,
 		CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm,
@@ -6,10 +10,6 @@ use openidconnect::{
 		CoreRevocationErrorResponse, CoreTokenIntrospectionResponse, CoreTokenType,
 		CoreUserInfoClaims,
 	},
-	AdditionalClaims, AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken,
-	EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields,
-	IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier,
-	RedirectUrl, Scope, StandardErrorResponse, StandardTokenResponse, TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;

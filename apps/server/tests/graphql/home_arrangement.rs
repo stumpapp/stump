@@ -1,9 +1,9 @@
 use crate::common::TestApp;
 use models::entity::user_preferences;
 use sea_orm::{
-	sea_query::Expr, ActiveModelTrait, EntityTrait, IntoActiveModel, QuerySelect, Set,
+	ActiveModelTrait, EntityTrait, IntoActiveModel, QuerySelect, Set, sea_query::Expr,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 const QUERY: &str = r#"
 query {
@@ -114,11 +114,13 @@ async fn empty_home_input_hides_all_sections() {
 	let app = TestApp::new_with_default_user().await;
 	let hidden = update(&app, json!([])).await;
 	assert_eq!(hidden.as_array().unwrap().len(), 4);
-	assert!(hidden
-		.as_array()
-		.unwrap()
-		.iter()
-		.all(|section| section["visible"] == false));
+	assert!(
+		hidden
+			.as_array()
+			.unwrap()
+			.iter()
+			.all(|section| section["visible"] == false)
+	);
 }
 
 #[tokio::test]
@@ -138,9 +140,11 @@ async fn stored_home_sections_are_normalized_on_read() {
 		normalized[0],
 		json!({"visible": true, "config": {"__typename": "OnDeckBooks"}})
 	);
-	assert!(normalized.as_array().unwrap()[1..]
-		.iter()
-		.all(|section| section["visible"] == false));
+	assert!(
+		normalized.as_array().unwrap()[1..]
+			.iter()
+			.all(|section| section["visible"] == false)
+	);
 }
 
 #[tokio::test]
@@ -249,8 +253,7 @@ async fn unreadable_navigation_uses_its_own_defaults_and_can_be_saved() {
 		json!({"locked": false, "sections": [{"visible": false}]})
 	);
 	assert_eq!(
-		app.execute_gql(query, None).await["data"]["me"]["preferences"]
-			["navigationArrangement"],
+		app.execute_gql(query, None).await["data"]["me"]["preferences"]["navigationArrangement"],
 		saved["data"]["updateNavigationArrangement"]
 	);
 }

@@ -1,13 +1,13 @@
 use models::entity::reading_session;
-use sea_orm::{prelude::*, EntityTrait};
+use sea_orm::{EntityTrait, prelude::*};
 
 use crate::common::{
+	TestApp,
 	book::{
 		active_session_for_book, create_nth_readthrough, fudge_session_time,
 		update_progress,
 	},
 	library::setup_library,
-	TestApp,
 };
 
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};

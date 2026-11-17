@@ -1,11 +1,11 @@
 use axum::{
+	Router,
 	extract::{Path, State},
 	middleware,
 	routing::get,
-	Router,
 };
 use models::entity::user;
-use sea_orm::{prelude::*, ColumnTrait, QuerySelect};
+use sea_orm::{ColumnTrait, QuerySelect, prelude::*};
 use stump_core::fs_utils::ContentType;
 
 use crate::{

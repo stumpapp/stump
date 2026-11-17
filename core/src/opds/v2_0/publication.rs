@@ -5,18 +5,18 @@ use std::collections::HashMap;
 
 use derive_builder::Builder;
 use models::entity::{media_analysis, media_metadata};
-use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::{
-	config::StumpConfig, fs_utils::ContentType,
+	CoreResult, config::StumpConfig, fs_utils::ContentType,
 	media::processor::get_content_type_for_page,
-	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder, CoreError, CoreResult,
+	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder,
 };
 
 use super::{
-	entity::OPDSPublicationEntity,
+	entity::{OPDSPublicationEntity, OPDSSeries},
 	link::{
 		OPDSBaseLinkBuilder, OPDSImageLink, OPDSImageLinkBuilder, OPDSLink,
 		OPDSLinkFinalizer, OPDSLinkRel, OPDSLinkType,
@@ -24,7 +24,7 @@ use super::{
 	metadata::{
 		OPDSEntryBelongsTo, OPDSMetadata, OPDSMetadataBuilder, OPDSWebPubMetadata,
 	},
-	properties::{OPDSProperties, AUTH_ROUTE},
+	properties::{AUTH_ROUTE, OPDSProperties},
 	utils::OPDSV2QueryExt,
 };
 
@@ -71,14 +71,14 @@ impl OPDSPublication {
 		books: Vec<OPDSPublicationEntity>,
 	) -> CoreResult<Vec<Self>> {
 		let mut series_to_books_map = HashMap::new();
-		let mut series_id_to_series_map = HashMap::new();
 
 		for book in &books {
-			series_to_books_map
-				.entry(book.series.id.clone())
-				.or_insert_with(Vec::new)
-				.push(book.media.id.clone());
-			series_id_to_series_map.insert(book.series.id.clone(), book.series.clone());
+			if let Some(series) = &book.series {
+				series_to_books_map
+					.entry(series.id.clone())
+					.or_insert_with(Vec::new)
+					.push(book.media.id.clone());
+			}
 		}
 
 		let mut all_positions = HashMap::new();
@@ -92,13 +92,6 @@ impl OPDSPublication {
 		let mut publications = Vec::with_capacity(books.len());
 
 		for book in books {
-			let series = series_id_to_series_map
-				.get(&book.series.id)
-				.ok_or_else(|| {
-					CoreError::InternalError("Series not found in series map".to_string())
-				})?
-				.clone();
-
 			let links = OPDSPublication::links_for_book(&book, &finalizer)?;
 			let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
@@ -119,24 +112,11 @@ impl OPDSPublication {
 				.title(title)
 				.modified(OPDSMetadata::generate_modified())
 				.description(description)
-				.belongs_to(OPDSEntryBelongsTo::Series(
-					OPDSEntryBelongsToEntityBuilder::default()
-						.name(
-							series.metadata.and_then(|m| m.title).unwrap_or(series.name),
-						)
-						.position(position)
-						.links(vec![OPDSLink::Link(
-							OPDSBaseLinkBuilder::default()
-								.href(finalizer.format_link(format!(
-									"/opds/v2.0/series/{}",
-									book.series.id
-								)))
-								.rel(OPDSLinkRel::Subsection.item())
-								._type(OPDSLinkType::OpdsJson)
-								.build()?,
-						)])
-						.build()?,
-				))
+				.belongs_to(Self::series_membership(
+					book.series.as_ref(),
+					position,
+					&finalizer,
+				)?)
 				.webpub_metadata(OPDSWebPubMetadata::from_model(
 					media_metadata,
 					&finalizer,
@@ -163,10 +143,14 @@ impl OPDSPublication {
 		let links = OPDSPublication::links_for_book(&book, &finalizer)?;
 		let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
-		let positions = conn
-			.book_positions_in_series(vec![book.media.id.clone()], book.series.id.clone())
-			.await?;
-		let position = positions.get(&book.media.id).copied();
+		let position = if let Some(series) = &book.series {
+			conn.book_positions_in_series(vec![book.media.id.clone()], series.id.clone())
+				.await?
+				.get(&book.media.id)
+				.copied()
+		} else {
+			None
+		};
 
 		let metadata = book.metadata.clone().unwrap_or_default();
 		let title = metadata.title.clone().unwrap_or(book.media.name);
@@ -225,27 +209,11 @@ impl OPDSPublication {
 			.identifier(book.media.id.clone())
 			.modified(OPDSMetadata::generate_modified())
 			.description(description)
-			.belongs_to(OPDSEntryBelongsTo::Series(
-				OPDSEntryBelongsToEntityBuilder::default()
-					.name(
-						book.series
-							.metadata
-							.and_then(|m| m.title)
-							.unwrap_or(book.series.name),
-					)
-					.position(position)
-					.links(vec![OPDSLink::Link(
-						OPDSBaseLinkBuilder::default()
-							.href(finalizer.format_link(format!(
-								"/opds/v2.0/series/{}",
-								book.series.id
-							)))
-							.rel(OPDSLinkRel::Subsection.item())
-							._type(OPDSLinkType::OpdsJson)
-							.build()?,
-					)])
-					.build()?,
-			))
+			.belongs_to(Self::series_membership(
+				book.series.as_ref(),
+				position,
+				&finalizer,
+			)?)
 			.webpub_metadata(OPDSWebPubMetadata::from_model(media_metadata, &finalizer)?)
 			.build()?;
 
@@ -265,6 +233,38 @@ impl OPDSPublication {
 		Ok(publication)
 	}
 
+	fn series_membership(
+		series: Option<&OPDSSeries>,
+		position: Option<f64>,
+		finalizer: &OPDSLinkFinalizer,
+	) -> CoreResult<Option<OPDSEntryBelongsTo>> {
+		let Some(series) = series else {
+			return Ok(None);
+		};
+		Ok(Some(OPDSEntryBelongsTo::Series(
+			OPDSEntryBelongsToEntityBuilder::default()
+				.name(
+					series
+						.metadata
+						.as_ref()
+						.and_then(|m| m.title.clone())
+						.unwrap_or_else(|| series.name.clone()),
+				)
+				.position(position)
+				.links(vec![OPDSLink::Link(
+					OPDSBaseLinkBuilder::default()
+						.href(
+							finalizer
+								.format_link(format!("/opds/v2.0/series/{}", series.id)),
+						)
+						.rel(OPDSLinkRel::Subsection.item())
+						._type(OPDSLinkType::OpdsJson)
+						.build()?,
+				)])
+				.build()?,
+		)))
+	}
+
 	// TODO: we should pull from media analysis first
 	async fn images_for_book(
 		book: &OPDSPublicationEntity,
@@ -281,18 +281,20 @@ impl OPDSPublication {
 				);
 				Ok(vec![])
 			},
-			Ok(content_type) => Ok(vec![OPDSImageLinkBuilder::default()
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href(finalizer.format_link(format!(
-							"/opds/v2.0/books/{}/thumbnail",
-							book.media.id
-						)))
-						._type(OPDSLinkType::from(content_type))
-						.build()?
-						.with_auth(finalizer.format_link(AUTH_ROUTE)),
-				)
-				.build()?]),
+			Ok(content_type) => Ok(vec![
+				OPDSImageLinkBuilder::default()
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href(finalizer.format_link(format!(
+								"/opds/v2.0/books/{}/thumbnail",
+								book.media.id
+							)))
+							._type(OPDSLinkType::from(content_type))
+							.build()?
+							.with_auth(finalizer.format_link(AUTH_ROUTE)),
+					)
+					.build()?,
+			]),
 		}
 	}
 
@@ -365,6 +367,7 @@ mod tests {
 				hash: Some("hash".to_string()),
 				koreader_hash: None,
 				series_id: Some("1".to_string()),
+				library_id: "library-1".to_string(),
 				pages: 3,
 				modified_at: None,
 				size: 2000,
@@ -378,11 +381,11 @@ mod tests {
 				summary: Some("A cool book".to_string()),
 				..Default::default()
 			}),
-			series: OPDSSeries {
+			series: Some(OPDSSeries {
 				id: "1".to_string(),
 				name: "Series 1".to_string(),
 				metadata: None,
-			},
+			}),
 			reading_session: None,
 		}
 	}
@@ -464,9 +467,11 @@ mod tests {
 		// Verify serialization works and contains expected fields
 		let json = serde_json::to_value(&publications[0]).unwrap();
 		assert!(json["metadata"]["title"].as_str().is_some());
-		assert!(json["metadata"]["belongsTo"]["series"]["name"]
-			.as_str()
-			.is_some());
+		assert!(
+			json["metadata"]["belongsTo"]["series"]["name"]
+				.as_str()
+				.is_some()
+		);
 		assert!(json["links"].is_array());
 		assert!(json["images"].is_array());
 	}
@@ -475,11 +480,13 @@ mod tests {
 	async fn test_from_book() {
 		let book = mock_book();
 
-		let position_results = vec![BTreeMap::from([
-			("id".to_string(), Value::from("1")),
-			("position".to_string(), Value::from(1.0f64)),
-		])
-		.into_mock_row()];
+		let position_results = vec![
+			BTreeMap::from([
+				("id".to_string(), Value::from("1")),
+				("position".to_string(), Value::from(1.0f64)),
+			])
+			.into_mock_row(),
+		];
 
 		// Mock the page analysis query result
 		let page_analysis_results = vec![media_analysis::Model {
@@ -597,10 +604,12 @@ mod tests {
 		assert_eq!(images.len(), 1);
 
 		let json = serde_json::to_value(&images[0]).unwrap();
-		assert!(json["href"]
-			.as_str()
-			.unwrap()
-			.contains("/opds/v2.0/books/1/thumbnail"));
+		assert!(
+			json["href"]
+				.as_str()
+				.unwrap()
+				.contains("/opds/v2.0/books/1/thumbnail")
+		);
 	}
 
 	#[test]

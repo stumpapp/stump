@@ -1,5 +1,5 @@
 use async_graphql::Enum;
-use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
+use sea_orm::{DeriveActiveEnum, EnumIter, prelude::*};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
@@ -352,6 +352,58 @@ pub enum LibraryPattern {
 	#[default]
 	SeriesBased,
 	CollectionBased,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SeriesKind {
+	#[default]
+	Filesystem,
+	Virtual,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OrganizationMode {
+	#[default]
+	Filesystem,
+	Metadata,
 }
 
 #[derive(

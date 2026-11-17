@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use chrono::Utc;
 use models::{
 	entity::{book_club_book, book_club_discussion},
@@ -7,7 +7,7 @@ use models::{
 		enums::UserPermission,
 	},
 };
-use sea_orm::{prelude::*, Set, TransactionTrait};
+use sea_orm::{Set, TransactionTrait, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

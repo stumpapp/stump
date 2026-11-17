@@ -1,9 +1,9 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{book_club, book_club_book_suggestion},
 	shared::{book_club::BookClubSuggestionStatus, enums::UserPermission},
 };
-use sea_orm::{prelude::*, ColumnTrait, QueryFilter, QueryOrder, QueryTrait};
+use sea_orm::{ColumnTrait, QueryFilter, QueryOrder, QueryTrait, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext},

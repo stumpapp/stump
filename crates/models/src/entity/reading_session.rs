@@ -1,17 +1,17 @@
 use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{
+	ActiveValue, Condition, DeriveEntityModel, ExprTrait, FromJsonQueryResult,
+	FromQueryResult, JoinType, QueryOrder, QuerySelect,
 	entity::prelude::*,
 	prelude::async_trait::async_trait,
 	sea_query::{Alias, ConditionType, Query, SelectStatement},
-	ActiveValue, Condition, DeriveEntityModel, ExprTrait, FromJsonQueryResult,
-	FromQueryResult, JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
 	entity::reading_device,
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 

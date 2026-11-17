@@ -2,8 +2,8 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Breadcrumbs, ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Helmet } from 'react-helmet'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { NoLibraries } from '@/components/library'
 import { OwlEmptyState } from '@/components/Owl'
@@ -70,10 +70,7 @@ export default function HomeScene() {
 
 	const helmet = (
 		<>
-			<Helmet>
-				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
-				<title>Stump | {'Home'}</title>
-			</Helmet>
+			<AppTitle title="Home" />
 
 			<PageHeader>
 				<Breadcrumbs segments={[{ label: translate('shared.common.home') }]} />

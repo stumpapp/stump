@@ -49,6 +49,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
+			organizationMode
 			libraryType
 			thumbnailConfig {
 				__typename

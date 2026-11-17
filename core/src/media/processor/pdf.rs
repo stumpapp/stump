@@ -1,3 +1,4 @@
+use models::shared::enums::OrganizationMode;
 use std::{
 	collections::HashMap,
 	io::Cursor,
@@ -14,14 +15,14 @@ use pdfium_render::prelude::{
 use crate::{
 	config::StumpConfig,
 	fs_utils::{
+		ContentType, FileParts, PathUtils,
 		archive::create_zip_archive,
 		hash::{self, generate_koreader_hash},
-		ContentType, FileParts, PathUtils,
 	},
 	image::into_image_format,
 	media::processor::{
-		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
-		MediaProcessorOptions, ProcessedMediaFile,
+		AnalyzedPage, GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
+		ProcessedMediaFile, error::MediaProcessorError,
 	},
 	metadata::ProcessedMediaMetadata,
 };
@@ -76,6 +77,7 @@ impl MediaProcessor for PdfProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		_organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		process_metadata_internal(path, &self.config.pdfium_path)
 	}

@@ -2,7 +2,7 @@ use models::error::EntityError;
 use sea_orm;
 
 use crate::{
-	media::processor::error::MediaProcessorError, metadata::MetadataError, CoreError,
+	CoreError, media::processor::error::MediaProcessorError, metadata::MetadataError,
 };
 
 #[derive(Debug, thiserror::Error)]

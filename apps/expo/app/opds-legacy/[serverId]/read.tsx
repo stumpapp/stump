@@ -2,7 +2,6 @@ import { useSDK } from '@stump/client'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo } from 'react'
 
@@ -176,13 +175,6 @@ export default function Screen() {
 		}),
 		[sdk],
 	)
-
-	useEffect(() => {
-		NavigationBar.setVisibilityAsync('hidden')
-		return () => {
-			NavigationBar.setVisibilityAsync('visible')
-		}
-	}, [])
 
 	return (
 		<ImageBasedReader

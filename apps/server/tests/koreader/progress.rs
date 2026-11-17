@@ -1,6 +1,6 @@
 use crate::common::{
-	api_key::create_api_key_for_user, library::setup_library,
-	series::setup_single_series_with_n_books, TestApp,
+	TestApp, api_key::create_api_key_for_user, library::setup_library,
+	series::setup_single_series_with_n_books,
 };
 use models::{
 	entity::{media, reading_device, reading_session, user},
@@ -10,8 +10,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
-	IntoActiveModel, PaginatorTrait, QueryFilter,
+	ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel,
+	PaginatorTrait, QueryFilter, prelude::Decimal,
 };
 use serde_json::json;
 use tests::fake_data;

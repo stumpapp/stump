@@ -8,7 +8,7 @@ use std::vec;
 use chrono::{self, DateTime, FixedOffset};
 use models::entity::{library, series};
 use urlencoding::encode;
-use xml::{writer::XmlEvent, EventWriter};
+use xml::{EventWriter, writer::XmlEvent};
 
 use crate::config::StumpConfig;
 use crate::error::CoreResult;

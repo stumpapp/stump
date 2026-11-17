@@ -14,7 +14,11 @@
 	},
 	"exports": {
 		".": "./src/index.ts",
-		"./assets/*": "./src/assets/*"
+		"./assets/*": "./src/assets/*",
+		"./components": "./src/components/index.ts",
+		"./hooks": "./src/hooks/index.ts",
+		"./stores": "./src/stores/index.ts",
+		"./utils": "./src/utils/index.ts"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.1.0",

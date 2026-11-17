@@ -2,9 +2,9 @@ import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
 import DynamicCardGrid from '@/components/container/DynamicCardGrid'
@@ -44,25 +44,40 @@ export default function LibraryBooksSceneContainer() {
 function LibraryBooksScene() {
 	const { library } = useLibraryContext()
 	const layoutKey = `library-${library.id}-books`
-	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
-		useBooksLayout(
-			layoutKey,
-			useShallow((state) => ({
-				columns: state.columns,
-				layoutMode: state.layout,
-				persistedOrdering: state.ordering,
-				setColumns: state.setColumns,
-				setLayout: state.setLayout,
-				setPersistedOrdering: state.setOrdering,
-			})),
-		)
+	const {
+		layoutMode,
+		setLayout,
+		columns,
+		setColumns,
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	} = useBooksLayout(
+		layoutKey,
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			persistedOrdering: state.ordering,
+			persistedPageSize: state.pageSize,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+			setPersistedOrdering: state.setOrdering,
+			setPersistedPageSize: state.setPageSize,
+		})),
+	)
 	const {
 		filters: mediaFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
+	} = useFilterScene({
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	})
 	const filters = mediaFilters as MediaFilterInput
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)
@@ -145,9 +160,7 @@ function LibraryBooksScene() {
 		),
 		{
 			filter: {
-				series: {
-					libraryId: { eq: library.id },
-				},
+				libraryId: { eq: library.id },
 				_and: resolvedFilters,
 				_or: searchFilter,
 			},
@@ -275,9 +288,7 @@ function LibraryBooksScene() {
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | {library.name || ''}</title>
-				</Helmet>
+				<AppTitle title={library.name} />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

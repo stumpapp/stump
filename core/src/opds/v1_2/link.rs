@@ -4,7 +4,7 @@
 //! It also defines the [`OpdsStreamLink`] struct for representing an OPDS page steaming extension
 //! link element as specified at https://github.com/anansi-project/opds-pse/blob/master/v1.2.md
 
-use xml::{writer::XmlEvent, EventWriter};
+use xml::{EventWriter, writer::XmlEvent};
 
 use crate::{error::CoreResult, fs_utils::ContentType};
 

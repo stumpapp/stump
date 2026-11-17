@@ -15,7 +15,7 @@ pub enum Commands {
 	#[command(subcommand)]
 	Account(account::Account),
 	#[command(subcommand)]
-	Library(library::LibraryCommand),
+	Library(library::Library),
 	#[command(subcommand)]
 	System(system::System),
 }

@@ -68,8 +68,11 @@ export default defineConfig({
 		react(),
 		babel({ presets: [reactCompilerPreset()] }),
 		tsconfigPaths({
-			tsConfigPath: fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url)),
-			// ^ without this the alias imports from packages/browser fail to resolve
+			tsConfigPath: [
+				fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url)),
+				'tsconfig.json',
+				'../../packages/browser/tsconfig.json',
+			],
 		}),
 		compression({
 			include: [/\.(js|mjs|json|css|html|svg|xml|wasm)$/i],

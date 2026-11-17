@@ -1,4 +1,4 @@
-use crate::{metadata::series::ProcessedSeriesMetadata, CoreError, CoreResult};
+use crate::{CoreError, CoreResult, metadata::series::ProcessedSeriesMetadata};
 use models::{
 	entity::{series, series_metadata},
 	shared::enums::FileStatus,
@@ -46,7 +46,7 @@ impl SeriesBuilder {
 		tracing::debug!(file_name, path_str, ?metadata, "Parsed series information");
 
 		let series = series::ActiveModel {
-			path: Set(path_str),
+			path: Set(Some(path_str)),
 			name: Set(file_name),
 			library_id: Set(Some(self.library_id)),
 			status: Set(FileStatus::Ready),

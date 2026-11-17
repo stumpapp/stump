@@ -6,15 +6,15 @@ use std::{
 
 use apalis::prelude::MemoryStorage;
 use models::entity::{library, library_config, media, series};
-use sea_orm::{prelude::*, DatabaseConnection};
+use sea_orm::{DatabaseConnection, prelude::*};
 use stump_core::{
+	CoreEvent,
 	config::StumpConfig,
 	database::connect_at,
 	job::{
 		ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt, StumpJob, WorkingState,
 	},
 	scan::library::{LibraryScanJob, LibraryScanOutput},
-	CoreEvent,
 };
 use tempfile::TempDir;
 use tests::{fake_data, fixtures::get_test_epub_path};
@@ -186,7 +186,7 @@ pub struct Snapshot {
 
 impl Snapshot {
 	pub fn series_at(&self, path: &str) -> Option<&series::Model> {
-		self.series.iter().find(|s| s.path == path)
+		self.series.iter().find(|s| s.path.as_deref() == Some(path))
 	}
 
 	pub fn books_in(&self, series_id: &str) -> usize {
@@ -228,7 +228,13 @@ impl Snapshot {
 		let mut series: Vec<_> = self
 			.series
 			.iter()
-			.map(|s| (s.id.as_str(), s.path.as_str(), s.is_oneshot))
+			.map(|s| {
+				(
+					s.id.as_str(),
+					s.path.as_deref().unwrap_or_default(),
+					s.is_oneshot,
+				)
+			})
 			.collect();
 		let mut media: Vec<_> = self
 			.media

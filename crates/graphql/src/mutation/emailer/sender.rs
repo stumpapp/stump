@@ -8,7 +8,7 @@ use async_graphql::Result;
 use email::{
 	AttachmentPayload, EmailContentType, EmailResult, EmailerClient, EmailerClientConfig,
 };
-use sea_orm::{prelude::*, IntoActiveModel, NotSet, Set};
+use sea_orm::{IntoActiveModel, NotSet, Set, prelude::*};
 use stump_core::{
 	fs_utils::{ContentType, FileParts, PathUtils},
 	utils::encryption::decrypt_string,
@@ -419,6 +419,7 @@ mod tests {
 			path: "path/to/book1.epub".to_string(),
 			status: FileStatus::Ready,
 			series_id: None,
+			library_id: "library-1".to_string(),
 			deleted_at: None,
 			thumbnail_meta: None,
 			thumbnail_path: None,

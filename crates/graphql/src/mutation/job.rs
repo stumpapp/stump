@@ -3,12 +3,12 @@ use crate::{
 	guard::PermissionGuard,
 	object::job::{DeleteJobAssociatedLogs, DeleteJobHistory},
 };
-use async_graphql::{Context, Error, ErrorExtensions, Object, Result, ID};
+use async_graphql::{Context, Error, ErrorExtensions, ID, Object, Result};
 use models::{
 	entity::{job, log},
 	shared::enums::{JobStatus, UserPermission},
 };
-use sea_orm::{prelude::*, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{EntityTrait, QueryFilter, QuerySelect, prelude::*};
 
 #[derive(Default)]
 pub struct JobMutation;

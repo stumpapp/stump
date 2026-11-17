@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native'
 import { useGraphQLMutation } from '@stump/client'
 import {
 	BookByIdQuery,
@@ -16,7 +17,7 @@ import { Platform } from 'react-native'
 import { toast } from 'sonner-native'
 
 import { SystemAlert } from '~/components/ui/system-alert'
-import { db, downloadedFiles } from '~/db'
+import { db, downloadedFiles, readProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -74,6 +75,7 @@ export default function BookMenu({ data }: Props) {
 	const { translate } = useTranslate()
 	const client = useQueryClient()
 	const book = useFragment(fragment, data)
+	const series = book.series
 
 	const { deleteBook: deleteBookRpc } = useDownload()
 
@@ -116,11 +118,32 @@ export default function BookMenu({ data }: Props) {
 			// TODO: would be better to have a little bit smarter cache invalidation here,
 			// im casting a wide net because i don't want to have to figure out where i am
 			// in the router (e.g., did i come from books? a series? etc)
-			client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
-			client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+			...(book.series
+				? [
+						client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
+						client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+					]
+				: []),
 			client.invalidateQueries({ queryKey: ['booksStats', serverID], exact: false }), // stats
 			client.invalidateQueries({ queryKey: ['books', serverID], exact: false }), // server books
 		])
+	}
+
+	const deleteLocalProgress = async () => {
+		try {
+			await db
+				.delete(readProgress)
+				.where(and(eq(readProgress.bookId, book.id), eq(readProgress.serverId, serverID)))
+		} catch (error) {
+			console.error('Failed to delete local progress', {
+				bookId: book.id,
+				serverId: serverID,
+				error,
+			})
+			Sentry.captureException(error, { extra: { bookId: book.id, serverId: serverID } })
+		}
+
+		await onSuccess()
 	}
 
 	const onError = (title: string, error: unknown) => {
@@ -130,11 +153,11 @@ export default function BookMenu({ data }: Props) {
 	}
 
 	const { mutate: completeBook } = useGraphQLMutation(completedMutation, {
-		onSuccess,
+		onSuccess: deleteLocalProgress,
 		onError: (error) => onError(translate('shared.bookActions.markAsRead.failure'), error),
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
-		onSuccess,
+		onSuccess: deleteLocalProgress,
 		onError: (error) => onError(translate('shared.bookActions.clearProgress.failure'), error),
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
@@ -266,19 +289,21 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/stump/${book.id}/libraries/${book.library.id}`)}
+							onPress={() => router.push(`/stump/${serverID}/libraries/${book.library.id}`)}
 							subtitle={book.library.name}
 						>
 							{translate('shared.bookActions.goToLibrary')}
 						</Stack.Toolbar.MenuAction>
 
-						<Stack.Toolbar.MenuAction
-							icon="arrow.up.right"
-							onPress={() => router.push(`/stump/${book.id}/series/${book.series.id}`)}
-							subtitle={book.series.resolvedName}
-						>
-							{translate('shared.bookActions.goToSeries')}
-						</Stack.Toolbar.MenuAction>
+						{series && (
+							<Stack.Toolbar.MenuAction
+								icon="arrow.up.right"
+								onPress={() => router.push(`/stump/${serverID}/series/${series.id}`)}
+								subtitle={series.resolvedName}
+							>
+								{translate('shared.bookActions.goToSeries')}
+							</Stack.Toolbar.MenuAction>
+						)}
 
 						{!isUntouched && (
 							<Stack.Toolbar.Menu inline>

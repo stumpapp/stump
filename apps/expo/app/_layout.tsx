@@ -5,14 +5,15 @@ import * as Sentry from '@sentry/react-native'
 import { initDateFnsLocale, LocaleProvider } from '@stump/i18n'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import * as Localization from 'expo-localization'
+import { NavigationBar } from 'expo-navigation-bar'
 import { Stack, useNavigationContainerRef } from 'expo-router'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from 'expo-router/react-navigation'
 import * as SplashScreen from 'expo-splash-screen'
+import { StatusBar } from 'expo-status-bar'
 import LottieView from 'lottie-react-native'
 import { vars } from 'nativewind'
 import * as React from 'react'
 import { AppState, Platform, View } from 'react-native'
-import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -28,7 +29,6 @@ import { SystemAlertHost } from '~/components/ui/system-alert'
 import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
-import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, Shade, toRgbChannels, useColors, usePalette } from '~/lib/constants'
 import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
@@ -115,10 +115,6 @@ export default function RootLayout() {
 		hasRestoredTheme.current = true
 		setIsColorSchemeLoaded(true)
 	}, [setColorScheme])
-
-	React.useEffect(() => {
-		setAndroidNavigationBar(isDarkBackground ? 'dark' : 'light')
-	}, [isDarkBackground])
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -224,14 +220,17 @@ export default function RootLayout() {
 								<View className="flex-1" style={accentVars}>
 									{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
 									<KeyboardProvider>
-										<SystemBars
+										<StatusBar style={isDarkBackground ? 'light' : 'dark'} hidden={hideStatusBar} />
+										<NavigationBar
 											style={isDarkBackground ? 'light' : 'dark'}
-											hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+											hidden={hideNavigationBar}
 										/>
 
 										<Stack
 											screenOptions={{
 												animation: animationEnabled ? 'default' : 'none',
+												statusBarHidden: hideStatusBar,
+												statusBarStyle: isDarkBackground ? 'light' : 'dark',
 												contentStyle: {
 													backgroundColor: colors.background.DEFAULT,
 												},

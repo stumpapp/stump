@@ -1,18 +1,18 @@
 use axum::{
+	Extension, Router,
 	extract::{Path, Request, State},
 	middleware::{self, Next},
 	response::{Json, Response},
 	routing::{get, put},
-	Extension, Router,
 };
 use chrono::Utc;
 use graphql::data::AuthContext;
 use models::{
 	entity::{media, reading_device, reading_session},
-	services::reading_progress::{upsert_reading_session, NormalizedProgression},
+	services::reading_progress::{NormalizedProgression, upsert_reading_session},
 	shared::enums::{ReadingStatus, UserPermission},
 };
-use sea_orm::{prelude::*, sea_query::OnConflict, QueryOrder, Set, TransactionTrait};
+use sea_orm::{QueryOrder, Set, TransactionTrait, prelude::*, sea_query::OnConflict};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

@@ -18,7 +18,7 @@ const BOOKS: [(&str, Option<f64>); 11] = [
 use models::entity::{media, series};
 use tests::fake_data;
 
-use crate::common::{library::setup_library, TestApp};
+use crate::common::{TestApp, library::setup_library};
 
 pub async fn create_murderbot(app: &TestApp) -> (series::Model, Vec<media::Model>) {
 	let conn = app.conn();

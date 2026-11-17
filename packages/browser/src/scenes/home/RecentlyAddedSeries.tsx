@@ -25,22 +25,7 @@ const query = graphql(`
 				oneshotBook {
 					id
 				}
-				media(take: 2, skip: 1) {
-					id
-					resolvedName
-					thumbnail {
-						url
-						metadata {
-							averageColor
-							colors {
-								color
-								percentage
-							}
-							thumbhash
-						}
-					}
-				}
-				thumbnail {
+				stackedThumbnails {
 					url
 					metadata {
 						averageColor
@@ -142,7 +127,7 @@ function RecentlyAddedSeries() {
 					subtitle={formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
 					isMissing={series.status === 'MISSING'}
 					width={cardWidth}
-					thumbnailData={[series.thumbnail, ...series.media.map((m) => m.thumbnail)]}
+					thumbnailData={series.stackedThumbnails}
 					oneshotBookId={series.oneshotBook?.id}
 				/>
 			)}

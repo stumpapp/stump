@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::{prelude::*, ActiveValue};
+use sea_orm::{ActiveValue, prelude::*};
 
 use crate::entity::user::{self, AuthUser};
 

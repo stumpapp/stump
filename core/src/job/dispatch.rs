@@ -3,10 +3,11 @@ use std::{fmt::Debug, sync::Arc};
 use apalis::prelude::Data;
 use async_graphql::Union;
 use models::shared::{enums::JobStatus, image_processor_options::ImageProcessorOptions};
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de};
 use uuid::Uuid;
 
 use crate::{
+	CoreEvent,
 	event::JobStarted,
 	image::thumbnail::{
 		PlaceholderGenerationJob, PlaceholderGenerationJobConfig,
@@ -14,9 +15,9 @@ use crate::{
 		ThumbnailGenerationJobParams, ThumbnailGenerationOutput,
 	},
 	job::{
+		JobLifecycle, JobProgress, WorkingState,
 		context::{ApalisWorkerState, JobContext},
 		error::JobError,
-		JobLifecycle, JobProgress, WorkingState,
 	},
 	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, AnalyzeMediaOutput},
 	metadata::provider::{
@@ -27,7 +28,6 @@ use crate::{
 		options::ScanOptions,
 		series::{SeriesScanJob, SeriesScanOutput},
 	},
-	CoreEvent,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Union)]

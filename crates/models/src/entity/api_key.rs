@@ -1,11 +1,11 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::{async_trait::async_trait, *},
 	ActiveValue, FromQueryResult, JoinType, QuerySelect,
+	entity::prelude::{async_trait::async_trait, *},
 };
 
 use crate::{
-	prefixer::{parse_query_to_model, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model},
 	shared::api_key::APIKeyPermissions,
 };
 

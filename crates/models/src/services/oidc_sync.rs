@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use sea_orm::{
-	prelude::*, ActiveValue, ConnectionTrait, ExprTrait, IntoActiveModel, QuerySelect,
+	ActiveValue, ConnectionTrait, ExprTrait, IntoActiveModel, QuerySelect, prelude::*,
 };
 
 use crate::{
@@ -243,7 +243,7 @@ mod tests {
 		shared::{enums::UserPermission, permission_set::PermissionSet},
 	};
 
-	use sea_orm::{prelude::*, ActiveValue};
+	use sea_orm::{ActiveValue, prelude::*};
 	use tests::{db::test_database, fake_data};
 
 	/// should only sync groups if no mapping for permissions is provided

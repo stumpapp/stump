@@ -19,6 +19,7 @@ import {
 export const seriesLayoutQuery = graphql(`
 	query SeriesLayout($id: ID!) {
 		seriesById(id: $id) {
+			kind
 			id
 			path
 			library {

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use axum::{
+	Extension, Json, Router,
 	extract::{Query, State},
 	response::Redirect,
 	routing::get,
-	Extension, Json, Router,
 };
 use chrono::Utc;
 use models::{
@@ -14,8 +14,8 @@ use models::{
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
-	entity::prelude::DateTimeWithTimeZone, ColumnTrait, ConnectionTrait, EntityTrait,
-	PaginatorTrait, QueryFilter, Set, TransactionTrait,
+	ColumnTrait, ConnectionTrait, EntityTrait, PaginatorTrait, QueryFilter, Set,
+	TransactionTrait, entity::prelude::DateTimeWithTimeZone,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::image::thumbnail::generate_image_metadata_from_bytes;
@@ -25,8 +25,8 @@ use openidconnect::PkceCodeChallenge;
 
 use crate::{
 	config::{
-		jwt::{create_jwt_auth, JwtTokenPair},
-		oidc::{exchange_code_for_claims, get_oidc_authorize_url, OidcProvider},
+		jwt::{JwtTokenPair, create_jwt_auth},
+		oidc::{OidcProvider, exchange_code_for_claims, get_oidc_authorize_url},
 		session::SESSION_USER_KEY,
 		state::AppState,
 	},

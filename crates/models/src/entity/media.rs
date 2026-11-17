@@ -4,11 +4,12 @@ use async_trait::async_trait;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QuerySelect,
+	ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect,
+	prelude::*, sea_query::NullOrdering,
 };
 
 use crate::{
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::{
 		enums::FileStatus,
 		ordering::{OrderDirection, OrderingField},
@@ -17,7 +18,7 @@ use crate::{
 
 use super::{
 	book_club_book, book_club_book_suggestion, book_club_member_favorite_book, bookmark,
-	library_access, media_analysis, media_annotation, media_metadata, media_tag,
+	library, library_access, media_analysis, media_annotation, media_metadata, media_tag,
 	metadata_fetch_record, reading_list_item, reading_session, review, series,
 	series_metadata, user::AuthUser,
 };
@@ -66,6 +67,11 @@ pub struct Model {
 	/// expected that all media will belong to a series
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series_id: Option<String>,
+	/// The unique identifier of the library that the media belongs to
+	#[sea_orm(column_type = "Text")]
+	#[graphql(skip)]
+	#[ordering(skip)]
+	pub library_id: String,
 	/// The timestamp of the last time the media was updated. This will be set during creation, as well
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub updated_at: Option<DateTimeWithTimeZone>,
@@ -118,6 +124,15 @@ pub struct Model {
 	)]
 	#[graphql(skip)]
 	pub series: BelongsTo<Option<series::Entity>>,
+	#[sea_orm(
+		belongs_to,
+		from = "library_id",
+		to = "id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	#[graphql(skip)]
+	pub library: BelongsTo<library::Entity>,
 	#[sea_orm(has_many, relation_enum = "Analysis")]
 	#[graphql(skip)]
 	pub analyses: HasMany<media_analysis::Entity>,
@@ -197,7 +212,7 @@ fn apply_age_restriction_filter(
 }
 
 fn apply_series_metadata_join(query: Select<Entity>) -> Select<Entity> {
-	query.inner_join(series::Entity).join_rev(
+	query.left_join(series::Entity).join_rev(
 		JoinType::LeftJoin,
 		series_metadata::Entity::belongs_to(series::Entity)
 			.from(series_metadata::Column::SeriesId)
@@ -207,12 +222,27 @@ fn apply_series_metadata_join(query: Select<Entity>) -> Select<Entity> {
 }
 
 fn apply_library_access_filter(query: Select<Entity>, user: &AuthUser) -> Select<Entity> {
-	query.filter(
-		series::Column::LibraryId.in_subquery(library_access::Entity::for_user(user)),
-	)
+	query.filter(Column::LibraryId.in_subquery(library_access::Entity::for_user(user)))
 }
 
 impl Entity {
+	/// A selection to order media according to:
+	///
+	/// 1. series number (nulls last)
+	/// 2. name
+	///
+	/// This is the order regardless of whether its series are virtual
+	pub fn order_in_series(query: Select<Entity>) -> Select<Entity> {
+		query
+			.order_by_with_nulls(
+				media_metadata::Column::Number,
+				sea_orm::Order::Asc,
+				NullOrdering::Last,
+			)
+			.order_by_asc(Column::Name)
+			.order_by_asc(Column::Id)
+	}
+
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		let select = Entity::find().left_join(media_metadata::Entity);
 		let select = apply_series_metadata_join(select);
@@ -324,7 +354,8 @@ pub struct MediaIdentWithSeriesId {
 pub struct MediaThumbSelect {
 	pub id: String,
 	pub path: String,
-	pub series_id: String,
+	pub library_id: String,
+	pub series_id: Option<String>,
 	pub thumbnail_path: Option<String>,
 	pub thumbnail_meta: Option<ImageMetadata>,
 }
@@ -334,6 +365,7 @@ impl MediaThumbSelect {
 		vec![
 			Column::Id,
 			Column::Path,
+			Column::LibraryId,
 			Column::SeriesId,
 			Column::ThumbnailPath,
 			Column::ThumbnailMeta,
@@ -346,7 +378,8 @@ impl From<Model> for MediaThumbSelect {
 		Self {
 			id: model.id,
 			path: model.path,
-			series_id: model.series_id.unwrap_or_default(),
+			library_id: model.library_id,
+			series_id: model.series_id,
 			thumbnail_path: model.thumbnail_path,
 			thumbnail_meta: model.thumbnail_meta,
 		}
@@ -421,8 +454,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
         );
 		let mut user = get_default_user();
 		user.age_restriction = Some(age_restriction::Model {
@@ -435,8 +468,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"# +
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"# +
             r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
         );
 	}
@@ -448,8 +481,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') AND "media"."id" = '123'"#
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') AND "media"."id" = '123'"#
         );
 	}
 
@@ -460,8 +493,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-			r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') AND "series"."id" = '123'"#
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+			r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42') AND "series"."id" = '123'"#
 		);
 	}
 
@@ -472,8 +505,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
             );
 	}
 
@@ -484,8 +517,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "media"."id" = '123' AND "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."id" = '123' AND "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"#
             );
 	}
 
@@ -502,8 +535,8 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
-            r#"WHERE "series"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"# +
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."library_id" IN (SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42')"# +
             r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
         );
 	}

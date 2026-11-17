@@ -3,15 +3,15 @@ use std::str::FromStr;
 use clap::Subcommand;
 use dialoguer::Confirm;
 use models::entity::{refresh_token, server_config};
-use sea_orm::{prelude::*, ConnectionTrait, DatabaseBackend, Statement};
+use sea_orm::{ConnectionTrait, DatabaseBackend, Statement, prelude::*};
 use stump_core::{
 	config::StumpConfig,
-	database::{connect, JournalMode},
+	database::{JournalMode, connect},
 	utils::encryption,
 };
 
 use super::default_progress_spinner;
-use crate::{error::CliResult, CliError};
+use crate::{CliError, error::CliResult};
 
 /// Subcommands for interacting with the system commands
 #[derive(Subcommand, Debug)]

@@ -1,5 +1,5 @@
 use chrono::Utc;
-use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*, prelude::async_trait::async_trait};
 
 use super::user;
 

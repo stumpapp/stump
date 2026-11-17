@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use sea_orm::{prelude::*, Condition, FromQueryResult, QueryOrder};
+use sea_orm::{Condition, FromQueryResult, QueryOrder, prelude::*};
 
 use super::{
 	reading_list_item, reading_list_rule,

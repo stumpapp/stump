@@ -379,7 +379,15 @@ mod tests {
 	async fn test_first_sync_standalones() {
 		let db = test_database().await;
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 		let book = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),

@@ -15,10 +15,7 @@ use models::{
 		api_key::{self, APIKeyWithUser},
 		user::{self, AuthUser},
 	},
-	shared::{
-		api_key::API_KEY_PREFIX, enums::UserPermission, image::ImageRef,
-		permission_set::PermissionSet,
-	},
+	shared::{api_key::API_KEY_PREFIX, enums::UserPermission, image::ImageRef},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use reqwest::Method;
@@ -494,6 +491,7 @@ impl IntoResponse for OPDSBasicAuth {
 
 #[cfg(test)]
 mod tests {
+	use models::shared::permission_set::PermissionSet;
 
 	use super::*;
 

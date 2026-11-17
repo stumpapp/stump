@@ -657,10 +657,10 @@
 			"diskUsage": "Schijfgebruik"
 		},
 		"noLibraries": {
-			"heading": "Hier valt niks te zien",
+			"heading": "Je Hebt Geen Bibliotheken",
 			"message": {
-				"create": "Maak een bibliotheek om te beginnen",
-				"wait": "Zodra er bibliotheken zijn aangemaakt, worden ze hier weergegeven"
+				"create": "Zodra je een bibliotheek hebt aangemaakt, verschijnt hier de inhoud",
+				"wait": "Zodra een bibliotheek is aangemaakt, verschijnt hier de inhoud"
 			},
 			"links": {
 				"create": "Bibliotheek aanmaken",
@@ -977,11 +977,17 @@
 					"options": {
 						"grayscale": "Grijstinten",
 						"averageColor": "Gemiddelde Kleur",
-						"colorful": "Kleurrijk"
+						"colorful": "Kleurrijk",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Miniatuur Formaat Wijzigen"
+					"label": "Miniatuur Formaat Wijzigen",
+					"options": {
+						"cover": "Vullen",
+						"stretch": "Uitrekken",
+						"fit": "Passend maken"
+					}
 				}
 			},
 			"reading": {
@@ -989,12 +995,71 @@
 					"errors": {
 						"minimumValue": "Moet tenminste 1 seconde zijn",
 						"integer": "Moet een getal zijn"
-					}
-				}
+					},
+					"label": "Paginaweergave Seconde Limiet"
+				},
+				"label": "Lezen",
+				"preferNativePdf": "Liever Originele PDF",
+				"preferMinimalReader": "Liever Minimale Leesmodus",
+				"disableDismissGesture": "Veeggebaar Voor Negeren Uitzetten",
+				"incognitoReading": "Incognito Lezen"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Functies in Stump zijn optioneel en kunnen worden uitgeschakeld als u ze niet nodig hebt"
+				"description": "Functies in Stump zijn optioneel en kunnen worden uitgeschakeld als u ze niet nodig hebt",
+				"bookClubsEnabled": "Boekenclub Functies"
+			},
+			"autoSyncLocalData": "Synchroniseer Lokale Data Automatisch",
+			"tintListBackground": "Geef Lijstachtergronden Tint",
+			"management": {
+				"label": "Beheren",
+				"dataUsage": {
+					"label": "Gegevensgebruik",
+					"noServersAdded": "Geen Servers Toegevoegd",
+					"nonStumpData": "Gegevens Buiten Stump",
+					"serversTotal": "Totaal Servers",
+					"totalFiles": "Totaal Bestanden",
+					"totalSize": "Totaal Grootte",
+					"deleteDownloads": {
+						"label": "Verwijder Downloads",
+						"confirmation": "Weet je zeker dat je alle downloads van {{serverName}} wil verwijderen?",
+						"deleteFailed": {
+							"title": "Verwijderen Mislukt",
+							"description": "Er is een fout opgetreden bij het verwijderen van alle downloads van {{serverName}}"
+						}
+					},
+					"noDownloads": "Geen bestanden gedownload voor deze server",
+					"storedPreferences": {
+						"label": "Opgeslagen Voorkeuren",
+						"description": "Overige data zoals boekvoorkeuren, leestimers, etc"
+					},
+					"clearPreferences": "Wis Voorkeuren"
+				}
+			},
+			"debug": {
+				"label": "Debuggen",
+				"clearCache": {
+					"label": "Cache Leegmaken",
+					"memory": {
+						"button": "Geheugen",
+						"success": "Geheugencache Leeggemaakt"
+					},
+					"disk": {
+						"button": "Schijf",
+						"success": "Schijfcache Leeggemaakt"
+					}
+				},
+				"deleteDatabase": {
+					"label": "Verwijder Database",
+					"success": {
+						"title": "Database Verwijderd",
+						"description": "Start de app opnieuw op"
+					},
+					"error": {
+						"title": "Verwijderen Mislukt",
+						"description": "Er is een fout opgetreden bij het verwijderen van de database"
+					}
+				}
 			}
 		}
 	}

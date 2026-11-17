@@ -2,9 +2,9 @@ import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
 import DynamicCardGrid from '@/components/container/DynamicCardGrid'
@@ -288,9 +288,7 @@ function LibraryBooksScene() {
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | {library.name || ''}</title>
-				</Helmet>
+				<AppTitle title={library.name} />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

@@ -1,7 +1,7 @@
 import { Button, NewCard, Sheet, Text } from '@stump/components'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import ReaderSettings from '@/components/readers/imageBased/container/ReaderSettings'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -35,9 +35,7 @@ export default function ReaderDefaultSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.app/reader.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.app/reader.helmet')} />
 
 			<NewCard
 				label={t(getSectionKey('universal.label'))}

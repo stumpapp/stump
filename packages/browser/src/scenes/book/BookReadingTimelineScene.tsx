@@ -1,6 +1,6 @@
-import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { useBookOverview } from '@/components/book'
 import { BookHeader } from '@/components/book/BookHeader'
 import UnderConstruction from '@/components/unimplemented/UnderConstruction'
@@ -23,9 +23,7 @@ export default function BookReadingTimelineScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {media.resolvedName}</title>
-			</Helmet>
+			<AppTitle title={media.resolvedName} />
 
 			<BookHeader fragment={media} />
 

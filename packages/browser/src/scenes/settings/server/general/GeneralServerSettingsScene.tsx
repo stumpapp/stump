@@ -2,8 +2,8 @@ import { useCheckForServerUpdate } from '@stump/client'
 import { Alert, AlertDescription } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 import { Suspense } from 'react'
-import { Helmet } from 'react-helmet'
 
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -20,9 +20,7 @@ export default function GeneralServerSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.server/general.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.server/general.helmet')} />
 
 			<div className="gap-12 flex flex-col">
 				<Suspense>

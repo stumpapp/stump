@@ -2,9 +2,9 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { Suspense, useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useNavigate, useParams } from 'react-router'
 
+import { AppTitle } from '@/AppTitle'
 import { BookHeader } from '@/components/book/BookHeader'
 import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
@@ -64,9 +64,7 @@ export default function BookSettingsScene() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Stump | {book.resolvedName}</title>
-			</Helmet>
+			<AppTitle title={book.resolvedName} />
 
 			<BookHeader fragment={book} />
 

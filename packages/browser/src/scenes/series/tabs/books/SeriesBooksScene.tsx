@@ -2,9 +2,9 @@ import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { InterfaceLayout, MediaFilterInput, SeriesKind } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
 import { defaultBookColumnSort } from '@/components/book/table'
@@ -292,9 +292,7 @@ function SeriesBooksScene() {
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | {series.resolvedName || ''}</title>
-				</Helmet>
+				<AppTitle title={series.resolvedName} />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

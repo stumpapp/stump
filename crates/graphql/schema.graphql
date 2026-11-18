@@ -2147,10 +2147,7 @@ type Mutation {
 	deleteLoginActivity: Int!
 	"Upload an avatar image for either the authenticated viewer or for any user (if authorized by permissions)"
 	uploadUserAvatar(id: ID, upload: Upload!): User!
-	"""
-	Delete the avatar for the authenticated viewer, or for any user if
-	called by a server owner (by passing `id`).
-	"""
+	"Delete the avatar for the authenticated viewer, or for another user if authorized"
 	deleteUserAvatar(id: ID): User!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!

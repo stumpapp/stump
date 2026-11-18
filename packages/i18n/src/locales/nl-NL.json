@@ -22,7 +22,8 @@
 				"buttons": {
 					"createAccount": "Account aanmaken",
 					"loginWithOidc": "Log in met OIDC",
-					"createAccountWithOidc": "Account aanmaken met OIDC"
+					"createAccountWithOidc": "Account aanmaken met OIDC",
+					"login": "Inloggen"
 				}
 			},
 			"toasts": {
@@ -48,7 +49,8 @@
 				"labels": {
 					"fileSize": "Bestandsgrootte",
 					"fileType": "Bestandstype",
-					"fileLocation": "Bestandslocatie"
+					"fileLocation": "Bestandslocatie",
+					"fileChecksum": "Controlesom"
 				}
 			},
 			"emailBook": {
@@ -78,7 +80,8 @@
 				},
 				"description": {
 					"label": "Omschrijving",
-					"description": "Een korte, optionele beschrijving van je boekenclub"
+					"description": "Een korte, optionele beschrijving van je boekenclub",
+					"placeholder": "Een fanclub van 'Our Flag Means Death'. We lezen naar hartelust piratenverhalen"
 				},
 				"is_private": {
 					"label": "Privéclub",
@@ -96,7 +99,9 @@
 						"description": "De naam van de standaardrol voor je boekenclub"
 					},
 					"moderator": {
-						"description": "De naam van de moderatorrol voor je boekenclub"
+						"description": "De naam van de moderatorrol voor je boekenclub",
+						"label": "Moderator",
+						"placeholder": "Moderator"
 					},
 					"admin": {
 						"label": "Beheerder",
@@ -104,13 +109,16 @@
 						"description": "De naam van de administrator voor je boekenclub"
 					},
 					"creator": {
-						"description": "De naam van de rol voor degene die je boekenclub heeft aangemaakt. Dit ben jij!"
+						"description": "De naam van de rol voor degene die je boekenclub heeft aangemaakt. Dit ben jij!",
+						"label": "Maker",
+						"placeholder": "Maker"
 					}
 				},
 				"membershipOptions": {
 					"displayName": {
 						"label": "Toon naam",
-						"description": "Een optionele bijnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
+						"description": "Een optionele bijnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam",
+						"placeholder": "oromei"
 					},
 					"hideProgress": {
 						"label": "Verberg voortgang",
@@ -162,20 +170,28 @@
 		"bookClubSettingsScene": {
 			"sidebar": {
 				"members": {
-					"members": "Gebruikers"
+					"members": "Gebruikers",
+					"roles": "Rollen",
+					"label": "Lidmaatschap"
 				},
 				"scheduling": {
-					"options": "Opties"
+					"options": "Opties",
+					"scheduler": "Planningstool",
+					"label": "Planning"
 				},
 				"danger-zone": {
-					"label": "Gevarenzone"
-				}
+					"label": "Gevarenzone",
+					"delete": "Verwijdering"
+				},
+				"basics": "Basis"
 			},
 			"members": {
-				"title": "Gebruikers"
+				"title": "Gebruikers",
+				"description": "Beheer de leden van deze boekenclub"
 			},
 			"scheduling/scheduler": {
-				"description": ""
+				"description": "Maak en beheer de geplande leesbijeenkomsten voor deze boekenclub",
+				"title": "Planningstool"
 			},
 			"danger-zone/delete": {
 				"sections": {
@@ -183,29 +199,108 @@
 						"description": [
 							"Verwijder permanent deze boekenclub en alle inhoud ervan.",
 							"Deze actie kan niet ongedaan gemaakt worden"
-						]
+						],
+						"heading": "Verwijder Club",
+						"trigger": "Verwijder Club"
+					}
+				},
+				"title": "Verwijderingsacties",
+				"description": "Deze boekenclub en alle inhoud of bepaalde bronnen ervan definitief verwijderen"
+			},
+			"basics": {
+				"title": "Algemene Informatie",
+				"description": "De gegevens van deze boekenclub, inclusief de naam en omschrijving ervan",
+				"form": {
+					"submit": "Update Club"
+				}
+			},
+			"roles": {
+				"title": "Rollen",
+				"description": "Pas de rollen in deze boekenclub aan",
+				"sections": {
+					"roleMappings": {
+						"heading": "Bestaande roltoewijzingen",
+						"description": "De huidige roltoewijzingen voor deze boekenclub"
 					}
 				}
+			},
+			"scheduling/options": {
+				"title": "Opties",
+				"description": "Extra opties voor de planning van deze boekenclub"
 			}
 		},
 		"createOrUpdateLibraryForm": {
 			"fields": {
 				"name": {
 					"label": "Naam",
-					"placeholder": "Mijn bibliotheek"
+					"placeholder": "Mijn bibliotheek",
+					"description": "Een gebruiksvriendelijke naam voor je bibliotheek"
 				},
 				"readingSettings": {
 					"section": {
-						"heading": "Leesinstellingen"
+						"heading": "Leesinstellingen",
+						"description": "Standaardinstellingen voor de reader die voor boeken wordt gebruikt"
 					},
 					"imageScaling": {
-						"label": "Afbeelding schalen"
+						"label": "Afbeelding schalen",
+						"description": "Hoe de beeld-gebaseerde reader afbeeldingen aanpast aan de pagina"
+					},
+					"readingMode": {
+						"label": "Standaard reader",
+						"description": "De standaardreader voor afbeeldingsboeken"
+					},
+					"readingDirection": {
+						"description": "In welke richting de reader door de pagina's bladert"
 					}
 				},
 				"thumbnailConfig": {
 					"enableSwitch": {
-						"label": "Ingeschakeld"
+						"label": "Ingeschakeld",
+						"description": "Genereer thumbnailafbeeldingen voor deze bibliotheek"
+					},
+					"section": {
+						"heading": {
+							"create": "Thumbnail Configuratie",
+							"update": "Generatie"
+						},
+						"description": "Verbeter de laadtijden tijdens het doorbladeren van je bibliotheek, door thumbnails van je boeken te genereren",
+						"disabled": "Er is geen aanvullende configuratie nodig wanneer thumbnailgeneratie is uitgeschakeld"
+					},
+					"resizeMethod": {
+						"label": "Schaalmethode",
+						"options": {
+							"scaleEvenlyByFactor": "Gelijkmatig",
+							"exact": "Exacte afmetingen",
+							"scaleDimension": "Automatisch Geschaald",
+							"none": "Geen"
+						}
+					},
+					"scaleEvenlyByFactor": {
+						"label": "Schaalfactor"
 					}
+				},
+				"path": {
+					"label": "Locatie",
+					"description": "Het pad naar de bibliotheek zoals dat op je server is opgeslagen",
+					"placeholder": "/pad/naar/bibliotheek"
+				},
+				"oneshotsDirectory": {
+					"label": "Oneshots-map",
+					"description": "De naam van de map waarin oneshots worden opgeslagen, ten opzichte van het bibliotheekpad. Als dit veld leeg is, worden oneshots niet verwerkt",
+					"placeholder": "_oneshots"
+				},
+				"description": {
+					"label": "Omschrijving",
+					"description": "Een korte beschrijving van jouw bibliotheek",
+					"placeholder": "Een bibliotheek met al mijn favoriete boeken"
+				},
+				"tags": {
+					"label": "Labels",
+					"description": "Gebruikt om jouw bibliotheek in categorieën in te delen of toegangsregels te handhaven"
+				},
+				"libraryType": {
+					"label": "Bibliotheekinhoud",
+					"description": "Het soort inhoud dat in deze bibliotheek staat"
 				}
 			}
 		},
@@ -706,6 +801,33 @@
 			"uploadDialog": {
 				"emptyState": "Een voorbeeld van je afbeelding verschijnt hier"
 			}
+		},
+		"bookManagementScene": {
+			"metadataSearch": {
+				"heading": "Zoek Metadata",
+				"description": "Zoek een externe provider voor dit boek en kies een match om toe te passen",
+				"openButton": "Zoek Metadata",
+				"noProviders": "Er zijn geen actieve metadataproviders geconfigureerd voor dit bibliotheektype. Configureer er eerst een in de serverinstellingen.",
+				"noResults": "Er zijn geen resultaten gevonden voor deze zoekopdracht",
+				"partialResults": "Sommige resultaten niet van de aanbieder geladen worden, waarschijnlijk vanwege een limiet aan het aantal verzoeken. Probeer opnieuw te zoeken om te zien of er meer resultaten verschijnen.",
+				"searchFailed": "Zoeken bij metadataproviders mislukt",
+				"form": {
+					"author": {
+						"label": "Auteur"
+					},
+					"number": {
+						"label": "Volumenummer"
+					},
+					"comicVineVolumeId": {
+						"label": "ComicVine Volumecode",
+						"placeholder": "bijv. 129260"
+					},
+					"provider": {
+						"label": "Aanbieder",
+						"allOption": "Alle Actieve Aanbieders"
+					}
+				}
+			}
 		}
 	},
 	"shared": {
@@ -1059,7 +1181,59 @@
 						"title": "Verwijderen Mislukt",
 						"description": "Er is een fout opgetreden bij het verwijderen van de database"
 					}
-				}
+				},
+				"performanceMonitor": "Prestatiemonitor",
+				"reduceAnimations": "Animaties Verminderen",
+				"displayLanguageKeys": {
+					"label": "Vertaalsleutels Weergeven",
+					"options": {
+						"none": "Geen",
+						"abbreviated": "Afgekort",
+						"full": "Volledig"
+					}
+				},
+				"debugAnalytics": {
+					"label": "Extra Diagnostische Gegevens",
+					"description": "Verstuur extra foutopsporing-gerelateerde gebeurtenissen om te helpen met het oplossen van problemen"
+				},
+				"maskUrls": "URL's Maskeren"
+			},
+			"contactInfo": {
+				"label": "Contact",
+				"email": "E-mail",
+				"discord": "Discord",
+				"github": "GitHub"
+			},
+			"supportInfo": {
+				"buildInformation": "Softwarebuild Informatie",
+				"version": "Versie: {{version}}",
+				"suuportIdentifier": "Ondersteunings-ID: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "Boeken",
+				"favorites": "Favorieten",
+				"series": "Series"
+			}
+		},
+		"readingSessions": {
+			"chaptersRead_one": "{{count}} hoofdstuk gelezen",
+			"chaptersRead_other": "{{count}} hoofdstukken gelezen",
+			"pagesRead_one": "{{count}} pagina gelezen",
+			"pagesRead_other": "{{count}} pagina's gelezen",
+			"pageFragment": "pagina {{page}}",
+			"sessionSentence": {
+				"pageRange": "Je hebt {{timeRange}} besteed aan het lezen van {{startPageFragment}} tot {{endPageFragment}}",
+				"singlePage": "Je hebt {{timeRange}} {{startPageFragment}} gelezen"
+			},
+			"bookmarkSentence": "Je hebt {{pageFragment}} aan je bladwijzers toegevoegd",
+			"openedBookSentence": "Boek geopend op {{pageFragment}}",
+			"closedBookSentence": "Boek gesloten op {{pageFragment}}"
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "Niets momenteel bezig"
 			}
 		}
 	}

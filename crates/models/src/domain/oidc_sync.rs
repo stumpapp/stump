@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
 
@@ -13,6 +13,29 @@ pub fn oidc_claims_to_permission_set(
 		.into_iter()
 		.collect();
 	PermissionSet::new(new_permissions)
+}
+
+/// Parses a csv of groups into a set
+pub fn parse_oidc_groups(groups: &Option<String>) -> BTreeSet<String> {
+	groups
+		.as_deref()
+		.unwrap_or_default()
+		.split(',')
+		.map(|group| group.trim().to_string())
+		.filter(|group| !group.is_empty())
+		.collect()
+}
+
+/// Returns the groups to reconcile library access against, or none if the effective sets did not change
+pub fn oidc_groups_to_reconcile(
+	existing: &Option<String>,
+	updated: &Option<String>,
+) -> Option<Vec<String>> {
+	let updated = parse_oidc_groups(updated);
+	if parse_oidc_groups(existing) == updated {
+		return None;
+	}
+	Some(updated.into_iter().collect())
 }
 
 #[cfg(test)]
@@ -50,5 +73,54 @@ mod tests {
 		let resolved = permissions_set.resolve_into_string();
 
 		assert!(resolved.is_none());
+	}
+
+	/// if no change then no reconcil needed
+	#[test]
+	fn test_unchanged_oidc_groups_do_not_trigger_reconciliation() {
+		assert_eq!(
+			oidc_groups_to_reconcile(
+				&Some("readers, admins".to_string()),
+				&Some("readers, admins".to_string())
+			),
+			None,
+		);
+	}
+
+	// love a good long name
+	/// if the string csv values are different but resolve to the same effective set of groups then
+	/// no reconcile is needed
+	#[test]
+	fn test_reordered_or_otherwise_effectively_equivalent_oidc_groups_do_not_trigger_reconciliation()
+	 {
+		assert_eq!(
+			oidc_groups_to_reconcile(
+				&Some("readers, admins".to_string()),
+				&Some("admins,readers,readers,".to_string())
+			),
+			None,
+		);
+		assert_eq!(oidc_groups_to_reconcile(&Some("".to_string()), &None), None);
+	}
+
+	/// if changed then yeah reconcile
+	#[test]
+	fn test_changed_oidc_groups_trigger_reconciliation() {
+		assert_eq!(
+			oidc_groups_to_reconcile(
+				&Some("readers".to_string()),
+				&Some("readers,admins".to_string())
+			),
+			Some(vec!["admins".to_string(), "readers".to_string()]),
+		);
+	}
+
+	/// if changed to be empty then yeah reconcile, more of a sanity check
+	#[test]
+	fn test_clearing_oidc_groups_triggers_empty_group_reconciliation() {
+		assert_eq!(
+			oidc_groups_to_reconcile(&Some("readers".to_string()), &None),
+			Some(vec![]),
+		);
 	}
 }

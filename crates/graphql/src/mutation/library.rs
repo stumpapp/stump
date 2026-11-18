@@ -5,6 +5,7 @@ use chrono::Utc;
 use itertools::chain;
 use metadata_integrations::MetadataField;
 use models::{
+	domain::oidc_sync::oidc_groups_to_reconcile,
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
@@ -496,18 +497,10 @@ impl LibraryMutation {
 		.update(&txn)
 		.await?;
 
-		let oidc_groups = updated_library
-			.oidc_groups
-			.clone()
-			.map(|groups| {
-				groups
-					.split(',')
-					.map(|g| g.trim().to_string())
-					.collect::<Vec<_>>()
-			})
-			.unwrap_or_default();
-
-		if updated_library.oidc_groups != existing_library.oidc_groups {
+		if let Some(oidc_groups) = oidc_groups_to_reconcile(
+			&existing_library.oidc_groups,
+			&updated_library.oidc_groups,
+		) {
 			sync_oidc_library_access_for_library(&txn, &updated_library.id, &oidc_groups)
 				.await?;
 		}

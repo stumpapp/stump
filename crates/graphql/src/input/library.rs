@@ -12,6 +12,10 @@ use models::{
 };
 use sea_orm::{Set, Unchanged, prelude::*};
 
+// TODO: AHHHH just delete this and have:
+// - create input
+// - patch input
+
 #[derive(Debug, InputObject)]
 pub struct CreateOrUpdateLibraryInput {
 	pub name: String,
@@ -22,7 +26,7 @@ pub struct CreateOrUpdateLibraryInput {
 	pub config: Option<LibraryConfigInput>,
 	#[graphql(default = true)]
 	pub scan_after_persist: bool,
-	pub oidc_groups: Option<Vec<String>>,
+	pub oidc_groups: MaybeUndefined<Vec<String>>,
 }
 
 impl CreateOrUpdateLibraryInput {
@@ -40,6 +44,14 @@ impl CreateOrUpdateLibraryInput {
 		} = self;
 
 		let id = Uuid::new_v4().to_string();
+		let oidc_groups = match oidc_groups {
+			MaybeUndefined::Undefined => Default::default(),
+			MaybeUndefined::Null => Set(None),
+			MaybeUndefined::Value(groups) => {
+				Set((!groups.is_empty()).then(|| groups.join(",")))
+			},
+		};
+
 		let library = library::ActiveModel {
 			id: Set(id.clone()),
 			name: Set(name),
@@ -48,7 +60,7 @@ impl CreateOrUpdateLibraryInput {
 			emoji: Set(emoji),
 			// TODO(oidc): probably good to assert there is overlap between user creating
 			// library and the oidc_groups, but fine for now
-			oidc_groups: Set(oidc_groups.map(|groups| groups.join(","))),
+			oidc_groups,
 			..Default::default()
 		};
 

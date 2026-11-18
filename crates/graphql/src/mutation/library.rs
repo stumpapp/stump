@@ -5,7 +5,7 @@ use chrono::Utc;
 use itertools::chain;
 use metadata_integrations::MetadataField;
 use models::{
-	domain::oidc_sync::oidc_groups_to_reconcile,
+	domain::oidc_sync::{oidc_groups_to_reconcile, parse_oidc_groups},
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
@@ -284,13 +284,30 @@ impl LibraryMutation {
 		.insert(&txn)
 		.await?;
 
-		let _access_record = library_access::ActiveModel {
-			library_id: Set(created_library.id.clone()),
-			user_id: Set(user.id.clone()),
-			..Default::default()
+		let oidc_groups: Vec<String> = parse_oidc_groups(&created_library.oidc_groups)
+			.into_iter()
+			.collect();
+		// we immediately sync so that folks have access without having to re-auth
+		if !oidc_groups.is_empty() {
+			sync_oidc_library_access_for_library(&txn, &created_library.id, &oidc_groups)
+				.await?;
 		}
-		.insert(&txn)
-		.await?;
+
+		let creator_has_access = library_access::Entity::find()
+			.filter(library_access::Column::UserId.eq(&user.id))
+			.filter(library_access::Column::LibraryId.eq(&created_library.id))
+			.count(&txn)
+			.await? > 0;
+
+		if !creator_has_access {
+			library_access::ActiveModel {
+				library_id: Set(created_library.id.clone()),
+				user_id: Set(user.id.clone()),
+				..Default::default()
+			}
+			.insert(&txn)
+			.await?;
+		}
 
 		// any stored mtimes beneath the path are leftovers from a previous library
 		let cleared_mtimes =

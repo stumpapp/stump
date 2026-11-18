@@ -118,7 +118,8 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 				/>
 			</NewCard>
 
-			{oidcConfig.enabled && (
+			{isCreatingLibrary && oidcConfig.enabled && (
+				// ^ when editing there is a separate access control page so don't need this here
 				<NewCard label={t(getKey('oidcGroups.label'))}>
 					<NewCard.Row
 						label={t(getKey('oidcGroups.label'))}

@@ -1,3 +1,15 @@
+<a name="0.1.14"></a>
+## 0.1.14 (2026-11-18)
+
+### Added
+
+- ✅ Fix doc comment test and flaky watcher test [[b680122](https://github.com/stumpapp/stump/commit/b680122c065b3602e883e9e6b99922b29eb2df30)]
+
+### Fixed
+
+- 🐛 Fix SQLite migration startup by forcing transactions ([#1544](https://github.com/stumpapp/stump/issues/1544)) [[bb9ca14](https://github.com/stumpapp/stump/commit/bb9ca14f064b1657aad9de7c9fb317e806f22b35)]
+
+
 <a name="0.1.13"></a>
 ## 0.1.13 (2026-11-13)
 

@@ -1,6 +1,6 @@
 use migrations::{Migrator, MigratorTrait};
 use sea_orm::{
-	Database, SqlxSqliteConnector,
+	SqlxSqliteConnector,
 	sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions},
 };
 use std::{env::temp_dir, str::FromStr};

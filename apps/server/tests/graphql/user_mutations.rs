@@ -46,6 +46,17 @@ fn assert_no_errors(response: &serde_json::Value) {
 	);
 }
 
+fn assert_forbidden(response: &serde_json::Value) {
+	assert!(
+		response["errors"]
+			.as_array()
+			.is_some_and(|errors| errors.iter().any(|error| {
+				error["message"] == "You do not have permission to perform this action."
+			})),
+		"should have been a forbidden error: {response:#}"
+	);
+}
+
 fn permissions_from(response: &serde_json::Value, mutation: &str) -> Vec<String> {
 	response["data"][mutation]["permissions"]
 		.as_array()
@@ -389,7 +400,7 @@ async fn test_user_cannot_strip_permissions_they_dont_have() {
 
 	let target = CreateTestUser {
 		username: "user-to-be-stripped".to_string(),
-		permissions: vec![UserPermission::ManageServer],
+		permissions: vec![UserPermission::DownloadFile],
 		..Default::default()
 	}
 	.insert(&app)
@@ -414,7 +425,7 @@ async fn test_user_cannot_strip_permissions_they_dont_have() {
 	assert_no_errors(&response);
 	let perms = permissions_from(&response, "updateUser");
 	assert!(
-		perms.iter().any(|p| p == "MANAGE_SERVER"),
+		perms.iter().any(|p| p == "DOWNLOAD_FILE"),
 		"should not have worked, got: {perms:?}"
 	);
 }
@@ -502,6 +513,169 @@ async fn test_manage_users_cannot_update_own_permissions_via_self_update() {
 		!perms.iter().any(|p| p == "MANAGE_SERVER"),
 		"MANAGE_SERVER must not be self-granted, got: {perms:?}"
 	);
+}
+
+/// a user without ManageServer should not be able to manage a user with ManageServer
+#[tokio::test]
+async fn test_manage_users_cannot_manage_admin_account() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "manager".to_string(),
+		permissions: vec![
+			UserPermission::ManageUsers,
+			UserPermission::LockUser,
+			UserPermission::ManageUserSessions,
+		],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let admin = CreateTestUser {
+		username: "server-admin".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": admin.id,
+				"input": {
+					"username": "muhahahahahaaha-enjoy-your-new-username-sucker",
+					"password": "youwillnevergetaccessagain!",
+					"permissions": [],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+	assert_forbidden(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUserSessions($id: ID!) { deleteUserSessions(id: $id) }"#,
+			Some(json!({ "id": admin.id })),
+			&manager.token,
+		)
+		.await;
+	assert_forbidden(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation LockUser($id: ID!, $lock: Boolean!) { updateUserLockStatus(id: $id, lock: $lock) { id } }"#,
+			Some(json!({ "id": admin.id, "lock": true })),
+			&manager.token,
+		)
+		.await;
+	assert_forbidden(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUserAvatar($id: ID!) { deleteUserAvatar(id: $id) { id } }"#,
+			Some(json!({ "id": admin.id })),
+			&manager.token,
+		)
+		.await;
+	assert_forbidden(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUser($id: ID!) { deleteUser(id: $id) { id } }"#,
+			Some(json!({ "id": admin.id })),
+			&manager.token,
+		)
+		.await;
+	assert_forbidden(&response);
+}
+
+/// a user with ManageServer should be able to manage another user with ManageServer
+#[tokio::test]
+async fn test_admin_can_manage_another_admin() {
+	let app = TestApp::new_with_default_user().await;
+	let admin_actor = CreateTestUser {
+		username: "server-admin-one".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+	let admin_target = CreateTestUser {
+		username: "server-admin-two".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": admin_target.id,
+				"input": {
+					"username": "muhahahahahaaha-enjoy-your-new-username-sucker",
+					"password": null,
+					"permissions": ["MANAGE_SERVER"],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation LockUser($id: ID!, $lock: Boolean!) { updateUserLockStatus(id: $id, lock: $lock) { id } }"#,
+			Some(json!({ "id": admin_target.id, "lock": true })),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation LockUser($id: ID!, $lock: Boolean!) { updateUserLockStatus(id: $id, lock: $lock) { id } }"#,
+			Some(json!({ "id": admin_target.id, "lock": false })),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUserSessions($id: ID!) { deleteUserSessions(id: $id) }"#,
+			Some(json!({ "id": admin_target.id })),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUserAvatar($id: ID!) { deleteUserAvatar(id: $id) { id } }"#,
+			Some(json!({ "id": admin_target.id })),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation DeleteUser($id: ID!) { deleteUser(id: $id) { id } }"#,
+			Some(json!({ "id": admin_target.id })),
+			&admin_actor.token,
+		)
+		.await;
+	assert_no_errors(&response);
 }
 
 /// a user with ManageUsers permission cannot update their own permissions via `updateViewer`

@@ -5,6 +5,14 @@ use models::shared::enums::UserPermission;
 use schematic::Config;
 use serde::Serialize;
 
+fn parse_group_permission_mapping(
+	value: String,
+) -> schematic::ParseEnvResult<HashMap<String, Vec<UserPermission>>> {
+	serde_json::from_str(&value).map(Some).map_err(|error| {
+		schematic::HandlerError::new(format!("invalid permission mapping: {error}"))
+	})
+}
+
 // see https://moonrepo.github.io/schematic/config/struct/env.html#nested-prefixes, tldr;
 // child structs require their own env_prefix
 /// OIDC authentication configuration
@@ -39,6 +47,7 @@ pub struct OidcConfig {
 	pub groups_claim: String,
 	/// Maps provider group names to Stump permissions. If empty, permissions are
 	/// not managed by OIDC at all
+	#[setting(parse_env = parse_group_permission_mapping)]
 	#[serde(default)]
 	#[graphql(skip)] // HashMap is not a SimpleObject
 	pub group_permission_mapping: HashMap<String, Vec<UserPermission>>,

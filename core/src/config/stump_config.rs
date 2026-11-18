@@ -317,6 +317,7 @@ impl StumpConfig {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use models::shared::enums::UserPermission;
 	use tempfile;
 
 	#[test]
@@ -343,6 +344,55 @@ mod tests {
 				assert_eq!(config.ip, "0.0.0.0");
 				assert_eq!(config.session_ttl, DEFAULT_SESSION_TTL);
 				assert_eq!(config.pdf_render_format, "webp");
+			},
+		);
+	}
+
+	#[test]
+	fn test_oidc_group_permission_mapping_from_env() {
+		temp_env::with_vars(
+			[(
+				"STUMP_OIDC_GROUP_PERMISSION_MAPPING",
+				Some(
+					r#"{"admins":["MANAGE_LIBRARY","READ_USERS"],"regular":["DOWNLOAD_FILE"]}"#,
+				),
+			)],
+			|| {
+				let dir = tempfile::tempdir().expect("should create temp dir");
+				let config = StumpConfig::load(dir.path()).expect("should load config");
+				let mapping = config
+					.oidc
+					.expect("OIDC config should be initialized from its env var")
+					.group_permission_mapping;
+
+				assert_eq!(
+					mapping.get("admins"),
+					Some(&vec![
+						UserPermission::ManageLibrary,
+						UserPermission::ReadUsers
+					])
+				);
+				assert_eq!(
+					mapping.get("regular"),
+					Some(&vec![UserPermission::DownloadFile])
+				);
+			},
+		);
+	}
+
+	#[test]
+	fn test_oidc_group_permission_mapping_from_env_with_bad_permission() {
+		temp_env::with_vars(
+			[(
+				"STUMP_OIDC_GROUP_PERMISSION_MAPPING",
+				Some(
+					r#"{"admins":["MANAGE_LIBRARY","READ_USERS"],"regular":["OOPSIEPOOPSIE"]}"#,
+				),
+			)],
+			|| {
+				let dir = tempfile::tempdir().expect("should create temp dir");
+				StumpConfig::load(dir.path())
+					.expect_err("should not have parse my oopsie poopsie");
 			},
 		);
 	}

@@ -2,13 +2,16 @@ use axum_test::multipart::{MultipartForm, Part};
 use models::shared::enums::UserPermission;
 use serde_json::{Value, json};
 
-use crate::common::{TestApp, account::CreateTestUser};
+use crate::common::{TestApp, account::CreateTestUser, assert::assert_forbidden};
 
 const UPLOAD_EMOJI: &str = r#"mutation UploadEmoji($input: CreateCustomEmojiInput!, $upload: Upload!) {
 	uploadCustomEmoji(input: $input, upload: $upload) { id }
 }"#;
 const UPLOAD_AVATAR: &str = r#"mutation UploadAvatar($upload: Upload!) {
 	uploadUserAvatar(upload: $upload) { id }
+}"#;
+const UPLOAD_OTHER_USER_AVATAR: &str = r#"mutation UploadAvatar($id: ID!, $upload: Upload!) {
+	uploadUserAvatar(id: $id, upload: $upload) { id }
 }"#;
 
 const HTML_PAYLOAD: &[u8] =
@@ -53,6 +56,43 @@ async fn uploader_token(app: &TestApp) -> String {
 	.insert(app)
 	.await
 	.token
+}
+
+/// a user without ManageServer cannot upload/replace a user's avatar if they have ManageServer
+#[tokio::test]
+async fn test_non_admin_cannot_upload_avatar_for_admin() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "manager".to_string(),
+		permissions: vec![
+			UserPermission::ManageUsers,
+			UserPermission::UploadFile,
+			UserPermission::ChangeAvatar,
+		],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+	let admin = CreateTestUser {
+		username: "server-admin".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let operations = json!({
+		"query": UPLOAD_OTHER_USER_AVATAR,
+		"variables": { "id": admin.id, "upload": null }
+	});
+	let response = post(
+		&app,
+		&manager.token,
+		form(operations, "variables.upload", "avatar.png", "image/png"),
+	)
+	.await;
+	assert_forbidden(&response);
 }
 
 /// html should be rejected for emoji uploads

@@ -84,7 +84,7 @@ impl UserMutation {
 			.one(conn)
 			.await?
 			.ok_or("User not found")?;
-		ensure_actor_can_manage_other_user(&user, existing_user.permissions.as_deref())?;
+		ensure_actor_can_manage_other_user(user, existing_user.permissions.as_deref())?;
 
 		let value = upload.value(ctx)?;
 
@@ -154,7 +154,7 @@ impl UserMutation {
 			.one(conn)
 			.await?
 			.ok_or("User not found")?;
-		ensure_actor_can_manage_other_user(&user, existing.permissions.as_deref())?;
+		ensure_actor_can_manage_other_user(user, existing.permissions.as_deref())?;
 
 		if let Some(ref path_str) = existing.avatar_path {
 			let _ = tokio::fs::remove_file(path_str).await;
@@ -323,7 +323,7 @@ impl UserMutation {
 			.await?
 			.ok_or("User not found")?;
 
-		ensure_actor_can_manage_other_user(&user, existing_user.permissions.as_deref())?;
+		ensure_actor_can_manage_other_user(user, existing_user.permissions.as_deref())?;
 
 		let deleted_user = if hard_delete {
 			user::Entity::delete_by_id(id.to_string())
@@ -358,7 +358,7 @@ impl UserMutation {
 				.one(conn)
 				.await?
 			{
-				ensure_actor_can_manage_other_user(&user, target_permissions.as_deref())?;
+				ensure_actor_can_manage_other_user(user, target_permissions.as_deref())?;
 			}
 		}
 
@@ -386,7 +386,7 @@ impl UserMutation {
 			.one(conn)
 			.await?
 			.ok_or("User not found")?;
-		ensure_actor_can_manage_other_user(&user, model.permissions.as_deref())?;
+		ensure_actor_can_manage_other_user(user, model.permissions.as_deref())?;
 		let mut active_model = model.into_active_model();
 		active_model.is_locked = Set(lock);
 

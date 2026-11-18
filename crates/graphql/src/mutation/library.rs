@@ -992,7 +992,8 @@ impl LibraryMutation {
 			.ok_or("Library not found")?;
 
 		let mut active_model = library.into_active_model();
-		active_model.oidc_groups = Set(Some(oidc_groups.clone().join(",")));
+		active_model.oidc_groups =
+			Set((!oidc_groups.is_empty()).then(|| oidc_groups.join(",")));
 		let updated_library = active_model.update(&tx).await?;
 
 		sync_oidc_library_access_for_library(&tx, &updated_library.id, &oidc_groups)

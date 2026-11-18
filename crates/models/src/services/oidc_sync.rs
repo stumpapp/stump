@@ -48,7 +48,8 @@ async fn sync_oidc_groups_and_permissions(
 		active_model.permissions = ActiveValue::Set(resolved_permissions);
 	}
 
-	active_model.oidc_groups = ActiveValue::Set(Some(groups.join(",")));
+	active_model.oidc_groups =
+		ActiveValue::Set((!groups.is_empty()).then(|| groups.join(",")));
 	active_model.update(tx).await?;
 
 	tracing::debug!("Synced OIDC permissions for user");
@@ -315,6 +316,23 @@ mod tests {
 		for permissions in group_permission_mapping.values() {
 			assert!(permissions.iter().all(|p| permission_set.contains(*p)));
 		}
+	}
+
+	#[tokio::test]
+	async fn test_sync_oidc_groups_and_permissions_stores_null_for_empty_groups() {
+		let db = test_database().await;
+		let user = fake_data::User::new("groupless").insert(&db).await;
+
+		sync_oidc_groups_and_permissions(&db, &user.id, &[], None)
+			.await
+			.expect("should have synced empty groups");
+
+		let updated_user = user::Entity::find_by_id(user.id)
+			.one(&db)
+			.await
+			.expect("should have queried user")
+			.expect("user should exist");
+		assert!(updated_user.oidc_groups.is_none());
 	}
 
 	/// permissions won't sync if a user doesn't exist lol

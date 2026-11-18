@@ -93,7 +93,7 @@ async fn change_oidc_groups(
 	progress.set_message("Updating OIDC groups for library...");
 
 	let mut library_model: library::ActiveModel = library.into();
-	library_model.oidc_groups = Set(Some(oidc_groups.join(",")));
+	library_model.oidc_groups = Set((!groups.is_empty()).then(|| groups.join(",")));
 	let updated_library = library_model.update(conn).await?;
 
 	progress.finish_with_message("OIDC groups updated successfully!");

@@ -364,11 +364,16 @@ async fn callback(
 		Some(oidc_config.group_permission_mapping.clone())
 	};
 
-	if let Err(error) =
-		sync_oidc_user(&txn, &user_model.id, &claims.groups, oidc_group_mapping).await
-	{
-		tracing::warn!(?error, user_id = %user_model.id, "Failed to sync OIDC groups and permissions for user");
-	}
+	// if syncing the permissions fails we error, otherwise risk letting a user in with stale permissions
+	// which might be more powerful than the set they now have
+	sync_oidc_user(&txn, &user_model.id, &claims.groups, oidc_group_mapping)
+		.await
+		.map_err(|error| {
+			tracing::error!(?error, user_id = %user_model.id, "Failed to sync OIDC groups and permissions for user!");
+			APIError::InternalServerError(
+				"Failed to synchronize OIDC groups and permissions!".to_string(),
+			)
+		})?;
 
 	txn.commit().await?;
 

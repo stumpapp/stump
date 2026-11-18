@@ -80,6 +80,12 @@ impl UserMutation {
 			None => user.id.clone(),
 		};
 
+		let existing_user = user::Entity::find_by_id(target_id.clone())
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+		ensure_actor_can_manage_other_user(&user, existing_user.permissions.as_deref())?;
+
 		let value = upload.value(ctx)?;
 
 		let (image_bytes, extension) =
@@ -112,14 +118,7 @@ impl UserMutation {
 
 		let avatar_path_str = avatar_path.to_string_lossy().to_string();
 
-		let updated_user = user::Entity::find()
-			.filter(user::Column::Id.eq(&target_id))
-			.one(conn)
-			.await?
-			.ok_or("User not found")?
-			.into_active_model();
-
-		let mut active = updated_user;
+		let mut active = existing_user.into_active_model();
 		active.avatar_path = Set(Some(avatar_path_str));
 		active.avatar_meta = Set(avatar_meta);
 		active.avatar_updated_at = Set(Some(Utc::now().into()));
@@ -128,8 +127,7 @@ impl UserMutation {
 		Ok(User::from(result))
 	}
 
-	/// Delete the avatar for the authenticated viewer, or for any user if
-	/// called by a server owner (by passing `id`).
+	/// Delete the avatar for the authenticated viewer, or for another user if authorized
 	async fn delete_user_avatar(
 		&self,
 		ctx: &Context<'_>,
@@ -156,6 +154,7 @@ impl UserMutation {
 			.one(conn)
 			.await?
 			.ok_or("User not found")?;
+		ensure_actor_can_manage_other_user(&user, existing.permissions.as_deref())?;
 
 		if let Some(ref path_str) = existing.avatar_path {
 			let _ = tokio::fs::remove_file(path_str).await;
@@ -324,6 +323,8 @@ impl UserMutation {
 			.await?
 			.ok_or("User not found")?;
 
+		ensure_actor_can_manage_other_user(&user, existing_user.permissions.as_deref())?;
+
 		let deleted_user = if hard_delete {
 			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
@@ -343,10 +344,25 @@ impl UserMutation {
 		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ManageUserSessions))"
 	)]
 	async fn delete_user_sessions(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		let removed_sessions = remove_all_session_for_user(id.to_string(), conn).await?;
+		let target_id = id.to_string();
+
+		if target_id != user.id {
+			if let Some(target_permissions) = user::Entity::find_by_id(&target_id)
+				.select_only()
+				.column(user::Column::Permissions)
+				.into_tuple::<Option<String>>()
+				.one(conn)
+				.await?
+			{
+				ensure_actor_can_manage_other_user(&user, target_permissions.as_deref())?;
+			}
+		}
+
+		let removed_sessions = remove_all_session_for_user(target_id, conn).await?;
 		Ok(removed_sessions.len().try_into()?)
 	}
 
@@ -370,6 +386,7 @@ impl UserMutation {
 			.one(conn)
 			.await?
 			.ok_or("User not found")?;
+		ensure_actor_can_manage_other_user(&user, model.permissions.as_deref())?;
 		let mut active_model = model.into_active_model();
 		active_model.is_locked = Set(lock);
 
@@ -551,15 +568,36 @@ fn grantable_permission_set(
 	PermissionSet::new(allowed)
 }
 
+/// Ensures that only users with ManageServer can be managed by others with ManageServer, and a sanity
+/// check to ensure the actor is not currently a locked account
+fn ensure_actor_can_manage_other_user(
+	actor: &AuthUser,
+	target_permissions: Option<&str>,
+) -> Result<()> {
+	if actor.is_locked {
+		return Err(FORBIDDEN_ACTION.into());
+	}
+	let target_is_server_admin =
+		PermissionSet::from(target_permissions.unwrap_or_default().to_owned())
+			.contains(UserPermission::ManageServer);
+	if target_is_server_admin && !actor.has_permission(UserPermission::ManageServer) {
+		return Err(FORBIDDEN_ACTION.into());
+	}
+
+	Ok(())
+}
+
 /// Returns a new [`PermissionSet`] representing the target's final effective permissions,
 /// considering both the actor's requested changes and the target's existing permissions.
 ///
 /// The goal of this is to avoid a scenario where a user with permission to update users doesn't
 /// inadvertently (or intentionally) remove permissions which they themselves lack. For example:
-/// - A user with [`UserPermission::ManageUsers`] attempts to update user B, who has [`UserPermission::ManageServer`]
-/// - The actor does not have [`UserPermission::ManageServer`], so they should not be able remove it from user B
-/// - This function ensures that user B's [`UserPermission::ManageServer`] permission is preserved, even if missing from the
+/// - A user with [`UserPermission::ManageUsers`] attempts to update user B, who has [`UserPermission::DownloadFile`]
+/// - The actor does not have [`UserPermission::DownloadFile`], so they should not be able remove it from user B
+/// - This function ensures that user B's [`UserPermission::DownloadFile`] permission is preserved, even if missing from the
 ///   requested set of permissions to apply.
+///
+/// Admin targets are rejected separately by `ensure_actor_can_manage_other_user`.
 fn merge_permissions(
 	actor: &AuthUser,
 	current_permissions: &[UserPermission],
@@ -643,19 +681,20 @@ async fn update_user(
 	let can_manage_privileged_fields =
 		by_user.has_permission(UserPermission::ManageUsers) && !is_self_update;
 	if can_manage_privileged_fields {
-		update_user.max_sessions_allowed = Set(input.max_sessions_allowed);
-		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
-
 		let current_permissions = user::Entity::find_by_id(for_user_id.clone())
 			.select_only()
 			.column(user::Column::Permissions)
 			.into_tuple::<Option<String>>()
 			.one(&txn)
 			.await?
-			.map(|permissions| {
-				PermissionSet::from(permissions.unwrap_or_default()).resolve_into_vec()
-			})
-			.unwrap_or_default();
+			.flatten();
+		ensure_actor_can_manage_other_user(by_user, current_permissions.as_deref())?;
+
+		update_user.max_sessions_allowed = Set(input.max_sessions_allowed);
+		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
+		let current_permissions =
+			PermissionSet::from(current_permissions.unwrap_or_default())
+				.resolve_into_vec();
 		let updated_permission_set =
 			merge_permissions(by_user, &current_permissions, &input.permissions);
 		update_user.permissions = Set(updated_permission_set.resolve_into_string());

@@ -83,17 +83,18 @@ async fn change_oidc_groups(
 		.default(current_oidc_groups.clone())
 		.interact_text()?;
 
-	let oidc_groups: Vec<String> = new_oidc_groups
+	let oidc_groups = new_oidc_groups
 		.split(',')
 		.map(|g| g.trim().to_string())
 		.filter(|g| !g.is_empty())
-		.collect();
+		.collect::<Vec<_>>();
 
 	let progress = default_progress_spinner();
 	progress.set_message("Updating OIDC groups for library...");
 
 	let mut library_model: library::ActiveModel = library.into();
-	library_model.oidc_groups = Set((!groups.is_empty()).then(|| groups.join(",")));
+	library_model.oidc_groups =
+		Set((!oidc_groups.is_empty()).then(|| oidc_groups.join(",")));
 	let updated_library = library_model.update(conn).await?;
 
 	progress.finish_with_message("OIDC groups updated successfully!");

@@ -477,6 +477,12 @@ input CreateOrUpdateLibraryInput {
 	config: LibraryConfigInput
 	scanAfterPersist: Boolean! = true
 	oidcGroups: [String!]
+	"""
+	The IDs for users besides the creator who should have access to the library
+	
+	Note: should be handled before calling `into_active_model`
+	"""
+	allowedUserIds: [String!]
 }
 
 input CreateScheduledJobInput {

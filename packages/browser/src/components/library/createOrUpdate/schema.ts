@@ -223,6 +223,7 @@ const buildBaseSchema = (
 			.optional(),
 		thumbnailConfig,
 		oidcGroups: z.array(z.string()).nullish(),
+		allowedUserIds: z.array(z.string()).nullish(),
 		processThumbnailColorsEvenWithoutConfig: z.boolean(),
 	})
 
@@ -277,6 +278,7 @@ export const formDefaults = (
 	processThumbnailColorsEvenWithoutConfig:
 		library?.config.processThumbnailColorsEvenWithoutConfig ?? false,
 	oidcGroups: library?.oidcGroups || [],
+	allowedUserIds: [],
 })
 
 // TODO: Investigate https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-validation-schema

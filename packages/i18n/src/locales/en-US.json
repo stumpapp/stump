@@ -850,11 +850,22 @@
             "description": "The options for if and how Stump generates thumbnails for this library"
           },
           {
+            "label": "Access",
+            "heading": "Access",
+            "description": "Choose which users can access this library"
+          },
+          {
             "label": "Review",
             "heading": "Review",
             "description": "Review your library settings before creating it"
           }
         ],
+        "access": {
+          "noPermission": {
+            "title": "Cannot List Users",
+            "description": "You don't have permission to see other users on this server, so you can't configure their access here. Ask a server administrator to adjust library access after creation if needed"
+          }
+        },
         "review": {
           "labels": {
             "generateThumbnails": "Generate Thumbnails",

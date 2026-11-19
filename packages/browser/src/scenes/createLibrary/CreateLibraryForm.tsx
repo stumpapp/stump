@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
-import { ClipboardCheck, FolderOpen, Image, ScanSearch } from 'lucide-react'
+import { ClipboardCheck, FolderOpen, Image, ScanSearch, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -24,6 +24,7 @@ import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 
+import CreateLibraryAccessStep from './CreateLibraryAccessStep'
 import LibraryReview from './LibraryReview'
 import ScanAfterPersist from './ScanAfterPersist'
 
@@ -32,9 +33,6 @@ type Props = {
 	onSubmit: (values: CreateOrUpdateLibrarySchema) => void
 	isLoading?: boolean
 }
-
-// TODO: user access as part of library creation? i don't have time now, and you can invite
-// in settings right after so not a huge deal, but makes sense to have here eventually
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { checkPermission } = useAppContext()
@@ -94,6 +92,11 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				icon: Image,
 				fields: ['thumbnailConfig'],
 				render: () => <ThumbnailConfig />,
+			},
+			{
+				key: 'access',
+				icon: ShieldCheck,
+				render: () => <CreateLibraryAccessStep />,
 			},
 			{
 				key: 'review',

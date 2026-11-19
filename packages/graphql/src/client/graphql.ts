@@ -526,6 +526,12 @@ export type CreateMetadataProviderConfigInput = {
 };
 
 export type CreateOrUpdateLibraryInput = {
+  /**
+   * The IDs for users besides the creator who should have access to the library
+   *
+   * Note: should be handled before calling `into_active_model`
+   */
+  allowedUserIds?: InputMaybe<Array<Scalars['String']['input']>>;
   config?: InputMaybe<LibraryConfigInput>;
   description?: InputMaybe<Scalars['String']['input']>;
   emoji?: InputMaybe<Scalars['String']['input']>;
@@ -2197,10 +2203,7 @@ export type Mutation = {
    */
   deleteTags: Array<Tag>;
   deleteUser: User;
-  /**
-   * Delete the avatar for the authenticated viewer, or for any user if
-   * called by a server owner (by passing `id`).
-   */
+  /** Delete the avatar for the authenticated viewer, or for another user if authorized */
   deleteUserAvatar: User;
   deleteUserSessions: Scalars['Int']['output'];
   /** Edit your own message */
@@ -6887,6 +6890,11 @@ export type BookSearchSceneQuery = { __typename?: 'Query', media: { __typename?:
       { __typename?: 'Media', id: string }
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type CreateLibraryAccessUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateLibraryAccessUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string, avatarUrl?: string | null }> } };
 
 export type CreateLibrarySceneExistingLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14191,6 +14199,17 @@ fragment BookMetadata on Media {
     number
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
+export const CreateLibraryAccessUsersQueryDocument = new TypedDocumentString(`
+    query CreateLibraryAccessUsersQuery {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+      avatarUrl
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateLibraryAccessUsersQueryQuery, CreateLibraryAccessUsersQueryQueryVariables>;
 export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
     query CreateLibrarySceneExistingLibraries {
   libraries(pagination: {none: {unpaginated: true}}) {

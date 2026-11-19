@@ -276,7 +276,38 @@
 						}
 					},
 					"scaleEvenlyByFactor": {
-						"label": "Schaalfactor"
+						"label": "Schaalfactor",
+						"description": "Schaal de thumbnail door een factor van de oorspronkelijke grootte"
+					},
+					"exact": {
+						"description": "Schaal de thumbnail door een factor van de oorspronkelijke grootte",
+						"width": {
+							"label": "Breedte"
+						},
+						"height": {
+							"label": "Hoogte"
+						}
+					},
+					"scaleDimension": {
+						"label": "Automatisch geschaald",
+						"description": "Stel de exacte grootte van de ene dimensie in en schaal automatisch de andere",
+						"dimension": {
+							"label": "Dimensie",
+							"options": {
+								"width": "Breedte",
+								"height": "Hoogte"
+							}
+						}
+					},
+					"output": {
+						"description": "Het formaat en de kwaliteit om te gebruiken voor de afbeelding (1-100)",
+						"format": "Formaat",
+						"quality": "Kwaliteit"
+					},
+					"thumbnailColors": {
+						"label": "Miniatuur Kleuren",
+						"description": "Haal dominante kleuren uit miniaturen voor esthetisch gebruik in de hele app",
+						"requiredWhenGenerationOn": "Dit is nodig wanneer generatie is ingeschakeld"
 					}
 				},
 				"path": {
@@ -301,11 +332,106 @@
 				"libraryType": {
 					"label": "Bibliotheekinhoud",
 					"description": "Het soort inhoud dat in deze bibliotheek staat"
+				},
+				"ignoreRules": {
+					"section": {
+						"heading": "Negeer regels",
+						"description": "Definieer glob patronen om bepaalde bestanden of mappen tijdens een scan te negeren"
+					},
+					"noRules": "Er zijn geen regels voor negeren geconfigureerd",
+					"save": "Bewaar Aanpassingen",
+					"addRule": {
+						"label": "Nieuwe Regel",
+						"description": "Glob patroon om bestanden of mappen te negeren",
+						"addButton": "Regel toevoegen",
+						"ignoreParents": {
+							"title": "Negeer Alle Bovenliggende Mappen",
+							"label": "Negeer bovenliggend"
+						},
+						"ignoreSubdirs": {
+							"title": "Negeer alle submappen",
+							"label": "Negeer Submappen"
+						}
+					},
+					"invalidGlob": "Foutief Glob Patroon",
+					"duplicateGlob": "Duplicaat van een bestaande regel",
+					"lockConfig": {
+						"lock": "Vergrendel Configuratie",
+						"unlock": "Ontgrendel Configuratie"
+					},
+					"editRule": "Bewerk Regel",
+					"deleteRule": "Verwijder Regel",
+					"cancelEdit": "Annuleer Bewerking",
+					"confirmEdit": "Bevestig Bewerking"
+				},
+				"convertOptions": {
+					"section": {
+						"heading": "Bestand Conversie",
+						"description": "Stump is in staat om bepaalde bestandsindelingen om te zetten naar meer compatibele"
+					},
+					"rarToZip": {
+						"label": "Converteer RAR naar ZIP",
+						"description": "Converteer RAR/CBR bestanden naar ZIP/CBZ bestanden tijdens een scan"
+					},
+					"deleteRarAfter": {
+						"label": "Verwijder RAR Na Conversie",
+						"description": "Verwijder het originele RAR/CBR bestand na conversie. Dit is onomkeerbaar"
+					}
+				},
+				"scannerFeatures": {
+					"section": {
+						"heading": "Optionele Verwerking",
+						"description": "Opt-in verwerkingsfuncties voor de scanner",
+						"disclaimer": "Deze functies omvatten extra bestandsaflezingen die het scanproces kunnen vertragen"
+					},
+					"processMetadata": {
+						"label": "Verwerk Metadata",
+						"description": "Haal alle metadata uit bibliotheekbestanden en sla de resultaten in de database op"
+					},
+					"watch": {
+						"label": "Volgen",
+						"description": "Bekijk de bibliotheekdirectory voor wijzigingen en werk de database dienovereenkomstig bij"
+					},
+					"generateFileHashes": {
+						"label": "Bestandshashes Genereren",
+						"description": "Genereer een hash voor elk bestand in de bibliotheek om duplicaten te detecteren"
+					},
+					"koreaderHashes": {
+						"label": "KoReader-Compatibele Hashes",
+						"description": "Als u KoReader gebruikt, genereert u extra hashes in het formaat dat het verwacht"
+					}
+				},
+				"organization": {
+					"label": "Organisatie",
+					"description": "Hiermee wordt Stump geïnformeerd hoe u uw bibliotheek tijdens scans kunt interpreteren. Deze instellingen kunnen later niet worden gewijzigd",
+					"filesystemPattern": {
+						"label": "Bestandsysteem Patroon",
+						"COLLECTION_BASED": {
+							"label": "Top-Level Collecties",
+							"description": "Elke map op het hoogste niveau van de bibliotheekwortel is een enkele serie"
+						},
+						"SERIES_BASED": {
+							"label": "Recursieve Series",
+							"description": "Elke map op elk niveau is een enkele serie"
+						}
+					},
+					"mode": {
+						"label": "Modus",
+						"filesystem": {
+							"label": "Bestandssysteem",
+							"description": "Groepeer boeken in serie met behulp van hun mappen en een bestandssysteempatroon"
+						},
+						"metadata": {
+							"label": "Metadata",
+							"description": "Scan elke map en groep boeken door hun serie metadata, indien aanwezig"
+						},
+						"processingRequired": "Het verwerken van metadata is vereist om een bibliotheek te organiseren via metadata"
+					}
 				}
 			}
 		},
 		"createLibraryScene": {
-			"heading": "Create New Library",
+			"heading": "Bibliotheek maken",
 			"form": {
 				"review": {
 					"labels": {

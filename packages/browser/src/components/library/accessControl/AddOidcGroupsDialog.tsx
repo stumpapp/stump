@@ -36,6 +36,7 @@ export function AddOidcGroupsDialog({ existing, disabled, onAdd }: Props) {
 					{t(getKey('add.trigger'))}
 				</Button>
 			</Dialog.Trigger>
+
 			<Dialog.Content>
 				<Dialog.Header>
 					<Dialog.Title>{t(getKey('add.title'))}</Dialog.Title>

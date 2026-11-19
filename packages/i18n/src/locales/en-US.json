@@ -863,7 +863,7 @@
         "access": {
           "noPermission": {
             "title": "Cannot List Users",
-            "description": "You don't have permission to see other users on this server, so you can't configure their access here. Ask a server administrator to adjust library access after creation if needed"
+            "description": "You don't have permission to see other users on this server, so you can't configure individual access here. Ask a server administrator to adjust individual user access if needed"
           }
         },
         "review": {
@@ -1123,8 +1123,8 @@
               "placeholder": "admins, readers"
             },
             "disclaimer": {
-              "title": "This will override manual authorization",
-              "description": "When set you will be unable to manually authorize users for this library. Only users in the specified OIDC groups will be able to access this library"
+              "title": "This might override individual authorizations",
+              "description": "If configured, OIDC groups manage the access for OIDC users. Individual access is for non-OIDC users, and if you grant individual access to an OIDC user who is not in an authorized group, their access will be revoked next sync. This includes your own access, if you are an OIDC user"
             },
             "confirmationModal": {
               "title": "Update OIDC groups",

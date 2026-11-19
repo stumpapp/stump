@@ -1,10 +1,11 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useOidcConfig, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { AlertCircle } from 'lucide-react'
+import { Suspense } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { UserAccessTable } from '@/components/library/accessControl/UserAccessTable'
+import { OidcGroupsTable, UserAccessTable } from '@/components/library/accessControl'
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate/schema'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -23,7 +24,30 @@ const usersQuery = graphql(`
 
 export default function CreateLibraryAccessStep() {
 	const { checkPermission } = useAppContext()
-	return checkPermission(UserPermission.ReadUsers) ? <UserAccess /> : <ReadUsersNotice />
+	const { enabled: oidcEnabled } = useOidcConfig()
+
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const oidcGroups = useWatch({ control: form.control, name: 'oidcGroups' }) ?? []
+	const canReadUsers = checkPermission(UserPermission.ReadUsers)
+
+	return (
+		<div className="gap-8 flex flex-col">
+			{!canReadUsers && <LacksReadUsersPermissionNotice />}
+			{canReadUsers && (
+				<Suspense>
+					<UserAccess />
+				</Suspense>
+			)}
+
+			{oidcEnabled && (
+				<OidcGroupsTable
+					groups={oidcGroups}
+					onChange={(groups) => form.setValue('oidcGroups', groups)}
+					alertId="create-library-oidc-groups-info"
+				/>
+			)}
+		</div>
+	)
 }
 
 function UserAccess() {
@@ -47,13 +71,12 @@ function UserAccess() {
 					allowedUserIds.filter((id) => !ids.includes(id)),
 				)
 			}
+			showHeader={false}
 		/>
 	)
 }
 
-// TODO: realizing i might need to rephrase this alert since a user without readusers can still
-// set oidc groups if enabled and all that, will revisit later today/tomorrow
-function ReadUsersNotice() {
+function LacksReadUsersPermissionNotice() {
 	const { t } = useTranslate()
 
 	return (

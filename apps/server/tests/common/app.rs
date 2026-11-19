@@ -114,6 +114,25 @@ impl TestApp {
 			.to_string()
 	}
 
+	pub async fn get_viewer(&self) -> Value {
+		let response = self
+			.server
+			.get("/api/v2/auth/me")
+			.add_header("Authorization", self.auth_header().await)
+			.await;
+		response.assert_status_ok();
+		response.json()
+	}
+
+	pub async fn get_viewer_id(&self) -> String {
+		self.get_viewer()
+			.await
+			.get("id")
+			.and_then(Value::as_str)
+			.expect("viewer id missing from response")
+			.to_string()
+	}
+
 	/// issue a GET request to the specified path with auth headers, returning the response directly
 	pub async fn get(&self, path: &str) -> TestResponse {
 		let response = self

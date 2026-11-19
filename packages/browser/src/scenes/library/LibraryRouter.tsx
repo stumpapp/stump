@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
 
-import { useLibraryContext } from './context.ts'
+import { useLibraryContext } from '../../components/library/context.ts'
 import LibraryDefaultRedirect from './LibraryDefaultRedirect.tsx'
 import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'

@@ -1,7 +1,7 @@
 import { LibraryViewMode } from '@stump/graphql'
 import { Navigate } from 'react-router'
 
-import { useLibraryContext } from './context'
+import { useLibraryContext } from '../../components/library/context'
 
 export default function LibraryDefaultRedirect() {
 	const { library } = useLibraryContext()

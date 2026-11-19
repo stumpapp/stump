@@ -67,7 +67,13 @@ export default defineConfig({
 		tailwindcss(),
 		react(),
 		babel({ presets: [reactCompilerPreset()] }),
-		tsconfigPaths({ tsConfigPath: ['tsconfig.json', '../../packages/browser/tsconfig.json'] }),
+		tsconfigPaths({
+			tsConfigPath: [
+				fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url)),
+				'tsconfig.json',
+				'../../packages/browser/tsconfig.json',
+			],
+		}),
 		compression({
 			include: [/\.(js|mjs|json|css|html|svg|xml|wasm)$/i],
 			exclude: [/\.(png|jpe?g|gif|webp|avif|woff2?|mp4|webm)$/i],

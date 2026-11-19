@@ -4,6 +4,7 @@ use models::{
 	shared::{
 		api_key::{API_KEY_PREFIX, APIKeyPermissions},
 		enums::UserPermission,
+		permission_set::PermissionSet,
 	},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
@@ -67,11 +68,15 @@ impl APIKeyController {
 		match &self.model.permissions {
 			APIKeyPermissions::Inherit(_) => for_user.permissions.clone(),
 			// If the user lacks a permission, they can't use it
-			APIKeyPermissions::Custom(permissions) => permissions
-				.iter()
-				.filter(|perm| for_user.permissions.contains(perm))
-				.cloned()
-				.collect(),
+			APIKeyPermissions::Custom(permissions) => {
+				let owner_permissions =
+					PermissionSet::new(for_user.permissions.clone()).resolve_into_vec();
+				PermissionSet::new(permissions.clone())
+					.resolve_into_vec()
+					.into_iter()
+					.filter(|permission| owner_permissions.contains(permission))
+					.collect()
+			},
 		}
 	}
 }
@@ -112,7 +117,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_get_permits_wrong_user() {
+	fn test_resolve_permissions_wrong_user() {
 		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
 		let key = api_key::Model {
 			long_token_hash: hash.clone(),
@@ -133,7 +138,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_get_permits_inherit() {
+	fn test_resolve_permissions_inherit() {
 		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
 		let key = api_key::Model {
 			permissions: APIKeyPermissions::default(),
@@ -158,7 +163,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_get_permits_custom() {
+	fn test_resolve_permissions_custom() {
 		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
 		let key = api_key::Model {
 			permissions: APIKeyPermissions::Custom(vec![UserPermission::AccessBookClub]),

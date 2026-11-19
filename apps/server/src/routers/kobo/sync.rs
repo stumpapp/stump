@@ -308,7 +308,16 @@ mod tests {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		fake_data::Media {
 			series_id: series.id.clone(),
@@ -370,7 +379,15 @@ mod tests {
 	async fn test_first_sync_standalones() {
 		let db = test_database().await;
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 		let book = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -420,7 +437,16 @@ mod tests {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		for i in 1..=5 {
 			fake_data::Media {
@@ -476,7 +502,16 @@ mod tests {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		for i in 1..=2 {
 			fake_data::Media {
@@ -551,7 +586,16 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		// a newly created book.
 		let new_book = fake_data::Media {
@@ -598,7 +642,16 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		// a book that was modified since the last sync.
 		let new_book = fake_data::Media {
@@ -683,7 +736,16 @@ mod tests {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("ishmael").insert(&db).await;
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		fake_data::Media {
 			series_id: series.id.clone(),

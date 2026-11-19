@@ -26,7 +26,9 @@ fn kind_from_config(config: &ScheduledJobConfigInput) -> ScheduledJobKind {
 
 #[Object]
 impl ScheduledJobConfigMutation {
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ManageScheduledBackgroundJobs)"
+	)]
 	async fn create_scheduled_job(
 		&self,
 		ctx: &Context<'_>,
@@ -53,7 +55,9 @@ impl ScheduledJobConfigMutation {
 		Ok(ScheduledJob::from(model))
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ManageScheduledBackgroundJobs)"
+	)]
 	async fn update_scheduled_job(
 		&self,
 		ctx: &Context<'_>,
@@ -94,7 +98,9 @@ impl ScheduledJobConfigMutation {
 		Ok(ScheduledJob::from(updated))
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ManageScheduledBackgroundJobs)"
+	)]
 	async fn delete_scheduled_job(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
 		let core = ctx.data::<CoreContext>()?;
 

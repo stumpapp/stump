@@ -7,11 +7,11 @@ import { Suspense, useState } from 'react'
 import { toast } from 'sonner'
 
 import BookPageGrid from '@/components/book/BookPageGrid'
+import { useLibraryContext } from '@/components/library/context'
 import SeriesBookGrid, { SelectedBook } from '@/components/series/SeriesBookGrid'
 import UploadImageModal from '@/components/thumbnail/UploadImageModal'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContext } from '@/scenes/library/context'
 import { invalidateThumbnailQueries } from '@/utils/query'
 
 import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'

@@ -192,4 +192,26 @@ async fn test_book_club_graphql_requires_access_book_club_permission() {
 		response.get("errors").is_some(),
 		"def should not have worked: {response:#}"
 	);
+
+	let moderator = CreateTestUser {
+		username: "moderator-without-club-access".to_string(),
+		permissions: vec![UserPermission::ManageBookClubs],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			r#"mutation {
+				updateBookClub(id: "club", input: { name: "Updated by moderator" }) { id }
+			}"#,
+			None,
+			&moderator.token,
+		)
+		.await;
+	assert!(
+		response.get("errors").is_some(),
+		"a global moderator without AccessBookClub should be denied: {response:#}"
+	);
 }

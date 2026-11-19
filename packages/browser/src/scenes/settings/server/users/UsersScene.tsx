@@ -1,8 +1,9 @@
+import { UserPermission } from '@stump/graphql'
 import { Suspense } from 'react'
 
 import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
-import { useAppContext } from '@/context'
+import { useCheckPermission } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
@@ -11,22 +12,20 @@ import UsersStats from './UsersStats'
 
 export default function UsersScene() {
 	const { t } = useTranslate()
-	// TODO(permissions): isServerOwner will be replaced by discrete permissions
-	// once https://github.com/stumpapp/stump/tree/improve-permissioning is merged
-	// ^ so once it is, use those (prolly stats-specific ones?) instead
-	const { isServerOwner } = useAppContext()
+
+	const canManageUsers = useCheckPermission(UserPermission.ManageUsers)
 
 	return (
 		<SceneContainer variant="settings">
 			<AppTitle title={t('settingsScene.server/users.helmet')} />
 
-			{isServerOwner && (
+			{canManageUsers && (
 				<Suspense>
 					<UsersStats />
 				</Suspense>
 			)}
 			<UserTableSection />
-			{isServerOwner && <LoginActivitySection />}
+			{canManageUsers && <LoginActivitySection />}
 		</SceneContainer>
 	)
 }

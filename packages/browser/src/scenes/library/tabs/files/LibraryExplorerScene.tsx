@@ -4,7 +4,7 @@ import { UserPermission } from '@stump/graphql'
 import { FileExplorer } from '@/components/explorer'
 import { useAppContext } from '@/context'
 
-import { useLibraryContext } from '../../context'
+import { useLibraryContext } from '../../../../components/library/context'
 
 export default function LibraryExplorerScene() {
 	const { library } = useLibraryContext()

@@ -35,12 +35,10 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const expirationFormatted = formatDate(displayedData?.expiresAt)
 	const lastUsedAtFormatted = formatDate(displayedData?.lastUsedAt)
 	const createdAtFormatted = formatDate(displayedData?.createdAt)
-	const isAllPermissions =
-		user.isServerOwner && displayedData?.permissions.__typename === 'InheritPermissionStruct'
+	const isPotentiallyDangerousKey =
+		displayedData?.permissions.__typename === 'InheritPermissionStruct'
 
 	const renderPermissions = () => {
-		if (isAllPermissions) return null
-
 		const permissions =
 			displayedData?.permissions.__typename === 'InheritPermissionStruct'
 				? user.permissions || []
@@ -70,7 +68,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 			description="A detailed view of this key"
 		>
 			<div className="px-4 gap-4 flex flex-col">
-				{isAllPermissions && (
+				{isPotentiallyDangerousKey && (
 					<Alert variant="warning" data-testid="unrestricted-meta">
 						<ShieldAlert className="size-4" />
 						<AlertTitle>{t(getKey('unrestrictedKey.heading'))}</AlertTitle>

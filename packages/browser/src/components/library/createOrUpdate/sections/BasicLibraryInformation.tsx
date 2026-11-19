@@ -1,13 +1,14 @@
-import { InputGroup, NewCard, Text } from '@stump/components'
+import { useOidcConfig } from '@stump/client'
+import { ComboBox, InputGroup, NewCard, Text } from '@stump/components'
 import { OrganizationMode, UserPermission } from '@stump/graphql'
 import { Folder } from 'lucide-react'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/components/library/context'
 import TagSelect from '@/components/TagSelect'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 import LibraryTypeSelect from './LibraryType'
@@ -33,6 +34,13 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	const { errors } = useFormState({
 		control: form.control,
 	})
+
+	const oidcConfig = useOidcConfig()
+	const oidcGroups = useWatch({ control: form.control, name: 'oidcGroups' })
+
+	const [groupOptions, setGroupOptions] = useState(
+		(oidcGroups || []).map((group) => ({ label: group, value: group })),
+	)
 
 	return (
 		<>
@@ -109,6 +117,25 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					{...form.register('oneshotsDirectory')}
 				/>
 			</NewCard>
+
+			{isCreatingLibrary && oidcConfig.enabled && (
+				// ^ when editing there is a separate access control page so don't need this here
+				<NewCard label={t(getKey('oidcGroups.label'))}>
+					<NewCard.Row
+						label={t(getKey('oidcGroups.label'))}
+						description={t(getKey('oidcGroups.description'))}
+					>
+						<ComboBox
+							options={groupOptions}
+							value={oidcGroups ?? []}
+							isMultiSelect
+							onChange={(value) => form.setValue('oidcGroups', value ?? [])}
+							onAddOption={(option) => setGroupOptions((prev) => [...prev, option])}
+							filterable
+						/>
+					</NewCard.Row>
+				</NewCard>
+			)}
 		</>
 	)
 }

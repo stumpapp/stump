@@ -12,7 +12,6 @@ export type PermissionEnforcerOptions = {
 
 export type IAppContext = {
 	user: AuthUser
-	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
 	logout: () => Promise<void>

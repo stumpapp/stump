@@ -1,6 +1,7 @@
 use async_graphql::InputType;
 use graphql::input::user::AgeRestrictionInput;
-use models::shared::enums::UserPermission;
+use models::{entity::user, shared::enums::UserPermission};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, sea_query::Expr};
 use serde_json::{Value, json};
 
 use super::TestApp;
@@ -16,6 +17,7 @@ pub struct CreateTestUser {
 	pub password: String,
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestrictionInput>,
+	pub oidc_groups: Option<Vec<String>>,
 }
 
 impl Default for CreateTestUser {
@@ -25,6 +27,7 @@ impl Default for CreateTestUser {
 			password: "password".to_string(),
 			permissions: vec![],
 			age_restriction: None,
+			oidc_groups: None,
 		}
 	}
 }
@@ -62,6 +65,17 @@ impl CreateTestUser {
 			.as_str()
 			.expect("createUser returned no id")
 			.to_string();
+
+		// update user doesn't expose oidc groups, so for now just manually edit
+		// there is separate mutation for that
+		if let Some(groups) = &self.oidc_groups {
+			user::Entity::update_many()
+				.filter(user::Column::Id.eq(id.clone()))
+				.col_expr(user::Column::OidcGroups, Expr::value(groups.join(",")))
+				.exec(app.conn())
+				.await
+				.expect("should have updated groups");
+		}
 
 		let token = app.login_as(&self.username, &self.password).await;
 

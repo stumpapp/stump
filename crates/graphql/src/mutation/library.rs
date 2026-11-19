@@ -38,6 +38,7 @@ use tokio::fs;
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	error_message::FORBIDDEN_ACTION,
 	guard::PermissionGuard,
 	input::{
 		library::{
@@ -259,6 +260,16 @@ impl LibraryMutation {
 		let scan_after_creation = input.scan_after_persist;
 		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
 		let tags = input.tags.take();
+		let allowed_user_ids = match input.allowed_user_ids.clone() {
+			MaybeUndefined::Value(ids) => {
+				if !user.has_permission(UserPermission::ReadUsers) {
+					return Err(FORBIDDEN_ACTION.into());
+				} else {
+					MaybeUndefined::Value(ids)
+				}
+			},
+			value => value,
+		};
 
 		let txn = core.conn.as_ref().begin().await?;
 
@@ -307,6 +318,25 @@ impl LibraryMutation {
 			}
 			.insert(&txn)
 			.await?;
+		}
+
+		if let MaybeUndefined::Value(ids) = allowed_user_ids {
+			let additional = ids
+				.iter()
+				.filter(|id| **id != user.id) // creator already handled above
+				.map(|id| library_access::ActiveModel {
+					library_id: Set(created_library.id.clone()),
+					user_id: Set(id.clone()),
+					..Default::default()
+				})
+				.collect::<Vec<_>>();
+
+			if !additional.is_empty() {
+				library_access::Entity::insert_many(additional)
+					.on_conflict_do_nothing()
+					.exec(&txn)
+					.await?;
+			}
 		}
 
 		// any stored mtimes beneath the path are leftovers from a previous library

@@ -27,6 +27,10 @@ pub struct CreateOrUpdateLibraryInput {
 	#[graphql(default = true)]
 	pub scan_after_persist: bool,
 	pub oidc_groups: MaybeUndefined<Vec<String>>,
+	/// The IDs for users besides the creator who should have access to the library
+	///
+	/// Note: should be handled before calling `into_active_model`
+	pub allowed_user_ids: MaybeUndefined<Vec<String>>,
 }
 
 impl CreateOrUpdateLibraryInput {

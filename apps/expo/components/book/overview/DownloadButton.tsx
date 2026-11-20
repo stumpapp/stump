@@ -13,14 +13,9 @@ import Animated, {
 import { Button, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { usePalette } from '~/lib/constants'
-import {
-	useDownloadQueue,
-	useIsBookDownloaded,
-	useIsBookDownloading,
-	useTranslate,
-} from '~/lib/hooks'
+import { useDownloadQueue, useIsBookDownloaded, useTranslate } from '~/lib/hooks'
 
-type DownloadState = 'downloading' | 'completed'
+import { type DownloadButtonState, getDownloadButtonState } from './downloadButtonState'
 
 const FADE_DURATION = 350
 const COMPLETION_LINGER_MS = 1500
@@ -32,16 +27,24 @@ type DownloadButtonProps = {
 }
 
 export default function DownloadButton({ bookId, serverId, onDownload }: DownloadButtonProps) {
-	const isDownloading = useIsBookDownloading(bookId)
 	const isDownloaded = useIsBookDownloaded(bookId, serverId)
 
 	const accentColor = usePalette('muted')
 
 	const { translate } = useTranslate()
-	const { activeItems, cancel } = useDownloadQueue({ serverId })
+	const { activeItems, pendingItems, cancel } = useDownloadQueue({ serverId })
 
-	const activeDownload = activeItems.find((item) => item.bookId === bookId)
+	const activeDownload = activeItems.find(
+		(item) => item.bookId === bookId && item.serverId === serverId,
+	)
 	const downloadPercentage = activeDownload?.progress?.percentage ?? 0
+	const queueState = getDownloadButtonState({
+		bookId,
+		serverId,
+		isDownloaded,
+		pendingItems,
+		activeItems,
+	})
 
 	const progress = useSharedValue(0)
 	const contentOpacity = useSharedValue(1)
@@ -50,11 +53,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const wasCancelledRef = useRef(false)
 	const prevIsDownloadedRef = useRef(isDownloaded)
 
-	const [downloadState, setDownloadState] = useState<DownloadState | undefined>(() => {
-		if (isDownloaded) return 'completed'
-		if (isDownloading) return 'downloading'
-		return undefined
-	})
+	const [downloadState, setDownloadState] = useState<DownloadButtonState | undefined>(queueState)
 
 	// Note: I don't _love_ having to dup the state but couldn't get it quite right without doing so
 	const [displayedState, setDisplayedState] = useState(downloadState)
@@ -77,20 +76,26 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	}, [isDownloaded, downloadState])
 
 	useEffect(() => {
-		if (isDownloading) {
+		if (queueState === 'downloading') {
 			wasDownloadingRef.current = true
 			wasCancelledRef.current = false
 			setDownloadState('downloading')
-		} else if (wasDownloadingRef.current && !isDownloading) {
+		} else if (wasDownloadingRef.current) {
 			wasDownloadingRef.current = false
 			if (wasCancelledRef.current) {
 				wasCancelledRef.current = false
 				setDownloadState(undefined)
 			} else {
-				setDownloadState('completed')
+				setDownloadState(isDownloaded ? 'completed' : undefined)
 			}
+		} else if (queueState === 'completed') {
+			setDownloadState('completed')
+		} else if (queueState === 'queued') {
+			setDownloadState('queued')
+		} else {
+			setDownloadState((previousState) => (previousState === 'queued' ? undefined : previousState))
 		}
-	}, [isDownloading])
+	}, [isDownloaded, queueState])
 
 	useEffect(() => {
 		if (displayedState === downloadState) return
@@ -166,7 +171,9 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 		? translate('shared.common.downloaded')
 		: isActive
 			? translate('shared.common.cancel')
-			: translate('shared.common.download')
+			: displayedState === 'queued'
+				? translate('shared.common.queued')
+				: translate('shared.common.download')
 
 	return (
 		<Animated.View exiting={isCompleted ? FadeOut.duration(300) : undefined}>

@@ -82,7 +82,6 @@ export default function JobOverlay() {
 					>
 						{isMinimized ? (
 							<MinimizedJobButton
-								message={activeJob.message ?? 'Job in progress'}
 								progressValue={progressValue}
 								onExpand={() => setIsMinimized(false)}
 							/>
@@ -104,17 +103,16 @@ export default function JobOverlay() {
 }
 
 type MinimizedJobButtonProps = {
-	message: string
 	progressValue: number | null
 	onExpand: () => void
 }
 
-function MinimizedJobButton({ message, progressValue, onExpand }: MinimizedJobButtonProps) {
+function MinimizedJobButton({ progressValue, onExpand }: MinimizedJobButtonProps) {
 	return (
 		<button
 			type="button"
 			className="inset-0 absolute flex size-full items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-			aria-label={`Expand job progress: ${message}`}
+			aria-label="Expand job progress"
 			onClick={onExpand}
 		>
 			<ProgressRing value={progressValue} />

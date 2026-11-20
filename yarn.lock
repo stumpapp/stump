@@ -8767,6 +8767,11 @@ baseline-browser-mapping@^2.11.20:
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.21.tgz#99af73cb8e54007e4f5345e132278e26c2662f2c"
   integrity sha512-uh8vpY/1/YyFkunIDFH/12p7/7VdPKA1hejMVEbdkEaWnUz0Hesvx5EbiU6XxjyHZIOju+ZMbQJkRh+es3/spQ==
 
+basic-auth@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/basic-auth/-/basic-auth-3.1.0.tgz#719aaa7d0451a7861e13fc38880b943a0e4c33b5"
+  integrity sha512-E87x8DEyyFLN1EeP5p6j8b/g7gynoV+L6G2zLXAoL1CkkXe7HjNU7JIAf4JozCXJgl5SzxREQq/HzSF/MqhPLw==
+
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.2.tgz#a4301d389b6a43f9b67ff3ca11a3f6637e360e9e"
@@ -13884,6 +13889,11 @@ jose@^5.0.0:
   resolved "https://registry.yarnpkg.com/jose/-/jose-5.10.0.tgz#c37346a099d6467c401351a9a0c2161e0f52c4be"
   integrity sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==
 
+jose@^6.2.12:
+  version "6.2.18"
+  resolved "https://registry.yarnpkg.com/jose/-/jose-6.2.18.tgz#81428d8ed8f7fc9332025836b4ec2d4365a67afb"
+  integrity sha512-doV4thUwgkrycJH4yLeqwTGIIZphHl+pk7CPReuMIhYhncmgzdko85MaCG4YQFTxqMFr1/oEH32tZuKKovcDEg==
+
 js-cookie@>=3.0.7, js-cookie@^2.2.1:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-3.0.8.tgz#444e6f4b27a5d844594fef61c9d6bca5f0787688"
@@ -16986,6 +16996,14 @@ oauth-sign@~0.9.0:
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.9.0.tgz#47a7b016baa68b5fa0ecf3dee08a85c679ac6455"
   integrity sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==
 
+oauth2-mock-server@^9.3.0:
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/oauth2-mock-server/-/oauth2-mock-server-9.3.0.tgz#6e5ffbd1bf0c9d2a2dace28a32c24f11393d8b9b"
+  integrity sha512-nqdjiAfDSWWWKrLhD7DSCgNUkX35z2+h1oRHEgNdZqFwHXDNZp98RVJ7Cs45u3GPplbazTeGoBsO8SPfv5GOIw==
+  dependencies:
+    basic-auth "^3.0.0"
+    jose "^6.2.12"
+
 ob1@0.87.1:
   version "0.87.1"
   resolved "https://registry.yarnpkg.com/ob1/-/ob1-0.87.1.tgz#d705e92df01c1a4a2a0fa5dd37cfda6ba9ad4ff1"
@@ -18458,7 +18476,6 @@ react-native-easing-gradient@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-native-easing-gradient/-/react-native-easing-gradient-1.1.1.tgz#8d099795d7a0065e67d37a8489bffe354ffb94fa"
   integrity sha512-KrGU97kPTMrLNzVXxFirFMgl65uo70gVNoKw2OngDzcDfoswb648I3ggeCnoY+JgMWkPyx4LlG7n3ZNgSPFnLw==
-
 
 react-native-enriched-markdown@^1.1.1:
   version "1.1.1"
@@ -21166,6 +21183,15 @@ tsx@^4.23.12:
   version "4.23.12"
   resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.23.12.tgz#3a4919591cd9b9e00011b75e596c8ab8db23c09c"
   integrity sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==
+  dependencies:
+    esbuild "~0.28.0"
+  optionalDependencies:
+    fsevents "~2.3.3"
+
+tsx@^4.23.15:
+  version "4.23.15"
+  resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.23.15.tgz#f53901695685ad567fed0f08532f7782e631c251"
+  integrity sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==
   dependencies:
     esbuild "~0.28.0"
   optionalDependencies:

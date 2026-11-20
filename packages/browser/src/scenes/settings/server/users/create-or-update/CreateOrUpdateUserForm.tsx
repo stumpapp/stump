@@ -73,7 +73,8 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 	const { mutate: createUser, error: createError } = useGraphQLMutation(createMutation, {
 		onSuccess: async () => {
 			await client.refetchQueries({
-				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.users,
+				predicate: ({ queryKey: [baseKey] }) =>
+					baseKey === sdk.cacheKeys.users || baseKey === 'user',
 			})
 			form.reset()
 			navigate(paths.settings('users'))
@@ -83,7 +84,8 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 	const { mutate: updateUser, error: updateError } = useGraphQLMutation(updateMutation, {
 		onSuccess: async ({ updateUser: result }) => {
 			await client.refetchQueries({
-				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.users,
+				predicate: ({ queryKey: [baseKey] }) =>
+					baseKey === sdk.cacheKeys.users || baseKey === 'user',
 			})
 			form.reset({
 				ageRestriction: result.ageRestriction?.age,

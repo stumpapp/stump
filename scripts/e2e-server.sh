@@ -14,5 +14,15 @@ fi
 export STUMP_CONFIG_DIR="$E2E_DIR"
 export STUMP_PORT=10801
 export STUMP_ALLOWED_ORIGINS="http://localhost:3000"
+export STUMP_OIDC_CLIENT_ID=test-client
+export STUMP_OIDC_CLIENT_SECRET=test-secret
+export STUMP_OIDC_ISSUER_URL=http://localhost:9000
+export STUMP_OIDC_GROUPS_CLAIM=groups
+export STUMP_OIDC_GROUP_PERMISSION_MAPPING='{"admins":["MANAGE_SERVER"],"readers":[]}'
+# TODO: ^ think more meaninfully about this for tests
+
+# Note: the oidc tests are rather self-contained so can run in more isolation:
+# STUMP_BASE_URL=http://localhost:10801 yarn e2e tests/specs/oidc/login.spec.ts --project=chromium --no-deps
+# ^ ofc once this server is running
 
 exec cargo run -p stump_server --release

@@ -11,6 +11,7 @@ import { Link, Locator, Publication } from '@readium/shared'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTranslate } from '@/hooks/useTranslate'
+import { publicUrl } from '@/utils/publicUrl'
 
 import { clearFramesSelection } from '../annotations/clearSelection'
 import { locatorToHref, resolvePublicationLinkLocator } from './locator'
@@ -283,7 +284,7 @@ export function useReadiumNavigator({
 
 				const fontHref =
 					typeof window !== 'undefined'
-						? `${window.location.origin}/assets/fonts/fonts.css`
+						? new URL(publicUrl('/assets/fonts/fonts.css'), window.location.origin).href
 						: '/assets/fonts/fonts.css'
 
 				navigator = new EpubNavigator(

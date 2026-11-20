@@ -134,23 +134,26 @@ struct OPDSSearchQuery {
 	search: Option<String>,
 }
 
-fn catalog_url(req_ctx: &AuthContext, path: &str) -> String {
+fn catalog_url(ctx: &AppState, req_ctx: &AuthContext, path: &str) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
-		format!("/opds/{}/v1.2/{}", api_key, path)
+		format!("{}/opds/{}/v1.2/{}", ctx.config.base_path, api_key, path)
 	} else {
-		format!("/opds/v1.2/{}", path)
+		format!("{}/opds/v1.2/{}", ctx.config.base_path, path)
 	}
 }
 
-fn service_url(req_ctx: &AuthContext) -> String {
+fn service_url(ctx: &AppState, req_ctx: &AuthContext) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
-		format!("/opds/{}/v1.2", api_key)
+		format!("{}/opds/{}/v1.2", ctx.config.base_path, api_key)
 	} else {
-		"/opds/v1.2".to_string()
+		format!("{}/opds/v1.2", ctx.config.base_path)
 	}
 }
 
-async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
+async fn catalog(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
@@ -162,7 +165,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "keep-reading"),
+				href: catalog_url(&ctx, &req, "keep-reading"),
 			}]),
 			None,
 		),
@@ -176,7 +179,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "series"),
+				href: catalog_url(&ctx, &req, "series"),
 			}]),
 			None,
 		),
@@ -190,7 +193,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "series/latest"),
+				href: catalog_url(&ctx, &req, "series/latest"),
 			}]),
 			None,
 		),
@@ -204,7 +207,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "libraries"),
+				href: catalog_url(&ctx, &req, "libraries"),
 			}]),
 			None,
 		),
@@ -218,7 +221,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "books"),
+				href: catalog_url(&ctx, &req, "books"),
 			}]),
 			None,
 		),
@@ -232,7 +235,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: catalog_url(&req, "books/latest"),
+				href: catalog_url(&ctx, &req, "books/latest"),
 			}]),
 			None,
 		),
@@ -242,17 +245,17 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 		OpdsLink {
 			link_type: OpdsLinkType::Navigation,
 			rel: OpdsLinkRel::ItSelf,
-			href: catalog_url(&req, "catalog"),
+			href: catalog_url(&ctx, &req, "catalog"),
 		},
 		OpdsLink {
 			link_type: OpdsLinkType::Navigation,
 			rel: OpdsLinkRel::Start,
-			href: catalog_url(&req, "catalog"),
+			href: catalog_url(&ctx, &req, "catalog"),
 		},
 		OpdsLink {
 			link_type: OpdsLinkType::Search,
 			rel: OpdsLinkRel::Search,
-			href: catalog_url(&req, "search"),
+			href: catalog_url(&ctx, &req, "search"),
 		},
 	];
 
@@ -266,8 +269,11 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn search_description(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
-	Ok(OpdsOpenSearch::new(Some(service_url(&req)))
+async fn search_description(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Xml> {
+	Ok(OpdsOpenSearch::new(Some(service_url(&ctx, &req)))
 		.build()
 		.map(Xml)?)
 }
@@ -284,7 +290,9 @@ async fn keep_reading(
 		.await?;
 
 	let entries = futures_util::future::join_all(books.into_iter().map(|m| {
-		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
@@ -295,12 +303,12 @@ async fn keep_reading(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: catalog_url(&req, "keep-reading"),
+				href: catalog_url(&ctx, &req, "keep-reading"),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: catalog_url(&req, "catalog"),
+				href: catalog_url(&ctx, &req, "catalog"),
 			},
 		]),
 		entries,
@@ -325,7 +333,9 @@ async fn get_libraries(
 		.all(ctx.conn.as_ref())
 		.await?;
 	let entries = futures_util::future::join_all(libraries.into_iter().map(|l| {
-		OPDSEntryBuilder::<library::Model>::new(l, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<library::Model>::new(l, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
@@ -336,12 +346,12 @@ async fn get_libraries(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: catalog_url(&req, "libraries"),
+				href: catalog_url(&ctx, &req, "libraries"),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: catalog_url(&req, "catalog"),
+				href: catalog_url(&ctx, &req, "catalog"),
 			},
 		]),
 		entries,
@@ -387,7 +397,9 @@ async fn get_library_by_id(
 		.await?;
 
 	let mut entries = futures_util::future::join_all(series.into_iter().map(|s| {
-		OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<series::Model>::new(s, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 	if first_page {
@@ -403,26 +415,32 @@ async fn get_library_by_id(
 				Some(vec![OpdsLink {
 					link_type: OpdsLinkType::Acquisition,
 					rel: OpdsLinkRel::Subsection,
-					href: catalog_url(&req, &format!("libraries/{}/books", library.id)),
+					href: catalog_url(
+						&ctx,
+						&req,
+						&format!("libraries/{}/books", library.id),
+					),
 				}]),
 				None,
 			),
 		);
 	}
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id,
-		title: library.name.clone(),
-		entries,
-		href_postfix: format!("libraries/{}", library.id),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count: count + 1,
-		}),
-		search: None,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id,
+			title: library.name.clone(),
+			entries,
+			href_postfix: format!("libraries/{}", library.id),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count: count + 1,
+			}),
+			search: None,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -485,23 +503,27 @@ async fn get_series(
 		.await?;
 
 	let entries = futures_util::future::join_all(series.into_iter().map(|s| {
-		OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<series::Model>::new(s, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id: "allSeries".to_string(),
-		title: i18n::translate!(&req, "opds.allSeriesFeed").to_string(),
-		entries,
-		href_postfix: "series".to_string(),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count,
-		}),
-		search,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id: "allSeries".to_string(),
+			title: i18n::translate!(&req, "opds.allSeriesFeed").to_string(),
+			entries,
+			href_postfix: "series".to_string(),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count,
+			}),
+			search,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -523,23 +545,27 @@ async fn get_latest_series(
 		.await?;
 
 	let entries = futures_util::future::join_all(series.into_iter().map(|s| {
-		OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<series::Model>::new(s, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id: "latestSeries".to_string(),
-		title: i18n::translate!(&req, "opds.latestSeriesFeed").to_string(),
-		entries,
-		href_postfix: "series/latest".to_string(),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count,
-		}),
-		search: None,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id: "latestSeries".to_string(),
+			title: i18n::translate!(&req, "opds.latestSeriesFeed").to_string(),
+			entries,
+			href_postfix: "series/latest".to_string(),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count,
+			}),
+			search: None,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -577,7 +603,9 @@ async fn get_series_by_id(
 		.await?;
 
 	let entries = futures_util::future::join_all(books.into_iter().map(|m| {
-		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
@@ -585,19 +613,21 @@ async fn get_series_by_id(
 		.and_then(|m| m.title.clone())
 		.unwrap_or_else(|| series.name.clone());
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id: series.id.clone(),
-		title,
-		entries,
-		href_postfix: format!("series/{}", series.id),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count,
-		}),
-		search: None,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id: series.id.clone(),
+			title,
+			entries,
+			href_postfix: format!("series/{}", series.id),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count,
+			}),
+			search: None,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -617,12 +647,12 @@ async fn search_feed(
 				OpdsLink {
 					link_type: OpdsLinkType::Navigation,
 					rel: OpdsLinkRel::ItSelf,
-					href: catalog_url(&req, "search/feed"),
+					href: catalog_url(&ctx, &req, "search/feed"),
 				},
 				OpdsLink {
 					link_type: OpdsLinkType::Navigation,
 					rel: OpdsLinkRel::Start,
-					href: catalog_url(&req, "catalog"),
+					href: catalog_url(&ctx, &req, "catalog"),
 				},
 			]),
 			vec![],
@@ -642,6 +672,7 @@ async fn search_feed(
 	for lib in libraries {
 		entries.push(
 			OPDSEntryBuilder::<library::Model>::new(lib, req.api_key())
+				.with_base_path(&ctx.config.base_path)
 				.into_opds_entry()
 				.await,
 		);
@@ -661,6 +692,7 @@ async fn search_feed(
 	for s in series {
 		entries.push(
 			OPDSEntryBuilder::<series::Model>::new(s, req.api_key())
+				.with_base_path(&ctx.config.base_path)
 				.into_opds_entry()
 				.await,
 		);
@@ -682,6 +714,7 @@ async fn search_feed(
 	for book in books {
 		entries.push(
 			OPDSEntryBuilder::<OPDSPublicationEntity>::new(book, req.api_key())
+				.with_base_path(&ctx.config.base_path)
 				.into_opds_entry()
 				.await,
 		);
@@ -694,12 +727,12 @@ async fn search_feed(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: catalog_url(&req, &format!("search/feed?search={}", search)),
+				href: catalog_url(&ctx, &req, &format!("search/feed?search={}", search)),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: catalog_url(&req, "catalog"),
+				href: catalog_url(&ctx, &req, "catalog"),
 			},
 		]),
 		entries,
@@ -749,28 +782,32 @@ async fn generate_books_feed(
 		.await?;
 
 	let entries = futures_util::future::join_all(books.into_iter().map(|m| {
-		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id: library_id
-			.as_ref()
-			.map(|id| format!("library:{id}:books"))
-			.unwrap_or_else(|| "allBooks".into()),
-		title: i18n::translate!(&req, "opds.allBooksFeed").to_string(),
-		entries,
-		href_postfix: library_id
-			.map(|id| format!("libraries/{id}/books"))
-			.unwrap_or_else(|| "books".into()),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count,
-		}),
-		search,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id: library_id
+				.as_ref()
+				.map(|id| format!("library:{id}:books"))
+				.unwrap_or_else(|| "allBooks".into()),
+			title: i18n::translate!(&req, "opds.allBooksFeed").to_string(),
+			entries,
+			href_postfix: library_id
+				.map(|id| format!("libraries/{id}/books"))
+				.unwrap_or_else(|| "books".into()),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count,
+			}),
+			search,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -796,23 +833,27 @@ async fn get_latest_books(
 		.await?;
 
 	let entries = futures_util::future::join_all(books.into_iter().map(|m| {
-		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key()).into_opds_entry()
+		OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+			.with_base_path(&ctx.config.base_path)
+			.into_opds_entry()
 	}))
 	.await;
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-		id: "latestBooks".to_string(),
-		title: i18n::translate!(&req, "opds.latestBooksFeed").to_string(),
-		entries,
-		href_postfix: "books/latest".to_string(),
-		page_params: Some(OPDSFeedBuilderPageParams {
-			page: pagination.page,
-			page_size: pagination.limit(),
-			zero_based: pagination.zero_based.unwrap_or(false),
-			count,
-		}),
-		search: None,
-	})?;
+	let feed = OPDSFeedBuilder::new(req.api_key())
+		.with_base_path(&ctx.config.base_path)
+		.paginated(OPDSFeedBuilderParams {
+			id: "latestBooks".to_string(),
+			title: i18n::translate!(&req, "opds.latestBooksFeed").to_string(),
+			entries,
+			href_postfix: "books/latest".to_string(),
+			page_params: Some(OPDSFeedBuilderPageParams {
+				page: pagination.page,
+				page_size: pagination.limit(),
+				zero_based: pagination.zero_based.unwrap_or(false),
+				count,
+			}),
+			search: None,
+		})?;
 
 	Ok(Xml(feed.build()?))
 }

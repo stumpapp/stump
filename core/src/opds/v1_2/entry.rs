@@ -118,18 +118,28 @@ pub trait IntoOPDSEntry {
 pub struct OPDSEntryBuilder<T> {
 	data: T,
 	api_key: Option<String>,
+	base_path: String,
 }
 
 impl<T> OPDSEntryBuilder<T> {
 	pub fn new(data: T, api_key: Option<String>) -> Self {
-		Self { data, api_key }
+		Self {
+			data,
+			api_key,
+			base_path: String::new(),
+		}
+	}
+
+	pub fn with_base_path(mut self, base_path: &str) -> Self {
+		self.base_path = base_path.to_string();
+		self
 	}
 
 	fn format_url(&self, path: &str) -> String {
 		if let Some(ref api_key) = self.api_key {
-			format!("/opds/{}/v1.2/{}", api_key, path)
+			format!("{}/opds/{}/v1.2/{}", self.base_path, api_key, path)
 		} else {
-			format!("/opds/v1.2/{}", path)
+			format!("{}/opds/v1.2/{}", self.base_path, path)
 		}
 	}
 }
@@ -325,6 +335,18 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 
 #[cfg(test)]
 mod tests {
+
+	#[tokio::test]
+	async fn builder_supports_subpaths_with_api_keys() {
+		let entry = OPDSEntryBuilder::new(library(), Some("key".to_string()))
+			.with_base_path("/mysubpath/mysvc")
+			.into_opds_entry()
+			.await;
+		assert_eq!(
+			entry.links[0].href,
+			"/mysubpath/mysvc/opds/key/v1.2/libraries/123"
+		);
+	}
 	use std::str::FromStr;
 
 	use models::shared::enums::FileStatus;

@@ -46,6 +46,12 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Add swap space for build
+        uses: pierotofy/set-swap-space@fc79b3f67fa8a838184ce84a674ca12238d2c761
+        with:
+          swap-size-gb: 10
+      # ^ https://github.com/actions/runner/issues/2468#issuecomment-1651313943
+
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses > /dev/null || true
 
@@ -73,9 +79,10 @@ jobs:
         working-directory: apps/expo/android
         env:
           SENTRY_DISABLE_AUTO_UPLOAD: 'true'
+          CMAKE_BUILD_PARALLEL_LEVEL: '2'
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace \
+          ./gradlew assembleRelease --stacktrace --max-workers=2 \
             -Pandroid.injected.signing.store.file="$PWD/temp-release.keystore" \
             -Pandroid.injected.signing.store.password=stump-temp-password \
             -Pandroid.injected.signing.store.key.alias=temp-alias \

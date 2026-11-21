@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - android-apks-ci
     paths:
       - 'apps/expo/**'
       - 'packages/**'

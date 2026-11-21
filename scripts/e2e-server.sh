@@ -19,10 +19,6 @@ export STUMP_OIDC_CLIENT_SECRET=test-secret
 export STUMP_OIDC_ISSUER_URL=http://localhost:9000
 export STUMP_OIDC_GROUPS_CLAIM=groups
 export STUMP_OIDC_GROUP_PERMISSION_MAPPING='{"admins":["MANAGE_SERVER"],"readers":[]}'
-# TODO: ^ think more meaninfully about this for tests
-
-# Note: the oidc tests are rather self-contained so can run in more isolation:
-# STUMP_BASE_URL=http://localhost:10801 yarn e2e tests/specs/oidc/login.spec.ts --project=chromium --no-deps
-# ^ ofc once this server is running
+# TODO: ^ think more meaningfully about this for tests
 
 exec cargo run -p stump_server --release

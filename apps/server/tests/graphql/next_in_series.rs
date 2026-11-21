@@ -1,6 +1,7 @@
 use crate::common::{
 	TestApp,
 	fixtures::murderbot::{self, create_murderbot},
+	library::setup_library,
 	series::setup_single_series_with_n_books,
 };
 use models::entity::{media, media_metadata, series};
@@ -36,14 +37,15 @@ async fn setup_murderbot(app: &TestApp) -> (series::Model, Vec<media::Model>) {
 }
 
 async fn setup_science(app: &TestApp) -> (series::Model, Vec<media::Model>) {
-	let db = app.conn();
-
-	let image = fake_data::Library {
-		id: Some("image".to_string()),
-		name: Some("Image".to_string()),
-		..Default::default()
-	}
-	.insert(db)
+	let image = setup_library(
+		app,
+		fake_data::Library {
+			id: Some("image".to_string()),
+			name: Some("Image".to_string()),
+			..Default::default()
+		},
+		None,
+	)
 	.await;
 
 	let (series, books) = setup_single_series_with_n_books(

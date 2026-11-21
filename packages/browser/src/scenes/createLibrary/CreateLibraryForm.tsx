@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
-import { ClipboardCheck, FolderOpen, Image, ScanSearch } from 'lucide-react'
+import { ClipboardCheck, FolderOpen, Image, ScanSearch, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -24,6 +24,7 @@ import { SteppedForm, type SteppedFormStep } from '@/components/steppedForm'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
 
+import CreateLibraryAccessStep from './CreateLibraryAccessStep'
 import LibraryReview from './LibraryReview'
 import ScanAfterPersist from './ScanAfterPersist'
 
@@ -91,6 +92,11 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				icon: Image,
 				fields: ['thumbnailConfig'],
 				render: () => <ThumbnailConfig />,
+			},
+			{
+				key: 'access',
+				icon: ShieldCheck,
+				render: () => <CreateLibraryAccessStep />,
 			},
 			{
 				key: 'review',

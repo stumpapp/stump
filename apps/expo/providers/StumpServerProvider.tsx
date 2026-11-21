@@ -10,7 +10,6 @@ export type PermissionEnforcerOptions = {
 
 export type IStumpServerContext = {
 	user: AuthUser | null
-	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
 }
@@ -24,8 +23,7 @@ type StumpServerProviderProps = {
 
 export function StumpServerProvider({ user, children }: StumpServerProviderProps) {
 	const checkPermission = useCallback(
-		(permission: UserPermission) =>
-			user?.isServerOwner || user?.permissions.includes(permission) || false,
+		(permission: UserPermission) => user?.permissions.includes(permission) || false,
 		[user],
 	)
 
@@ -42,7 +40,6 @@ export function StumpServerProvider({ user, children }: StumpServerProviderProps
 		<StumpServerContext.Provider
 			value={{
 				user,
-				isServerOwner: user?.isServerOwner || false,
 				checkPermission,
 				enforcePermission,
 			}}

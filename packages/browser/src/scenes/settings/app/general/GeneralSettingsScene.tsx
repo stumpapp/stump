@@ -10,7 +10,7 @@ export default function GeneralSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<AppTitle title={t('settingsScene.app/account.helmet')} />	
+			<AppTitle title={t('settingsScene.app/account.helmet')} />
 
 			<ProfileForm />
 			<LocalePreferences />

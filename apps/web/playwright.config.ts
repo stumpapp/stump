@@ -1,9 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// TODO: e2e assumes a clean slate, which is quite fine for ci but quite annoying for local
-// runs, so i think it would be in my best interest to dedicate some more chore time to
-// create some scripts to help with runs that auto clean up the database
-
 const baseURL = process.env.STUMP_BASE_URL ?? 'http://localhost:3000'
 
 export default defineConfig({
@@ -31,7 +27,11 @@ export default defineConfig({
 	],
 	// when the url is set we assume it is running, otherwise we start the dev server manually
 	webServer: process.env.STUMP_BASE_URL
-		? undefined
+		? {
+				command: 'yarn oidc:mock',
+				url: 'http://localhost:9001/health',
+				reuseExistingServer: !process.env.CI,
+			}
 		: {
 				command: 'yarn dev',
 				url: 'http://localhost:3000',

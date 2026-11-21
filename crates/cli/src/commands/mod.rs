@@ -10,16 +10,14 @@ use stump_core::config::StumpConfig;
 
 use crate::error::CliResult;
 
-use self::{account::Account, library::Library, system::System};
-
 #[derive(Subcommand, Debug)]
 pub enum Commands {
 	#[command(subcommand)]
-	Account(Account),
+	Account(account::Account),
 	#[command(subcommand)]
-	System(System),
+	Library(library::Library),
 	#[command(subcommand)]
-	Library(Library),
+	System(system::System),
 }
 
 pub async fn handle_command(command: Commands, config: &StumpConfig) -> CliResult<()> {
@@ -27,10 +25,10 @@ pub async fn handle_command(command: Commands, config: &StumpConfig) -> CliResul
 		Commands::Account(account) => {
 			account::handle_account_command(account, config).await
 		},
-		Commands::System(system) => system::handle_system_command(system, config).await,
 		Commands::Library(library) => {
 			library::handle_library_command(library, config).await
 		},
+		Commands::System(system) => system::handle_system_command(system, config).await,
 	}
 }
 

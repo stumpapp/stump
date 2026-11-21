@@ -4,8 +4,8 @@ import { extractErrorMessage, graphql } from '@stump/graphql'
 import { Info } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { useLibraryContext } from '@/components/library/context'
 import { useTranslate } from '@/hooks/useTranslate'
-import { useLibraryContext } from '@/scenes/library/context'
 
 const query = graphql(`
 	query InitFetchJobCheckProviders {

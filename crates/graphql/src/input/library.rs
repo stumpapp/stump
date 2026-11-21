@@ -12,6 +12,10 @@ use models::{
 };
 use sea_orm::{Set, Unchanged, prelude::*};
 
+// TODO: AHHHH just delete this and have:
+// - create input
+// - patch input
+
 #[derive(Debug, InputObject)]
 pub struct CreateOrUpdateLibraryInput {
 	pub name: String,
@@ -22,6 +26,11 @@ pub struct CreateOrUpdateLibraryInput {
 	pub config: Option<LibraryConfigInput>,
 	#[graphql(default = true)]
 	pub scan_after_persist: bool,
+	pub oidc_groups: MaybeUndefined<Vec<String>>,
+	/// The IDs for users besides the creator who should have access to the library
+	///
+	/// Note: should be handled before calling `into_active_model`
+	pub allowed_user_ids: MaybeUndefined<Vec<String>>,
 }
 
 impl CreateOrUpdateLibraryInput {
@@ -34,16 +43,28 @@ impl CreateOrUpdateLibraryInput {
 			path,
 			emoji,
 			config,
+			oidc_groups,
 			..
 		} = self;
 
 		let id = Uuid::new_v4().to_string();
+		let oidc_groups = match oidc_groups {
+			MaybeUndefined::Undefined => Default::default(),
+			MaybeUndefined::Null => Set(None),
+			MaybeUndefined::Value(groups) => {
+				Set((!groups.is_empty()).then(|| groups.join(",")))
+			},
+		};
+
 		let library = library::ActiveModel {
 			id: Set(id.clone()),
 			name: Set(name),
 			description: Set(description),
 			path: Set(path),
 			emoji: Set(emoji),
+			// TODO(oidc): probably good to assert there is overlap between user creating
+			// library and the oidc_groups, but fine for now
+			oidc_groups,
 			..Default::default()
 		};
 

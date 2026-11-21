@@ -11,7 +11,7 @@ use sea_orm::{
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
+	guard::{PermissionGuard, SelfGuard},
 	object::{user::User, user_login_activity::UserLoginActivity},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -37,9 +37,7 @@ impl UserQuery {
 		Ok(User::from(first))
 	}
 
-	#[graphql(
-		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
-	)]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadUsers)")]
 	async fn user_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -48,9 +46,7 @@ impl UserQuery {
 		Ok(count as i64)
 	}
 
-	#[graphql(
-		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
-	)]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadUsers)")]
 	async fn top_readers(
 		&self,
 		ctx: &Context<'_>,
@@ -74,9 +70,7 @@ impl UserQuery {
 		Ok(users_with_counts.into_iter().map(User::from).collect())
 	}
 
-	#[graphql(
-		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
-	)]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadUsers)")]
 	async fn users(
 		&self,
 		ctx: &Context<'_>,
@@ -145,7 +139,7 @@ impl UserQuery {
 	}
 
 	#[graphql(
-		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ReadUsers)).or(ServerOwnerGuard)"
+		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ReadUsers))"
 	)]
 	async fn user_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<User> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -159,7 +153,7 @@ impl UserQuery {
 		Ok(User::from(first))
 	}
 
-	#[graphql(guard = "ServerOwnerGuard")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
 	async fn login_activity(&self, ctx: &Context<'_>) -> Result<Vec<UserLoginActivity>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -174,7 +168,9 @@ impl UserQuery {
 			.collect())
 	}
 
-	#[graphql(guard = "SelfGuard::new(&id).or(ServerOwnerGuard)")]
+	#[graphql(
+		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ManageUsers))"
+	)]
 	async fn login_activity_by_id(
 		&self,
 		ctx: &Context<'_>,

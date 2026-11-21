@@ -136,7 +136,7 @@ impl BookClubDiscussionMutation {
 
 		let can_edit = message.member_id.as_ref() == Some(&member.id)
 			|| member.role >= BookClubMemberRole::Moderator
-			|| user.is_server_owner;
+			|| user.has_permission(UserPermission::ModerateBookClubs);
 
 		if !can_edit {
 			return Err("You can only edit your own messages".into());
@@ -182,7 +182,7 @@ impl BookClubDiscussionMutation {
 
 		let can_delete = message.member_id.as_ref() == Some(&member.id)
 			|| member.role >= BookClubMemberRole::Moderator
-			|| user.is_server_owner;
+			|| user.has_permission(UserPermission::ModerateBookClubs);
 
 		if !can_delete {
 			return Err("You can only delete your own messages".into());
@@ -306,7 +306,9 @@ impl BookClubDiscussionMutation {
 
 		let member = get_member_for_user(&discussion.book_club_id, user, conn).await?;
 
-		if member.role < BookClubMemberRole::Moderator && !user.is_server_owner {
+		if member.role < BookClubMemberRole::Moderator
+			&& !user.has_permission(UserPermission::ModerateBookClubs)
+		{
 			return Err("Only moderators and above can lock/unlock discussions".into());
 		}
 
@@ -348,7 +350,9 @@ impl BookClubDiscussionMutation {
 
 		let member = get_member_for_user(&discussion.book_club_id, user, conn).await?;
 
-		if member.role < BookClubMemberRole::Moderator && !user.is_server_owner {
+		if member.role < BookClubMemberRole::Moderator
+			&& !user.has_permission(UserPermission::ModerateBookClubs)
+		{
 			return Err("Only moderators and above can pin/unpin messages".into());
 		}
 
@@ -375,7 +379,9 @@ impl BookClubDiscussionMutation {
 
 		let member = get_member_for_user(book_club_id.as_ref(), user, conn).await?;
 
-		if member.role < BookClubMemberRole::Moderator && !user.is_server_owner {
+		if member.role < BookClubMemberRole::Moderator
+			&& !user.has_permission(UserPermission::ModerateBookClubs)
+		{
 			return Err("Only moderators and above can create discussions".into());
 		}
 
@@ -433,7 +439,9 @@ impl BookClubDiscussionMutation {
 
 		let member = get_member_for_user(&discussion.book_club_id, user, conn).await?;
 
-		if member.role < BookClubMemberRole::Moderator && !user.is_server_owner {
+		if member.role < BookClubMemberRole::Moderator
+			&& !user.has_permission(UserPermission::ModerateBookClubs)
+		{
 			return Err(
 				"Only moderators and above can archive/unarchive discussions".into(),
 			);

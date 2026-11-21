@@ -20,7 +20,8 @@ export const buildSchema = (
 				message: t('settingsScene.server/users.createOrUpdateForm.validation.ageRestrictionTooLow'),
 			}),
 		ageRestrictionOnUnset: z.boolean().optional(),
-		forbiddenTags: z.array(z.string()).optional(),
+		// TODO(ac): support forbidden tags
+		// forbiddenTags: z.array(z.string()).optional(),
 		maxSessionsAllowed: z
 			.number()
 			.optional()

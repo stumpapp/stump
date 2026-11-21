@@ -23,6 +23,7 @@ type Props = {
 export function CollectionGridItem({ title, to, thumbnails, layoutNumber, stats, onHover }: Props) {
 	return (
 		<Link
+			data-testid={`collection-grid-item-${title}`}
 			to={to}
 			onMouseEnter={onHover}
 			className="group relative block w-full rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"

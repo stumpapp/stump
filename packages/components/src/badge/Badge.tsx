@@ -5,7 +5,7 @@ import { forwardRef } from 'react'
 import { cn } from '../utils'
 
 export const BADGE_VARIANTS = {
-	default: 'bg-primary text-primary-foreground',
+	default: 'bg-muted',
 	error: 'bg-destructive/15 text-destructive focus-visible:ring-field-error-ring',
 	primary: 'bg-primary/15 text-primary',
 	secondary: 'bg-secondary text-secondary-foreground',

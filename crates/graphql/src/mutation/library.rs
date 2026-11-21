@@ -5,13 +5,14 @@ use chrono::Utc;
 use itertools::chain;
 use metadata_integrations::MetadataField;
 use models::{
+	domain::oidc_sync::{oidc_groups_to_reconcile, parse_oidc_groups},
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
-		library_config, library_exclusion, library_scan_record, library_tag, media,
-		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
+		library_access, library_config, library_scan_record, library_tag, media,
+		media_metadata, metadata_provider_config, series, series_metadata, tag,
 	},
-	services::scanned_directory,
+	services::{oidc_sync::sync_oidc_library_access_for_library, scanned_directory},
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
@@ -37,7 +38,7 @@ use tokio::fs;
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	error_message,
+	error_message::FORBIDDEN_ACTION,
 	guard::PermissionGuard,
 	input::{
 		library::{
@@ -182,7 +183,7 @@ impl LibraryMutation {
 
 	/// Clear the scan history for a specific library
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::ReadJobs, UserPermission::ManageLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::ReadBackgroundJobs, UserPermission::ManageLibrary])"
 	)]
 	async fn clear_scan_history(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
@@ -247,6 +248,7 @@ impl LibraryMutation {
 		ctx: &Context<'_>,
 		mut input: CreateOrUpdateLibraryInput,
 	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		if let Some(config) = &input.config {
@@ -258,6 +260,16 @@ impl LibraryMutation {
 		let scan_after_creation = input.scan_after_persist;
 		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
 		let tags = input.tags.take();
+		let allowed_user_ids = match input.allowed_user_ids.clone() {
+			MaybeUndefined::Value(ids) => {
+				if !user.has_permission(UserPermission::ReadUsers) {
+					return Err(FORBIDDEN_ACTION.into());
+				} else {
+					MaybeUndefined::Value(ids)
+				}
+			},
+			value => value,
+		};
 
 		let txn = core.conn.as_ref().begin().await?;
 
@@ -282,6 +294,50 @@ impl LibraryMutation {
 		}
 		.insert(&txn)
 		.await?;
+
+		let oidc_groups: Vec<String> = parse_oidc_groups(&created_library.oidc_groups)
+			.into_iter()
+			.collect();
+		// we immediately sync so that folks have access without having to re-auth
+		if !oidc_groups.is_empty() {
+			sync_oidc_library_access_for_library(&txn, &created_library.id, &oidc_groups)
+				.await?;
+		}
+
+		let creator_has_access = library_access::Entity::find()
+			.filter(library_access::Column::UserId.eq(&user.id))
+			.filter(library_access::Column::LibraryId.eq(&created_library.id))
+			.count(&txn)
+			.await? > 0;
+
+		if !creator_has_access {
+			library_access::ActiveModel {
+				library_id: Set(created_library.id.clone()),
+				user_id: Set(user.id.clone()),
+				..Default::default()
+			}
+			.insert(&txn)
+			.await?;
+		}
+
+		if let MaybeUndefined::Value(ids) = allowed_user_ids {
+			let additional = ids
+				.iter()
+				.filter(|id| **id != user.id) // creator already handled above
+				.map(|id| library_access::ActiveModel {
+					library_id: Set(created_library.id.clone()),
+					user_id: Set(id.clone()),
+					..Default::default()
+				})
+				.collect::<Vec<_>>();
+
+			if !additional.is_empty() {
+				library_access::Entity::insert_many(additional)
+					.on_conflict_do_nothing()
+					.exec(&txn)
+					.await?;
+			}
+		}
 
 		// any stored mtimes beneath the path are leftovers from a previous library
 		let cleared_mtimes =
@@ -487,6 +543,14 @@ impl LibraryMutation {
 		}
 		.update(&txn)
 		.await?;
+
+		if let Some(oidc_groups) = oidc_groups_to_reconcile(
+			&existing_library.oidc_groups,
+			&updated_library.oidc_groups,
+		) {
+			sync_oidc_library_access_for_library(&txn, &updated_library.id, &oidc_groups)
+				.await?;
+		}
 
 		if let Some(tags) = tags {
 			let (to_connect, to_disconnect) =
@@ -864,16 +928,15 @@ impl LibraryMutation {
 		Ok(library.into())
 	}
 
-	/// Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
-	/// full replacement of the excluded users list, so any users not included in the provided list will be
-	/// removed from the exclusion list if they were previously excluded.
+	/// Grant users access to a library. This operates as a full replacement of the
+	/// granted users list, so any users not included in the provided list will have
+	/// their access revoked if they were previously granted access
 	///
-	/// The server owner cannot be excluded from a library, nor can the user performing the action exclude
-	/// themselves.
+	/// The requesting user cannot revoke their own access, so their ID must be included
 	#[graphql(
 		guard = "PermissionGuard::new(&[UserPermission::ManageLibrary, UserPermission::ReadUsers])"
 	)]
-	async fn update_library_excluded_users(
+	async fn update_library_access(
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
@@ -882,27 +945,8 @@ impl LibraryMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		if user_ids.contains(&user.id) {
-			return Err("Cannot exclude self from library".into());
-		}
-
-		let server_owner_id = if user.is_server_owner {
-			user.id.clone()
-		} else {
-			user::Entity::find()
-				.select_only()
-				.columns(vec![user::Column::Id, user::Column::Username])
-				.filter(user::Column::IsServerOwner.eq(true))
-				.into_model::<user::UserIdentSelect>()
-				.one(core.conn.as_ref())
-				.await?
-				.ok_or("Server owner not found")?
-				.id
-		};
-
-		if user_ids.contains(&server_owner_id) {
-			tracing::error!(?user, library = ?id, "Attempted to exclude server owner from library");
-			return Err(error_message::FORBIDDEN_ACTION.into());
+		if !user_ids.contains(&user.id) {
+			return Err("You cannot revoke your own access to a library".into());
 		}
 
 		let library = library::Entity::find_for_user(user)
@@ -911,56 +955,83 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let existing_exclusions = library_exclusion::Entity::find()
-			.filter(library_exclusion::Column::LibraryId.eq(library.id.clone()))
+		let existing_grants = library_access::Entity::find()
+			.filter(library_access::Column::LibraryId.eq(library.id.clone()))
 			.all(core.conn.as_ref())
 			.await?;
 
 		let to_add = user_ids
 			.iter()
-			.filter(|id| {
-				!existing_exclusions
-					.iter()
-					.any(|exclusion| exclusion.user_id == **id)
-			})
-			.map(|id| library_exclusion::ActiveModel {
+			.filter(|id| !existing_grants.iter().any(|grant| grant.user_id == **id))
+			.map(|id| library_access::ActiveModel {
 				library_id: Set(library.id.clone()),
 				user_id: Set(id.clone()),
 				..Default::default()
 			})
 			.collect::<Vec<_>>();
 
-		let to_remove = existing_exclusions
+		let to_remove = existing_grants
 			.iter()
-			.filter(|exclusion| !user_ids.contains(&exclusion.user_id))
-			.map(|exclusion| exclusion.id)
+			.filter(|grant| !user_ids.contains(&grant.user_id))
+			.map(|grant| grant.id)
 			.collect::<Vec<_>>();
 
 		if to_add.is_empty() && to_remove.is_empty() {
-			tracing::warn!("No changes to library exclusions");
+			tracing::warn!("No changes to library access");
 			return Ok(Library::from(library));
 		}
 
 		let txn = core.conn.as_ref().begin().await?;
 
 		if !to_add.is_empty() {
-			library_exclusion::Entity::insert_many(to_add)
+			library_access::Entity::insert_many(to_add)
 				.on_conflict_do_nothing()
 				.exec(&txn)
 				.await?;
 		}
 
 		if !to_remove.is_empty() {
-			library_exclusion::Entity::delete_many()
-				.filter(library_exclusion::Column::Id.is_in(to_remove))
+			library_access::Entity::delete_many()
+				.filter(library_access::Column::Id.is_in(to_remove))
 				.exec(&txn)
 				.await?;
 		}
 
 		txn.commit().await?;
 
-		// Note: We return the full node so the ID may be pulled to properly update the cache.
 		Ok(Library::from(library))
+	}
+
+	/// update the OIDC groups which have access to a library
+	#[graphql(guard = "PermissionGuard::new(&[UserPermission::ManageLibrary])")]
+	async fn update_library_oidc_groups(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		oidc_groups: Vec<String>,
+	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.as_ref().begin().await?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(&tx)
+			.await?
+			.ok_or("Library not found")?;
+
+		let mut active_model = library.into_active_model();
+		active_model.oidc_groups =
+			Set((!oidc_groups.is_empty()).then(|| oidc_groups.join(",")));
+		let updated_library = active_model.update(&tx).await?;
+
+		sync_oidc_library_access_for_library(&tx, &updated_library.id, &oidc_groups)
+			.await?;
+
+		tx.commit().await?;
+
+		Ok(Library::from(updated_library))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]

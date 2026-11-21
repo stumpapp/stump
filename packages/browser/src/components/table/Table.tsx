@@ -143,6 +143,7 @@ export default function Table<T, V>({
 	}
 
 	const tableRows = table.getRowModel().rows
+	const hasHeaders = columns.some((column) => column.header != null)
 
 	return (
 		<div className="flex flex-col">
@@ -154,43 +155,45 @@ export default function Table<T, V>({
 					ref={viewportRef}
 				>
 					<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
-						<thead className="border-b border-border text-left">
-							{table.getHeaderGroups().map((headerGroup) => (
-								<tr key={headerGroup.id}>
-									{headerGroup.headers.map((header) => {
-										return (
-											<th
-												key={header.id}
-												colSpan={header.colSpan}
-												className="py-2.5 first:pl-2.5 bg-muted/50"
-												style={{
-													...getCommonPinningStyles(header.column),
-												}}
-											>
-												<div
-													className={clsx('flex items-center', {
-														'cursor-pointer select-none': header.column.getCanSort() && sortable,
-													})}
-													onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+						{hasHeaders && (
+							<thead className="border-b border-border text-left">
+								{table.getHeaderGroups().map((headerGroup) => (
+									<tr key={headerGroup.id}>
+										{headerGroup.headers.map((header) => {
+											return (
+												<th
+													key={header.id}
+													colSpan={header.colSpan}
+													className="py-2.5 first:pl-2.5 bg-muted/50"
 													style={{
-														width: header.getSize(),
+														...getCommonPinningStyles(header.column),
 													}}
 												>
-													<Heading className="text-sm font-medium line-clamp-1 w-full">
-														{flexRender(header.column.columnDef.header, header.getContext())}
-													</Heading>
-													{sortable && (
-														<SortIcon
-															direction={(header.column.getIsSorted() as SortDirection) ?? null}
-														/>
-													)}
-												</div>
-											</th>
-										)
-									})}
-								</tr>
-							))}
-						</thead>
+													<div
+														className={clsx('flex items-center', {
+															'cursor-pointer select-none': header.column.getCanSort() && sortable,
+														})}
+														onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+														style={{
+															width: header.getSize(),
+														}}
+													>
+														<Heading className="text-sm font-medium line-clamp-1 w-full">
+															{flexRender(header.column.columnDef.header, header.getContext())}
+														</Heading>
+														{sortable && (
+															<SortIcon
+																direction={(header.column.getIsSorted() as SortDirection) ?? null}
+															/>
+														)}
+													</div>
+												</th>
+											)
+										})}
+									</tr>
+								))}
+							</thead>
+						)}
 						<tbody className="divide-y divide-border">
 							{tableRows.map((row) => {
 								return (

@@ -34,11 +34,16 @@ async fn fetch_read_progress(app: &TestApp, book_id: &str) -> Value {
 #[tokio::test]
 async fn test_clearing_read_progress_removes_the_cursor_used_for_offline_sync() {
 	let app = TestApp::new_with_default_user().await;
+	let library_id = fake_data::Library::default()
+		.insert_with_user(app.conn(), app.get_viewer_id().await.as_str())
+		.await
+		.id;
 	let (_, books) = setup_single_series_with_n_books(
 		&app,
 		fake_data::Series {
 			id: Some("murderbot".to_string()),
 			name: Some("The Murderbot Diaries".to_string()),
+			library_id: Some(library_id),
 			..Default::default()
 		},
 		1,

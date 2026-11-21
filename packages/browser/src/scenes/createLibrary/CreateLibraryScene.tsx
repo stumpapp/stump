@@ -77,6 +77,8 @@ export default function CreateLibraryScene() {
 				scanAfterPersist,
 				ignoreRules,
 				thumbnailConfig,
+				oidcGroups,
+				allowedUserIds,
 				...config
 			} = values
 
@@ -91,6 +93,8 @@ export default function CreateLibraryScene() {
 				path,
 				scanAfterPersist,
 				tags: tags?.map(({ label }) => label).filter(Boolean),
+				oidcGroups,
+				allowedUserIds: allowedUserIds?.length ? allowedUserIds : undefined,
 			}
 
 			createLibrary({ input })

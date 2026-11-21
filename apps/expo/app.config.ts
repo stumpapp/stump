@@ -3,6 +3,7 @@ import 'tsx/cjs'
 import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+	const androidPackage = process.env.STUMP_ANDROID_PACKAGE ?? 'com.stumpapp.stump'
 	const initialConfig: ExpoConfig = {
 		...config,
 		name: 'Stump',
@@ -75,7 +76,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				monochromeImage: './assets/images/android-monochrome.png',
 				backgroundColor: '#ffffff',
 			},
-			package: 'com.stumpapp.stump',
+			package: androidPackage,
 			permissions: ['WRITE_SETTINGS'],
 			intentFilters: [
 				{

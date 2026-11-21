@@ -1,6 +1,5 @@
 use axum::Router;
 
-use crate::config::session;
 use crate::config::state::AppState;
 
 mod api;
@@ -79,6 +78,7 @@ mod tests {
 	use stump_core::Ctx;
 
 	use super::*;
+	use crate::config::session;
 	use crate::middleware::HostExtractor;
 
 	#[tokio::test]

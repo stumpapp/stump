@@ -58,6 +58,7 @@ jobs:
         working-directory: apps/expo
         env:
           EXPO_NO_TELEMETRY: '1'
+          STUMP_ANDROID_PACKAGE: 'com.stumpapp.stump.dev'
         run: npx expo prebuild --platform android --no-install
 
       # TODO: should probably add signing but not sorting that out now

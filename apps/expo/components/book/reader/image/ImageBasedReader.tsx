@@ -43,7 +43,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	const { book, onPageChanged, pageSets, currentPage, flashListRef, serverId } =
 		useImageBasedReader()
 	const {
-		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
+		preferences: { readingMode, readingDirection, doublePageBehavior },
 	} = useBookPreferences({ book, serverId })
 	const { height, width } = useWindowDimensions()
 	const insets = useSafeAreaInsets()
@@ -78,11 +78,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	 */
 	const handlePageChanged = useCallback(
 		async (page: number) => {
-			if (!incognito) {
-				onPageChanged?.(page)
-			}
+			onPageChanged?.(page)
 		},
-		[onPageChanged, incognito],
+		[onPageChanged],
 	)
 
 	useEffect(() => {

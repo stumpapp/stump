@@ -86,7 +86,7 @@ type Props = {
 export default function ReadiumReader({
 	book,
 	initialLocator,
-	incognito,
+	incognito = false,
 	onLocationChanged,
 	onReachedEnd,
 	onBookmark,
@@ -404,10 +404,14 @@ export default function ReadiumReader({
 		[onCreateAnnotation, store, book.id, highlightColor],
 	)
 
-	const handleNoteRequest = useCallback((event: { nativeEvent: NoteRequestEvent }) => {
-		const { locator, text } = event.nativeEvent
-		createAnnotationSheetRef.current?.open(locator, text)
-	}, [])
+	const handleNoteRequest = useCallback(
+		(event: { nativeEvent: NoteRequestEvent }) => {
+			if (!onCreateAnnotation) return
+			const { locator, text } = event.nativeEvent
+			createAnnotationSheetRef.current?.open(locator, text)
+		},
+		[onCreateAnnotation],
+	)
 
 	const handleAnnotationTap = useCallback(
 		(event: { nativeEvent: DecoratorTapEvent }) => {
@@ -540,8 +544,8 @@ export default function ReadiumReader({
 					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 					onMiddleTouch={handleMiddleTouch}
 					onReachedEnd={handleReachedEnd}
-					onHighlightRequest={handleHighlightRequest}
-					onNoteRequest={handleNoteRequest}
+					onHighlightRequest={onCreateAnnotation ? handleHighlightRequest : undefined}
+					onNoteRequest={onCreateAnnotation ? handleNoteRequest : undefined}
 					onAnnotationTap={handleAnnotationTap}
 					onEditHighlight={handleEditHighlight}
 					onDeleteHighlight={handleNativeDeleteAnnotation}

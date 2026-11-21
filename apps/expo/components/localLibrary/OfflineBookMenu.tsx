@@ -4,6 +4,7 @@ import { Platform } from 'react-native'
 
 import { epubProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
+import { useReaderStore } from '~/stores'
 
 import { SystemAlert } from '../ui/system-alert'
 import AndroidOfflineBookMenu from './AndroidOfflineBookMenu'
@@ -47,6 +48,10 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 
 		return { isCompleted: false, hasProgress: true }
 	}, [readProgress, currentPage, totalPages])
+
+	const handleReadIncognito = useCallback(() => {
+		router.push(`/offline/${downloadedFile.id}/read?incognito=true`)
+	}, [downloadedFile.id, router])
 
 	const handleMarkAsComplete = useCallback(() => {
 		SystemAlert.alert(
@@ -113,11 +118,18 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 		)
 	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, translate, router])
 
+	const disableProgressTracking = useReaderStore((store) => store.disableProgressTracking)
+
 	return Platform.select({
 		ios: (
 			<Stack.Toolbar placement="right">
 				<Stack.Toolbar.Menu icon="ellipsis">
 					<Stack.Toolbar.Menu inline>
+						{!disableProgressTracking && (
+							<Stack.Toolbar.MenuAction icon="eye.slash" onPress={handleReadIncognito}>
+								{translate('shared.bookActions.readIncognito')}
+							</Stack.Toolbar.MenuAction>
+						)}
 						{!progression.isCompleted && (
 							<Stack.Toolbar.MenuAction icon="book.closed" onPress={handleMarkAsComplete}>
 								{translate('shared.bookActions.markAsRead.label')}
@@ -139,6 +151,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 		),
 		android: (
 			<AndroidOfflineBookMenu
+				handleReadIncognito={handleReadIncognito}
 				handleMarkAsComplete={handleMarkAsComplete}
 				handleClearProgress={handleClearProgress}
 				handleDelete={handleDelete}

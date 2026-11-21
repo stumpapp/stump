@@ -1,6 +1,7 @@
 import { cn, Heading, Text } from '@stump/components'
 
 import { useIsDarkTheme } from '@/hooks/useTheme'
+import { publicUrl } from '@/utils/publicUrl'
 
 export type OwlType =
 	// | 'search'
@@ -13,7 +14,7 @@ export type OwlType =
 
 const getOwl = (owl: OwlType, isDark: boolean): string | undefined => {
 	const postfix = isDark ? 'dark' : 'light'
-	return `/assets/owls/owl-${owl}-${postfix}.png`
+	return publicUrl(`/assets/owls/owl-${owl}-${postfix}.png`)
 }
 
 type OwlProps = {

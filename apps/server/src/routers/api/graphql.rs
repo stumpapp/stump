@@ -37,6 +37,7 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 // TODO: Consider new user permission
 async fn playground(
 	Extension(req_ctx): Extension<AuthContext>,
+	State(ctx): State<AppState>,
 ) -> Result<impl IntoResponse, APIError> {
 	if !req_ctx.user().is_server_owner {
 		return Err(APIError::forbidden_discreet());
@@ -44,8 +45,8 @@ async fn playground(
 
 	Ok(Html(
 		GraphiQLSource::build()
-			.endpoint("/api/graphql")
-			.subscription_endpoint("/api/graphql/ws")
+			.endpoint(&format!("{}/api/graphql", ctx.config.base_path))
+			.subscription_endpoint(&format!("{}/api/graphql/ws", ctx.config.base_path))
 			.credentials(Credentials::Include)
 			.finish(),
 	))
@@ -60,10 +61,7 @@ async fn graphql_handler(
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
 	req = req.data(auth);
-	req = req.data(ServiceContext {
-		host: details.host,
-		scheme: details.scheme,
-	});
+	req = req.data(ServiceContext::from(details));
 	req = req.data(session);
 	schema.execute(req).await.into()
 }

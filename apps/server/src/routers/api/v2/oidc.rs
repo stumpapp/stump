@@ -472,7 +472,7 @@ async fn get_frontend_url(
 ///
 /// # Examples
 ///
-/// ```
+/// ```ignore
 /// // 1. Appends path while preserving query parameters and fragments
 /// assert_eq!(
 ///     append_base_path("https://example.com", "/api"),

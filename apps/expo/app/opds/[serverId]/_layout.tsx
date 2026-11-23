@@ -3,6 +3,7 @@ import { Api, authDocument, OPDSAuthenticationDocument } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { ServerErrorBoundary } from '~/components/error'
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
 import { getOPDSInstance } from '~/lib/sdk/auth'
 import {
@@ -137,4 +138,8 @@ function Screen() {
 			</SDKContext.Provider>
 		</StumpClientContextProvider>
 	)
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+	return <ServerErrorBoundary error={error} onRetry={() => retry()} />
 }

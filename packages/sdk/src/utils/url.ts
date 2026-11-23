@@ -88,6 +88,10 @@ export const isOutdatedGraphQLSchemaError = (error: unknown) => {
 			/Unknown argument ".*" on field ".*"/,
 			/Cannot query field ".*" on type ".*"/,
 			/Field ".*" of type ".*" must have a selection of subfields/,
+			/Unknown type ".*"\.?/,
+			/Unknown directive "@.*"\.?/,
+			/Field ".*" argument ".*" of type ".*" is required, but it was not provided/,
+			/Argument ".*" of required type ".*" was not provided/,
 		]
 		return patterns.some((pattern) => pattern.test(message))
 	}

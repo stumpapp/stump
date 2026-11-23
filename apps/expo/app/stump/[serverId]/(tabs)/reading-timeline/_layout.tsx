@@ -22,6 +22,10 @@ export default function Screen() {
 			)}
 
 			<Stack
+				unstable_nativeProps={
+					listColors ? { nativeContainerStyle: { backgroundColor: 'transparent' } } : undefined
+				}
+				// ^ how very annoying
 				screenOptions={{
 					headerShown: false,
 					contentStyle: {

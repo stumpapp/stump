@@ -74,7 +74,7 @@ where
 		let trust_proxy_headers = app_state.config.trust_proxy_headers;
 
 		let scheme = parse_scheme(parts, trust_proxy_headers).unwrap_or_else(|| {
-			tracing::warn!(?host, "No scheme found in request, defaulting to http");
+			tracing::trace!(?host, "No scheme found in request, defaulting to http");
 			"http".to_string()
 		});
 

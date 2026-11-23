@@ -131,8 +131,7 @@
 				"label": "Lettura",
 				"preferNativePdf": "Usa lettore PDF nativo",
 				"preferMinimalReader": "Usa lettore minimale",
-				"disableDismissGesture": "Disabilita gesto di chiusura",
-				"incognitoReading": "Lettura in incognito"
+				"disableDismissGesture": "Disabilita gesto di chiusura"
 			},
 			"stump": {
 				"description": "Le funzionalità di Stump sono opzionali e possono essere disattivate se non sono necessarie",

@@ -42,6 +42,7 @@ cssInterop(GlassView, { className: { target: 'style' } })
 export default function ReadiumFooter() {
 	const showControls = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
+	const compactEpubReaderLayout = usePreferencesStore((state) => state.compactEpubReaderLayout)
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
 	const { isDarkEpubTheme } = useEpubTheme()
 	const buttonColors = useButtonColors()
@@ -55,7 +56,7 @@ export default function ReadiumFooter() {
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 
 	const showBookmark = isBookmarked && !bookmarkDisabled
-	const showMenuButton = (showControls || showBookmark) && !showMenu
+	const showMenuButton = (showControls || (showBookmark && !compactEpubReaderLayout)) && !showMenu
 
 	const progress = useSharedValue(showControls ? 1 : 0)
 
@@ -108,7 +109,16 @@ export default function ReadiumFooter() {
 				</Pressable>
 			)}
 
-			<View className="mx-safe-or-6 mt-2 h-12 items-center justify-center">
+			{compactEpubReaderLayout && <PageNumber />}
+
+			<View
+				className={cn(
+					'mx-safe-or-6 items-center justify-center',
+					compactEpubReaderLayout ? 'inset-x-0 bottom-0 absolute z-40' : 'mt-2 h-12',
+				)}
+				pointerEvents={compactEpubReaderLayout ? 'box-none' : undefined}
+				style={compactEpubReaderLayout ? { height: BUTTON_SIZE } : undefined}
+			>
 				<View
 					className="bottom-16 right-4 gap-2 w-80 absolute z-40 flex-col items-end"
 					pointerEvents={showMenu ? 'auto' : 'none'}
@@ -164,7 +174,7 @@ export default function ReadiumFooter() {
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
-						className="right-0 absolute z-30"
+						className={cn('right-0 absolute z-30', compactEpubReaderLayout && 'bottom-0')}
 						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 					>
 						<Animated.View style={menuButtonStyle} className="inset-0 absolute">
@@ -216,7 +226,7 @@ export default function ReadiumFooter() {
 					</Animated.View>
 				)}
 
-				<PageNumber />
+				{!compactEpubReaderLayout && <PageNumber />}
 			</View>
 		</>
 	)
@@ -226,15 +236,28 @@ function PageNumber() {
 	const { colors } = useEpubTheme()
 	const { secondaryStyle, primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const compactEpubReaderLayout = usePreferencesStore((state) => state.compactEpubReaderLayout)
+	const showControls = useReaderStore((state) => state.showControls)
 	const { page, pageOfTotal, formattedPageOfTotal } = usePositionFormat()
 
-	return (
+	const labels = (
 		<>
 			{/* Controls hidden: Page only */}
 			{!preferMinimalReader && (
-				<Animated.View className="absolute w-full items-center justify-center" style={primaryStyle}>
+				<Animated.View
+					className={cn(
+						compactEpubReaderLayout
+							? 'bottom-0 inset-x-0 h-5 absolute items-center justify-center'
+							: 'absolute w-full items-center justify-center',
+					)}
+					style={primaryStyle}
+					pointerEvents={compactEpubReaderLayout ? 'none' : undefined}
+				>
 					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
-						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+						<Text
+							className={cn('font-medium opacity-50', compactEpubReaderLayout && 'text-sm')}
+							style={{ color: colors?.foreground }}
+						>
 							{page}
 						</Text>
 					</Animated.View>
@@ -242,15 +265,51 @@ function PageNumber() {
 			)}
 
 			{/* Controls shown: Page out of total */}
-			<Animated.View className="absolute w-full items-center justify-center" style={secondaryStyle}>
+			<Animated.View
+				className={cn(
+					compactEpubReaderLayout
+						? 'inset-0 absolute items-center justify-center'
+						: 'absolute w-full items-center justify-center',
+				)}
+				style={secondaryStyle}
+				pointerEvents={compactEpubReaderLayout ? (showControls ? 'box-none' : 'none') : undefined}
+			>
 				<JumpButton />
 
-				<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
-					<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+				<Animated.View
+					key={page}
+					entering={FADE_IN}
+					exiting={FADE_OUT}
+					className={
+						compactEpubReaderLayout
+							? 'bottom-0 h-5 absolute w-full items-center justify-center'
+							: undefined
+					}
+					pointerEvents={compactEpubReaderLayout ? 'none' : undefined}
+				>
+					<Text
+						className={cn('font-medium opacity-50', compactEpubReaderLayout && 'text-sm')}
+						style={{ color: colors?.foreground }}
+					>
 						{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
 					</Text>
 				</Animated.View>
 			</Animated.View>
+		</>
+	)
+
+	if (!compactEpubReaderLayout) return labels
+
+	return (
+		<>
+			<View className="h-5" />
+			<View
+				className="mx-safe-or-6 inset-x-0 bottom-0 absolute z-20 items-center justify-center"
+				style={{ height: BUTTON_SIZE }}
+				pointerEvents="box-none"
+			>
+				{labels}
+			</View>
 		</>
 	)
 }

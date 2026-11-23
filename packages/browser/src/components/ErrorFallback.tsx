@@ -4,6 +4,7 @@ import { FallbackProps } from 'react-error-boundary'
 import { toast } from 'sonner'
 
 import { useTranslate } from '@/hooks/useTranslate'
+import { publicUrl } from '@/utils/publicUrl'
 
 import { copyTextToClipboard } from '../utils/misc'
 import { Owl } from './Owl'
@@ -43,7 +44,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 						onClick={resetErrorBoundary}
 						title={t('errorScene.buttons.goHomeTitle')}
 						forceAnchor
-						href="/"
+						href={publicUrl('')}
 					>
 						{t('errorScene.buttons.goHome')}
 					</ButtonOrLink>

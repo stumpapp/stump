@@ -12,6 +12,7 @@ import { useState } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
+import { publicUrl } from '@/utils/publicUrl'
 
 import { EntityImage } from '../entity'
 
@@ -54,7 +55,7 @@ export default function FileThumbnail({ path, isDirectory, thumbSize, containerC
 	const book = data?.mediaByPath
 	const showFallback = !!book && failedThumbnailUrl === book.thumbnail.url
 
-	const iconSrc = getIconSrc(path, isDirectory, isDarkVariant)
+	const iconSrc = publicUrl(getIconSrc(path, isDirectory, isDarkVariant))
 
 	if (thumbSize != undefined) {
 		if (isDirectory || showFallback || !book) {

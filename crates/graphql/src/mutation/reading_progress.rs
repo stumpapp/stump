@@ -30,6 +30,7 @@ pub struct ReadProgressMutation;
 
 #[Object]
 impl ReadProgressMutation {
+	#[tracing::instrument(level = "trace", skip(self, ctx))]
 	async fn update_media_progress(
 		&self,
 		ctx: &Context<'_>,

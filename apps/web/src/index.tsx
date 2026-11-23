@@ -1,13 +1,25 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { registerSW } from 'virtual:pwa-register'
 
 import App from './App'
 
 function registerServiceWorkerWhenIdle() {
 	if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
 
-	const doRegister = () => registerSW()
+	if (navigator.serviceWorker.controller) {
+		navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), {
+			once: true,
+		})
+	}
+
+	const doRegister = () => {
+		const scope = new URL('./', document.baseURI)
+		navigator.serviceWorker
+			.register(new URL('sw.js', scope), { scope: scope.pathname })
+			.catch((error) => {
+				console.error('Failed to register service worker', error)
+			})
+	}
 
 	if (document.readyState === 'complete') {
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions

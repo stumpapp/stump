@@ -31,6 +31,38 @@ The port for the Stump server.
 | ------- | ------------- | -------- |
 | Integer | `10801`       | `port`   |
 
+### STUMP_BASE_PATH
+
+The URL subpath under which the entire server is served. Set `STUMP_BASE_PATH=/stump` or add
+`base_path = "/stump"` to `Stump.toml` to serve Stump at `http://myexamp.org/stump/`.
+The web app, API, OPDS feeds, and enabled integrations all use this prefix. No web app rebuild is required.
+Leading and trailing slashes are normalized; an empty value or `/` serves Stump at the root.
+Nested paths such as `/mysubpath/mysvc` are supported. Path segments may contain letters, digits, `-`, `.`, `_`, and `~`, but cannot be `.` or `..`.
+
+When using a reverse proxy, forward the complete path, including the prefix, to Stump. For example:
+
+Set `STUMP_BASE_PATH=/mysubpath/mysvc` and enable `STUMP_TRUST_PROXY_HEADERS=true` when the proxy terminates HTTPS. Only enable trusted proxy headers when Stump is reachable through a proxy you control.
+
+```nginx
+location /mysubpath/mysvc/ {
+    proxy_pass http://127.0.0.1:10801;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
+
+If you configure a public URL for OIDC, include the subpath (for example, `https://myexamp.org/mysubpath/mysvc`).
+Register the OIDC callback at `https://myexamp.org/mysubpath/mysvc/api/v2/auth/oidc/callback`.
+Restart the server after changing this setting.
+
+| Type   | Default Value | TOML Key    |
+| ------ | ------------- | ----------- |
+| String | `""`          | `base_path` |
+
 ### STUMP_CONFIG_DIR
 
 The directory where Stump will look for its configuration file.

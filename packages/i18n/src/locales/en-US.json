@@ -3074,6 +3074,7 @@
       "dismiss": "Dismiss",
       "download": "Download",
       "downloaded": "Downloaded",
+      "queued": "Queued",
       "downloads": "Downloads",
       "done": "Done",
       "enabled": "Enabled",
@@ -3479,6 +3480,7 @@
         "premadeThemes": "Premade Themes",
         "highlight": "Highlight"
       },
+      "compactReaderLayout": "Compact Reader Layout",
       "pageMargins": "Page Margins"
     },
     "formatSeriesPosition": {

@@ -34,64 +34,91 @@ export default function ReadiumHeader() {
 	const { isDarkEpubTheme } = useEpubTheme()
 	const buttonColors = useButtonColors()
 	const showControls = useReaderStore((state) => state.showControls)
+	const compactEpubReaderLayout = usePreferencesStore((state) => state.compactEpubReaderLayout)
 
 	return (
-		<View className="mx-safe-or-6 h-12 mb-2 z-20 items-center justify-center">
-			{showControls && (
-				<Animated.View
-					entering={ENTERING_ANIMATION}
-					exiting={EXITING_ANIMATION}
-					className="left-0 absolute z-30"
-					style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
-				>
-					<GlassView
-						className="flex-1 rounded-full"
-						isInteractive
-						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-						style={{ backgroundColor: buttonColors.controls.background }}
-					>
-						<Pressable
-							disabled={!showControls}
-							onPress={() => router.back()}
-							className={cn(
-								'h-full w-full items-center justify-center',
-								!IS_IOS_26_PLUS && 'active:opacity-60',
-							)}
-						>
-							<Icon
-								as={Platform.OS === 'ios' ? X : ArrowLeft}
-								size={ICON_SIZE}
-								absoluteStrokeWidth
-								strokeWidth={2.5}
-								color={buttonColors.controls.foreground}
-							/>
-						</Pressable>
-					</GlassView>
-				</Animated.View>
-			)}
+		<>
+			{compactEpubReaderLayout && <View className="h-5" />}
 
-			<Title />
-		</View>
+			<View
+				className={cn(
+					'mx-safe-or-6 z-20 items-center justify-center',
+					compactEpubReaderLayout ? 'inset-x-0 top-0 absolute' : 'h-12 mb-2',
+				)}
+				pointerEvents={compactEpubReaderLayout ? 'box-none' : undefined}
+				style={compactEpubReaderLayout ? { height: BUTTON_SIZE } : undefined}
+			>
+				{showControls && (
+					<Animated.View
+						entering={ENTERING_ANIMATION}
+						exiting={EXITING_ANIMATION}
+						className={cn('left-0 absolute z-30', compactEpubReaderLayout && 'top-0')}
+						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
+					>
+						<GlassView
+							className="flex-1 rounded-full"
+							isInteractive
+							colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+							style={{ backgroundColor: buttonColors.controls.background }}
+						>
+							<Pressable
+								disabled={!showControls}
+								onPress={() => router.back()}
+								className={cn(
+									'h-full w-full items-center justify-center',
+									!IS_IOS_26_PLUS && 'active:opacity-60',
+								)}
+							>
+								<Icon
+									as={Platform.OS === 'ios' ? X : ArrowLeft}
+									size={ICON_SIZE}
+									absoluteStrokeWidth
+									strokeWidth={2.5}
+									color={buttonColors.controls.foreground}
+								/>
+							</Pressable>
+						</GlassView>
+					</Animated.View>
+				)}
+
+				{compactEpubReaderLayout ? (
+					<View
+						className="top-0 h-5 absolute w-full items-center justify-center"
+						pointerEvents="none"
+					>
+						<Title />
+					</View>
+				) : (
+					<Title />
+				)}
+			</View>
+		</>
 	)
 }
 
 function Title() {
 	const { colors } = useEpubTheme()
 	const { primaryStyle, secondaryStyle } = useReaderAnimations()
-	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
-	const showControls = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
+
+	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const compactEpubReaderLayout = usePreferencesStore((state) => state.compactEpubReaderLayout)
+	const showControls = useReaderStore((state) => state.showControls)
 
 	return (
 		<>
 			{/* Controls hidden */}
 			{!preferMinimalReader && (
-				<Animated.View style={primaryStyle} className="absolute w-full items-center justify-center">
+				<Animated.View
+					style={primaryStyle}
+					className="absolute w-full items-center justify-center"
+					pointerEvents={compactEpubReaderLayout ? 'none' : undefined}
+				>
 					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text
 							numberOfLines={1}
 							style={{ color: colors?.foreground }}
-							className="font-medium opacity-50"
+							className={cn('font-medium opacity-50', compactEpubReaderLayout && 'text-sm')}
 						>
 							{chapterTitle}
 						</Text>
@@ -103,7 +130,7 @@ function Title() {
 			<Animated.View
 				className="absolute w-full items-center justify-center"
 				style={secondaryStyle}
-				pointerEvents={showControls ? undefined : 'none'}
+				pointerEvents={compactEpubReaderLayout ? 'none' : showControls ? undefined : 'none'}
 			>
 				<Animated.View
 					key={preferMinimalReader ? chapterTitle : progressText}
@@ -113,7 +140,7 @@ function Title() {
 					<Text
 						numberOfLines={1}
 						style={{ color: colors?.foreground }}
-						className="font-medium opacity-50"
+						className={cn('font-medium opacity-50', { 'text-sm': compactEpubReaderLayout })}
 					>
 						{preferMinimalReader ? chapterTitle : progressText}
 					</Text>
@@ -180,6 +207,7 @@ function useChapterProgress() {
 		if (pagesLeftInChapter === 0) return 'Final page in chapter'
 		else return `${pagesLeftInChapter} pages left in chapter`
 	}, [pagesLeftInChapter])
+	// TODO(i8n): translate
 
 	return { chapterTitle, progressText }
 }

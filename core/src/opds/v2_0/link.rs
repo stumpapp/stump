@@ -478,11 +478,12 @@ mod tests {
 
 	#[test]
 	fn test_finalizer_format_link() {
-		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+		let finalizer =
+			OPDSLinkFinalizer::new("https://example.com/mysubpath/mysvc".to_string());
 
 		assert_eq!(
 			finalizer.format_link("/opds/v2.0/libraries"),
-			"https://example.com/opds/v2.0/libraries"
+			"https://example.com/mysubpath/mysvc/opds/v2.0/libraries"
 		);
 		assert_eq!(
 			finalizer.format_link("https://example.com/opds/v2.0/libraries"),

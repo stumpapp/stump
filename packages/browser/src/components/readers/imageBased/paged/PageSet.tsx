@@ -5,6 +5,7 @@ import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { publicUrl } from '@/utils/publicUrl'
 
 import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
 
@@ -122,7 +123,7 @@ const _Page = ({
 			}}
 			onError={(err) => {
 				// @ts-expect-error: is oke
-				err.target.src = '/favicon.png'
+				err.target.src = publicUrl('/assets/favicon.png')
 			}}
 			onClick={onPageClick}
 		/>

@@ -3,6 +3,7 @@ import 'tsx/cjs'
 import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+	const androidPackage = process.env.STUMP_ANDROID_PACKAGE ?? 'com.stumpapp.stump'
 	const initialConfig: ExpoConfig = {
 		...config,
 		name: 'Stump',
@@ -34,6 +35,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				UISupportsDocumentBrowser: true,
 				UIFileSharingEnabled: true,
 				LSSupportsOpeningDocumentsInPlace: true,
+				UTImportedTypeDeclarations: [
+					{
+						UTTypeIdentifier: 'com.stumpapp.cbz',
+						UTTypeDescription: 'Comic Book Archive',
+						UTTypeConformsTo: ['public.zip-archive'],
+						UTTypeTagSpecification: {
+							'public.filename-extension': ['cbz'],
+							'public.mime-type': ['application/vnd.comicbook+zip', 'application/x-cbz'],
+						},
+					},
+				],
 				CFBundleDocumentTypes: [
 					{
 						CFBundleTypeName: 'EPUB Document',
@@ -42,12 +54,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					},
 					{
 						CFBundleTypeName: 'Comic Book Archive (CBZ)',
-						LSItemContentTypes: ['public.zip-archive'],
+						LSItemContentTypes: ['com.stumpapp.cbz'],
 						LSHandlerRank: 'Alternate',
 					},
 					{
 						CFBundleTypeName: 'PDF Document',
 						LSItemContentTypes: ['com.adobe.pdf'],
+						LSHandlerRank: 'Alternate',
+					},
+					{
+						CFBundleTypeName: 'ZIP Archive',
+						LSItemContentTypes: ['public.zip-archive'],
 						LSHandlerRank: 'Alternate',
 					},
 				],
@@ -59,7 +76,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				monochromeImage: './assets/images/android-monochrome.png',
 				backgroundColor: '#ffffff',
 			},
-			package: 'com.stumpapp.stump',
+			package: androidPackage,
 			permissions: ['WRITE_SETTINGS'],
 			intentFilters: [
 				{
@@ -74,6 +91,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						{ mimeType: 'application/x-cbz', scheme: 'file' },
 						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'content' },
 						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'file' },
+						{ mimeType: 'application/zip', scheme: 'content' },
+						{ mimeType: 'application/zip', scheme: 'file' },
+						{ mimeType: 'application/x-zip-compressed', scheme: 'content' },
+						{ mimeType: 'application/x-zip-compressed', scheme: 'file' },
 					],
 				},
 				{
@@ -83,6 +104,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						{ mimeType: '*/*', pathPattern: '.*\\.epub', scheme: 'content' },
 						{ mimeType: '*/*', pathPattern: '.*\\.cbz', scheme: 'content' },
 						{ mimeType: '*/*', pathPattern: '.*\\.pdf', scheme: 'content' },
+						{ mimeType: '*/*', pathPattern: '.*\\.zip', scheme: 'content' },
 					],
 				},
 			],

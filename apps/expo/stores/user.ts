@@ -46,6 +46,7 @@ type MobilePreferencesStore = {
 	// Note: Will push more analytics to aide in debug efforts
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
+	compactEpubReaderLayout: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
 	textCase: TextCase
@@ -87,6 +88,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			bookClubsEnabled: false,
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
+			compactEpubReaderLayout: false,
 			displayLanguageKeys: 'none',
 			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
 			tintListBackground: false,

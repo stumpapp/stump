@@ -2,18 +2,18 @@
 title: Troubleshooting
 ---
 
-This guide is very young and so won't cover much ground yet. As I notice common issues or points of confusion, I'll try my best to update this page accordingly.
+This guide covers a few common issues with the mobile app. If the steps below do not identify or resolve your issue, please open an issue on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) and include the relevant debug information (e.g., app version, server version, etc). Please try to be thorough, it is very difficult to remotely debug a problem without sufficient information.
 
 <Callout type="info">
-	Most error pages in the mobile app will have a button to quickly open an issue with relevant
-	details
+	Most error pages in the mobile app include a button to open a GitHub issue with the debug info
+	organized for you
 </Callout>
 
-## I keep getting `Incompatible server` errors
+## The app reports a server compatibility or GraphQL error
 
-The mobile app is alpha software and only available on TestFlight and Google Play Beta at the moment. In order to facilitate development, this means that those versions of the app are only compatible with more experimental versions of the Stump server.
+The mobile app and Stump server communicate through a GraphQL API. The app may show a compatibility error if there is some kind of version mismatch, e.g. the app is newer than the server and is asking for something which doesn't exist, or the app is too old and is not asking for something in the correct format.
 
-If you are running a stable version of the Stump server earlier than `0.1.0`, which at the time of writing doesn't exist yet, you will see this error. The version you are running is not compatible with the API that the mobile app expects. The solution is to migrate to or update an existing `nightly` server instance. I cannot guarantee the stability of these builds, this is the nature of alpha software.
+Current TestFlight builds are made against the `nightly` branch, so may "break" more often if you lag on updating your server instance.
 
 ## I get validation errors when browsing my OPDS catalog
 

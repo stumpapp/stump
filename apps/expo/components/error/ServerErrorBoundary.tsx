@@ -1,11 +1,17 @@
-import { isNetworkError, isOutdatedGraphQLSchemaError } from '@stump/sdk'
+import {
+	isNetworkError,
+	isOutdatedGraphQLSchemaError,
+	isServerCompatibilityError,
+} from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { Linking, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useTranslate } from '~/lib/hooks'
+
 import Owl from '../Owl'
 import { Button, Heading, Text } from '../ui'
-import PotentiallyOutdatedServer from './PotentiallyOutdatedServer'
+import ServerCompatibilityIssue from './ServerCompatibilityIssue'
 import ServerConnectFailed from './ServerConnectFailed'
 import { getIssueUrl } from './utils'
 
@@ -16,13 +22,14 @@ type Props = {
 
 export default function ServerErrorBoundary({ error, onRetry }: Props) {
 	const router = useRouter()
+	const { translate } = useTranslate()
 
 	if (isNetworkError(error)) {
 		return <ServerConnectFailed onRetry={onRetry} />
 	}
 
-	if (isOutdatedGraphQLSchemaError(error)) {
-		return <PotentiallyOutdatedServer error={error} onRetry={onRetry} />
+	if (isOutdatedGraphQLSchemaError(error) || isServerCompatibilityError(error)) {
+		return <ServerCompatibilityIssue error={error} onRetry={onRetry} />
 	}
 
 	return (
@@ -33,7 +40,7 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 
 					<View className="gap-2 px-4 tablet:max-w-lg">
 						<Heading size="xl" className="text-center">
-							Something went wrong!
+							{translate('shared.common.somethingWentWrong')}
 						</Heading>
 
 						<ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 200 }}>
@@ -51,7 +58,7 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 						variant="brand"
 						onPress={() => router.dismissAll()}
 					>
-						<Text>Return Home</Text>
+						<Text>{translate('shared.common.returnHome')}</Text>
 					</Button>
 
 					<Button
@@ -63,12 +70,12 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 							Linking.openURL(issueUrl)
 						}}
 					>
-						<Text>Report Issue</Text>
+						<Text>{translate('shared.errors.reportIssue')}</Text>
 					</Button>
 
 					{onRetry && (
 						<Button className="rounded-full" size="lg" variant="ghost" onPress={onRetry}>
-							<Text>Try Again</Text>
+							<Text>{translate('shared.common.tryAgain')}</Text>
 						</Button>
 					)}
 				</View>

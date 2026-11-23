@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { ServerErrorBoundary } from '~/components/error'
 import { useColors } from '~/lib/constants'
 import { useAutoSyncActiveServer, useSyncDeviceName, useTranslate } from '~/lib/hooks'
+import { getServerCompatibilityError } from '~/lib/sdk/serverErrors'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
@@ -35,20 +36,17 @@ export default function TabLayout() {
 		setUser(user)
 	}, [user, setUser])
 
+	const isAuthError = isAxiosError(error) && error.response?.status === 401
 	useEffect(() => {
-		if (isAxiosError(error)) {
-			if (error.response?.status === 401) {
-				onUnauthenticatedResponse?.()
-			} else if (error.response?.status === 405) {
-				// This can happen if the client is "newer" than the server and is trying to use an endpoint that doesn't exist.
-				// We should probably inform the user that they need to update their server.
-				// For now, throw to trigger the error boundary
-				throw new Error('Incompatible server', { cause: error })
-			}
-		} else if (error?.message === 'Malformed response received from server') {
-			throw new Error('Incompatible server', { cause: error })
+		if (isAuthError) {
+			onUnauthenticatedResponse?.()
 		}
-	}, [error, onUnauthenticatedResponse])
+	}, [isAuthError, onUnauthenticatedResponse])
+
+	const compatibilityError = getServerCompatibilityError(error, translate)
+	if (!isAuthError && compatibilityError) {
+		throw compatibilityError
+	}
 
 	const showClubs = bookClubsEnabled && checkPermission(UserPermission.AccessBookClub)
 

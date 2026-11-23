@@ -3573,10 +3573,17 @@
       }
     },
     "errors": {
+    	"reportIssue": "Report Issue",
       "unknown": "Unknown Error",
       "bookNotFound": {
         "title": "Book Not Found",
         "description": "The book you are looking for could not be found. It may have been deleted or moved"
+      },
+      "serverCompatibility": {
+        "heading": "Server Compatibility Issue",
+        "fallbackMessage": "The server's API is not compatible with this version of the mobile app",
+        "http405": "The server responded with a 405 code, you may need to update your deployed instance",
+        "malformedResponse": "The server returned a response that this version of the mobile app did not understand"
       },
       "serverConnectFailed": {
         "heading": "Failed to Connect",

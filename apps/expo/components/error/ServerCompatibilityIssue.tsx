@@ -2,6 +2,8 @@ import { useRouter } from 'expo-router'
 import { Linking, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useTranslate } from '~/lib/hooks/useTranslate'
+
 import Owl, { useOwlHeaderOffset } from '../Owl'
 import { Button, Heading, Text } from '../ui'
 import { getIssueUrl } from './utils'
@@ -11,9 +13,13 @@ type Props = {
 	onRetry?: () => void
 }
 
-export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
+export default function ServerCompatibilityIssue({ error, onRetry }: Props) {
 	const router = useRouter()
 	const emptyContainerStyle = useOwlHeaderOffset()
+
+	const { translate } = useTranslate()
+
+	const message = error.message ?? translate('shared.errors.serverCompatibility.fallbackMessage')
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
@@ -25,12 +31,11 @@ export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 
 				<View className="gap-2 px-4 tablet:max-w-lg">
 					<Heading size="xl" className="font-semibold leading-tight text-center">
-						Outdated Server
+						{translate('shared.errors.serverCompatibility.heading')}
 					</Heading>
 
 					<Text size="lg" className="text-center">
-						An error was returned that suggests your server is outdated. Please make sure your
-						server is updated to continue.
+						{message}
 					</Text>
 				</View>
 
@@ -38,7 +43,7 @@ export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 
 				<View className="gap-3 w-full">
 					<Button variant="brand" size="lg" roundness="full" onPress={() => router.dismissAll()}>
-						<Text>Return Home</Text>
+						<Text>{translate('shared.common.returnHome')}</Text>
 					</Button>
 
 					<Button
@@ -50,12 +55,12 @@ export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 							Linking.openURL(issueUrl)
 						}}
 					>
-						<Text>Report Issue</Text>
+						<Text>{translate('shared.errors.reportIssue')}</Text>
 					</Button>
 
 					{onRetry && (
 						<Button variant="ghost" size="lg" roundness="full" className="ml-2" onPress={onRetry}>
-							<Text>Try Again</Text>
+							<Text>{translate('shared.common.tryAgain')}</Text>
 						</Button>
 					)}
 				</View>

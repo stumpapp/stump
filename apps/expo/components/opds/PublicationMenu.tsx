@@ -47,7 +47,7 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 				<Stack.Toolbar.Menu icon="ellipsis">
 					{!disableProgressTracking && (
 						<Stack.Toolbar.MenuAction
-							icon="eye.slash"
+							icon="eyeglasses.slash"
 							onPress={() =>
 								router.push({
 									pathname: `/opds/[serverId]/publication/read`,

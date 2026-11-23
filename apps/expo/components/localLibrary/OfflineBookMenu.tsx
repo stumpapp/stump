@@ -126,7 +126,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 				<Stack.Toolbar.Menu icon="ellipsis">
 					<Stack.Toolbar.Menu inline>
 						{!disableProgressTracking && (
-							<Stack.Toolbar.MenuAction icon="eye.slash" onPress={handleReadIncognito}>
+							<Stack.Toolbar.MenuAction icon="eyeglasses.slash" onPress={handleReadIncognito}>
 								{translate('shared.bookActions.readIncognito')}
 							</Stack.Toolbar.MenuAction>
 						)}

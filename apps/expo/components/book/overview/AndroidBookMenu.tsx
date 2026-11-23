@@ -7,7 +7,7 @@ import {
 	Clock,
 	CopyMinus,
 	Ellipsis,
-	EyeOff,
+	HatGlasses,
 	Heart,
 	Trash,
 } from 'lucide-react-native'
@@ -103,7 +103,7 @@ export default function AndroidBookMenu({
 						onPress={() => router.push(`/stump/${serverId}/books/${book.id}/read?incognito=true`)}
 					>
 						<Text className="text-lg">{translate('shared.bookActions.readIncognito')}</Text>
-						<Icon as={EyeOff} size={20} className="text-foreground-muted ml-auto" />
+						<Icon as={HatGlasses} size={20} className="text-foreground-muted ml-auto" />
 					</DropdownMenuItem>
 				)}
 				<DropdownMenuSeparator variant="group" />

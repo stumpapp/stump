@@ -267,7 +267,7 @@ export default function BookMenu({ data }: Props) {
 							</Stack.Toolbar.MenuAction>
 							{!disableProgressTracking && (
 								<Stack.Toolbar.MenuAction
-									icon="eye.slash"
+									icon="eyeglasses.slash"
 									onPress={() =>
 										router.push(`/stump/${serverID}/books/${book.id}/read?incognito=true`)
 									}

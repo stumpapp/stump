@@ -7,7 +7,7 @@ import {
 	OPDSLegacyEntry,
 } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { Download, EyeOff, Info, Radio, Trash } from 'lucide-react-native'
+import { Download, HatGlasses, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
 import { Platform, View } from 'react-native'
 
@@ -114,8 +114,8 @@ export default function OPDSEntry({ entry }: Props) {
 											label: translate('shared.bookActions.readIncognito'),
 											disabled: !streamingData,
 											icon: {
-												ios: 'eye.slash',
-												android: EyeOff,
+												ios: 'eyeglasses.slash',
+												android: HatGlasses,
 											},
 											onPress: () => onPress(true),
 										} satisfies ContextMenuItem,

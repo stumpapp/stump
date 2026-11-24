@@ -8,7 +8,6 @@ import { z } from 'zod'
 
 import {
 	bookThumbnailPath,
-	toAbsolutePath,
 	widgetAssetsDirectory,
 	widgetThumbnailDirectory,
 	widgetThumbnailPath,
@@ -57,8 +56,7 @@ async function ensureThumbnailCached(
 	try {
 		// we might have a thumb if e.g. the book is downloaded, and if so just use that
 		// instead of redownloading it
-		const localPath = toAbsolutePath(bookThumbnailPath(book.serverId, book.id))
-		const localFile = new File(localPath)
+		const localFile = new File(bookThumbnailPath(book.serverId, book.id))
 		if (localFile.exists) {
 			if (!destFile.exists) {
 				const resized = await createThumbnail(localFile.uri)
@@ -78,8 +76,8 @@ async function ensureThumbnailCached(
 			}
 		}
 
-		if (!api) {
-			// no api = local reading, so if no thumb we can't do anything
+		if (!api || book.isReadingOffline) {
+			// no api = local reading
 			return destFile.exists ? destFile.uri : null
 		}
 

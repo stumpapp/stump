@@ -1,7 +1,3 @@
-// export type WidgetShared = {
-// 	// TODO(widgets): figure out things like locale, colors, etc
-// }
-
 export type WidgetBook = {
 	id: string
 	serverId: string

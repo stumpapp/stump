@@ -120,6 +120,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				'expo-widgets',
 				{
 					groupIdentifier: 'group.com.stumpapp.stump',
+					enableAndroid: true,
 					widgets: [
 						{
 							name: 'ReadingNow',

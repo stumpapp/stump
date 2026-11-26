@@ -8,12 +8,12 @@ import { useReaderStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
-export default function GlobalIncognito() {
+export default function DisableProgressTracking() {
 	const { t } = useTranslate()
-	const { incognito, updateGlobalSettings } = useReaderStore(
+	const { disabled, setDisabled } = useReaderStore(
 		useShallow((state) => ({
-			incognito: state.globalSettings.incognito,
-			updateGlobalSettings: state.setGlobalSettings,
+			disabled: state.disableProgressTracking,
+			setDisabled: state.setDisableProgressTracking,
 		})),
 	)
 
@@ -21,13 +21,10 @@ export default function GlobalIncognito() {
 		<AppSettingsRow
 			icon={HatGlasses}
 			iconBackgroundColor={SETTINGS_COLORS.hiding}
-			title={t('settings.reading.incognitoReading')}
-			onPress={() => updateGlobalSettings({ incognito: !incognito })}
+			title={t('settings.reading.disableProgressTracking')}
+			onPress={() => setDisabled(!disabled)}
 		>
-			<Switch
-				checked={Boolean(incognito)}
-				onCheckedChange={(checked) => updateGlobalSettings({ incognito: checked })}
-			/>
+			<Switch checked={disabled} onCheckedChange={setDisabled} />
 		</AppSettingsRow>
 	)
 }

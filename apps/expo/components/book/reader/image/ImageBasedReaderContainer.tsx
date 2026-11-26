@@ -19,18 +19,19 @@ type Props = Omit<
 > &
 	ComponentProps<typeof ImageBasedReader> & {
 		nextInSeries?: NextInSeriesBookRef | null
+		incognito?: boolean
 	}
 
 export default function ImageBasedReaderContainer({
 	initialPage,
 	onPageChanged,
 	nextInSeries,
+	incognito = false,
 	...ctx
 }: Props) {
 	const { height, width } = useDisplay()
 	const {
 		preferences: {
-			incognito,
 			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			secondPageSeparate,

@@ -21,6 +21,7 @@ import { db, downloadedFiles, readProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useReaderStore } from '~/stores'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -236,6 +237,8 @@ export default function BookMenu({ data }: Props) {
 	const isPreviouslyCompleted = !!book.readHistory?.length
 	const isUntouched = !isReading && !isPreviouslyCompleted
 
+	const disableProgressTracking = useReaderStore((store) => store.disableProgressTracking)
+
 	const router = useRouter()
 
 	return Platform.select({
@@ -262,6 +265,16 @@ export default function BookMenu({ data }: Props) {
 							>
 								{isFavorite ? 'Unfavorite' : 'Favorite'}
 							</Stack.Toolbar.MenuAction>
+							{!disableProgressTracking && (
+								<Stack.Toolbar.MenuAction
+									icon="eyeglasses.slash"
+									onPress={() =>
+										router.push(`/stump/${serverID}/books/${book.id}/read?incognito=true`)
+									}
+								>
+									{translate('shared.bookActions.readIncognito')}
+								</Stack.Toolbar.MenuAction>
+							)}
 						</Stack.Toolbar.Menu>
 
 						<Stack.Toolbar.Menu inline>

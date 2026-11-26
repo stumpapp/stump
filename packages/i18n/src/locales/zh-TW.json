@@ -212,7 +212,6 @@
         "preferNativePdf": "優先使用原生 PDF",
         "preferMinimalReader": "優先使用極簡閱讀器",
         "disableDismissGesture": "停用關閉手勢",
-        "incognitoReading": "無痕閱讀",
         "maxPageViewingSeconds": {
           "label": "頁面瀏覽秒數限制",
           "errors": {

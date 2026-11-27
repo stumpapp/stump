@@ -215,7 +215,7 @@
         "preferNativePdf": "Prefer Native PDF",
         "preferMinimalReader": "Prefer Minimal Reader",
         "disableDismissGesture": "Disable Dismiss Gesture",
-        "incognitoReading": "Incognito Reading",
+        "disableProgressTracking": "Disable Progress Tracking",
         "maxPageViewingSeconds": {
           "label": "Page Viewing Seconds Limit",
           "errors": {

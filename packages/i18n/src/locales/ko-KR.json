@@ -136,7 +136,6 @@
         "preferNativePdf": "기본 PDF 뷰어 우선 사용",
         "preferMinimalReader": "간소화된 뷰어 우선 사용",
         "disableDismissGesture": "닫기 제스처 비활성화",
-        "incognitoReading": "시크릿 읽기",
         "maxPageViewingSeconds": {
           "label": "페이지당 기록할 최대 독서 시간(초)",
           "errors": {

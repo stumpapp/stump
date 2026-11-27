@@ -1,4 +1,4 @@
-import { BookOpenCheck, CircleMinus, Ellipsis, Trash } from 'lucide-react-native'
+import { BookOpenCheck, CircleMinus, Ellipsis, EyeOff, Trash } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,8 +16,10 @@ import {
 } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useReaderStore } from '~/stores'
 
 type Props = {
+	handleReadIncognito: () => void
 	handleMarkAsComplete: () => void
 	handleClearProgress: () => void
 	handleDelete: () => void
@@ -25,6 +27,7 @@ type Props = {
 }
 
 export default function AndroidOfflineBookMenu({
+	handleReadIncognito,
 	handleMarkAsComplete,
 	handleClearProgress,
 	handleDelete,
@@ -39,6 +42,8 @@ export default function AndroidOfflineBookMenu({
 		left: 4,
 		right: 4,
 	}
+
+	const disableProgressTracking = useReaderStore((store) => store.disableProgressTracking)
 
 	return (
 		<DropdownMenu>
@@ -57,6 +62,15 @@ export default function AndroidOfflineBookMenu({
 				align="end"
 			>
 				<DropdownMenuGroup>
+					{!disableProgressTracking && (
+						<>
+							<DropdownMenuItem onPress={handleReadIncognito}>
+								<Text className="text-lg">{translate('shared.bookActions.readIncognito')}</Text>
+								<Icon as={EyeOff} size={20} className={cn('text-foreground-muted ml-auto')} />
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+						</>
+					)}
 					{!progression.isCompleted && (
 						<Fragment>
 							<DropdownMenuItem onPress={handleMarkAsComplete}>

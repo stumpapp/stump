@@ -101,7 +101,6 @@
         }
       },
       "reading": {
-        "incognitoReading": "Lectura de Incognito",
         "label": "Leyendo",
         "disableDismissGesture": "Desactivar gesto de descarte"
       },

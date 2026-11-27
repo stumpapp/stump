@@ -7,6 +7,7 @@ import {
 	Clock,
 	CopyMinus,
 	Ellipsis,
+	HatGlasses,
 	Heart,
 	Trash,
 } from 'lucide-react-native'
@@ -28,6 +29,7 @@ import {
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useReaderStore } from '~/stores'
 
 type Props = {
 	book: BookMenuFragment
@@ -68,6 +70,8 @@ export default function AndroidBookMenu({
 	const isPreviouslyCompleted = !!book.readHistory?.length
 	const isUntouched = !isReading && !isPreviouslyCompleted
 
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -94,6 +98,14 @@ export default function AndroidBookMenu({
 						})}
 					/>
 				</DropdownMenuItem>
+				{!disableProgressTracking && (
+					<DropdownMenuItem
+						onPress={() => router.push(`/stump/${serverId}/books/${book.id}/read?incognito=true`)}
+					>
+						<Text className="text-lg">{translate('shared.bookActions.readIncognito')}</Text>
+						<Icon as={HatGlasses} size={20} className="text-foreground-muted ml-auto" />
+					</DropdownMenuItem>
+				)}
 				<DropdownMenuSeparator variant="group" />
 
 				<DropdownMenuGroup>

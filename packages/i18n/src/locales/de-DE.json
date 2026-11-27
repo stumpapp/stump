@@ -138,7 +138,6 @@
 				"preferNativePdf": "Native PDF bevorzugen",
 				"preferMinimalReader": "Minimalen Leser bevorzugen",
 				"disableDismissGesture": "Deaktiviere Zurück-Geste",
-				"incognitoReading": "Inkognito lesen",
 				"maxPageViewingSeconds": {
 					"label": "Seitenansicht-Sekunden-Limit",
 					"errors": {

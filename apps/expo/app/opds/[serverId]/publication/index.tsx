@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSDK } from '@stump/client'
 import { OPDSLink, resolveUrl } from '@stump/sdk'
 import { useNavigation, useRouter } from 'expo-router'
-import { Loader2 } from 'lucide-react-native'
+import { HatGlasses, Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
@@ -50,7 +50,7 @@ import {
 } from '~/lib/opds/utils'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
-import { usePreferencesStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 
 import { usePublicationContext } from './context'
 
@@ -70,6 +70,7 @@ export default function Screen() {
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
 
 	const isDownloaded = useIsOPDSPublicationDownloaded(url, metadata, serverId)
 
@@ -260,7 +261,7 @@ export default function Screen() {
 					<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button
 							variant="brand"
-							className="flex-1"
+							className="gap-2 flex-1 flex-row"
 							roundness="full"
 							onPress={() =>
 								router.push({
@@ -270,6 +271,9 @@ export default function Screen() {
 							}
 							disabled={!canStream || !isSupportedStream}
 						>
+							{disableProgressTracking && (
+								<Icon as={HatGlasses} size={18} className="text-foreground-on-fill" />
+							)}
 							<Text>Stream</Text>
 						</Button>
 						{!isDownloaded && (

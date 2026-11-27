@@ -263,14 +263,17 @@ const deleteAnnotationMutation = graphql(`
 
 type Params = {
 	bookId: string
+	incognito?: string
 }
-
-// TODO(reading): support incognito, not using it here lol
 
 export default function Screen() {
 	useKeepAwake()
 
-	const { bookId } = useLocalSearchParams<Params>()
+	const { bookId, incognito: localIncognito } = useLocalSearchParams<Params>()
+
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+	const incognito = disableProgressTracking || localIncognito === 'true'
+
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -315,15 +318,17 @@ export default function Screen() {
 
 	const timer = useReadingTimer({
 		databaseSeconds: book.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !incognito,
 	})
 
 	// tracks the last synced locator so that on exit we can send a final update so timer progression
 	// is not lost if the page did not change
 	const lastSyncedReadiumLocator = useRef(
-		book.readProgress?.locator ? intoReadiumLocator(book.readProgress.locator) : undefined,
+		incognito || !book.readProgress?.locator
+			? undefined
+			: intoReadiumLocator(book.readProgress.locator),
 	)
-	const lastSyncedImageReaderPage = useRef(book.readProgress?.page)
+	const lastSyncedImageReaderPage = useRef(incognito ? undefined : book.readProgress?.page)
 
 	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
 
@@ -358,6 +363,8 @@ export default function Screen() {
 
 	const onPageChanged = useCallback(
 		(page: number) => {
+			if (incognito) return
+
 			const delta = timer.popDeltaSeconds()
 
 			updateProgress({
@@ -371,11 +378,13 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, timer, updateProgress, deviceId],
+		[book.id, timer, updateProgress, deviceId, incognito],
 	)
 
 	const onLocationChanged = useCallback(
 		(locator: ReadiumLocator, percentage: number) => {
+			if (incognito) return
+
 			const delta = timer.popDeltaSeconds()
 
 			updateProgress({
@@ -398,11 +407,13 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, timer, updateProgress, deviceId],
+		[book.id, timer, updateProgress, deviceId, incognito],
 	)
 
 	const onReachedEnd = useCallback(
 		(locator: ReadiumLocator) => {
+			if (incognito) return
+
 			const delta = timer.popDeltaSeconds()
 
 			updateProgress({
@@ -424,7 +435,7 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, timer, updateProgress, deviceId],
+		[book.id, timer, updateProgress, deviceId, incognito],
 	)
 
 	const { mutate: resetElapsedSeconds } = useGraphQLMutation(resetElapsedSecondsMutation, {
@@ -435,8 +446,9 @@ export default function Screen() {
 	})
 
 	const resetTimer = useCallback(() => {
+		if (incognito) return
 		resetElapsedSeconds({ id: book.id })
-	}, [resetElapsedSeconds, book.id])
+	}, [resetElapsedSeconds, book.id, incognito])
 
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
 		useSyncOnlineToOfflineBookmarks({
@@ -476,6 +488,7 @@ export default function Screen() {
 
 	const onBookmark = useCallback(
 		async (locator: ReadiumLocator, previewContent?: string) => {
+			if (incognito) return
 			const result = await createBookmark({
 				input: {
 					mediaId: book.id,
@@ -492,7 +505,7 @@ export default function Screen() {
 			})
 			return { id: result.createBookmark.id }
 		},
-		[book.id, createBookmark],
+		[book.id, createBookmark, incognito],
 	)
 
 	const onDeleteBookmark = useCallback(
@@ -595,14 +608,14 @@ export default function Screen() {
 
 	const onExitReader = useCallback(async () => {
 		// update progress first so refetch picks up changes
-		if (lastSyncedReadiumLocator.current) {
+		if (!incognito && lastSyncedReadiumLocator.current) {
 			onLocationChanged(
 				lastSyncedReadiumLocator.current,
 				lastSyncedReadiumLocator.current.locations?.totalProgression ?? 0,
 			)
 		}
 
-		if (lastSyncedImageReaderPage.current) {
+		if (!incognito && lastSyncedImageReaderPage.current) {
 			onPageChanged(lastSyncedImageReaderPage.current)
 		}
 
@@ -615,7 +628,7 @@ export default function Screen() {
 			queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
 		])
-	}, [bookId, onLocationChanged, onPageChanged, queryClient])
+	}, [bookId, onLocationChanged, onPageChanged, queryClient, incognito])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -641,7 +654,10 @@ export default function Screen() {
 		[sdk],
 	)
 
-	const currentProgressPage = useMemo(() => book.readProgress?.page || 1, [book.readProgress?.page])
+	const currentProgressPage = useMemo(
+		() => (incognito ? 1 : book.readProgress?.page || 1),
+		[book.readProgress?.page, incognito],
+	)
 	const offlineUri = useMemo(
 		() => (record ? `${booksDirectory(serverId)}/${record.filename}` : undefined),
 		[record, serverId],
@@ -650,21 +666,22 @@ export default function Screen() {
 	if (!book || isLoadingRecord) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
-		const initialLocator = book.readProgress?.locator || undefined
+		const initialLocator = incognito ? undefined : book.readProgress?.locator || undefined
 
 		return (
 			<ReadiumReader
 				book={book}
 				timer={timer}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
+				incognito={incognito}
 				onLocationChanged={onLocationChanged}
 				onReachedEnd={onReachedEnd}
-				onBookmark={onBookmark}
+				onBookmark={incognito ? undefined : onBookmark}
 				onDeleteBookmark={onDeleteBookmark}
 				offlineUri={offlineUri}
 				serverId={serverId}
 				requestHeaders={requestHeaders}
-				onCreateAnnotation={onCreateAnnotation}
+				onCreateAnnotation={incognito ? undefined : onCreateAnnotation}
 				onUpdateAnnotation={onUpdateAnnotation}
 				onDeleteAnnotation={onDeleteAnnotation}
 			/>
@@ -676,7 +693,7 @@ export default function Screen() {
 				initialPage={currentProgressPage}
 				onPageChanged={onPageChanged}
 				serverId={serverId}
-				// incognito
+				incognito={incognito}
 				timer={timer}
 			/>
 		)
@@ -684,6 +701,7 @@ export default function Screen() {
 		return (
 			<ImageBasedReader
 				initialPage={currentProgressPage}
+				incognito={incognito}
 				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
 				onPageChanged={onPageChanged}

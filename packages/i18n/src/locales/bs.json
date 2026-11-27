@@ -162,7 +162,6 @@
         "preferNativePdf": "Dajte prednost nativnom PDF čitaču",
         "preferMinimalReader": "Dajte prednost minimalističkom čitaču",
         "disableDismissGesture": "Onemogućite gestu zatvaranja",
-        "incognitoReading": "Inkognito čitanje",
         "maxPageViewingSeconds": {
           "label": "Ograničenje vremena prikaza stranice u sekundama",
           "errors": {

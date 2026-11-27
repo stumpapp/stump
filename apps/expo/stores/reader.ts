@@ -17,7 +17,6 @@ export type FooterControls = 'images' | 'slider'
 
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
-	incognito?: boolean
 	preferSmallImages?: boolean
 	allowDownscaling: boolean
 	doublePageBehavior: DoublePageBehavior
@@ -51,6 +50,10 @@ type BookCacheData = {
 export type ReaderStore = {
 	isReading: boolean
 	setIsReading: (reading: boolean) => void
+
+	/** disables tracking globally for all servers */
+	disableProgressTracking: boolean
+	setDisableProgressTracking: (disabled: boolean) => void
 
 	globalSettings: GlobalSettings
 	setGlobalSettings: (settings: Partial<GlobalSettings>) => void
@@ -103,6 +106,8 @@ export const useReaderStore = create<ReaderStore>()(
 			({
 				isReading: false,
 				setIsReading: (reading) => set({ isReading: reading }),
+				disableProgressTracking: false,
+				setDisableProgressTracking: (disabled) => set({ disableProgressTracking: disabled }),
 				globalSettings: DEFAULT_BOOK_PREFERENCES,
 				setGlobalSettings: (updates: Partial<GlobalSettings>) => {
 					// NOTE: i added this timeout to fix a weird crash that happens in very specific circumstances

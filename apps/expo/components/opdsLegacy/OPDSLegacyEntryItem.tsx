@@ -7,7 +7,7 @@ import {
 	OPDSLegacyEntry,
 } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { Download, Info, Radio, Trash } from 'lucide-react-native'
+import { Download, HatGlasses, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
 import { Platform, View } from 'react-native'
 
@@ -16,13 +16,14 @@ import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
-import { usePreferencesStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 
 import { useResolveURL } from '../../lib/opds/utils'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { Icon, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { ContextMenuItem } from '../ui/context-menu/types'
 import { OPDSLegacyEntryItemSheet } from './OPDSLegacyEntryItemSheet'
 import { useLegacyOPDSEntrySize } from './useLegacyOPDSEntrySize'
 
@@ -62,8 +63,9 @@ export default function OPDSEntry({ entry }: Props) {
 
 	const router = useRouter()
 	const resolveUrl = useResolveURL()
+	const disableProgressTracking = useReaderStore((store) => store.disableProgressTracking)
 
-	const onPress = () => {
+	const onPress = (incognito?: boolean) => {
 		const toUrl = navigateUrl || subsectionUrl
 		if (streamingData) {
 			router.push({
@@ -75,6 +77,7 @@ export default function OPDSEntry({ entry }: Props) {
 					entryContent: entry.content,
 					streamingURL: streamingData.streamingURL,
 					pageCount: streamingData.pageCount.toString(),
+					incognito: incognito ? 'true' : undefined,
 				},
 			})
 		} else if (toUrl) {
@@ -105,6 +108,19 @@ export default function OPDSEntry({ entry }: Props) {
 								},
 								onPress: () => sheetRef.current?.present(),
 							},
+							...(!disableProgressTracking
+								? [
+										{
+											label: translate('shared.bookActions.readIncognito'),
+											disabled: !streamingData,
+											icon: {
+												ios: 'eyeglasses.slash',
+												android: HatGlasses,
+											},
+											onPress: () => onPress(true),
+										} satisfies ContextMenuItem,
+									]
+								: []),
 							// {
 							// 	label: 'Select',
 							// 	icon: {

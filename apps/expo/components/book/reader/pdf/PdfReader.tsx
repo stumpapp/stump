@@ -48,6 +48,10 @@ type Props = {
 	 * The active book's timer
 	 */
 	timer: Timer
+	/**
+	 * Whether progress callbacks should be suppressed
+	 */
+	incognito?: boolean
 } & OfflineCompatibleReader
 
 // TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf
@@ -58,13 +62,17 @@ type Props = {
 // TODO(expo-pdf): In the meantime re: ^, I should at least add:
 // - settings sheet, a chunk of existing settings do not apply to PDF
 
-export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: Props) {
+export default function PdfReader({
+	book,
+	initialPage,
+	onPageChanged,
+	incognito = false,
+	...ctx
+}: Props) {
 	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
 	const [isDownloading, setIsDownloading] = useState(false)
-
-	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 
 	// TODO(readium): I think I'll need to do the same thing for the ebook reader once I enable scrolling
 	// Note: We don't track the locator throughout reading here because when `scroll` is enabled the change

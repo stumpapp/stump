@@ -24,7 +24,11 @@ export default function SettingsLayout() {
 	} = usePreferences()
 
 	if (!user) {
-		return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname + window.location.search)}`} />
+		return (
+			<Navigate
+				to={`/auth?redirect=${encodeURIComponent(location.pathname + window.location.search)}`}
+			/>
+		)
 	}
 
 	const displaySideBar = !isMobile

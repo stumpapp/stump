@@ -188,7 +188,6 @@
         "preferNativePdf": "优先使用原生 PDF",
         "preferMinimalReader": "优先使用极简阅读器",
         "disableDismissGesture": "禁用关闭手势",
-        "incognitoReading": "隐身阅读",
         "maxPageViewingSeconds": {
           "label": "页面浏览秒数限制",
           "errors": {

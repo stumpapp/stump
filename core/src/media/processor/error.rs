@@ -20,6 +20,8 @@ pub enum MediaProcessorError {
 	ImageSize(#[from] imagesize::ImageError),
 	#[error("Image operation failed: {0}")]
 	Image(#[from] image::ImageError),
+	#[error("Archive contains an invalid or unsafe path: {0}")]
+	InvalidArchivePath(String),
 	#[error("Failed to parse metadata: {0}")]
 	Metadata(String),
 	#[error("Failed to parse metadata XML: {0}")]

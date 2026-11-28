@@ -50,6 +50,7 @@ prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex.workspace = true
 ring = "0.17.8"
+tempfile.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
@@ -70,7 +71,6 @@ base64.workspace = true
 
 [dev-dependencies]
 temp-env = "0.3.6"
-tempfile.workspace = true
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 tests = { path = "../crates/tests" }
 

@@ -1,8 +1,8 @@
 import { Heading, Text } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { Suspense } from 'react'
-import { Helmet } from 'react-helmet'
 
+import { AppTitle } from '@/AppTitle.tsx'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { useTranslate } from '@/hooks/useTranslate'
@@ -19,9 +19,7 @@ export default function JobSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.server/jobs.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.server/jobs.helmet')} />
 
 			{/*
 					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all

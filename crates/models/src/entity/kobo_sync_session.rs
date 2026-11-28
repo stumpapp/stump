@@ -1,6 +1,6 @@
 use chrono::Utc;
 use sea_orm::FromJsonQueryResult;
-use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*, prelude::async_trait::async_trait};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]

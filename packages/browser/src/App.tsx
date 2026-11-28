@@ -6,12 +6,12 @@ import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Helmet } from 'react-helmet'
 import { createSearchParams, useLocation, useNavigate } from 'react-router'
 
 import { ErrorFallback } from '@/components/ErrorFallback'
 
 import { AppRouter } from './AppRouter'
+import { AppTitle } from './AppTitle'
 import { Toaster } from './components/Toaster'
 import { useApplyTheme } from './hooks'
 import { useAppStore, useDebugStore, useUserStore } from './stores'
@@ -77,7 +77,7 @@ const RouterContainer = (props: StumpClientProps) => {
 		navigate({
 			pathname: url,
 			search: createSearchParams({
-				redirect: location.pathname,
+				redirect: location.pathname + location.search,
 			}).toString(),
 		})
 	}
@@ -108,9 +108,7 @@ const RouterContainer = (props: StumpClientProps) => {
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
 				{showQueryTools && <ReactQueryDevtools position="right" />}
-				<Helmet defaultTitle="Stump">
-					<title>Stump</title>
-				</Helmet>
+				<AppTitle />
 				<AppRouter />
 				<Toaster />
 			</SDKProvider>

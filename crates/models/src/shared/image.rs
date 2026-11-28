@@ -1,6 +1,6 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::DateTimeWithTimeZone, prelude::Decimal, FromJsonQueryResult,
+	FromJsonQueryResult, entity::prelude::DateTimeWithTimeZone, prelude::Decimal,
 };
 use serde::{Deserialize, Serialize};
 

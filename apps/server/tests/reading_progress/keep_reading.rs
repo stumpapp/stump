@@ -1,10 +1,10 @@
 use crate::common::{
+	TestApp,
 	book::{
 		active_session_for_book, create_nth_readthrough, fudge_session_time,
 		fudge_session_time_with_timestamp, update_progress,
 	},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 
 use chrono::{Duration, Utc};

@@ -19,10 +19,10 @@ use models::entity::{
 	user::AuthUser,
 };
 use sea_orm::{
-	prelude::*, Condition, DatabaseTransaction, QuerySelect, QueryTrait, Select,
+	Condition, DatabaseTransaction, QuerySelect, QueryTrait, Select, prelude::*,
 };
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub async fn build_smart_list_items(
 	user: &AuthUser,
@@ -44,39 +44,39 @@ async fn group_by_series(
 	books: Vec<Media>,
 	txn: &DatabaseTransaction,
 ) -> Result<SmartListItems> {
-	let mut series_ids: HashSet<String> = HashSet::new();
-	let mut series_map: HashMap<String, Vec<Media>> = HashMap::new();
-
-	books.into_iter().for_each(|book| {
-		if let Some(series_id) = book.model.series_id.clone() {
-			series_ids.insert(series_id.clone());
-		}
-
+	let mut series_map: HashMap<Option<String>, Vec<Media>> = HashMap::new();
+	for book in books {
 		series_map
-			.entry(book.model.series_id.clone().unwrap_or_default())
+			.entry(book.model.series_id.clone())
 			.or_default()
 			.push(book);
-	});
+	}
 
 	// get all series for the books
 	let series_models = series::ModelWithMetadata::find_for_user(user)
-		.filter(series::Column::Id.is_in(series_ids))
+		.filter(series::Column::Id.is_in(series_map.keys().flatten()))
 		.into_model::<series::ModelWithMetadata>()
 		.all(txn)
 		.await?;
 
-	let items: Vec<SmartListGroupedItem> = series_models
+	let mut items: Vec<SmartListGroupedItem> = series_models
 		.into_iter()
 		.map(|series_model| {
 			let books = series_map
-				.remove(&series_model.series.id)
+				.remove(&Some(series_model.series.id.clone()))
 				.unwrap_or_default();
 			SmartListGroupedItem {
-				entity: SmartListItemEntity::Series(Box::new(series_model.into())),
+				entity: Some(SmartListItemEntity::Series(Box::new(series_model.into()))),
 				books,
 			}
 		})
 		.collect();
+	if let Some(books) = series_map.remove(&None) {
+		items.push(SmartListGroupedItem {
+			entity: None,
+			books,
+		});
+	}
 
 	Ok(SmartListItems::Grouped(SmartListGrouped { items }))
 }
@@ -86,60 +86,23 @@ async fn group_by_library(
 	books: Vec<Media>,
 	txn: &DatabaseTransaction,
 ) -> Result<SmartListItems> {
-	let mut series_ids: HashSet<String> = HashSet::new();
-	let mut series_map: HashMap<String, Vec<Media>> = HashMap::new();
-
-	books.into_iter().for_each(|book| {
-		if let Some(series_id) = book.model.series_id.clone() {
-			series_ids.insert(series_id.clone());
-		}
-
-		series_map
-			.entry(book.model.series_id.clone().unwrap_or_default())
+	let mut library_books: HashMap<String, Vec<Media>> = HashMap::new();
+	for book in books {
+		library_books
+			.entry(book.model.library_id.clone())
 			.or_default()
 			.push(book);
-	});
-
-	// get all series for the books
-	let series_and_library_ids: Vec<(String, String)> =
-		series::Entity::find_for_user(user)
-			.select_only()
-			.columns(vec![series::Column::Id, series::Column::LibraryId])
-			.filter(series::Column::Id.is_in(series_ids))
-			.into_tuple()
-			.all(txn)
-			.await?;
-
-	let library_to_series_ids: HashMap<String, Vec<String>> = series_and_library_ids
-		.into_iter()
-		.fold(HashMap::new(), |mut acc, (series_id, library_id)| {
-			acc.entry(library_id).or_default().push(series_id);
-			acc
-		});
-
+	}
 	let library_models = library::Entity::find_for_user(user)
-		.filter(library::Column::Id.is_in(library_to_series_ids.keys()))
-		.into_model::<library::Model>()
+		.filter(library::Column::Id.is_in(library_books.keys()))
 		.all(txn)
 		.await?;
-
-	let items: Vec<SmartListGroupedItem> = library_models
+	let items = library_models
 		.into_iter()
-		.map(|library_model| {
-			let library_id = library_model.id.clone();
-			let series_ids = library_to_series_ids
-				.get(&library_id)
-				.cloned()
-				.unwrap_or_default();
-
-			// collect all the books that belong to the series in this library
-			let books: Vec<Media> = series_ids
-				.into_iter()
-				.flat_map(|series_id| series_map.remove(&series_id).unwrap_or_default())
-				.collect();
-
+		.map(|library| {
+			let books = library_books.remove(&library.id).unwrap_or_default();
 			SmartListGroupedItem {
-				entity: SmartListItemEntity::Library(Box::new(library_model.into())),
+				entity: Some(SmartListItemEntity::Library(Box::new(library.into()))),
 				books,
 			}
 		})
@@ -221,13 +184,7 @@ fn add_library_join(
 	});
 
 	if is_using_library {
-		query.join_rev(
-			sea_orm::JoinType::InnerJoin,
-			library::Entity::belongs_to(series::Entity)
-				.from(models::entity::library::Column::Id)
-				.to(models::entity::series::Column::LibraryId)
-				.into(),
-		)
+		query.inner_join(library::Entity)
 	} else {
 		query
 	}
@@ -269,16 +226,16 @@ mod tests {
 	use super::*;
 	use crate::{
 		filter::{
-			library::LibraryFilterInput, media::MediaFilterInput, NumericFilter,
-			StringLikeFilter,
+			NumericFilter, StringLikeFilter, library::LibraryFilterInput,
+			media::MediaFilterInput,
 		},
 		tests::common::get_default_user,
 	};
 	use ::tests::{db::test_database, fake_data};
 	use pretty_assertions::assert_eq;
 	use sea_orm::{
-		sea_query::{Query, SqliteQueryBuilder},
 		QueryTrait,
+		sea_query::{Query, SqliteQueryBuilder},
 	};
 
 	pub fn condition_to_string(condition: &Condition) -> String {
@@ -365,9 +322,11 @@ mod tests {
 			.expect("should exec query");
 
 		assert_eq!(results.len(), 1);
-		assert!(!results
-			.iter()
-			.any(|book| should_exclude_ids.contains(&book.media.id)));
+		assert!(
+			!results
+				.iter()
+				.any(|book| should_exclude_ids.contains(&book.media.id))
+		);
 		assert_eq!(results[0].media.id, totally_okay_will_return_book.id);
 	}
 
@@ -447,7 +406,7 @@ mod tests {
 			.to_string(SqliteQueryBuilder);
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" LEFT JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "media"."library_id" = "libraries"."id" WHERE "media"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
 		);
 	}
 }

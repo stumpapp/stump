@@ -2,13 +2,13 @@ use async_graphql::SimpleObject;
 
 use chrono::Utc;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
-	QuerySelect,
+	ActiveValue, FromQueryResult, QuerySelect, entity::prelude::*,
+	prelude::async_trait::async_trait,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	prefixer::{Prefixer, parse_query_to_model, parse_query_to_model_optional},
 	shared::{
 		enums::UserPermission,
 		image::{ImageMetadata, ImageRef},

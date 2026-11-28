@@ -1,12 +1,12 @@
 use async_trait::async_trait;
 use models::{domain::author::normalize_author_name, entity::author};
-use sea_orm::{prelude::*, ActiveValue::Set, ConnectionTrait, EntityTrait, Iterable};
+use sea_orm::{ActiveValue::Set, ConnectionTrait, EntityTrait, Iterable, prelude::*};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 use crate::{
-	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
 	CoreResult,
+	database::{SQLITE_BIND_LIMIT, get_insert_batch_size},
 };
 
 #[async_trait]

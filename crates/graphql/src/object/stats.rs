@@ -1,5 +1,5 @@
 use async_graphql::{Result, SimpleObject};
-use sea_orm::{prelude::*, DatabaseConnection, FromQueryResult};
+use sea_orm::{DatabaseConnection, FromQueryResult, prelude::*};
 
 use crate::utils::db_statement;
 
@@ -41,8 +41,7 @@ impl LibraryStats {
 				WITH library_media AS (
 					SELECT media.id, media.size
 					FROM media
-					INNER JOIN series ON media.series_id = series.id
-					WHERE ($1 IS NULL OR series.library_id = $1)
+					WHERE ($1 IS NULL OR media.library_id = $1)
 				),
 				base_counts AS (
 					SELECT

@@ -1,7 +1,7 @@
 use std::{thread, time::Duration};
 
 use clap::Subcommand;
-use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
+use dialoguer::{Confirm, Input, Password, theme::ColorfulTheme};
 use models::entity::{
 	api_key, book_club_member, bookmark, favorite_library, favorite_media,
 	favorite_series, last_library_visit, library_exclusion, media_annotation,
@@ -9,11 +9,11 @@ use models::entity::{
 	user_preferences,
 };
 use sea_orm::{
-	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
+	ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait, prelude::*,
 };
 use stump_core::{config::StumpConfig, database::connect};
 
-use crate::{error::CliResult, CliError};
+use crate::{CliError, error::CliResult};
 
 use super::default_progress_spinner;
 
@@ -227,7 +227,9 @@ async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
 			if existing_user.is_some() {
 				Ok(())
 			} else {
-				Err("An account with that username does not exist or their account is locked")
+				Err(
+					"An account with that username does not exist or their account is locked",
+				)
 			}
 		})
 		.interact_text()?;
@@ -625,9 +627,9 @@ mod tests {
 		},
 	};
 	use sea_orm::{
+		ActiveModelTrait, ColumnTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
 		prelude::{Date, DateTimeWithTimeZone},
 		sqlx::types::chrono::Utc,
-		ActiveModelTrait, ColumnTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
 	};
 
 	use super::do_migrate_oidc_account;
@@ -725,7 +727,7 @@ mod tests {
 		let series = series::ActiveModel {
 			name: Set("Test Series".to_string()),
 			library_id: Set(Some(library.id.clone())),
-			path: Set("/test/series".to_string()),
+			path: Set(Some("/test/series".to_string())),
 			status: Set(FileStatus::Ready),
 			..Default::default()
 		}
@@ -738,6 +740,7 @@ mod tests {
 				name: Set(format!("Test Media {}", i + 1)),
 				path: Set(format!("/test/series/media{}", i + 1)),
 				series_id: Set(Some(series.id.clone())),
+				library_id: Set(library.id.clone()),
 				extension: Set("cbz".to_string()),
 				pages: Set(100 + i),
 				status: Set(FileStatus::Ready),

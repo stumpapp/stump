@@ -3,17 +3,17 @@ use serde::{Deserialize, Serialize};
 
 use models::entity::{library, media, series};
 use sea_orm::{
-	prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait,
+	ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait, prelude::*,
 };
 
 use crate::{
-	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
+	database::chunk_vec_into,
 	image::thumbnail::generate::{
-		safely_generate_placeholder_batch, GenerateImageSource,
+		GenerateImageSource, safely_generate_placeholder_batch,
 	},
 	job::{
-		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkingState,
+		JobContext, JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError,
 	},
 };
 
@@ -112,8 +112,7 @@ impl JobLifecycle for PlaceholderGenerationJob {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
-					.inner_join(series::Entity)
-					.filter(series::Column::LibraryId.eq(id))
+					.filter(media::Column::LibraryId.eq(id))
 					.into_model::<media::MediaThumbSelect>()
 					.all(ctx.conn())
 					.await
@@ -122,30 +121,12 @@ impl JobLifecycle for PlaceholderGenerationJob {
 
 				let series_ids = books
 					.iter()
-					.map(|m| m.series_id.clone())
+					.filter_map(|m| m.series_id.clone())
 					.collect::<std::collections::HashSet<_>>()
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let mut series = Vec::with_capacity(series_ids.len());
-				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
-					let batch = series::Entity::find()
-						.select_only()
-						.columns(series::SeriesThumbSelect::columns())
-						.filter(series::Column::Id.is_in(chunk.to_vec()))
-						.into_model::<series::SeriesThumbSelect>()
-						.all(ctx.conn())
-						.await
-						.map_err(|e| JobError::InitFailed(e.to_string()))?;
-					series.extend(batch);
-				}
-
-				let library_ids = series
-					.iter()
-					.filter_map(|s| s.library_id.clone())
-					.collect::<std::collections::HashSet<_>>()
-					.into_iter()
-					.collect::<Vec<_>>();
+				let library_ids = vec![id.clone()];
 
 				PlaceholderGenerationInit {
 					media_ids,

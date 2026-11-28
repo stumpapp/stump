@@ -1,6 +1,6 @@
 use std::{
 	collections::{HashMap, HashSet, VecDeque},
-	path::{Path, PathBuf},
+	path::PathBuf,
 	sync::Arc,
 	time::Instant,
 };
@@ -9,24 +9,28 @@ use futures::StreamExt;
 use models::{
 	domain::author::normalize_author_name,
 	entity::{library_config, media, media_author, media_metadata, media_tag, tag},
-	shared::enums::{AuthorRole, FileStatus},
+	shared::enums::{AuthorRole, FileStatus, OrganizationMode},
 };
 use sea_orm::{
+	ActiveValue, DatabaseTransaction, IntoActiveModel, Iterable, QuerySelect, QueryTrait,
+	Set, TransactionTrait,
 	prelude::*,
-	sea_query::{Expr, OnConflict},
-	ActiveValue, DatabaseConnection, DatabaseTransaction, IntoActiveModel, Iterable, Set,
-	TransactionTrait,
+	sea_query::{Expr, OnConflict, SimpleExpr},
 };
 
 use crate::{
+	CoreEvent,
 	config::StumpConfig,
-	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
+	database::{SQLITE_BIND_LIMIT, get_insert_batch_size},
 	error::{CoreError, CoreResult},
-	event::CreatedMedia,
-	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
+	event::{CreatedManySeries, CreatedMedia},
+	job::{JobContext, JobExecuteLog, JobProgress, error::JobError},
 	media::{
-		prepare::{prepare_draft, MediaDraft},
-		processor::{generate_hashes, process_metadata, MediaProcessorOptions},
+		prepare::{MediaDraft, prepare_draft},
+		processor::{MediaProcessorOptions, generate_hashes, process_metadata},
+	},
+	metadata::membership::{
+		refresh_series, remove_series_thumbnails, resolve_series_membership,
 	},
 	scan::{
 		cache::AuthorCache,
@@ -34,18 +38,18 @@ use crate::{
 		tag_cache::TagCache,
 		utils::{BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},
 	},
-	CoreEvent,
 };
 
 // TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {
-	pub series_id: String,
+	pub series_id: Option<String>,
 	pub library_config: library_config::Model,
 }
 
 #[derive(Default)]
 pub(crate) struct MediaOperationOutput {
 	pub created_media: u64,
+	pub created_series: u64,
 	pub updated_media: u64,
 	pub logs: Vec<JobExecuteLog>,
 }
@@ -239,7 +243,7 @@ pub(super) async fn insert_media_in_txn(
 }
 
 pub(crate) async fn update_media(
-	db: &DatabaseConnection,
+	txn: &DatabaseTransaction,
 	MediaDraft {
 		media,
 		metadata,
@@ -248,9 +252,7 @@ pub(crate) async fn update_media(
 	}: MediaDraft,
 	author_cache: &AuthorCache,
 ) -> CoreResult<media::Model> {
-	let txn = db.begin().await?;
-
-	let updated_media = media.update(&txn).await?;
+	let updated_media = media.update(txn).await?;
 	let has_metadata = metadata.is_some();
 
 	if let Some(meta) = metadata {
@@ -259,17 +261,15 @@ pub(crate) async fn update_media(
 			.to_owned();
 		media_metadata::Entity::insert(meta.into_active_model())
 			.on_conflict(on_conflict)
-			.exec(&txn)
+			.exec(txn)
 			.await?;
 	}
 
-	ensure_tags_linked(&txn, &updated_media.id, &tags).await?;
+	ensure_tags_linked(txn, &updated_media.id, &tags).await?;
 	if let Some(writers) = writers.or_else(|| has_metadata.then(Vec::new)) {
 		// ^ seems unintuitive, but basically the or_else ensure we wipe if needed
 		sync_media_authors(&txn, &updated_media.id, &writers, author_cache).await?;
 	}
-
-	txn.commit().await?;
 
 	Ok(updated_media)
 }
@@ -348,35 +348,10 @@ pub(crate) async fn ensure_tags_linked(
 	Ok(())
 }
 
-/// Builds a media from the given path
-///
-/// # Arguments
-/// * `path` - The path to the media on disk
-/// * `series_id` - The series ID to associate the media with
-/// * `existing_book` - An optional existing media to rebuild
-/// * `library_config` - The library configuration
-/// * `config` - The core configuration
-async fn build_book(
-	path: &Path,
-	series_id: &str,
-	existing_book: Option<media::ModelWithMetadata>,
-	library_config: library_config::Model,
-	config: &StumpConfig,
-) -> CoreResult<MediaDraft> {
-	prepare_draft(
-		path,
-		series_id,
-		library_config,
-		config,
-		existing_book.as_ref(),
-	)
-	.await
-}
-
 struct BookVisitCtx {
 	operation: BookVisitOperation,
 	path: PathBuf,
-	series_id: String,
+	series_id: Option<String>,
 	existing_book: Option<media::ModelWithMetadata>,
 }
 
@@ -391,11 +366,15 @@ async fn execute_book_visit(
 	config: &StumpConfig,
 ) -> CoreResult<BookVisitResult> {
 	match (operation, existing_book) {
-		(BookVisitOperation::Rebuild, Some(book)) => {
-			prepare_draft(&path, &series_id, library_config, config, Some(&book))
-				.await
-				.map(|b| BookVisitResult::Built(Box::new(b)))
-		},
+		(BookVisitOperation::Rebuild, Some(book)) => prepare_draft(
+			&path,
+			series_id.as_deref(),
+			library_config,
+			config,
+			Some(&book),
+		)
+		.await
+		.map(|b| BookVisitResult::Built(Box::new(b))),
 		(BookVisitOperation::Custom(custom), Some(book)) => {
 			let mut result = CustomVisitResult {
 				id: book.media.id.clone(),
@@ -409,19 +388,27 @@ async fn execute_book_visit(
 				result.hashes = Some(hashes);
 			}
 			if custom.regen_meta {
-				let meta = process_metadata(&path, config)
-					.await
-					.map_err(CoreError::from)?;
-				result.meta = meta.map(Box::new);
+				let meta =
+					process_metadata(&path, library_config.organization_mode, config)
+						.await
+						.map_err(CoreError::from)?;
+				result.meta = meta
+					.or_else(|| {
+						(library_config.organization_mode == OrganizationMode::Metadata)
+							.then(Default::default)
+					})
+					.map(Box::new);
 			}
 			Ok(BookVisitResult::Custom(result))
 		},
 		// If the existing book is None, it means the book doesn't yet exist so we
 		// always just do a full build. However, we really shouldn't be in this state
 		// since media creation is handled in a separate flow than visit
-		(_, None) => prepare_draft(&path, &series_id, library_config, config, None)
-			.await
-			.map(|b| BookVisitResult::Built(Box::new(b))),
+		(_, None) => {
+			prepare_draft(&path, series_id.as_deref(), library_config, config, None)
+				.await
+				.map(|b| BookVisitResult::Built(Box::new(b)))
+		},
 	}
 }
 
@@ -429,7 +416,7 @@ async fn execute_book_visit(
 /// reporting progress to the worker context
 async fn build_media(
 	paths: Vec<PathBuf>,
-	series_id: &str,
+	series_id: Option<&str>,
 	library_config: library_config::Model,
 	worker_ctx: &JobContext,
 ) -> (VecDeque<MediaDraft>, Vec<JobExecuteLog>) {
@@ -473,13 +460,13 @@ async fn build_media(
 			}
 		}
 
-		let series_id = series_id.to_string();
+		let series_id = series_id.map(str::to_string);
 		let library_config = library_config.clone();
 		let config = Arc::clone(&config_arc);
 
 		futures.push(Box::pin(async move {
 			tracing::trace!(?path, "Starting media build");
-			build_book(&path, &series_id, None, library_config, &config)
+			prepare_draft(&path, series_id.as_deref(), library_config, &config, None)
 				.await
 				.map_err(|e| (e, path.clone()))
 		}));
@@ -521,10 +508,10 @@ async fn build_media(
 /// worker context.
 async fn insert_media(
 	mut books: VecDeque<MediaDraft>,
-	series_id: &str,
+	organization_mode: OrganizationMode,
 	library_id: &str,
 	worker_ctx: &JobContext,
-) -> Result<u64, JobError> {
+) -> Result<(u64, u64), JobError> {
 	let conn = worker_ctx.conn();
 	let task_count = books.len() as i32;
 
@@ -541,13 +528,14 @@ async fn insert_media(
 	let author_cache = AuthorCache::build(conn, all_writers).await?;
 
 	let mut count = 0i32;
+	let mut created_series = 0;
 
 	while !books.is_empty() {
 		let txn = conn.begin().await?;
 		let chunk_count = MAX_INSERT_CHUNK_SIZE.min(books.len());
 
-		let mut media_ids: Vec<String> = Vec::with_capacity(chunk_count);
 		let mut media_models = Vec::with_capacity(chunk_count);
+		let mut series_names = Vec::with_capacity(chunk_count);
 		let mut meta_models: Vec<media_metadata::ActiveModel> = Vec::new();
 		let mut tags_by_media: Vec<(String, Vec<String>)> = Vec::new();
 		let mut writers_by_media = Vec::new();
@@ -576,7 +564,11 @@ async fn insert_media(
 			count += 1;
 			worker_ctx.report_progress(JobProgress::subtask_position(count, task_count));
 
-			media_ids.push(media_id.clone());
+			series_names.push(
+				metadata
+					.as_ref()
+					.and_then(|meta| meta.series.try_as_ref().cloned().flatten()),
+			);
 			media_models.push(media);
 
 			if let Some(meta) = metadata {
@@ -590,6 +582,25 @@ async fn insert_media(
 			}
 		}
 
+		let mut chunk_created_series = 0;
+		let mut joined_series = Vec::new();
+		if organization_mode == OrganizationMode::Metadata {
+			let (memberships, created) =
+				resolve_series_membership(&txn, library_id, &series_names).await?;
+			chunk_created_series = created;
+			joined_series.extend(memberships.iter().flatten().cloned());
+			for (book, membership) in media_models.iter_mut().zip(memberships) {
+				book.series_id = Set(membership);
+			}
+		}
+		let media_ids: Vec<_> = media_models
+			.iter()
+			.filter_map(|book| {
+				book.id.try_as_ref().map(|id| {
+					(id.clone(), book.series_id.try_as_ref().cloned().flatten())
+				})
+			})
+			.collect();
 		insert_media_in_txn(
 			&txn,
 			media_models,
@@ -600,24 +611,33 @@ async fn insert_media(
 			&author_cache,
 		)
 		.await?;
+		// New books only join series, so none can be left empty to prune here.
+		refresh_series(&txn, joined_series).await?;
 		txn.commit().await?;
+		created_series += chunk_created_series;
+		if chunk_created_series > 0 {
+			worker_ctx.emit_event(CoreEvent::CreatedManySeries(CreatedManySeries {
+				count: chunk_created_series,
+				library_id: library_id.to_string(),
+			}));
+		}
 
 		// TODO(metadata-fetching): Track media_ids as needing fetching (assuming enabled)
-		for media_id in media_ids {
+		for (media_id, series_id) in media_ids {
 			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
 				id: media_id,
-				series_id: series_id.to_string(),
+				series_id,
 				library_id: library_id.to_string(),
 			}));
 		}
 	}
 
-	Ok(count as u64)
+	Ok((count as u64, created_series))
 }
 
 /// Handles a completed book-visit result by persisting the outcome to the database
 pub(crate) async fn handle_book_visit_operation(
-	db: &DatabaseConnection,
+	txn: &DatabaseTransaction,
 	result: BookVisitResult,
 	author_cache: &AuthorCache,
 ) -> CoreResult<()> {
@@ -627,7 +647,6 @@ pub(crate) async fn handle_book_visit_operation(
 				let tags = meta.tags.take().unwrap_or_default();
 				let writers = meta.writers.clone().unwrap_or_default();
 
-				let txn = db.begin().await?;
 				let active_model = media_metadata::ActiveModel {
 					media_id: Set(Some(custom.id.clone())),
 					..meta.into_active_model()
@@ -638,11 +657,10 @@ pub(crate) async fn handle_book_visit_operation(
 							.update_columns(media_metadata::Column::iter())
 							.to_owned(),
 					)
-					.exec_with_returning(&txn)
+					.exec_with_returning(txn)
 					.await?;
-				ensure_tags_linked(&txn, &custom.id, &tags).await?;
-				sync_media_authors(&txn, &custom.id, &writers, author_cache).await?;
-				txn.commit().await?;
+				ensure_tags_linked(txn, &custom.id, &tags).await?;
+				sync_media_authors(txn, &custom.id, &writers, author_cache).await?;
 
 				tracing::trace!(?upserted_meta, "Metadata upserted");
 			}
@@ -652,14 +670,14 @@ pub(crate) async fn handle_book_visit_operation(
 					.filter(media::Column::Id.eq(custom.id.clone()))
 					.col_expr(media::Column::Hash, Expr::value(hashes.stump))
 					.col_expr(media::Column::KoreaderHash, Expr::value(hashes.koreader))
-					.exec(db)
+					.exec(txn)
 					.await?
 					.rows_affected;
 				tracing::trace!(affected_rows, "Book updated with new hashes");
 			}
 		},
 		BookVisitResult::Built(book) => {
-			let updated_media = update_media(db, *book, author_cache).await?;
+			let updated_media = update_media(txn, *book, author_cache).await?;
 			tracing::trace!(?updated_media, "Book updated");
 		},
 	}
@@ -667,11 +685,77 @@ pub(crate) async fn handle_book_visit_operation(
 	Ok(())
 }
 
+async fn persist_visit_chunk(
+	txn: &DatabaseTransaction,
+	library_id: &str,
+	organization_mode: OrganizationMode,
+	mut results: Vec<BookVisitResult>,
+	author_cache: &AuthorCache,
+) -> CoreResult<(u64, Vec<String>)> {
+	let mut created_series = 0;
+	let mut touched_series = Vec::new();
+	if organization_mode == OrganizationMode::Metadata {
+		let (indices, names): (Vec<_>, Vec<_>) = results
+			.iter()
+			.enumerate()
+			.filter_map(|(index, result)| {
+				let name = match result {
+					BookVisitResult::Built(book) => book
+						.metadata
+						.as_ref()
+						.and_then(|meta| meta.series.try_as_ref().cloned().flatten()),
+					BookVisitResult::Custom(custom) => {
+						custom.meta.as_ref()?.series.clone()
+					},
+				};
+				Some((index, name))
+			})
+			.unzip();
+		let book_ids: Vec<_> = indices
+			.iter()
+			.filter_map(|&index| match &results[index] {
+				BookVisitResult::Built(book) => book.media.id.try_as_ref().cloned(),
+				BookVisitResult::Custom(custom) => Some(custom.id.clone()),
+			})
+			.collect();
+		touched_series = media::Entity::find()
+			.select_only()
+			.column(media::Column::SeriesId)
+			.filter(media::Column::Id.is_in(book_ids))
+			.filter(media::Column::SeriesId.is_not_null())
+			.into_tuple::<String>()
+			.all(txn)
+			.await?;
+		let (memberships, created) =
+			resolve_series_membership(txn, library_id, &names).await?;
+		created_series = created;
+		touched_series.extend(memberships.iter().flatten().cloned());
+		for (index, membership) in indices.into_iter().zip(memberships) {
+			match &mut results[index] {
+				BookVisitResult::Built(book) => book.media.series_id = Set(membership),
+				BookVisitResult::Custom(custom) => {
+					media::Entity::update_many()
+						.filter(media::Column::Id.eq(&custom.id))
+						.filter(media::Column::LibraryId.eq(library_id))
+						.col_expr(media::Column::SeriesId, Expr::value(membership))
+						.exec(txn)
+						.await?;
+				},
+			}
+		}
+	}
+	for result in results {
+		handle_book_visit_operation(txn, result, author_cache).await?;
+	}
+	let thumbnails = refresh_series(txn, touched_series).await?;
+	Ok((created_series, thumbnails))
+}
+
 /// Handles missing media by updating the database with the latest information. A media is
 /// considered missing if it was previously marked as ready and is no longer found on disk.
 pub(crate) async fn handle_missing_media(
 	ctx: &JobContext,
-	series_id: &str,
+	scope: SimpleExpr,
 	paths: Vec<PathBuf>,
 ) -> MediaOperationOutput {
 	let mut output = MediaOperationOutput::default();
@@ -686,9 +770,9 @@ pub(crate) async fn handle_missing_media(
 		.map(|p| p.to_string_lossy().to_string())
 		.collect();
 
-	for (i, chunk) in path_strings.chunks(SQLITE_BIND_LIMIT).enumerate() {
+	for (i, chunk) in path_strings.chunks(SQLITE_BIND_LIMIT - 1).enumerate() {
 		let _affected_rows = media::Entity::update_many()
-			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.filter(scope.clone())
 			.filter(media::Column::Path.is_in(chunk.to_vec()))
 			.col_expr(
 				media::Column::Status,
@@ -724,7 +808,7 @@ pub(crate) async fn handle_missing_media(
 /// found on disk.
 pub(crate) async fn handle_restored_media(
 	ctx: &JobContext,
-	series_id: &str,
+	scope: SimpleExpr,
 	ids: Vec<String>,
 ) -> MediaOperationOutput {
 	let mut output = MediaOperationOutput::default();
@@ -736,9 +820,9 @@ pub(crate) async fn handle_restored_media(
 
 	let id_strings: Vec<String> = ids.iter().map(|id| id.to_string()).collect();
 
-	for (i, chunk) in id_strings.chunks(SQLITE_BIND_LIMIT).enumerate() {
+	for (i, chunk) in id_strings.chunks(SQLITE_BIND_LIMIT - 1).enumerate() {
 		let _affected_series = media::Entity::update_many()
-			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.filter(scope.clone())
 			.filter(media::Column::Id.is_in(chunk.to_vec()))
 			.col_expr(
 				media::Column::Status,
@@ -797,15 +881,18 @@ pub(crate) async fn build_and_insert_media(
 		return Ok(output);
 	};
 
+	let organization_mode = library_config.organization_mode;
 	let (books, build_logs) =
-		build_media(paths, &series_id, library_config, worker_ctx).await;
+		build_media(paths, series_id.as_deref(), library_config, worker_ctx).await;
 	output.logs.extend(build_logs);
 
 	worker_ctx.report_progress(JobProgress::msg("Inserting books into database"));
 	let start = Instant::now();
 
-	let created_count = insert_media(books, &series_id, &library_id, worker_ctx).await?;
+	let (created_count, created_series) =
+		insert_media(books, organization_mode, &library_id, worker_ctx).await?;
 	output.created_media = created_count;
+	output.created_series = created_series;
 
 	let insert_error_count = output.logs.len();
 	tracing::debug!(
@@ -841,14 +928,20 @@ pub(crate) async fn visit_and_update_media(
 		.collect::<HashMap<_, _>>();
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
+	let library_id = library_config.library_id.as_deref().ok_or_else(|| {
+		JobError::TaskFailed("Library configuration is missing its library ID".into())
+	})?;
 
 	let mut media = Vec::with_capacity(paths_len);
 	// we cannot just do a single query with all paths because bind limits
 	// for sqlite, so we chunk it up and load them iteratively
-	for chunk in paths.chunks(SQLITE_BIND_LIMIT) {
+	for chunk in paths.chunks(SQLITE_BIND_LIMIT - 2) {
 		let batch = media::ModelWithMetadata::find()
 			.filter(media::Column::Path.is_in(chunk.to_vec()))
-			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.filter(media::Column::LibraryId.eq(library_id))
+			.apply_if(series_id.clone(), |query, id| {
+				query.filter(media::Column::SeriesId.eq(id))
+			})
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;
@@ -966,13 +1059,41 @@ pub(crate) async fn visit_and_update_media(
 
 	let mut update_cursor = 0i32;
 
-	while let Some(result) = build_results.pop_front() {
-		let error_ctx = result.error_ctx();
-		match handle_book_visit_operation(conn, result, &author_cache).await {
-			Ok(_) => {
-				output.updated_media += 1;
+	let chunk_size = if library_config.organization_mode == OrganizationMode::Metadata {
+		MAX_INSERT_CHUNK_SIZE
+	} else {
+		1
+	};
+	while !build_results.is_empty() {
+		let chunk_count = chunk_size.min(build_results.len());
+		let chunk: Vec<_> = build_results.drain(..chunk_count).collect();
+		let error_ctx = chunk[0].error_ctx();
+		let txn = conn.begin().await?;
+		match persist_visit_chunk(
+			&txn,
+			library_id,
+			library_config.organization_mode,
+			chunk,
+			&author_cache,
+		)
+		.await
+		{
+			Ok((created, thumbnails)) => {
+				txn.commit().await?;
+				remove_series_thumbnails(thumbnails).await;
+				output.updated_media += chunk_count as u64;
+				output.created_series += created;
+				if created > 0 {
+					worker_ctx.emit_event(CoreEvent::CreatedManySeries(
+						CreatedManySeries {
+							count: created,
+							library_id: library_id.to_string(),
+						},
+					));
+				}
 			},
 			Err(e) => {
+				txn.rollback().await?;
 				tracing::error!(error = ?e, ?error_ctx, "Failed to update media");
 				output.logs.push(
 					JobExecuteLog::error(format!(
@@ -984,7 +1105,7 @@ pub(crate) async fn visit_and_update_media(
 			},
 		}
 
-		update_cursor += 1;
+		update_cursor += chunk_count as i32;
 		worker_ctx
 			.report_progress(JobProgress::subtask_position(update_cursor, task_count));
 	}
@@ -1040,9 +1161,11 @@ mod tests {
 			hashes: None,
 		});
 
-		handle_book_visit_operation(&db, original_visit, &author_cache)
+		let txn = db.begin().await.unwrap();
+		handle_book_visit_operation(&txn, original_visit, &author_cache)
 			.await
 			.expect("first upsert should not fail");
+		txn.commit().await.unwrap();
 
 		let row = media_metadata::Entity::find()
 			.filter(media_metadata::Column::MediaId.eq(media.id.clone()))
@@ -1062,9 +1185,11 @@ mod tests {
 			hashes: None,
 		});
 
-		handle_book_visit_operation(&db, subsequent_visit, &author_cache)
+		let txn = db.begin().await.unwrap();
+		handle_book_visit_operation(&txn, subsequent_visit, &author_cache)
 			.await
 			.expect("second upsert should not fail");
+		txn.commit().await.unwrap();
 
 		let row = media_metadata::Entity::find()
 			.filter(media_metadata::Column::MediaId.eq(media.id.clone()))

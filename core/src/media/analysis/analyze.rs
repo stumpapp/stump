@@ -1,22 +1,22 @@
 use crate::{
-	job::{error::JobError, JobContext, JobExecuteLog, JobProgress, JobTaskOutput},
+	job::{JobContext, JobExecuteLog, JobProgress, JobTaskOutput, error::JobError},
 	media::{
 		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
-		processor::{analyze_page, AnalyzedPage},
+		processor::{AnalyzedPage, analyze_page},
 	},
 };
 
 use std::sync::{
-	atomic::{AtomicUsize, Ordering},
 	Arc,
+	atomic::{AtomicUsize, Ordering},
 };
 
-use futures::{stream, StreamExt};
+use futures::{StreamExt, stream};
 use models::{
 	entity::media_analysis,
 	shared::analysis::{MediaAnalysisData, PageDimension},
 };
-use sea_orm::{sea_query::OnConflict, ActiveValue::Set, EntityTrait, FromQueryResult};
+use sea_orm::{ActiveValue::Set, EntityTrait, FromQueryResult, sea_query::OnConflict};
 
 #[derive(Debug, Clone, FromQueryResult)]
 pub struct MediaForProcessing {

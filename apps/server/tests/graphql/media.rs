@@ -1,6 +1,6 @@
-use crate::common::{series::setup_single_series_with_n_books, TestApp};
+use crate::common::{TestApp, series::setup_single_series_with_n_books};
 use models::entity::media_metadata;
-use sea_orm::{prelude::Decimal, ActiveModelTrait};
+use sea_orm::{ActiveModelTrait, prelude::Decimal};
 use tests::fake_data;
 
 // TODO: added these quickly to assert a fix while i was there but should organize better,

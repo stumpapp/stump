@@ -1,7 +1,7 @@
 use crate::common::{
+	TestApp,
 	book::{fudge_session_time, update_progress},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 
 use graphql::input::media::{EpubProgressInput, MediaProgressInput, PagedProgressInput};
@@ -9,7 +9,7 @@ use models::{
 	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
-use sea_orm::{prelude::*, ExprTrait, QueryOrder};
+use sea_orm::{ExprTrait, QueryOrder, prelude::*};
 use serde_json::json;
 use tests::fake_data;
 

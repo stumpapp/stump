@@ -87,9 +87,7 @@ export const usePrefetchLibraryBooks = () => {
 					queryFn: async () => {
 						const response = await sdk.execute(query, {
 							filter: {
-								series: {
-									libraryId: { eq: id },
-								},
+								libraryId: { eq: id },
 								_and: params.filter,
 								_or: searchFilter,
 							},

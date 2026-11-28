@@ -1,6 +1,6 @@
 use async_graphql::{InputObject, SimpleObject};
 use derive_builder::Builder;
-use sea_orm::{prelude::Decimal, FromJsonQueryResult};
+use sea_orm::{FromJsonQueryResult, prelude::Decimal};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

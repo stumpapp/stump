@@ -1,13 +1,13 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{domain::author::normalize_author_name, entity::author};
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*};
 
 use crate::{
 	data::CoreContext,
-	filter::{author::AuthorFilterInput, IntoFilter},
+	filter::{IntoFilter, author::AuthorFilterInput},
 	object::author::Author,
 	pagination::{
-		get_paginated_results, PaginatedResponse, Pagination, PaginationValidator,
+		PaginatedResponse, Pagination, PaginationValidator, get_paginated_results,
 	},
 };
 

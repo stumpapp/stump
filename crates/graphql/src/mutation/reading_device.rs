@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result};
 use models::entity::reading_device;
-use sea_orm::{prelude::*, sea_query::OnConflict, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{ActiveValue::Set, IntoActiveModel, prelude::*, sea_query::OnConflict};
 
 use crate::data::{AuthContext, CoreContext};
 

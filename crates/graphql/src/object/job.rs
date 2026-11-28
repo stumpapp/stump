@@ -1,5 +1,5 @@
 use async_graphql::{
-	dataloader::DataLoader, ComplexObject, Context, Json, Result, SimpleObject,
+	ComplexObject, Context, Json, Result, SimpleObject, dataloader::DataLoader,
 };
 use models::{entity::job, shared::enums::UserPermission};
 use stump_core::job::CoreJobOutput;

@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use async_graphql::SimpleObject;
 use chrono::Datelike;
 use sea_orm::strum::IntoEnumIterator;
-use sea_orm::{prelude::*, FromQueryResult, QuerySelect, Statement};
+use sea_orm::{FromQueryResult, QuerySelect, Statement, prelude::*};
 
 use crate::{
 	domain::reading_progress::logical_today,

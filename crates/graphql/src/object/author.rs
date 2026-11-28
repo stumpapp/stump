@@ -3,7 +3,7 @@ use models::{
 	entity::{author, media, media_author, series, series_author},
 	shared::{enums::AuthorRole, image::ImageRef},
 };
-use sea_orm::{prelude::*, ExprTrait, QueryTrait};
+use sea_orm::{ExprTrait, QueryTrait, prelude::*};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -221,12 +221,9 @@ impl Author {
 					.eq(AuthorRole::Primary)
 					.and(media_author::Column::AuthorId.eq(self.model.id.clone())),
 			)
-			// AHHHHHHHH
-			// TODO(chore): add fk to media
-			// .apply_if(self.library_id.is_some(), |query| {
-			// 	query
-			// 		.filter(media::Column::LibraryId.eq(self.library_id.clone().unwrap()))
-			// })
+			.apply_if(self.library_id.as_deref(), |query, library_id| {
+				query.filter(media::Column::LibraryId.eq(library_id))
+			})
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?

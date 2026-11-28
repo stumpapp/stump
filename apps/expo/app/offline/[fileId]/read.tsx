@@ -5,7 +5,6 @@ import { useMutation } from '@tanstack/react-query'
 import { and, eq, isNull } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import urlJoin from 'url-join'
@@ -44,6 +43,7 @@ import { useBookPreferences, useReaderStore } from '~/stores/reader'
 
 type Params = {
 	fileId: string
+	incognito?: string
 }
 
 // TODO: Follow https://github.com/dexie/Dexie.js/pull/2205
@@ -51,7 +51,10 @@ type Params = {
 export default function Screen() {
 	useKeepAwake()
 
-	const { fileId } = useLocalSearchParams<Params>()
+	const { fileId, incognito: localIncognito } = useLocalSearchParams<Params>()
+
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+	const incognito = disableProgressTracking || localIncognito === 'true'
 
 	const {
 		data: [record],
@@ -92,6 +95,7 @@ export default function Screen() {
 			record={record}
 			bookmarks={bookmarkRecords || []}
 			annotations={annotationRecords || []}
+			incognito={incognito}
 		/>
 	)
 }
@@ -103,9 +107,10 @@ type ReaderProps = {
 	}
 	bookmarks: (typeof bookmarksTable.$inferSelect)[]
 	annotations: (typeof annotationsTable.$inferSelect)[]
+	incognito: boolean
 }
 
-function Reader({ record, bookmarks, annotations }: ReaderProps) {
+function Reader({ record, bookmarks, annotations, incognito }: ReaderProps) {
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
 	const unsyncedProgress = useMemo(() => record.read_progress, [record])
@@ -179,7 +184,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 
 	const timer = useReadingTimer({
 		databaseSeconds: book?.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !incognito,
 	})
 
 	const { mutate: resetElapsedSeconds } = useMutation({
@@ -251,6 +256,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 
 	const onPageChanged = useCallback(
 		(page: number) => {
+			if (incognito) return
 			updatePagedProgress({
 				bookId: book.id,
 				serverId: downloadedFile.serverId,
@@ -258,13 +264,14 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				totalPages: book.pages,
 			})
 		},
-		[book.id, book.pages, downloadedFile.serverId, updatePagedProgress],
+		[book.id, book.pages, downloadedFile.serverId, updatePagedProgress, incognito],
 	)
 
 	const resetTimer = useCallback(() => {
+		if (incognito) return
 		resetElapsedSeconds({ bookId: book.id, serverId: downloadedFile.serverId })
 		timer.clearTotalSeconds()
-	}, [book.id, downloadedFile.serverId, resetElapsedSeconds, timer])
+	}, [book.id, downloadedFile.serverId, resetElapsedSeconds, timer, incognito])
 
 	const { mutate: updateEbookProgress } = useMutation({
 		retry: (attempts) => attempts < 3,
@@ -308,6 +315,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 
 	const onLocationChanged = useCallback(
 		(locator: ReadiumLocator, percentage: number) => {
+			if (incognito) return
 			updateEbookProgress({
 				bookId: book.id,
 				serverId: downloadedFile.serverId,
@@ -315,11 +323,12 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				...locator,
 			})
 		},
-		[book.id, downloadedFile.serverId, updateEbookProgress],
+		[book.id, downloadedFile.serverId, updateEbookProgress, incognito],
 	)
 
 	const onReachedEnd = useCallback(
 		(locator: ReadiumLocator) => {
+			if (incognito) return
 			updateEbookProgress({
 				bookId: book.id,
 				serverId: downloadedFile.serverId,
@@ -327,7 +336,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				...locator,
 			})
 		},
-		[book.id, downloadedFile.serverId, updateEbookProgress],
+		[book.id, downloadedFile.serverId, updateEbookProgress, incognito],
 	)
 
 	const { createBookmark, deleteBookmark } = useLocalBookmarkMutations({
@@ -350,11 +359,9 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 	useEffect(
 		() => {
 			setIsReading(true)
-			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
 				setIsReading(false)
 				setShowControls(false)
-				NavigationBar.setVisibilityAsync('visible')
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -362,18 +369,19 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 	)
 
 	if (extension?.match(EBOOK_EXTENSION)) {
-		const initialLocator = book.readProgress?.locator || undefined
+		const initialLocator = incognito ? undefined : book.readProgress?.locator || undefined
 
 		return (
 			<ReadiumReader
 				book={book}
 				timer={timer}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
+				incognito={incognito}
 				onLocationChanged={onLocationChanged}
 				onReachedEnd={onReachedEnd}
-				onBookmark={createBookmark}
+				onBookmark={incognito ? undefined : createBookmark}
 				onDeleteBookmark={deleteBookmark}
-				onCreateAnnotation={createAnnotation}
+				onCreateAnnotation={incognito ? undefined : createAnnotation}
 				onUpdateAnnotation={updateAnnotation}
 				onDeleteAnnotation={deleteAnnotation}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
@@ -389,7 +397,8 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 
 		return (
 			<ImageBasedReader
-				initialPage={book.readProgress?.page || 1}
+				initialPage={incognito ? 1 : book.readProgress?.page || 1}
+				incognito={incognito}
 				book={book}
 				pageURL={pageURL}
 				onPageChanged={onPageChanged}
@@ -404,9 +413,10 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				book={book}
 				onPageChanged={onPageChanged}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
-				initialPage={book.readProgress?.page || 1}
+				initialPage={incognito ? 1 : book.readProgress?.page || 1}
 				timer={timer}
 				serverId={downloadedFile.serverId}
+				incognito={incognito}
 			/>
 		)
 	}

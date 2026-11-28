@@ -1,5 +1,4 @@
-import { Helmet } from 'react-helmet'
-
+import { AppTitle } from '@/AppTitle'
 import { SceneContainer } from '@/components/container'
 import { useTranslate } from '@/hooks/useTranslate'
 
@@ -10,9 +9,7 @@ export default function DesktopSettingsScene() {
 
 	return (
 		<SceneContainer variant="settings">
-			<Helmet>
-				<title>Stump | {t('settingsScene.app/desktop.helmet')}</title>
-			</Helmet>
+			<AppTitle title={t('settingsScene.app/desktop.helmet')} />
 
 			<OptionalFeaturesSection />
 		</SceneContainer>

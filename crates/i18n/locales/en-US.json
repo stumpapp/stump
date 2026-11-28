@@ -1,0 +1,49 @@
+{
+	"opds": {
+		"catalog": "Stump OPDS catalog",
+		"catalogV2": "Stump OPDS V2 Catalog",
+		"keepReading": {
+			"title": "Keep reading",
+			"description": "Continue reading your in progress books"
+		},
+		"allSeries": {
+			"title": "All series",
+			"description": "Browse by series"
+		},
+		"latestSeries": {
+			"title": "Latest series",
+			"description": "Browse latest series"
+		},
+		"allLibraries": {
+			"title": "All libraries",
+			"description": "Browse by library"
+		},
+		"allBooks": {
+			"title": "All books",
+			"description": "Browse all books"
+		},
+		"latestBooks": {
+			"title": "Latest books",
+			"description": "Browse latest books"
+		},
+		"searchResults": "Search Results",
+		"keepReadingFeed": "Keep Reading",
+		"allSeriesFeed": "All Series",
+		"latestSeriesFeed": "Latest Series",
+		"allBooksFeed": "All Books",
+		"latestBooksFeed": "Latest Books",
+		"libraries": "Libraries",
+		"series": "Series",
+		"books": "Books",
+		"currentlyReading": "Currently Reading",
+		"browseLibraries": "Browse Libraries",
+		"browseSeries": "Browse Series",
+		"browseBooks": "Browse Books",
+		"libraryBooksAll": "Library Books - All",
+		"libraryBooksLatest": "Library Books - Latest",
+		"librarySeries": "Library Series",
+		"seriesSuffix": "Series",
+		"seriesFallbackPrefix": "Series ",
+		"search": "Search"
+	}
+}

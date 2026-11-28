@@ -1,18 +1,18 @@
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use apalis::prelude::*;
-use axum::{extract::connect_info::Connected, serve::IncomingStream, Extension, Router};
+use axum::{Extension, Router, extract::connect_info::Connected, serve::IncomingStream};
 use stump_core::{
+	StumpCore,
 	config::{bootstrap_config_dir, logging::init_tracing},
 	job::dispatch_job,
-	StumpCore,
 };
 use tokio::net::TcpListener;
 use tokio::sync::Notify;
 use tower_http::{
 	compression::{
-		predicate::{DefaultPredicate, NotForContentType, Predicate},
 		CompressionLayer,
+		predicate::{DefaultPredicate, NotForContentType, Predicate},
 	},
 	trace::TraceLayer,
 };
@@ -25,7 +25,10 @@ use crate::{
 };
 use stump_core::config::StumpConfig;
 
-pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
+pub async fn run_http_server(mut config: StumpConfig) -> ServerResult<()> {
+	config
+		.normalize_base_path()
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 	let core = StumpCore::new(config.clone()).await;
 
 	// TODO: These need reorganizing, the core-specific initializations should just be
@@ -133,7 +136,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
+	tracing::info!(
+		"⚡️ Stump HTTP server starting on http://{}{}/",
+		addr,
+		config.base_path
+	);
 
 	// TODO: Experiment with higher concurrency, YEARS ago at this point (before enforcing WAL even)
 	// I experienced multi-writer issues but perhaps with SeaORM + WAL we can have parallel scans.

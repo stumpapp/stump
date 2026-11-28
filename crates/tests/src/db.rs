@@ -1,9 +1,9 @@
 use models::entity::{
-	age_restriction, api_key, book_club, book_club_book, book_club_discussion,
+	age_restriction, api_key, author, book_club, book_club_book, book_club_discussion,
 	book_club_member, kobo_sync_session, library, library_config, library_exclusion,
-	media, media_analysis, media_metadata, media_tag, reading_device, reading_session,
-	refresh_token, series, series_metadata, server_config, session, tag, user,
-	user_preferences,
+	media, media_analysis, media_author, media_metadata, media_tag, reading_device,
+	reading_session, refresh_token, series, series_author, series_metadata,
+	server_config, session, tag, user, user_preferences,
 };
 use sea_orm::{ConnectionTrait, Database, DbBackend, DbConn, DbErr, Schema};
 pub async fn test_database() -> DbConn {
@@ -23,6 +23,7 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 
 	let tables = [
 		schema.create_table_from_entity(api_key::Entity),
+		schema.create_table_from_entity(author::Entity),
 		schema.create_table_from_entity(media::Entity),
 		schema.create_table_from_entity(media_metadata::Entity),
 		schema.create_table_from_entity(media_analysis::Entity),
@@ -43,6 +44,8 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 		schema.create_table_from_entity(reading_device::Entity),
 		schema.create_table_from_entity(tag::Entity),
 		schema.create_table_from_entity(media_tag::Entity),
+		schema.create_table_from_entity(media_author::Entity),
+		schema.create_table_from_entity(series_author::Entity),
 		schema.create_table_from_entity(server_config::Entity),
 		schema.create_table_from_entity(refresh_token::Entity),
 		schema.create_table_from_entity(session::Entity),

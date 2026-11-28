@@ -1,8 +1,8 @@
 use crate::NotificationClient;
 
 use super::{
-	error::{NotificationError, NotificationResult},
 	NotificationEvent,
+	error::{NotificationError, NotificationResult},
 };
 
 pub struct TelegramClient {
@@ -36,10 +36,12 @@ impl NotificationClient for TelegramClient {
 		let chat_id = self.chat_id.clone();
 		let message = event.into_message();
 		let response = self
-		.client
-		.post(format!("https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={message}"))
-		.send()
-		.await?;
+			.client
+			.post(format!(
+				"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={message}"
+			))
+			.send()
+			.await?;
 		if !response.status().is_success() {
 			let errmsg = response
 				.text()

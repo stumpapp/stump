@@ -7,6 +7,7 @@ import {
 	Clock,
 	CopyMinus,
 	Ellipsis,
+	HatGlasses,
 	Heart,
 	Trash,
 } from 'lucide-react-native'
@@ -28,6 +29,7 @@ import {
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useReaderStore } from '~/stores'
 
 type Props = {
 	book: BookMenuFragment
@@ -68,6 +70,8 @@ export default function AndroidBookMenu({
 	const isPreviouslyCompleted = !!book.readHistory?.length
 	const isUntouched = !isReading && !isPreviouslyCompleted
 
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -94,6 +98,14 @@ export default function AndroidBookMenu({
 						})}
 					/>
 				</DropdownMenuItem>
+				{!disableProgressTracking && (
+					<DropdownMenuItem
+						onPress={() => router.push(`/stump/${serverId}/books/${book.id}/read?incognito=true`)}
+					>
+						<Text className="text-lg">{translate('shared.bookActions.readIncognito')}</Text>
+						<Icon as={HatGlasses} size={20} className="text-foreground-muted ml-auto" />
+					</DropdownMenuItem>
+				)}
 				<DropdownMenuSeparator variant="group" />
 
 				<DropdownMenuGroup>
@@ -131,7 +143,7 @@ export default function AndroidBookMenu({
 						onPress={() =>
 							router.push({
 								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/stump/${book.id}/libraries/${book.library.id}`,
+								pathname: `/stump/${serverId}/libraries/${book.library.id}`,
 							})
 						}
 					>
@@ -142,22 +154,26 @@ export default function AndroidBookMenu({
 						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
 					</DropdownMenuItem>
 
-					<DropdownMenuSeparator />
+					{book.series && (
+						<>
+							<DropdownMenuSeparator />
 
-					<DropdownMenuItem
-						onPress={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/stump/${book.id}/series/${book.series.id}`,
-							})
-						}
-					>
-						<View>
-							<Text className="text-lg">Go to Series</Text>
-							<Text className="text-sm text-foreground-muted">{book.series.resolvedName}</Text>
-						</View>
-						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
-					</DropdownMenuItem>
+							<DropdownMenuItem
+								onPress={() =>
+									router.push({
+										// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
+										pathname: `/stump/${serverId}/series/${book.series?.id}`,
+									})
+								}
+							>
+								<View>
+									<Text className="text-lg">Go to Series</Text>
+									<Text className="text-sm text-foreground-muted">{book.series.resolvedName}</Text>
+								</View>
+								<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
+							</DropdownMenuItem>
+						</>
+					)}
 				</DropdownMenuGroup>
 
 				{!isUntouched && (

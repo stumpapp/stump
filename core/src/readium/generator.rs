@@ -6,8 +6,8 @@ use models::shared::readium::{
 	RWPMPositionBuilder, RWPMPositionLocationsBuilder, RWPMPositions,
 	RWPMPositionsBuilder, RWPManifest, RWPManifestBuilder,
 };
-use quick_xml::events::Event;
 use quick_xml::Reader;
+use quick_xml::events::Event;
 
 use super::error::ReadiumError;
 
@@ -823,18 +823,22 @@ mod tests {
 			.unwrap();
 		let manifest = RWPManifestBuilder::default()
 			.metadata(metadata)
-			.links(vec![RWPMLinkBuilder::default()
-				.href("/manifest.json")
-				.media_type("application/webpub+json")
-				.rel(vec!["self".to_string()])
-				.build()
-				.unwrap()])
-			.reading_order(vec![RWPMLinkBuilder::default()
-				.href("/chapter1.xhtml")
-				.media_type("application/xhtml+xml")
-				.title("Chapter 1")
-				.build()
-				.unwrap()])
+			.links(vec![
+				RWPMLinkBuilder::default()
+					.href("/manifest.json")
+					.media_type("application/webpub+json")
+					.rel(vec!["self".to_string()])
+					.build()
+					.unwrap(),
+			])
+			.reading_order(vec![
+				RWPMLinkBuilder::default()
+					.href("/chapter1.xhtml")
+					.media_type("application/xhtml+xml")
+					.title("Chapter 1")
+					.build()
+					.unwrap(),
+			])
 			.build()
 			.unwrap();
 

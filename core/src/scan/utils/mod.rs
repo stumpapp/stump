@@ -16,7 +16,7 @@ use walkdir::DirEntry;
 
 use crate::{error::CoreError, job::error::JobError};
 
-const MAX_INSERT_CHUNK_SIZE: usize = 250;
+pub(super) const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
 /// A type alias for the unordered stream of futures returned by concurernt builds of
 /// managed entities

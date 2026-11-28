@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import * as NavigationBar from 'expo-navigation-bar'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 
@@ -38,11 +37,15 @@ export default function Screen() {
 		progressionURL,
 		refetchProgression,
 	} = usePublicationContext()
+	const { incognito: localIncognito } = useLocalSearchParams<{ incognito?: string }>()
+
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const deviceId = useDeviceId()
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+	const incognito = disableProgressTracking || localIncognito === 'true'
 
 	const [id] = useState(() => identifier || hashFromURL(url))
 
@@ -85,13 +88,14 @@ export default function Screen() {
 
 	const timer = useReadingTimer({
 		databaseSeconds: record?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !incognito,
 	})
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
-	const currentPage = useMemo(() => {
+	const initialPage = useMemo(() => {
+		if (incognito) return 1
 		const extractedPosition = getProgressionPage(progression)
 		if (!extractedPosition) {
 			console.warn('Failed to extract progression page, defaulting to 1', {
@@ -100,7 +104,7 @@ export default function Screen() {
 			return 1
 		}
 		return extractedPosition
-	}, [progression])
+	}, [progression, incognito])
 
 	const queryClient = useQueryClient()
 	const lastPageRef = useRef<number | null>(null)
@@ -167,7 +171,7 @@ export default function Screen() {
 
 	const onPageChanged = useCallback(
 		(page: number) => {
-			if (!progressionURL || !deviceId) {
+			if (incognito || !progressionURL || !deviceId) {
 				return
 			}
 
@@ -192,13 +196,14 @@ export default function Screen() {
 
 			updateProgression({ url: progressionURL, input, page, bookId: id, serverId })
 		},
-		[progressionURL, deviceId, readingOrder, updateProgression, timer, id, serverId],
+		[progressionURL, deviceId, readingOrder, updateProgression, timer, id, serverId, incognito],
 	)
 
 	const resetTimer = useCallback(() => {
+		if (incognito) return
 		resetElapsedSeconds({ bookId: id, serverId: serverId })
 		timer.clearTotalSeconds()
-	}, [id, serverId, resetElapsedSeconds, timer])
+	}, [id, serverId, resetElapsedSeconds, timer, incognito])
 
 	useFocusEffect(
 		useCallback(() => {
@@ -235,10 +240,8 @@ export default function Screen() {
 
 	useEffect(
 		() => {
-			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
 				refetchProgression()
-				NavigationBar.setVisibilityAsync('visible')
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -250,7 +253,8 @@ export default function Screen() {
 	return (
 		<ImageBasedReader
 			serverId={serverId}
-			initialPage={currentPage}
+			initialPage={initialPage}
+			incognito={incognito}
 			book={book}
 			pageURL={(page: number) => getPageURL(readingOrder![page - 1]?.href || '')}
 			requestHeaders={requestHeaders}

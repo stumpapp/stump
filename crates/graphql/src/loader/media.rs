@@ -2,8 +2,8 @@ use async_graphql::dataloader::Loader;
 use models::entity::media;
 use models::entity::user;
 use models::entity::user::AuthUser;
-use sea_orm::prelude::*;
 use sea_orm::DatabaseConnection;
+use sea_orm::prelude::*;
 use std::collections::HashSet;
 use std::{collections::HashMap, sync::Arc};
 

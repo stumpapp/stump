@@ -132,8 +132,7 @@
         "label": "Czytane",
         "preferNativePdf": "Preferuj natywny PDF",
         "preferMinimalReader": "Preferuj minimalny czytnik",
-        "disableDismissGesture": "Wyłącz gest odrzucania",
-        "incognitoReading": "Czytanie w trybie prywatnym"
+        "disableDismissGesture": "Wyłącz gest odrzucania"
       },
       "stump": {
         "description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",

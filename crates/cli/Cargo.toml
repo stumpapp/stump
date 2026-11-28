@@ -12,11 +12,13 @@ stump_core = { path = "../../core" }
 models = { path = "../models" }
 migrations = { path = "../migrations" }
 
-sea-orm = { workspace = true }
-tokio = { workspace = true }
 bcrypt = { workspace = true }
-thiserror = { workspace = true }
+chrono.workspace = true
 clap.workspace = true
+sea-orm = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+uuid.workspace = true
 
 dialoguer = "0.11.0"
 indicatif = "0.17.8"

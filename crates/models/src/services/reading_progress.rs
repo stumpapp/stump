@@ -1,8 +1,8 @@
 use chrono::Utc;
 use sea_orm::{
-	prelude::Decimal, sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait,
-	ConnectionTrait, EntityTrait, ExprTrait, IntoActiveModel, QueryFilter, QueryOrder,
-	QuerySelect,
+	ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait, EntityTrait,
+	ExprTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, prelude::Decimal,
+	sea_query::Expr,
 };
 
 use crate::{

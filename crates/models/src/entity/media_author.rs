@@ -2,7 +2,7 @@ use crate::{
 	entity::{author, media},
 	shared::enums::AuthorRole,
 };
-use sea_orm::{prelude::*, ActiveValue};
+use sea_orm::{ActiveValue, prelude::*};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]

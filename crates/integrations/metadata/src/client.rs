@@ -1,7 +1,7 @@
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::{
-	policies::ExponentialBackoff, RetryTransientMiddleware, Retryable, RetryableStrategy,
+	RetryTransientMiddleware, Retryable, RetryableStrategy, policies::ExponentialBackoff,
 };
 
 const DEFAULT_MAX_RETRIES: u32 = 3;

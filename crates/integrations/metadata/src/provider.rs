@@ -2,12 +2,12 @@ use async_graphql::SimpleObject;
 use async_trait::async_trait;
 
 use crate::{
+	MatchScorer,
 	error::MetadataProviderError,
 	types::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchOutcome, SearchQuery,
 	},
-	MatchScorer,
 };
 
 #[derive(SimpleObject)]

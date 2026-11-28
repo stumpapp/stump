@@ -1,28 +1,34 @@
 use std::sync::Arc;
 
 use axum::{
-	extract::{Query, State},
-	response::Redirect,
-	routing::get,
 	Extension, Json, Router,
+	extract::{Query, State},
+	http::{
+		HeaderMap, HeaderValue,
+		header::{CACHE_CONTROL, COOKIE, SET_COOKIE},
+	},
+	response::{IntoResponse, Redirect, Response},
+	routing::get,
 };
+use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use chrono::Utc;
 use models::entity::{server_config, user};
 use models::services::user::create_user_with_preferences;
 use sea_orm::{
-	entity::prelude::DateTimeWithTimeZone, ColumnTrait, EntityTrait, PaginatorTrait,
-	QueryFilter, Set,
+	ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, Set,
+	entity::prelude::DateTimeWithTimeZone,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::image::thumbnail::generate_image_metadata_from_bytes;
 use tower_sessions::Session;
 
-use openidconnect::PkceCodeChallenge;
+use openidconnect::{Nonce, PkceCodeChallenge, PkceCodeVerifier};
+use uuid::Uuid;
 
 use crate::{
 	config::{
-		jwt::{create_jwt_auth, JwtTokenPair},
-		oidc::{exchange_code_for_claims, get_oidc_authorize_url, OidcProvider},
+		jwt::create_jwt_auth,
+		oidc::{OidcProvider, exchange_code_for_claims, get_oidc_authorize_url},
 		session::SESSION_USER_KEY,
 		state::AppState,
 	},
@@ -32,6 +38,12 @@ use crate::{
 	utils::http::download_image,
 };
 
+const OIDC_STATE_COOKIE_NAME: &str = "stump_oidc_transaction";
+const OIDC_STATE_COOKIE_SECURE_NAME: &str = "__Host-stump_oidc_transaction";
+// ^ https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie_prefixes
+const OIDC_STATE_COOKIE_PATH: &str = "/api/v2/auth/oidc";
+const OIDC_STATE_TTL_SECONDS: u32 = 300;
+
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new().nest(
 		"/auth/oidc",
@@ -40,6 +52,14 @@ pub(crate) fn mount() -> Router<AppState> {
 			.route("/authorize", get(authorize))
 			.route("/callback", get(callback)),
 	)
+}
+
+fn cookie_name(secure: bool) -> &'static str {
+	if secure {
+		OIDC_STATE_COOKIE_SECURE_NAME
+	} else {
+		OIDC_STATE_COOKIE_NAME
+	}
 }
 
 #[derive(Debug, Serialize)]
@@ -86,11 +106,12 @@ pub struct AuthorizeQuery {
 
 /// The OIDC state parameter passed through the authorization flow.
 /// Contains both the original query params and the PKCE code verifier.
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 struct OidcState {
-	#[serde(flatten)]
+	state: String,
 	query: AuthorizeQuery,
 	pkce_verifier: String,
+	nonce: String,
 }
 
 /// Initiate OIDC authorization
@@ -101,7 +122,10 @@ async fn authorize(
 	Extension(oidc_provider): Extension<Option<Arc<OidcProvider>>>,
 	HostExtractor(service): HostExtractor,
 	Query(query): Query<AuthorizeQuery>,
-) -> Result<Redirect, APIError> {
+) -> Result<Response, APIError> {
+	let secure_cookie = service.scheme.eq_ignore_ascii_case("https");
+	validate_redirect_target(&query)?;
+
 	let config = &*ctx.config;
 
 	let oidc_config = config
@@ -121,34 +145,35 @@ async fn authorize(
 	let client = oidc_provider.create_client(&frontend_url)?;
 
 	let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
-
-	let generate_token = query.generate_token;
-	let state = OidcState {
-		query,
-		pkce_verifier: pkce_verifier.secret().to_string(),
-	};
-
-	let state_value = serde_json::to_string(&state).map_err(|error| {
-		tracing::error!(?error, "Failed to encode state parameter");
-		APIError::InternalServerError("Failed to encode state".to_string())
-	})?;
-
-	let pkce_challenge_code = pkce_challenge.as_str().to_owned();
-	let redirect_to = get_oidc_authorize_url(
+	let state_value = Uuid::new_v4().to_string();
+	let (redirect_to, nonce) = get_oidc_authorize_url(
 		&client,
 		&oidc_config.scopes,
 		&state_value,
 		Some(pkce_challenge),
 	);
+	let state = OidcState {
+		state: state_value,
+		query,
+		pkce_verifier: pkce_verifier.secret().to_string(),
+		nonce: nonce.secret().to_string(),
+	};
+	let state_cookie = encode_state_cookie(&state)?;
 
-	tracing::debug!(
-		%generate_token,
-		pkce_challenge_code,
-		?redirect_to,
-		"Redirecting to OIDC provider",
-	);
+	tracing::debug!(?redirect_to, "Redirecting to OIDC provider");
 
-	Ok(Redirect::temporary(&redirect_to))
+	let mut response = Redirect::temporary(&redirect_to).into_response();
+	let cookie = oidc_state_cookie(
+		&state_cookie,
+		secure_cookie,
+		OIDC_STATE_TTL_SECONDS,
+		&config.base_path,
+	)?;
+	response.headers_mut().insert(SET_COOKIE, cookie);
+	response
+		.headers_mut()
+		.insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
+	Ok(response)
 }
 
 #[derive(Debug, Deserialize)]
@@ -157,25 +182,96 @@ pub struct CallbackQuery {
 	pub state: Option<String>,
 }
 
-#[derive(Debug)]
-pub enum OidcCallbackResponse {
-	Token(JwtTokenPair),
-	Redirect(Redirect),
+fn oidc_state_cookie(
+	value: &str,
+	secure: bool,
+	max_age: u32,
+	base_path: &str,
+) -> Result<HeaderValue, APIError> {
+	let name = cookie_name(secure);
+	let (path, secure_attribute) = if secure {
+		("/".to_string(), "; Secure")
+	} else {
+		(format!("{base_path}{OIDC_STATE_COOKIE_PATH}"), "")
+	};
+	let cookie = format!(
+		"{}={}; Path={}; Max-Age={}; HttpOnly; SameSite=Lax{}",
+		name, value, path, max_age, secure_attribute
+	);
+	HeaderValue::from_bytes(cookie.as_bytes()).map_err(|error| {
+		tracing::error!(?error, "Failed to build OIDC state cookie");
+		APIError::InternalServerError("Failed to build OIDC state cookie".to_string())
+	})
 }
 
-impl axum::response::IntoResponse for OidcCallbackResponse {
-	fn into_response(self) -> axum::response::Response {
-		match self {
-			OidcCallbackResponse::Token(token) => Json(token).into_response(),
-			OidcCallbackResponse::Redirect(redirect) => redirect.into_response(),
+fn with_oidc_callback_headers(
+	response: impl IntoResponse,
+	secure_cookie: bool,
+	base_path: &str,
+) -> Result<Response, APIError> {
+	let mut response = response.into_response();
+	response.headers_mut().insert(
+		SET_COOKIE,
+		// clears the cookie
+		oidc_state_cookie("", secure_cookie, 0, base_path)?,
+	);
+	response
+		.headers_mut()
+		.insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
+	Ok(response)
+}
+
+fn encode_state_cookie(state: &OidcState) -> Result<String, APIError> {
+	let bytes = serde_json::to_vec(state).map_err(|error| {
+		tracing::error!(?error, "Failed to encode OIDC state cookie");
+		APIError::InternalServerError("Failed to encode OIDC state".to_string())
+	})?;
+	Ok(URL_SAFE_NO_PAD.encode(bytes))
+}
+
+fn parse_state(
+	state: Option<&str>,
+	headers: &HeaderMap,
+	secure: bool,
+) -> Result<OidcState, APIError> {
+	let state = state.ok_or(APIError::Unauthorized)?;
+	let cookie_header = headers
+		.get(COOKIE)
+		.and_then(|value| value.to_str().ok())
+		.ok_or(APIError::Unauthorized)?;
+	let cookie_name = cookie_name(secure);
+	let cookie_value = cookie_header
+		.split(';')
+		.filter_map(|cookie| cookie.trim().split_once('='))
+		.find_map(|(name, value)| (name == cookie_name).then_some(value))
+		.ok_or(APIError::Unauthorized)?;
+	let bytes = URL_SAFE_NO_PAD
+		.decode(cookie_value)
+		.map_err(|_| APIError::Unauthorized)?;
+	let oidc_state: OidcState =
+		serde_json::from_slice(&bytes).map_err(|_| APIError::Unauthorized)?;
+
+	if oidc_state.state != state {
+		return Err(APIError::Unauthorized);
+	}
+
+	Ok(oidc_state)
+}
+
+fn validate_redirect_target(query: &AuthorizeQuery) -> Result<(), APIError> {
+	if let Some(redirect_uri) = query.redirect_uri.as_deref() {
+		if !query.generate_token || !is_allowed_mobile_redirect(redirect_uri) {
+			return Err(APIError::BadRequest(
+				"Unsupported OIDC mobile redirect URI".to_string(),
+			));
 		}
 	}
+
+	Ok(())
 }
 
-fn parse_state(state: Option<&str>) -> OidcState {
-	state
-		.and_then(|s| serde_json::from_str::<OidcState>(s).ok())
-		.unwrap_or_default()
+fn is_allowed_mobile_redirect(uri: &str) -> bool {
+	uri == "stump://"
 }
 
 /// The handler for the OIDC callback (code exchange + user creation/login)
@@ -185,12 +281,15 @@ async fn callback(
 	Extension(oidc_provider): Extension<Option<Arc<OidcProvider>>>,
 	HostExtractor(service): HostExtractor,
 	session: Session,
+	headers: HeaderMap,
 	Query(query): Query<CallbackQuery>,
-) -> Result<OidcCallbackResponse, APIError> {
+) -> Result<Response, APIError> {
+	let secure_cookie = service.scheme.eq_ignore_ascii_case("https");
 	let config = &*ctx.config;
 
-	let oidc_state = parse_state(query.state.as_deref());
+	let oidc_state = parse_state(query.state.as_deref(), &headers, secure_cookie)?;
 	let generate_token = oidc_state.query.generate_token;
+	validate_redirect_target(&oidc_state.query).map_err(|_| APIError::Unauthorized)?;
 
 	let oidc_config = config
 		.oidc
@@ -212,15 +311,16 @@ async fn callback(
 	);
 
 	let extra_audiences = oidc_config.extra_audiences.clone();
-	let pkce_verifier = (!oidc_state.pkce_verifier.is_empty())
-		.then(|| openidconnect::PkceCodeVerifier::new(oidc_state.pkce_verifier));
+	let pkce_verifier = PkceCodeVerifier::new(oidc_state.pkce_verifier);
+	let expected_nonce = Nonce::new(oidc_state.nonce);
 
 	let claims = exchange_code_for_claims(
 		&http_client,
 		&client,
 		query.code,
 		extra_audiences,
-		pkce_verifier,
+		Some(pkce_verifier),
+		expected_nonce,
 	)
 	.await
 	.map_err(|e| {
@@ -377,11 +477,13 @@ async fn callback(
 				token.expires_at
 			);
 			tracing::debug!(user_id = %user_model.id, "Redirecting mobile app with tokens");
-			Ok(OidcCallbackResponse::Redirect(Redirect::temporary(
-				&redirect_url,
-			)))
+			with_oidc_callback_headers(
+				Redirect::temporary(&redirect_url),
+				secure_cookie,
+				&config.base_path,
+			)
 		} else {
-			Ok(OidcCallbackResponse::Token(token))
+			with_oidc_callback_headers(Json(token), secure_cookie, &config.base_path)
 		}
 	} else {
 		session
@@ -392,7 +494,11 @@ async fn callback(
 				APIError::InternalServerError("Session error".to_string())
 			})?;
 		tracing::debug!(user_id = %user_model.id, "Created session for OIDC user");
-		Ok(OidcCallbackResponse::Redirect(Redirect::temporary("/")))
+		with_oidc_callback_headers(
+			Redirect::temporary(&format!("{}/", config.base_path)),
+			secure_cookie,
+			&config.base_path,
+		)
 	}
 }
 
@@ -441,11 +547,81 @@ async fn get_frontend_url(
 		APIError::InternalServerError("Missing server config".to_string()),
 	)?;
 
-	Ok(config
+	let public_url = config
 		.public_url
 		.map(|url| url.trim().trim_end_matches('/').to_string())
-		.filter(|url| !url.is_empty())
-		.unwrap_or_else(|| service.url()))
+		.filter(|url| !url.is_empty());
+
+	Ok(match public_url {
+		Some(url) => append_base_path(&url, &service.base_path),
+		None => service.url(),
+	})
+}
+
+/// Appends a `base_path` to the path component of a given URL.
+///
+/// This function parses the path segment of the URL and handles the following cases:
+/// - Returns the original URL unchanged if `base_path` is empty.
+/// - Prevents duplicate appending if the URL path already equals `base_path` or starts with `base_path/`.
+/// - Trims trailing slashes at the join point to avoid double slashes (`//`), while preserving query parameters (`?`) and fragments (`#`).
+///
+/// # Arguments
+///
+/// * `url` - The original full URL string (e.g., `"https://example.com"`).
+/// * `base_path` - The base path to append, expected to start with `/` (e.g., `"/api"`).
+///
+/// # Returns
+///
+/// A new `String` containing the URL with `base_path` appended.
+///
+/// # Examples
+///
+/// ```ignore
+/// // 1. Appends path while preserving query parameters and fragments
+/// assert_eq!(
+///     append_base_path("https://example.com", "/api"),
+///     "https://example.com"
+/// );
+///
+/// // 2. Handles trailing slashes cleanly without creating double slashes
+/// assert_eq!(
+///     append_base_path("https://example.com", "/api"),
+///     "https://example.comapi"
+/// );
+///
+/// // 3. Idempotency: avoids duplicating base_path if already present
+/// assert_eq!(
+///     append_base_path("https://example.comapi/users", "/api"),
+///     "https://example.comapi/users"
+/// );
+/// ```
+fn append_base_path(url: &str, base_path: &str) -> String {
+	if base_path.is_empty() {
+		return url.to_string();
+	}
+
+	let authority_end = url.find("://").and_then(|scheme_end| {
+		url[scheme_end + 3..].find('/').map(|i| scheme_end + 3 + i)
+	});
+	let path_start = authority_end.unwrap_or(url.len());
+	let path_end = url[path_start..]
+		.find(['?', '#'])
+		.map(|i| path_start + i)
+		.unwrap_or(url.len());
+	let path = &url[path_start..path_end];
+
+	if path == base_path
+		|| path.starts_with(&format!("{}/", base_path.trim_end_matches('/')))
+	{
+		url.to_string()
+	} else {
+		format!(
+			"{}{}{}",
+			url[..path_end].trim_end_matches('/'),
+			base_path,
+			&url[path_end..]
+		)
+	}
 }
 // ^ the url resolution is opposite to what i do elsewhere, e.g. for epub resource
 // fetching. i _think_ this is correct here tho since the redirects is handled
@@ -457,6 +633,103 @@ mod tests {
 	use sea_orm::ActiveModelTrait;
 
 	use super::*;
+
+	#[test]
+	fn test_mobile_redirect_only_accepts_app_callback_uri() {
+		assert!(is_allowed_mobile_redirect("stump://"));
+		assert!(
+			validate_redirect_target(&AuthorizeQuery {
+				generate_token: true,
+				redirect_uri: Some("stump://".to_string()),
+			})
+			.is_ok()
+		);
+
+		for uri in [
+			"https://biz.example/foo",
+			"http://127.0.0.1:9000/foo",
+			"stump://biz.example/foo",
+			"stump:///foo",
+			"//biz.example/foo",
+		] {
+			assert!(
+				!is_allowed_mobile_redirect(uri),
+				"should not have accepted: {uri}"
+			);
+			assert!(
+				validate_redirect_target(&AuthorizeQuery {
+					generate_token: true,
+					redirect_uri: Some(uri.to_string()),
+				})
+				.is_err()
+			);
+		}
+	}
+
+	#[test]
+	fn test_callback_state_requires_matching_state_cookie() {
+		let state = OidcState {
+			state: "state-id".to_string(),
+			query: AuthorizeQuery {
+				generate_token: true,
+				redirect_uri: Some("stump://".to_string()),
+			},
+			pkce_verifier: "pkce-verifier".to_string(),
+			nonce: "expected-nonce".to_string(),
+		};
+		let cookie_value = encode_state_cookie(&state).unwrap();
+		let mut headers = HeaderMap::new();
+		headers.insert(
+			COOKIE,
+			HeaderValue::from_bytes(
+				format!("{OIDC_STATE_COOKIE_NAME}={cookie_value}").as_bytes(),
+			)
+			.unwrap(),
+		);
+
+		let parsed = parse_state(Some("state-id"), &headers, false).unwrap();
+		assert_eq!(parsed.state, "state-id");
+		assert_eq!(parsed.pkce_verifier, "pkce-verifier");
+		assert_eq!(parsed.nonce, "expected-nonce");
+		assert!(parse_state(Some("another-state"), &headers, false).is_err());
+		assert!(parse_state(None, &headers, false).is_err());
+	}
+
+	#[test]
+	fn test_callback_state_rejects_missing_or_malformed_cookie() {
+		let headers = HeaderMap::new();
+		assert!(parse_state(Some("state-id"), &headers, false).is_err());
+
+		let mut headers = HeaderMap::new();
+		headers.insert(
+			COOKIE,
+			HeaderValue::from_static("stump_oidc_transaction=not-valid-base64!"),
+		);
+		assert!(parse_state(Some("state-id"), &headers, false).is_err());
+	}
+
+	#[test]
+	fn test_https_state_cookie_uses_host_prefix_and_secure_attributes() {
+		let cookie =
+			oidc_state_cookie("payload", true, OIDC_STATE_TTL_SECONDS, "/stump").unwrap();
+		let cookie = cookie.to_str().unwrap();
+		assert!(cookie.starts_with("__Host-stump_oidc_transaction=payload; Path=/;"));
+		assert!(cookie.contains("; HttpOnly; SameSite=Lax; Secure"));
+		assert!(!cookie.contains("Domain="));
+	}
+
+	#[test]
+	fn test_http_state_cookie_path_includes_base_path() {
+		let cookie =
+			oidc_state_cookie("payload", false, OIDC_STATE_TTL_SECONDS, "/stump")
+				.unwrap();
+		assert!(
+			cookie
+				.to_str()
+				.unwrap()
+				.contains("; Path=/stump/api/v2/auth/oidc;")
+		);
+	}
 
 	async fn setup_db(public_url: Option<&str>) -> sea_orm::DatabaseConnection {
 		let db = test_database().await;
@@ -476,7 +749,39 @@ mod tests {
 		HostDetails {
 			host: "stump.example.com".to_string(),
 			scheme: "https".to_string(),
+			base_path: String::new(),
 		}
+	}
+
+	#[tokio::test]
+	async fn test_unset_public_url_includes_subpath() {
+		let db = setup_db(None).await;
+		let mut service = service();
+		service.base_path = "/stump".to_string();
+		assert_eq!(
+			get_frontend_url(&db, service).await.unwrap(),
+			"https://stump.example.com/stump"
+		);
+	}
+
+	#[test]
+	fn public_url_includes_base_path_without_duplicating_it() {
+		assert_eq!(
+			append_base_path("https://stump.example.com", "/stump"),
+			"https://stump.example.com/stump"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com/proxy", "/stump"),
+			"https://stump.example.com/proxy/stump"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com/stump/", "/stump"),
+			"https://stump.example.com/stump/"
+		);
+		assert_eq!(
+			append_base_path("https://stump.example.com", ""),
+			"https://stump.example.com"
+		);
 	}
 
 	#[tokio::test]

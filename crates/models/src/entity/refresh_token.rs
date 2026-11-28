@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::{entity::prelude::*, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*};
 
 use super::user;
 

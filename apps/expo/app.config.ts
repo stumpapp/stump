@@ -3,6 +3,7 @@ import 'tsx/cjs'
 import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+	const androidPackage = process.env.STUMP_ANDROID_PACKAGE ?? 'com.stumpapp.stump'
 	const initialConfig: ExpoConfig = {
 		...config,
 		name: 'Stump',
@@ -27,12 +28,24 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			},
 			infoPlist: {
 				ITSAppUsesNonExemptEncryption: false,
+				UIViewControllerBasedStatusBarAppearance: true,
 				NSAppTransportSecurity: {
 					NSAllowsArbitraryLoads: true,
 				},
 				UISupportsDocumentBrowser: true,
 				UIFileSharingEnabled: true,
 				LSSupportsOpeningDocumentsInPlace: true,
+				UTImportedTypeDeclarations: [
+					{
+						UTTypeIdentifier: 'com.stumpapp.cbz',
+						UTTypeDescription: 'Comic Book Archive',
+						UTTypeConformsTo: ['public.zip-archive'],
+						UTTypeTagSpecification: {
+							'public.filename-extension': ['cbz'],
+							'public.mime-type': ['application/vnd.comicbook+zip', 'application/x-cbz'],
+						},
+					},
+				],
 				CFBundleDocumentTypes: [
 					{
 						CFBundleTypeName: 'EPUB Document',
@@ -41,12 +54,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					},
 					{
 						CFBundleTypeName: 'Comic Book Archive (CBZ)',
-						LSItemContentTypes: ['public.zip-archive'],
+						LSItemContentTypes: ['com.stumpapp.cbz'],
 						LSHandlerRank: 'Alternate',
 					},
 					{
 						CFBundleTypeName: 'PDF Document',
 						LSItemContentTypes: ['com.adobe.pdf'],
+						LSHandlerRank: 'Alternate',
+					},
+					{
+						CFBundleTypeName: 'ZIP Archive',
+						LSItemContentTypes: ['public.zip-archive'],
 						LSHandlerRank: 'Alternate',
 					},
 				],
@@ -58,7 +76,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				monochromeImage: './assets/images/android-monochrome.png',
 				backgroundColor: '#ffffff',
 			},
-			package: 'com.stumpapp.stump',
+			package: androidPackage,
 			permissions: ['WRITE_SETTINGS'],
 			intentFilters: [
 				{
@@ -73,6 +91,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						{ mimeType: 'application/x-cbz', scheme: 'file' },
 						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'content' },
 						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'file' },
+						{ mimeType: 'application/zip', scheme: 'content' },
+						{ mimeType: 'application/zip', scheme: 'file' },
+						{ mimeType: 'application/x-zip-compressed', scheme: 'content' },
+						{ mimeType: 'application/x-zip-compressed', scheme: 'file' },
 					],
 				},
 				{
@@ -82,16 +104,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						{ mimeType: '*/*', pathPattern: '.*\\.epub', scheme: 'content' },
 						{ mimeType: '*/*', pathPattern: '.*\\.cbz', scheme: 'content' },
 						{ mimeType: '*/*', pathPattern: '.*\\.pdf', scheme: 'content' },
+						{ mimeType: '*/*', pathPattern: '.*\\.zip', scheme: 'content' },
 					],
 				},
 			],
 		},
-		// TODO(android): this was removed at some point in expo, i think
-		// expo-navigation-bar is the route forward but do not have time
-		// to sort it out
-		// androidNavigationBar: {
-		// 	visible: 'immersive',
-		// },
 		web: {
 			bundler: 'metro',
 			output: 'static',
@@ -195,6 +212,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						gradleProperties: {
 							'org.gradle.jvmargs':
 								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
+							edgeToEdgeEnabled: 'true',
 						},
 						// Note: For i18next and date-fns intlFormat
 						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
@@ -208,6 +226,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						// and the widgets, with no way for me to specify a target, and that causes
 						// build failures
 					},
+				},
+			],
+			[
+				'expo-navigation-bar',
+				{
+					// https://docs.expo.dev/versions/latest/sdk/navigation-bar/#configurable-properties
+					enforceContrast: false,
 				},
 			],
 			[
@@ -230,16 +255,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					organization: 'stumpapp',
 				},
 			],
-			// TODO(expo-54): Figure out if this is still needed
-			// [
-			// 	'react-native-edge-to-edge',
-			// 	{
-			// 		android: {
-			// 			parentTheme: 'Default',
-			// 			enforceNavigationBarContrast: false,
-			// 		},
-			// 	},
-			// ],
 		],
 		owner: 'stumpapp',
 		experiments: {

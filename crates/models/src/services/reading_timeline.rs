@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use sea_orm::{prelude::*, DatabaseConnection, Order, QueryOrder};
+use sea_orm::{DatabaseConnection, Order, QueryOrder, prelude::*};
 
 use crate::entity::{bookmark, media_annotation, reading_session};
 

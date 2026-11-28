@@ -1,8 +1,8 @@
 use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{
-	prelude::{async_trait::async_trait, *},
 	ActiveValue, DeriveEntityModel,
+	prelude::{async_trait::async_trait, *},
 };
 use serde_json::Value as JsonValue;
 

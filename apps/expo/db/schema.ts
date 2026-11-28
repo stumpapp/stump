@@ -17,6 +17,7 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	bookName: text('book_name'),
 	bookDescription: text('book_description'),
 	bookMetadata: text('book_metadata', { mode: 'json' }),
+	libraryId: text('library_id'),
 	seriesId: text('series_id'),
 	pages: integer('pages').default(-1), // Number of pages (for comic books)
 	// TODO: Store for PDF, too?

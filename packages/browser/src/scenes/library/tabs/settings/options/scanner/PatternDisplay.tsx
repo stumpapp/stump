@@ -1,5 +1,5 @@
 import { Badge, Text, ToolTip } from '@stump/components'
-import { useFragment } from '@stump/graphql'
+import { OrganizationMode, useFragment } from '@stump/graphql'
 
 import { useTranslate } from '@/hooks/useTranslate'
 import { useLibraryContext } from '@/scenes/library/context'
@@ -14,15 +14,24 @@ export default function PatternDisplay() {
 
 	const { library } = useLibraryContext()
 	const {
-		config: { libraryPattern },
+		config: { libraryPattern, organizationMode },
 	} = useFragment(LibrarySettingsConfig, library)
+
+	const isMetadata = organizationMode === OrganizationMode.Metadata
 
 	return (
 		<>
 			<div className="flex-1" />
-			<ToolTip content={t(getKey(`${libraryPattern}.description`))} align="end">
+			<ToolTip
+				content={
+					isMetadata
+						? t(METADATA_MODE_KEY('description'))
+						: t(getKey(`${libraryPattern}.description`))
+				}
+				align="end"
+			>
 				<Badge size="md" variant="secondary">
-					{t(getKey(`${libraryPattern}.label`))}
+					{isMetadata ? t(METADATA_MODE_KEY('label')) : t(getKey(`${libraryPattern}.label`))}
 				</Badge>
 			</ToolTip>
 		</>
@@ -45,3 +54,5 @@ export default function PatternDisplay() {
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.organization.filesystemPattern'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+const METADATA_MODE_KEY = (key: string) =>
+	`createOrUpdateLibraryForm.fields.organization.mode.metadata.${key}`

@@ -2,7 +2,6 @@ import { useSDK } from '@stump/client'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo } from 'react'
 
@@ -19,12 +18,16 @@ import { useBookPreferences } from '~/stores/reader'
 type Params = Omit<OPDSLegacyStreamingData, 'pageCount' | 'serverLastRead'> & {
 	pageCount: string // conform to Route params, reqs being a string
 	serverLastRead?: string
+	incognito?: string
 }
 
 export default function Screen() {
 	useKeepAwake()
 
 	const params = useLocalSearchParams<Params>()
+
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
+	const incognito = disableProgressTracking || params.incognito === 'true'
 
 	const contextValue = useMemo(
 		() => ({
@@ -100,16 +103,16 @@ export default function Screen() {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
-	const initialPage = contextValue.serverLastRead ?? 1
+	const initialPage = incognito ? 1 : (contextValue.serverLastRead ?? 1)
 
 	const timer = useReadingTimer({
 		databaseSeconds: record?.read_progress?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !incognito,
 	})
 
 	const onPageChanged = useCallback(
 		async (pageNumber: number) => {
-			if (isLoadingRecord || !record) return
+			if (incognito || isLoadingRecord || !record) return
 			timer.popDeltaSeconds()
 			const totalSeconds = timer.getTotalSeconds()
 
@@ -132,10 +135,11 @@ export default function Screen() {
 					},
 				})
 		},
-		[isLoadingRecord, record, timer],
+		[isLoadingRecord, record, timer, incognito],
 	)
 
 	const resetTimer = useCallback(() => {
+		if (incognito) return
 		db.insert(readProgress)
 			.values({
 				bookId: book.id,
@@ -151,7 +155,7 @@ export default function Screen() {
 				},
 			})
 		timer.clearTotalSeconds()
-	}, [book.id, serverId, timer])
+	}, [book.id, serverId, timer, incognito])
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -177,17 +181,11 @@ export default function Screen() {
 		[sdk],
 	)
 
-	useEffect(() => {
-		NavigationBar.setVisibilityAsync('hidden')
-		return () => {
-			NavigationBar.setVisibilityAsync('visible')
-		}
-	}, [])
-
 	return (
 		<ImageBasedReader
 			serverId={serverId}
 			initialPage={initialPage}
+			incognito={incognito}
 			book={book}
 			pageURL={getStreamURLForPage}
 			requestHeaders={requestHeaders}

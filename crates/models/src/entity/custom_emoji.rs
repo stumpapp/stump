@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
+use sea_orm::{ActiveValue, entity::prelude::*, prelude::async_trait::async_trait};
 
 use super::{book_club_discussion_message_reaction, user};
 

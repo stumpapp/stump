@@ -4,8 +4,8 @@ use models::{
 	shared::ordering::{OrderDirection, OrderingField},
 };
 use sea_orm::{
-	sea_query::{DynIden, Expr, ExprTrait, NullOrdering, SelectStatement, SimpleExpr},
 	ColumnTrait, Condition, ModelTrait, Order, QueryOrder, Value,
+	sea_query::{DynIden, Expr, ExprTrait, NullOrdering, SelectStatement, SimpleExpr},
 };
 
 #[derive(InputObject, Clone)]
@@ -140,6 +140,16 @@ macro_rules! order_spec {
 // new([(col,order)]) etc
 pub(crate) use order_spec;
 
+/// The spec for reading order of books within a series
+pub(crate) fn series_position_spec() -> OrderSpec {
+	order_spec![
+		(media_metadata::Column::Number, Order::Asc),
+		(media::Column::Name, Order::Asc),
+		(media::Column::Id, Order::Asc),
+	]
+	// ^ this Id addition is really just a tie breaker
+}
+
 // NOTE: this is, in part, a workaround for https://github.com/SeaQL/sea-orm/issues/2407
 //
 // also, i must be cursed because i sat here for way too long and could not think of a
@@ -265,17 +275,9 @@ fn value_is_null(value: &Value) -> bool {
 mod tests {
 	use super::*;
 	use ::tests::{db::test_database, fake_data};
-	use sea_orm::{prelude::*, QueryFilter};
+	use sea_orm::{QueryFilter, prelude::*};
 
 	type Row = media::ModelWithMetadata;
-
-	fn series_position_spec() -> OrderSpec {
-		order_spec![
-			(media_metadata::Column::Number, Order::Asc),
-			(media::Column::Name, Order::Asc),
-			(media::Column::Id, Order::Asc),
-		]
-	}
 
 	fn cursor_values(row: &Row) -> Vec<Value> {
 		vec![

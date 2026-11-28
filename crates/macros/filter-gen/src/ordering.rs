@@ -2,7 +2,7 @@ use heck::ToUpperCamelCase;
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::collections::HashMap;
-use syn::{parse2, spanned::Spanned, Error};
+use syn::{Error, parse2, spanned::Spanned};
 
 /// This macro generates an enum with a variant where every variant is a name of the field of the
 /// struct.

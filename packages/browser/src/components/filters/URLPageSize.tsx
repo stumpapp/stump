@@ -1,10 +1,11 @@
 import { Input, Text } from '@stump/components'
 import { useCallback, useEffect, useState } from 'react'
 
-import { useURLPageParams } from './useFilterScene'
+import { useFilterContext } from './context'
 
 export default function URLPageSize() {
-	const { pageSize, setPageSize } = useURLPageParams()
+	const { pagination, setPageSize } = useFilterContext()
+	const pageSize = pagination.pageSize ?? undefined
 	const [inputPageSize, setInputPageSize] = useState<number | undefined>(pageSize)
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

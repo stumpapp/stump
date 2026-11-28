@@ -1,6 +1,6 @@
 use crate::{
 	data::CoreContext,
-	filter::{log::LogFilterInput, IntoFilter},
+	filter::{IntoFilter, log::LogFilterInput},
 	guard::PermissionGuard,
 	object::log::LogDeleteOutput,
 };

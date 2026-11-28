@@ -1,4 +1,4 @@
-import { LibraryPattern } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
@@ -101,13 +101,22 @@ export default function LibraryReview() {
 
 			<ReviewSection stepIndex={1}>
 				<ReviewItem
-					label={t(getLabelKey('pattern'))}
+					label={t('createOrUpdateLibraryForm.fields.organization.mode.label')}
 					value={t(
-						state.libraryPattern === LibraryPattern.CollectionBased
-							? getPatternKey('COLLECTION_BASED')
-							: getPatternKey('SERIES_BASED'),
+						`createOrUpdateLibraryForm.fields.organization.mode.${state.organizationMode === OrganizationMode.Metadata ? 'metadata' : 'filesystem'}.label`,
 					)}
 				/>
+
+				{state.organizationMode !== OrganizationMode.Metadata && (
+					<ReviewItem
+						label={t(getLabelKey('pattern'))}
+						value={t(
+							state.libraryPattern === LibraryPattern.CollectionBased
+								? getPatternKey('COLLECTION_BASED')
+								: getPatternKey('SERIES_BASED'),
+						)}
+					/>
+				)}
 
 				<ReviewItem
 					label={t(getLabelKey('ignoreRules'))}

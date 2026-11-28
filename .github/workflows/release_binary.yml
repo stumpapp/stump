@@ -57,10 +57,14 @@ jobs:
       matrix:
         # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
         # Note: macos-15-intel is x86_64, available until Aug 2027. See https://github.com/actions/runner-images/issues/13045
-        os: [ubuntu-22.04, macos-15-intel, macos-latest, windows-latest]
+        # Note: ubuntu-22.04-arm is free and unlimited on public repositories.
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15-intel, macos-latest, windows-latest]
         include:
           - os: ubuntu-22.04
             artifact_name: linux-artifact
+            artifact_filename: stump_server
+          - os: ubuntu-22.04-arm
+            artifact_name: linux-arm-artifact
             artifact_filename: stump_server
           - os: macos-15-intel
             artifact_name: macos-intel-artifact
@@ -112,6 +116,12 @@ jobs:
           name: linux-artifact
           path: StumpServer-linux
 
+      - name: Download artifact (Linux ARM)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: linux-arm-artifact
+          path: StumpServer-linux-arm
+
       - name: Download artifact (macOS Intel)
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
@@ -136,6 +146,7 @@ jobs:
       - name: Zip artifacts
         run: |
           cd StumpServer-linux && zip -r ../linux-build-results.zip * && cd ..
+          cd StumpServer-linux-arm && zip -r ../linux-arm-build-results.zip * && cd ..
           cd StumpServer-macos-intel && zip -r ../macos-intel-build-results.zip * && cd ..
           cd StumpServer-macos-arm && zip -r ../macos-arm-build-results.zip * && cd ..
           cd StumpServer-windows && zip -r ../windows-build-results.zip * && cd ..
@@ -148,6 +159,7 @@ jobs:
             --title "v$VERSION" \
             --generate-notes \
             linux-build-results.zip#StumpServer-$VERSION-linux-x86_64.zip \
+            linux-arm-build-results.zip#StumpServer-$VERSION-linux-arm64.zip \
             macos-intel-build-results.zip#StumpServer-$VERSION-macos-intel.zip \
             macos-arm-build-results.zip#StumpServer-$VERSION-macos-arm.zip \
             windows-build-results.zip#StumpServer-$VERSION-windows-x86_64.zip

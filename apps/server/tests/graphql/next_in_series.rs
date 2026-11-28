@@ -1,7 +1,7 @@
 use crate::common::{
+	TestApp,
 	fixtures::murderbot::{self, create_murderbot},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 use models::entity::{media, media_metadata, series};
 use sea_orm::{

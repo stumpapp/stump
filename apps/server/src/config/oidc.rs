@@ -1,4 +1,8 @@
 use openidconnect::{
+	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
+	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
+	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse,
+	TokenResponse,
 	core::{
 		CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreClient,
 		CoreErrorResponseType, CoreGenderClaim, CoreJsonWebKey,
@@ -6,10 +10,6 @@ use openidconnect::{
 		CoreRevocationErrorResponse, CoreTokenIntrospectionResponse, CoreTokenResponse,
 		CoreUserInfoClaims,
 	},
-	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
-	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
-	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse,
-	TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;
@@ -132,7 +132,7 @@ pub fn get_oidc_authorize_url(
 	scopes: &[String],
 	state: &str,
 	pkce_challenge: Option<PkceCodeChallenge>,
-) -> String {
+) -> (String, Nonce) {
 	let scope_vec: Vec<Scope> = scopes.iter().map(|s| Scope::new(s.clone())).collect();
 	let state_owned = state.to_string();
 
@@ -148,8 +148,8 @@ pub fn get_oidc_authorize_url(
 		auth_request = auth_request.set_pkce_challenge(challenge);
 	}
 
-	let (authorize_url, _, _) = auth_request.url();
-	authorize_url.to_string()
+	let (authorize_url, _, nonce) = auth_request.url();
+	(authorize_url.to_string(), nonce)
 }
 
 // TODO(oidc): Support permissions from OIDC claims? See https://pocket-id.org/docs/client-examples/audiobookshelf for an example
@@ -174,6 +174,7 @@ pub async fn exchange_code_for_claims(
 	code: String,
 	extra_audiences: Vec<String>,
 	pkce_verifier: Option<PkceCodeVerifier>,
+	expected_nonce: Nonce,
 ) -> Result<OidcClaims, APIError> {
 	let mut request = client.exchange_code(AuthorizationCode::new(code))?;
 	if let Some(verifier) = pkce_verifier {
@@ -194,6 +195,11 @@ pub async fn exchange_code_for_claims(
 			.set_other_audience_verifier_fn(move |aud| {
 				extra_audiences.iter().any(|a| a.as_str() == aud.as_str())
 			});
+	let expected_nonce = expected_nonce.secret().to_string();
+	let nonce_verifier = |nonce: Option<&Nonce>| match nonce {
+		Some(nonce) if nonce.secret().as_str() == expected_nonce.as_str() => Ok(()),
+		_ => Err("ID token nonce did not match authorization request".to_string()),
+	};
 	let id_token_claims = id_token.claims(&token_verifier, nonce_verifier)?;
 
 	let access_token = token_response.access_token();
@@ -221,8 +227,4 @@ pub async fn exchange_code_for_claims(
 			.and_then(|p| p.get(None))
 			.map(|p| p.to_string()),
 	})
-}
-
-fn nonce_verifier(_nonce: Option<&Nonce>) -> Result<(), String> {
-	Ok(())
 }

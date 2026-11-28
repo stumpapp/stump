@@ -2,6 +2,7 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { formatBytes } from '@stump/client'
 import { graphql, MediaFilterInput, MediaMetadataFilterInput, UserPermission } from '@stump/graphql'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { HatGlasses } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
@@ -27,13 +28,13 @@ import {
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, ListLabel, Text } from '~/components/ui'
-import { formatSeriesPosition } from '~/lib/bookUtils'
+import { Button, Icon, ListLabel, Text } from '~/components/ui'
+import { bookSeriesPosition, formatSeriesPosition } from '~/lib/bookUtils'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useStumpServer } from '~/providers/StumpServerProvider'
-import { usePreferencesStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 
 const query = graphql(`
 	query BookById($id: ID!) {
@@ -170,8 +171,8 @@ export default function Screen() {
 			extension: book.extension,
 			libraryId: book.library.id,
 			libraryName: book.library.name,
-			seriesId: book.series.id,
-			seriesName: book.series.resolvedName,
+			seriesId: book.series?.id,
+			seriesName: book.series?.resolvedName,
 			metadata: book.metadata || undefined,
 			bookName: book.resolvedName,
 			readProgress: book.readProgress,
@@ -183,6 +184,7 @@ export default function Screen() {
 	const insets = useSafeAreaInsets()
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
 
 	const stackFragment = useBookMenu(book)
 
@@ -208,10 +210,10 @@ export default function Screen() {
 	const links = book.metadata?.links || []
 	const characters = book.metadata?.characters || []
 
-	const seriesName = book.metadata?.series || book.series.resolvedName
+	const seriesName = book.metadata?.series || book.series?.resolvedName
 	const seriesPosition = formatSeriesPosition(
-		(Number(book.metadata?.number) || book.seriesPosition) ?? null,
-		book.series.metadata?.totalIssues ?? null,
+		bookSeriesPosition(book),
+		book.series?.metadata?.totalIssues ?? null,
 		{
 			translate,
 			seriesName,
@@ -329,7 +331,7 @@ export default function Screen() {
 
 					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button
-							className="flex-1"
+							className="gap-2 flex-1 flex-row"
 							roundness="full"
 							onPress={() =>
 								router.push({
@@ -339,6 +341,9 @@ export default function Screen() {
 							}
 							variant="brand"
 						>
+							{disableProgressTracking && (
+								<Icon as={HatGlasses} size={18} className="text-foreground-on-fill" />
+							)}
 							{renderRead()}
 						</Button>
 						{checkPermission(UserPermission.DownloadFile) && (
@@ -440,7 +445,7 @@ export default function Screen() {
 						}))}
 					/>
 
-					<BooksAfterCursor cursor={bookId} />
+					{book.series && <BooksAfterCursor cursor={bookId} />}
 
 					{links.length > 0 && (
 						<View className="gap-2 flex w-full">

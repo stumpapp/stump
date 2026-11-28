@@ -1,16 +1,16 @@
 use crate::common::{
+	TestApp,
 	book::{
 		create_nth_readthrough, fudge_session_time, fudge_session_time_with_timestamp,
 		update_progress,
 	},
 	series::setup_single_series_with_n_books,
-	TestApp,
 };
 
 use chrono::{Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session, shared::enums::ReadingStatus};
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{QueryOrder, prelude::*};
 use serde_json::Value;
 use tests::fake_data;
 

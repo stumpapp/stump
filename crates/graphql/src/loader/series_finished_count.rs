@@ -4,8 +4,8 @@ use models::{
 	shared::enums::ReadingStatus,
 };
 use sea_orm::{
-	prelude::*, ColumnTrait, DatabaseConnection, FromQueryResult, QueryFilter,
-	QuerySelect,
+	ColumnTrait, DatabaseConnection, FromQueryResult, QueryFilter, QuerySelect,
+	prelude::*,
 };
 use std::{collections::HashMap, sync::Arc};
 

@@ -1,10 +1,10 @@
 import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
-import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
+import { InterfaceLayout, MediaFilterInput, SeriesKind } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AppTitle } from '@/AppTitle'
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
 import { defaultBookColumnSort } from '@/components/book/table'
@@ -44,19 +44,29 @@ export default function SeriesBooksSceneContainer() {
 
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
-	const layoutKey = `library-${series.library.id}-seriesBooks`
-	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
-		useBooksLayout(
-			layoutKey,
-			useShallow((state) => ({
-				columns: state.columns,
-				layoutMode: state.layout,
-				persistedOrdering: state.ordering,
-				setColumns: state.setColumns,
-				setLayout: state.setLayout,
-				setPersistedOrdering: state.setOrdering,
-			})),
-		)
+	const layoutKey = `library-${series.library.id}-${series.kind === SeriesKind.Virtual ? 'virtual-' : ''}seriesBooks`
+	const {
+		layoutMode,
+		setLayout,
+		columns,
+		setColumns,
+		persistedOrdering,
+		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
+	} = useBooksLayout(
+		layoutKey,
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			persistedOrdering: state.ordering,
+			persistedPageSize: state.pageSize,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+			setPersistedOrdering: state.setOrdering,
+			setPersistedPageSize: state.setPageSize,
+		})),
+	)
 	const {
 		filters: mediaFilters,
 		ordering,
@@ -66,6 +76,8 @@ function SeriesBooksScene() {
 	} = useFilterScene({
 		persistedOrdering,
 		setPersistedOrdering,
+		persistedPageSize,
+		setPersistedPageSize,
 		defaultOrdering: SERIES_POSITION_ORDERING,
 	})
 	const filters = mediaFilters as MediaFilterInput
@@ -280,9 +292,7 @@ function SeriesBooksScene() {
 			}}
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
-				<Helmet>
-					<title>Stump | {series.resolvedName || ''}</title>
-				</Helmet>
+				<AppTitle title={series.resolvedName} />
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 

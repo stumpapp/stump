@@ -6,18 +6,9 @@ import { ChevronDown } from 'lucide-react'
 type EntityGroup = SmartListGroupedItem
 const columnHelper = createColumnHelper<EntityGroup>()
 
-const buildNameColumn = (isGroupedBySeries: boolean) =>
-	columnHelper.accessor('entity.name', {
-		cell: ({
-			row: {
-				original: {
-					entity: { name },
-				},
-				getToggleExpandedHandler,
-				getIsExpanded,
-				getCanExpand,
-			},
-		}) => {
+const buildNameColumn = (isGroupedBySeries: boolean, standaloneLabel: string) =>
+	columnHelper.accessor(({ entity }) => entity?.name ?? standaloneLabel, {
+		cell: ({ getValue, row: { getToggleExpandedHandler, getIsExpanded, getCanExpand } }) => {
 			const isExpanded = getIsExpanded()
 
 			return (
@@ -35,7 +26,7 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 							},
 						)}
 					/>
-					<Text className="text-sm md:text-base line-clamp-1 text-left">{name}</Text>
+					<Text className="text-sm md:text-base line-clamp-1 text-left">{getValue()}</Text>
 				</button>
 			)
 		},
@@ -94,10 +85,10 @@ const staticColumnMap = {
 	books: booksCountColumn,
 } as Record<string, ColumnDef<EntityGroup>>
 
-export const getColumnMap = (isGroupedBySeries: boolean) =>
+export const getColumnMap = (isGroupedBySeries: boolean, standaloneLabel: string) =>
 	({
 		...staticColumnMap,
-		name: buildNameColumn(isGroupedBySeries),
+		name: buildNameColumn(isGroupedBySeries, standaloneLabel),
 	}) as Record<string, ColumnDef<EntityGroup>>
 
 const staticColumnOptionMap: Record<keyof typeof staticColumnMap, string> = {
@@ -110,27 +101,22 @@ export const getColumnOptionMap = (isGroupedBySeries: boolean) =>
 		...staticColumnOptionMap,
 	}) as Record<string, string>
 
-export const defaultSeriesColumns = [
-	buildNameColumn(true),
-	booksCountColumn,
-] as ColumnDef<EntityGroup>[]
-export const defaultLibraryColumns = [
-	buildNameColumn(false),
-	booksCountColumn,
-] as ColumnDef<EntityGroup>[]
-
-export const buildDefaultColumns = (isGroupedBySeries: boolean) =>
-	isGroupedBySeries ? defaultSeriesColumns : defaultLibraryColumns
-
-export const buildColumns = (isGroupedBySeries: boolean, columns?: SmartListViewColumn[]) => {
+export const buildColumns = (
+	isGroupedBySeries: boolean,
+	columns?: SmartListViewColumn[],
+	standaloneLabel = 'Standalone books',
+) => {
 	if (!columns?.length) {
-		return buildDefaultColumns(isGroupedBySeries)
+		return [
+			buildNameColumn(isGroupedBySeries, standaloneLabel),
+			booksCountColumn,
+		] as ColumnDef<EntityGroup>[]
 	}
 
 	const sortedColumns = columns.sort((a, b) => a.position - b.position)
 	const selectedColumnIds = sortedColumns.map(({ id }) => id)
 
-	const columnMap = getColumnMap(isGroupedBySeries)
+	const columnMap = getColumnMap(isGroupedBySeries, standaloneLabel)
 
 	return selectedColumnIds.map((id) => columnMap[id]).filter(Boolean) as ColumnDef<EntityGroup>[]
 }

@@ -32,7 +32,7 @@ export class OPDSLegacyAPI extends APIBase {
 
 	get config(): AxiosRequestConfig {
 		return {
-			baseURL: this.serviceURL.replace(/\/api(\/.+)?$/, ''),
+			baseURL: this.serviceURL.replace(/\/api(?:\/v\d+)?$/, ''),
 		}
 	}
 

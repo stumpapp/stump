@@ -35,17 +35,49 @@ mod m20260815_205755_avatar_image_metadata;
 mod m20260816_000000_drop_legacy_epubcfi;
 mod m20260830_015110_oneshots;
 mod m20260928_173434_bookmark_and_annotation_fks_to_session;
+mod m20260930_000000_media_library;
+mod m20260930_000001_virtual_series;
+mod m20260930_000002_organization_mode;
 mod m20261006_152724_journal_entries;
 mod m20261006_225247_reading_devices;
 mod m20261025_235745_drop_navigation_user_prefs;
 mod m20261104_154357_authors;
+
+/// Forces every migration to run inside a transaction, which is not needed for
+/// postgres (since it already does) and is primarily for sqlite. This is a
+/// temporary patch to resolve https://github.com/stumpapp/stump/issues/1544
+///
+/// TODO(sea-orm): remove once `feat-sqlite-transactional-migrations` is released
+struct Transactional(Box<dyn MigrationTrait>);
+
+impl MigrationName for Transactional {
+	fn name(&self) -> &str {
+		self.0.name()
+	}
+}
+
+#[async_trait]
+impl MigrationTrait for Transactional {
+	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		self.0.up(manager).await
+	}
+
+	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		self.0.down(manager).await
+	}
+
+	fn use_transaction(&self) -> Option<bool> {
+		Some(true)
+	}
+	// ^ this is the force in method
+}
 
 pub struct Migrator;
 
 #[async_trait]
 impl MigratorTrait for Migrator {
 	fn migrations() -> Vec<Box<dyn MigrationTrait>> {
-		vec![
+		let migrations: Vec<Box<dyn MigrationTrait>> = vec![
 			Box::new(m20250807_202824_init::Migration),
 			Box::new(m20251013_233701_add_media_metadata_fields::Migration),
 			Box::new(m20251020_145410_add_thumbnail_ratio::Migration),
@@ -83,7 +115,16 @@ impl MigratorTrait for Migrator {
 			Box::new(m20261006_152724_journal_entries::Migration),
 			Box::new(m20261006_225247_reading_devices::Migration),
 			Box::new(m20261025_235745_drop_navigation_user_prefs::Migration),
+			Box::new(m20260930_000000_media_library::Migration),
+			Box::new(m20260930_000001_virtual_series::Migration),
+			Box::new(m20260930_000002_organization_mode::Migration),
 			Box::new(m20261104_154357_authors::Migration),
-		]
+		];
+
+		// TODO(sea-orm): remove along with `Transactional` band-aid
+		migrations
+			.into_iter()
+			.map(|m| Box::new(Transactional(m)) as Box<dyn MigrationTrait>)
+			.collect()
 	}
 }

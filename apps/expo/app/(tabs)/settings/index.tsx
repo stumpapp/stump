@@ -11,10 +11,10 @@ import {
 	DefaultServer,
 	DeleteDatabase,
 	DisableDismissGesture,
+	DisableProgressTracking,
 	DisplayLanguageKeys,
 	EnableDebugAnalytics,
 	EpubSettings,
-	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
 	MaskUrls,
@@ -62,7 +62,7 @@ export default function Screen() {
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
 					<MaxPageViewingSeconds />
-					<GlobalIncognito />
+					<DisableProgressTracking />
 					<ImageReaderSettings />
 					<EpubSettings />
 				</Card>

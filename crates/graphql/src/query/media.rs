@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, ID, Object, Result};
 use models::{
 	entity::{media, media_metadata, reading_session, user::AuthUser},
 	shared::{
@@ -9,20 +9,20 @@ use models::{
 	},
 };
 use sea_orm::{
+	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, FromQueryResult, JoinType, Order, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	filter::{media::MediaFilterInput, IntoFilter},
+	filter::{IntoFilter, media::MediaFilterInput},
 	guard::{PermissionGuard, ServerOwnerGuard},
 	object::{
 		media::Media,
 		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
 	},
-	order::{order_spec, MediaOrderBy},
+	order::{MediaOrderBy, order_spec},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
@@ -523,11 +523,13 @@ impl MediaQuery {
 						m.series_id,
 						ROW_NUMBER() OVER(
 							PARTITION BY m.series_id
-							ORDER BY m.name
+							ORDER BY CASE WHEN s.kind = 'VIRTUAL' THEN mm.number END NULLS LAST, m.name, m.id
 						) as book_rank,
 						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
 					FROM
 						media m
+                    LEFT JOIN media_metadata mm ON mm.media_id = m.id
+                    LEFT JOIN series s ON s.id = m.series_id
 					LEFT JOIN
 						series_last_read srl ON srl.series_id = m.series_id
 					WHERE

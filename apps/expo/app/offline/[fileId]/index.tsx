@@ -3,6 +3,7 @@ import { MediaMetadata } from '@stump/graphql'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import { HatGlasses } from 'lucide-react-native'
 import { useCallback, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
@@ -25,7 +26,7 @@ import { useOfflineBookMenu } from '~/components/localLibrary/OfflineBookMenu'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { getThumbnailPath } from '~/components/localLibrary/utils'
 import { MetadataBadgeSection } from '~/components/overview'
-import { Button, Text } from '~/components/ui'
+import { Button, Icon, Text } from '~/components/ui'
 import {
 	db,
 	downloadedFiles,
@@ -35,10 +36,10 @@ import {
 	readProgress,
 	seriesRefs,
 } from '~/db'
-import { formatSeriesPosition } from '~/lib/bookUtils'
+import { bookSeriesPosition, formatSeriesPosition } from '~/lib/bookUtils'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 
 // TODO: Take the patterns which I copied here from books/[id]/index.tsx and make reusable
 // overview components, instead, instead of being :sparkles: l a z y :sparkles:
@@ -48,6 +49,7 @@ export default function Screen() {
 	const { translate } = useTranslate()
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const disableProgressTracking = useReaderStore((state) => state.disableProgressTracking)
 	const { fetchCounter, increment } = useDownloadsState(
 		useShallow((state) => ({
 			fetchCounter: state.fetchCounter,
@@ -69,7 +71,7 @@ export default function Screen() {
 			.from(downloadedFiles)
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
-			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
+			.leftJoin(libraryRefs, eq(downloadedFiles.libraryId, libraryRefs.id))
 			.where(eq(downloadedFiles.id, fileId))
 			.limit(1),
 		[fileId, fetchCounter],
@@ -105,7 +107,7 @@ export default function Screen() {
 
 	const seriesName = metadata?.series || downloadedFile.series?.name
 	const seriesPosition = formatSeriesPosition(
-		(Number(metadata?.number) || undefined) ?? null,
+		bookSeriesPosition({ metadata }),
 		// We don't have totalBooks offline, pass 0 so it always shows "Book X in Series"
 		0,
 		{
@@ -171,11 +173,14 @@ export default function Screen() {
 
 					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button
-							className="flex-1"
+							className="gap-2 flex-1 flex-row"
 							roundness="full"
 							onPress={() => router.push(`/offline/${fileId}/read`)}
 							variant="brand"
 						>
+							{disableProgressTracking && (
+								<Icon as={HatGlasses} size={18} className="text-foreground-on-fill" />
+							)}
 							{renderRead()}
 						</Button>
 					</View>

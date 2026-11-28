@@ -1,13 +1,13 @@
 //! This module defines the [`OpdsOpenSearch`] struct for representing OpenSearch SearchDescription
 //! data as specified at https://developer.mozilla.org/en-US/docs/Web/OpenSearch
 
-use xml::{writer::XmlEvent, EventWriter};
+use xml::{EventWriter, writer::XmlEvent};
 
 use crate::error::CoreResult;
 
 use super::{
 	link::OpdsLinkType,
-	util::{write_xml_element, OpdsEnumStr},
+	util::{OpdsEnumStr, write_xml_element},
 };
 
 /// A struct for building an OpenSearch SearchDescription XML string as

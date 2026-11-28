@@ -5,7 +5,7 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result};
 use models::entity::{bookmark, media_annotation, reading_session};
-use sea_orm::{prelude::*, QuerySelect, Set};
+use sea_orm::{QuerySelect, Set, prelude::*};
 
 #[derive(Default)]
 pub struct EpubMutation;

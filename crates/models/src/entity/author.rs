@@ -1,11 +1,9 @@
 use async_graphql::SimpleObject;
-use sea_orm::{
-	entity::prelude::*, sea_query::Query, ActiveValue, QuerySelect, QueryTrait,
-};
+use sea_orm::{ActiveValue, QuerySelect, QueryTrait, entity::prelude::*};
 
 use crate::{
 	domain::author::normalize_author_name,
-	entity::{media, media_author, series, series_author},
+	entity::{media, media_author, series_author},
 	shared::image::ImageMetadata,
 };
 
@@ -46,8 +44,7 @@ impl Entity {
 	// TODO: refactor once metadata library change lands for
 	// media.library_id fk
 
-	/// Authors that have at least one media link inside the given library
-	/// and therefore are part of the "authors in library" kind of query
+	/// Authors that have at least one media link inside the given library.
 	pub fn find_for_library(library_id: String) -> Select<Entity> {
 		Self::find().filter(
 			Column::Id.in_subquery(
@@ -59,17 +56,7 @@ impl Entity {
 							media::Entity::find()
 								.select_only()
 								.column(media::Column::Id)
-								.filter(
-									media::Column::SeriesId.in_subquery(
-										Query::select()
-											.column(series::Column::Id)
-											.from(series::Entity)
-											.and_where(
-												series::Column::LibraryId.eq(library_id),
-											)
-											.to_owned(),
-									),
-								)
+								.filter(media::Column::LibraryId.eq(library_id))
 								.into_query(),
 						),
 					)

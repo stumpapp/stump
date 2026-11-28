@@ -1,14 +1,14 @@
 use crate::{
-	domain::author::{normalize_author_name, parse_writers},
+	domain::author::normalize_author_name,
 	entity::{author, media, media_author, series_author},
 	shared::enums::AuthorRole,
 };
 use chrono::Utc;
 use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
 	DbErr, QuerySelect,
+	prelude::*,
+	sea_query::{OnConflict, Query},
 };
 
 /// Returns an existing author by name if it exists, otherwise creating and

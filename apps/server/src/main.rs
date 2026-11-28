@@ -1,7 +1,7 @@
-use cli::{handle_command, Cli, Parser};
+use cli::{Cli, Parser, handle_command};
 use errors::EntryError;
 use stump_core::{
-	config::bootstrap_config_dir, config::logging::init_tracing, StumpCore,
+	StumpCore, config::bootstrap_config_dir, config::logging::init_tracing,
 };
 
 mod config;

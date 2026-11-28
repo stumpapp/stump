@@ -86,7 +86,7 @@ type Props = {
 export default function ReadiumReader({
 	book,
 	initialLocator,
-	incognito,
+	incognito = false,
 	onLocationChanged,
 	onReachedEnd,
 	onBookmark,
@@ -404,10 +404,14 @@ export default function ReadiumReader({
 		[onCreateAnnotation, store, book.id, highlightColor],
 	)
 
-	const handleNoteRequest = useCallback((event: { nativeEvent: NoteRequestEvent }) => {
-		const { locator, text } = event.nativeEvent
-		createAnnotationSheetRef.current?.open(locator, text)
-	}, [])
+	const handleNoteRequest = useCallback(
+		(event: { nativeEvent: NoteRequestEvent }) => {
+			if (!onCreateAnnotation) return
+			const { locator, text } = event.nativeEvent
+			createAnnotationSheetRef.current?.open(locator, text)
+		},
+		[onCreateAnnotation],
+	)
 
 	const handleAnnotationTap = useCallback(
 		(event: { nativeEvent: DecoratorTapEvent }) => {
@@ -528,28 +532,30 @@ export default function ReadiumReader({
 					paddingBottom: initialWindowMetrics?.insets.bottom || insets.bottom || 14,
 				}}
 			>
-				<ReadiumHeader />
+				<View className="flex-1">
+					<ReadiumHeader />
 
-				<ReadiumView
-					ref={readerRef}
-					bookId={book.id}
-					url={localUri}
-					initialLocator={initialLocator}
-					decorations={annotations}
-					onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
-					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
-					onMiddleTouch={handleMiddleTouch}
-					onReachedEnd={handleReachedEnd}
-					onHighlightRequest={handleHighlightRequest}
-					onNoteRequest={handleNoteRequest}
-					onAnnotationTap={handleAnnotationTap}
-					onEditHighlight={handleEditHighlight}
-					onDeleteHighlight={handleNativeDeleteAnnotation}
-					style={{ flex: 1 }}
-					{...config}
-				/>
+					<ReadiumView
+						ref={readerRef}
+						bookId={book.id}
+						url={localUri}
+						initialLocator={initialLocator}
+						decorations={annotations}
+						onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
+						onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
+						onMiddleTouch={handleMiddleTouch}
+						onReachedEnd={handleReachedEnd}
+						onHighlightRequest={onCreateAnnotation ? handleHighlightRequest : undefined}
+						onNoteRequest={onCreateAnnotation ? handleNoteRequest : undefined}
+						onAnnotationTap={handleAnnotationTap}
+						onEditHighlight={handleEditHighlight}
+						onDeleteHighlight={handleNativeDeleteAnnotation}
+						style={{ flex: 1 }}
+						{...config}
+					/>
 
-				<ReadiumFooter />
+					<ReadiumFooter />
+				</View>
 
 				<EpubSettingsSheet />
 				<TableOfContentsSheet />

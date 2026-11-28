@@ -1,13 +1,13 @@
 use async_graphql::InputObject;
-use models::entity::{author, media, media_author, series};
+use models::entity::{author, media, media_author};
 use sea_orm::{
-	sea_query::{Query, SelectStatement},
 	ColumnTrait,
+	sea_query::{Query, SelectStatement},
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{apply_string_filter, IntoFilter, StringLikeFilter};
+use super::{IntoFilter, StringLikeFilter, apply_string_filter};
 
 #[skip_serializing_none]
 #[derive(InputObject, Clone, Serialize, Deserialize, Debug, Default)]
@@ -68,17 +68,10 @@ impl IntoFilter for AuthorFilterInput {
 }
 
 fn library_author_subquery(filter: StringLikeFilter<String>) -> SelectStatement {
-	let series_id_subquery = Query::select()
-		.column(series::Column::Id)
-		.from(series::Entity)
-		.cond_where(apply_string_filter(series::Column::LibraryId, filter))
-		.to_owned();
-
-	// TODO: refactor once metadata library merges
 	let media_id_subquery = Query::select()
 		.column(media::Column::Id)
 		.from(media::Entity)
-		.and_where(media::Column::SeriesId.in_subquery(series_id_subquery))
+		.cond_where(apply_string_filter(media::Column::LibraryId, filter))
 		.to_owned();
 
 	Query::select()

@@ -5,10 +5,10 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 use super::{
+	OPDSV2Error,
 	link::{OPDSLink, OPDSNavigationLink},
 	metadata::OPDSMetadata,
 	publication::OPDSPublication,
-	OPDSV2Error,
 };
 
 /// A struct representing a group, which is used to organize feeds which contain more
@@ -85,17 +85,19 @@ mod tests {
 					.build()
 					.unwrap(),
 			)])
-			.navigation(vec![OPDSNavigationLinkBuilder::default()
-				.title("Test Navigation".to_string())
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href("/opds/v2.0/catalog".to_string())
-						.rel(OPDSLinkRel::SelfLink.item())
-						.build()
-						.unwrap(),
-				)
-				.build()
-				.unwrap()])
+			.navigation(vec![
+				OPDSNavigationLinkBuilder::default()
+					.title("Test Navigation".to_string())
+					.base_link(
+						OPDSBaseLinkBuilder::default()
+							.href("/opds/v2.0/catalog".to_string())
+							.rel(OPDSLinkRel::SelfLink.item())
+							.build()
+							.unwrap(),
+					)
+					.build()
+					.unwrap(),
+			])
 			.publications(vec![])
 			.metadata(
 				OPDSMetadataBuilder::default()

@@ -1,5 +1,5 @@
 use async_graphql::{Enum, SimpleObject};
-use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter, FromQueryResult};
+use sea_orm::{DeriveActiveEnum, EnumIter, FromQueryResult, prelude::*};
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
@@ -32,6 +32,7 @@ pub enum MissingEntityType {
 #[derive(Debug, Clone, SimpleObject, FromQueryResult)]
 pub struct MissingEntity {
 	pub id: String,
-	pub path: String,
+	pub name: String,
+	pub path: Option<String>,
 	pub r#type: MissingEntityType,
 }
